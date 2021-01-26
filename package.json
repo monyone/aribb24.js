@@ -7,6 +7,13 @@
     "src/**/*"
   ],
   "author": "monyone <monyone.teihen@gmail.com>",
+  "description": "an alternative implementation for b24.js",
+  "keywords": [
+    "html5",
+    "arib",
+    "b24",
+    "subtitle"
+  ],
   "license": "MIT",
   "scripts": {
     "build": "webpack --mode production",
