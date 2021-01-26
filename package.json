@@ -1,11 +1,12 @@
 {
   "name": "arib24.js",
   "version": "0.0.1",
-  "main": "dist/arib24.js",
+  "main": "dist/aribb24.js",
   "author": "monyone <monyone.teihen@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "webpack --mode development",
+    "build": "webpack --mode production",
+    "build:dev": "webpack --mode development",
     "tsc": "tsc --noEmit",
     "eslint": "eslint src/**/*.ts",
     "prettier": "prettier --write src/**/*.ts"
