@@ -1,6 +1,6 @@
 {
   "name": "aribb24.js",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "dist/aribb24.js",
   "files": [
     "dist/**/*",
