@@ -2,6 +2,10 @@
   "name": "arib24.js",
   "version": "0.0.1",
   "main": "dist/aribb24.js",
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
   "author": "monyone <monyone.teihen@gmail.com>",
   "license": "MIT",
   "scripts": {
