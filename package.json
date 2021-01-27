@@ -2,8 +2,10 @@
   "name": "aribb24.js",
   "version": "0.0.3",
   "main": "dist/aribb24.js",
+  "types": "d.ts/index.d.ts",
   "files": [
     "dist/**/*",
+    "d.ts/**/*",
     "src/**/*"
   ],
   "author": "monyone <monyone.teihen@gmail.com>",
