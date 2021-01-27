@@ -1,6 +1,6 @@
 {
   "name": "aribb24.js",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "dist/aribb24.js",
   "files": [
     "dist/**/*",
@@ -14,6 +14,10 @@
     "b24",
     "subtitle"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/monyone/aribb24.js"
+  },
   "license": "MIT",
   "scripts": {
     "build": "webpack --mode production",
