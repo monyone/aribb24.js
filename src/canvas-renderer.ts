@@ -30,6 +30,34 @@ export default class CanvasRenderer {
     this.media = null
   }
 
+  public dispose(): void {
+    this.detachMedia()
+  }
+
+  public show(): void {
+    if (!this.track) {
+      return
+    }
+
+    this.track.mode = 'hidden'
+    this.onCueChange()
+  }
+
+  public hide(): void {
+    if (!this.track) {
+      return
+    }
+
+    this.track.mode = 'disabled'
+    if (!this.canvas) {
+      return
+    }
+
+    const ctx = this.canvas.getContext('2d')
+    if (!ctx) { return }
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+  }
+
   public pushData(pid: number, uint8array: Uint8Array, pts: number): void {
     if (!this.media || !this.track) {
       return
