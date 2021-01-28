@@ -1,4 +1,4 @@
-# aribb24.js
+# aribb24.js [![npm](https://img.shields.io/npm/v/aribb24.js.svg?style=flat)](https://www.npmjs.com/package/aribb24.js)
 
 An HTML5 subtitle renderer.  
 It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).  
