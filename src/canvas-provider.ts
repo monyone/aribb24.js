@@ -1131,16 +1131,16 @@ export default class CanvasProvider {
         for(let dx = -1; dx <= 1; dx++) {
           ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}` 
           ctx.fillStyle = this.orn
-          ctx.textBaseline = 'bottom'
-          ctx.fillText(character, this.shs / 2 + dx, canvas.height - this.svs / 2 + dy)
+          ctx.textBaseline = 'middle'
+          ctx.fillText(character, this.shs / 2 + dx, canvas.height / 2 + dy)
         }
       }
     }
 
     ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
     ctx.fillStyle = this.fg_color
-    ctx.textBaseline = 'bottom'
-    ctx.fillText(character, this.shs / 2, canvas.height - this.svs / 2)
+    ctx.textBaseline = 'middle'
+    ctx.fillText(character, this.shs / 2, canvas.height / 2)
 
     return canvas
   }

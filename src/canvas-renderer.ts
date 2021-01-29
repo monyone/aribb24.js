@@ -1,6 +1,6 @@
 import CanvasProvider from '@/canvas-provider'
 
-interface ProviderOption {
+interface RendererOption {
   normalFont?: string,
   gaijiFont?: string,
 }
@@ -16,7 +16,7 @@ export default class CanvasRenderer {
   private normalFont: string | undefined
   private gaijiFont: string | undefined
   
-  public constructor(option?: ProviderOption) {
+  public constructor(option?: RendererOption) {
     this.media = null
     this.track = null
     this.subtitleElement = null
@@ -145,7 +145,7 @@ export default class CanvasRenderer {
       }
     }
     if (!this.track) {
-      this.track = this.media.addTextTrack('subtitles', aribb24js_label, 'ja')
+      this.track = this.media.addTextTrack('metadata', aribb24js_label, 'ja')
     }
     this.onCueChangeHandler = this.onCueChange.bind(this)
     this.track.addEventListener('cuechange', this.onCueChangeHandler)
