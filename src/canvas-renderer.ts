@@ -1,6 +1,8 @@
 import CanvasProvider from '@/canvas-provider'
 
 interface RendererOption {
+  width?: number,
+  height?: number,
   normalFont?: string,
   gaijiFont?: string,
 }
@@ -14,6 +16,8 @@ export default class CanvasRenderer {
   private onCueChangeHandler: (() => void) | null
   private onResizeHandler: (() => void) | null
 
+  private width: number | undefined
+  private height: number | undefined
   private normalFont: string | undefined
   private gaijiFont: string | undefined
   
@@ -26,6 +30,8 @@ export default class CanvasRenderer {
     this.onCueChangeHandler = null
     this.onResizeHandler = null
 
+    this.width = option?.width
+    this.height = option?.height
     this.normalFont = option?.normalFont
     this.gaijiFont = option?.gaijiFont
   }
@@ -85,6 +91,8 @@ export default class CanvasRenderer {
     }
 
     const provider = new CanvasProvider(uint8array, {
+      width: (this.width ?? (this.media as any).videoWidth) * window.devicePixelRatio,
+      height: (this.height ?? (this.media as any).videoHeight) * window.devicePixelRatio,
       normalFont: this.normalFont,
       gaijiFont: this.gaijiFont
     })

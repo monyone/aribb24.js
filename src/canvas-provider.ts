@@ -12,6 +12,8 @@ import KATAKANA_MAPPING from '@/constants/mapping/katakana'
 import ADDITIONAL_SYMBOL_SET from '@/constants/mapping/additional-symbol-set'
 
 interface ProviderOption {
+  width?: number,
+  height?: number,
   normalFont?: string,
   gaijiFont?: string,
 }
@@ -49,6 +51,9 @@ export default class CanvasProvider {
     [ALPHABETS.DRCS_15, new Map<number, Uint8Array>()],
   ])
 
+  private canvas_width: number = 960
+  private canvas_height: number = 540
+
   private swf_x: number = 960
   private swf_y: number = 540
   private sdf_x: number = 960
@@ -82,6 +87,8 @@ export default class CanvasProvider {
   public constructor(pes: Uint8Array, option?: ProviderOption) {
     this.pes = pes
     this.startTime = this.endTime = null
+    this.canvas_width = option?.width ?? this.canvas_width
+    this.canvas_height = option?.height ?? this.canvas_height
     this.normalFont = option?.normalFont ?? 'sans-serif'
     this.gaijiFont = option?.gaijiFont ?? this.normalFont
   }
@@ -92,6 +99,13 @@ export default class CanvasProvider {
   private height(): number {
     return Math.floor((this.svs + this.ssm_y) * this.text_size_y)
   }
+  private width_magnification(): number { 
+    return this.canvas_width / this.swf_x
+  }
+  private height_magnification(): number { 
+    return this.canvas_height / this.swf_y
+  }
+  
   private move_absolute_dot(x: number, y: number): void{
     this.position_x = x
     this.position_y = y
@@ -175,8 +189,8 @@ export default class CanvasProvider {
 
     if(this.fg_canvas && this.bg_canvas){
       const canvas = document.createElement('canvas')
-      canvas.width = this.swf_x
-      canvas.height = this.swf_y
+      canvas.width = this.canvas_width
+      canvas.height = this.canvas_height
       const ctx = canvas.getContext('2d')
       if(!ctx){
         return null
@@ -629,238 +643,145 @@ export default class CanvasProvider {
   }
 
   private renderCharacter(key: number, entry: ALPHABET_ENTRY) {
+    if(!this.fg_canvas){
+      this.fg_canvas = document.createElement('canvas')
+      this.fg_canvas.width = this.canvas_width
+      this.fg_canvas.height = this.canvas_height
+    }
+    if(!this.bg_canvas){
+      this.bg_canvas = document.createElement('canvas')
+      this.bg_canvas.width = this.canvas_width
+      this.bg_canvas.height = this.canvas_height
+    }
+
+    const fg_ctx = this.fg_canvas.getContext('2d')
+    if(!fg_ctx){
+      return
+    }
+
+    if(entry.alphabet !== ALPHABETS.MACRO) {
+      //HLC
+      if(this.hlc & 0b0001){
+        fg_ctx.fillStyle = this.fg_color
+        fg_ctx.fillRect(
+           this.position_x * this.width_magnification(),
+           (this.position_y - 2) * this.height_magnification(),
+           this.width() * this.width_magnification(),
+           1 * this.height_magnification()
+        )
+      }
+      if(this.hlc & 0b0010){
+        fg_ctx.fillStyle = this.fg_color
+        fg_ctx.fillRect(
+          (this.position_x + this.width() - 2) * this.width_magnification(),
+          this.position_y * this.height_magnification(),
+          1 * this.width_magnification(),
+          this.height() * this.height_magnification()
+        )
+      }
+      if(this.hlc & 0b0100){
+        fg_ctx.fillStyle = this.fg_color
+        fg_ctx.fillRect(
+          this.position_x * this.width_magnification(),
+          (this.position_y - this.height()) * this.height_magnification(),
+          this.width() * this.width_magnification(), 
+          1 * this.height_magnification()
+        )
+      }
+      if(this.hlc & 0b1000){
+        fg_ctx.fillStyle = this.fg_color
+        fg_ctx.fillRect(
+          this.position_x * this.width_magnification(),
+          this.position_y * this.height_magnification(),
+          1 * this.width_magnification(),
+          this.height() * this.height_magnification()
+        )
+      }
+
+      // STL
+      if(this.stl){
+        fg_ctx.fillStyle = this.fg_color
+        fg_ctx.fillRect(
+          this.position_x * this.width_magnification(),
+          (this.position_y - 1) * this.height_magnification(),
+          this.width() * this.width_magnification(),
+          1 * this.height_magnification()
+        )
+      }
+
+      const bg_ctx = this.bg_canvas.getContext('2d')
+      if(!bg_ctx){
+        return
+      }
+      bg_ctx.fillStyle = this.bg_color
+      bg_ctx.fillRect(
+         this.position_x * this.width_magnification(),
+         (this.position_y - this.height()) * this.height_magnification(),
+         this.width() * this.width_magnification(),
+         this.height() * this.width_magnification()
+      )
+    }
+
     if (entry.alphabet === ALPHABETS.KANJI) {
       const ch1 = ((key & 0xFF00) >> 8) - 0x21
       const ch2 = ((key & 0x00FF) >> 0) - 0x21
       const index = ch1 * (0x7E - 0x21 + 1) + ch2
       const character = KANJI_MAPPING[index]
 
-      if(!this.fg_canvas){
-        this.fg_canvas = document.createElement('canvas')
-        this.fg_canvas.width = this.swf_x
-        this.fg_canvas.height = this.swf_y
-      }
-      if(!this.bg_canvas){
-        this.bg_canvas = document.createElement('canvas')
-        this.bg_canvas.width = this.swf_x
-        this.bg_canvas.height = this.swf_y
-      }
-
       const font_canvas = this.renderFont(character)
-      const fg_ctx = this.fg_canvas.getContext('2d')
-      if(!fg_ctx){
-        return
-      }
       fg_ctx.drawImage(
         font_canvas,
         0, 0, font_canvas.width, font_canvas.height,
-        this.position_x, this.position_y - this.height(), this.width(), this.height()
+        this.position_x * this.width_magnification(), 
+        (this.position_y - this.height()) * this.height_magnification(),
+        this.width() * this.width_magnification(),
+        this.height() * this.width_magnification()
       )
-
-      //HLC
-      if(this.hlc & 0b0001){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y - 2, this.width(), 1)
-      }
-      if(this.hlc & 0b0010){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x + this.width() - 2, this.position_y, 1, this.height())
-      }
-      if(this.hlc & 0b0100){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y - this.height(), this.width(), 1)
-      }
-      if(this.hlc & 0b1000){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y, 1, this.height())
-      }
-
-      // STL
-      if(this.stl){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y - 1, this.width(), 1)
-      }
-
-      const bg_ctx = this.bg_canvas.getContext('2d')
-      if(!bg_ctx){
-        return
-      }
-      bg_ctx.fillStyle = this.bg_color
-      bg_ctx.fillRect(this.position_x, this.position_y - this.height(), this.width(), this.height())
 
       this.move_relative_pos(1, 0)
     }else if(entry.alphabet === ALPHABETS.ASCII) {
       const index = key - 0x21
       const character = ASCII_MAPPING[index]
 
-      if(!this.fg_canvas){
-        this.fg_canvas = document.createElement('canvas')
-        this.fg_canvas.width = this.swf_x
-        this.fg_canvas.height = this.swf_y
-      }
-      if(!this.bg_canvas){
-        this.bg_canvas = document.createElement('canvas')
-        this.bg_canvas.width = this.swf_x
-        this.bg_canvas.height = this.swf_y
-      }
-
       const font_canvas = this.renderFont(character)
-      const fg_ctx = this.fg_canvas.getContext('2d')
-      if(!fg_ctx){
-        return
-      }
       fg_ctx.drawImage(
         font_canvas,
         0, 0, font_canvas.width, font_canvas.height,
-        this.position_x, this.position_y - this.height(), this.width(), this.height()
+        this.position_x * this.width_magnification(), 
+        (this.position_y - this.height()) * this.height_magnification(),
+        this.width() * this.width_magnification(),
+        this.height() * this.width_magnification()
       )
-
-      //HLC
-      if(this.hlc & 0b0001){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y - 2, this.width(), 1)
-      }
-      if(this.hlc & 0b0010){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x + this.width() - 2, this.position_y, 1, this.height())
-      }
-      if(this.hlc & 0b0100){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y - this.height(), this.width(), 1)
-      }
-      if(this.hlc & 0b1000){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y, 1, this.height())
-      }
-
-      // STL
-      if(this.stl){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y - 1, this.width(), 1)
-      }
-
-      const bg_ctx = this.bg_canvas.getContext('2d')
-      if(!bg_ctx){
-        return
-      }
-      bg_ctx.fillStyle = this.bg_color
-      bg_ctx.fillRect(this.position_x, this.position_y - this.height(), this.width(), this.height())
 
       this.move_relative_pos(1, 0)
     }else if(entry.alphabet === ALPHABETS.HIRAGANA) {
       const index = key - 0x21
       const character = HIRAGANA_MAPPING[index]
 
-      if(!this.fg_canvas){
-        this.fg_canvas = document.createElement('canvas')
-        this.fg_canvas.width = this.swf_x
-        this.fg_canvas.height = this.swf_y
-      }
-      if(!this.bg_canvas){
-        this.bg_canvas = document.createElement('canvas')
-        this.bg_canvas.width = this.swf_x
-        this.bg_canvas.height = this.swf_y
-      }
-
       const font_canvas = this.renderFont(character)
-      const fg_ctx = this.fg_canvas.getContext('2d')
-      if(!fg_ctx){
-        return
-      }
       fg_ctx.drawImage(
         font_canvas,
         0, 0, font_canvas.width, font_canvas.height,
-        this.position_x, this.position_y - this.height(), this.width(), this.height()
+        this.position_x * this.width_magnification(), 
+        (this.position_y - this.height()) * this.height_magnification(),
+        this.width() * this.width_magnification(),
+        this.height() * this.width_magnification()
       )
-
-      //HLC
-      if(this.hlc & 0b0001){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y - 2, this.width(), 1)
-      }
-      if(this.hlc & 0b0010){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x + this.width() - 2, this.position_y, 1, this.height())
-      }
-      if(this.hlc & 0b0100){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y - this.height(), this.width(), 1)
-      }
-      if(this.hlc & 0b1000){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y, 1, this.height())
-      }
-
-      // STL
-      if(this.stl){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y - 1, this.width(), 1)
-      }
-
-      const bg_ctx = this.bg_canvas.getContext('2d')
-      if(!bg_ctx){
-        return
-      }
-      bg_ctx.fillStyle = this.bg_color
-      bg_ctx.fillRect(this.position_x, this.position_y - this.height(), this.width(), this.height())
 
       this.move_relative_pos(1, 0)
     }else if(entry.alphabet === ALPHABETS.KATAKANA) {
       const index = key - 0x21
       const character = KATAKANA_MAPPING[index]
 
-      if(!this.fg_canvas){
-        this.fg_canvas = document.createElement('canvas')
-        this.fg_canvas.width = this.swf_x
-        this.fg_canvas.height = this.swf_y
-      }
-      if(!this.bg_canvas){
-        this.bg_canvas = document.createElement('canvas')
-        this.bg_canvas.width = this.swf_x
-        this.bg_canvas.height = this.swf_y
-      }
-
       const font_canvas = this.renderFont(character)
-      const fg_ctx = this.fg_canvas.getContext('2d')
-      if(!fg_ctx){
-        return
-      }
       fg_ctx.drawImage(
         font_canvas,
         0, 0, font_canvas.width, font_canvas.height,
-        this.position_x, this.position_y - this.height(), this.width(), this.height()
+        this.position_x * this.width_magnification(), 
+        (this.position_y - this.height()) * this.height_magnification(),
+        this.width() * this.width_magnification(),
+        this.height() * this.width_magnification()
       )
-
-      //HLC
-      if(this.hlc & 0b0001){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y - 2, this.width(), 1)
-      }
-      if(this.hlc & 0b0010){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x + this.width() - 2, this.position_y, 1, this.height())
-      }
-      if(this.hlc & 0b0100){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y - this.height(), this.width(), 1)
-      }
-      if(this.hlc & 0b1000){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y, 1, this.height())
-      }
-
-      // STL
-      if(this.stl){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y - 1, this.width(), 1)
-      }
-
-      const bg_ctx = this.bg_canvas.getContext('2d')
-      if(!bg_ctx){
-        return
-      }
-      bg_ctx.fillStyle = this.bg_color
-      bg_ctx.fillRect(this.position_x, this.position_y - this.height(), this.width(), this.height())
 
       this.move_relative_pos(1, 0)
     }else if(entry.alphabet === ALPHABETS.MACRO) {
@@ -1009,18 +930,9 @@ export default class CanvasProvider {
         this.GL = 0
         this.GR = 2
       }
-    }else { // DRCS
-      if(!this.fg_canvas){
-        this.fg_canvas = document.createElement('canvas')
-        this.fg_canvas.width = this.swf_x
-        this.fg_canvas.height = this.swf_y
-      }
-      if(!this.bg_canvas){
-        this.bg_canvas = document.createElement('canvas')
-        this.bg_canvas.width = this.swf_x
-        this.bg_canvas.height = this.swf_y
-      }
 
+      return
+    }else { // DRCS
       const drcs = this.DRCS_mapping.get(entry.alphabet)?.get(key & 0x7F7F)
       if(!drcs){
         return
@@ -1049,10 +961,10 @@ export default class CanvasProvider {
 
                 if(value > 0){
                   fg_ctx.fillRect(
-                    this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x + dx,
-                    this.position_y - this.height() + Math.floor(this.svs * this.text_size_y / 2) + y + dy,
-                    1,
-                    1,
+                    (this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x + dx) * this.width_magnification(),
+                    (this.position_y - this.height() + Math.floor(this.svs * this.text_size_y / 2) + y + dy) * this.height_magnification(),
+                    1 * this.width_magnification(),
+                    1 * this.height_magnification(),
                   )
                 }
               }
@@ -1074,52 +986,21 @@ export default class CanvasProvider {
 
           if(value > 0){
             fg_ctx.fillRect(
-              this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x,
-              this.position_y - this.height() + Math.floor(this.svs * this.text_size_y / 2) + y,
-              1,
-              1,
+              (this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x) * this.width_magnification(),
+              (this.position_y - this.height() + Math.floor(this.svs * this.text_size_y / 2) + y) * this.height_magnification(),
+              1 * this.width_magnification(),
+              1 * this.height_magnification(),
             )
           }
         }
       }
-
-      //HLC
-      if(this.hlc & 0b0001){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y - 1, this.width(), 1)
-      }
-      if(this.hlc & 0b0010){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x + width - 1, this.position_y - this.height(), 1, this.height())
-      }
-      if(this.hlc & 0b0100){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y - this.height() + 1, this.width(), 1)
-      }
-      if(this.hlc & 0b1000){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y - this.height(), 1, this.height())
-      }
-
-      // STL
-      if(this.stl){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(this.position_x, this.position_y - 1, this.width(), 1)
-      }
-
-      const bg_ctx = this.bg_canvas.getContext('2d')
-      if(!bg_ctx){
-        return
-      }
-      bg_ctx.fillStyle = this.bg_color
-      bg_ctx.fillRect(this.position_x, this.position_y - this.height(), this.width(), this.height())
     }
   }
 
   private renderFont(character: string): HTMLCanvasElement {
     const canvas = document.createElement('canvas')
-    canvas.width = this.shs + this.ssm_x
-    canvas.height = this.svs + this.ssm_y
+    canvas.width = (this.shs + this.ssm_x) * this.width_magnification()
+    canvas.height = (this.svs + this.ssm_y) * this.height_magnification()
 
     const ctx = canvas.getContext('2d')
     if(!ctx){
@@ -1129,18 +1010,21 @@ export default class CanvasProvider {
     if(this.orn){
       for(let dy = -1; dy <= 1; dy++) {
         for(let dx = -1; dx <= 1; dx++) {
-          ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}` 
+          ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}` 
           ctx.fillStyle = this.orn
           ctx.textBaseline = 'middle'
-          ctx.fillText(character, this.shs / 2 + dx, canvas.height / 2 + dy)
+          ctx.fillText(character, 
+            (this.shs / 2 + dx) * this.width_magnification(),
+            (canvas.height / 2 + dy * this.height_magnification())
+          )
         }
       }
     }
 
-    ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
+    ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
     ctx.fillStyle = this.fg_color
     ctx.textBaseline = 'middle'
-    ctx.fillText(character, this.shs / 2, canvas.height / 2)
+    ctx.fillText(character, (this.shs / 2) * this.width_magnification(), canvas.height / 2)
 
     return canvas
   }
