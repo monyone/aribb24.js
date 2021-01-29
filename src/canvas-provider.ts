@@ -1,7 +1,7 @@
 import { JIS8, ESC, CSI } from '@/constants/jis8'
 import { ALPHABETS, ALPHABET_ENTRY } from '@/constants/jis8'
 import { G_SET_BY_ALPHABET, G_SET_BY_F } from '@/constants/jis8'
-import { G_DRCS_BY_ALPHABET, G_DRCS_BY_F,} from '@/constants/jis8'
+import { G_DRCS_BY_ALPHABET, G_DRCS_BY_F } from '@/constants/jis8'
 
 import pallets from '@/constants/color-table'
 
@@ -9,6 +9,12 @@ import KANJI_MAPPING from '@/constants/mapping/kanji'
 import ASCII_MAPPING from '@/constants/mapping/ascii'
 import HIRAGANA_MAPPING from '@/constants/mapping/hiragana'
 import KATAKANA_MAPPING from '@/constants/mapping/katakana'
+import ADDITIONAL_SYMBOL_SET from '@/constants/mapping/additional-symbol-set'
+
+interface ProviderOption {
+  normalFont?: string,
+  gaijiFont?: string,
+}
 
 export default class CanvasProvider {
   private pes: Uint8Array
@@ -70,9 +76,14 @@ export default class CanvasProvider {
   private timeElapsed: number = 0;
   private endTime: number | null;
 
-  public constructor(pes: Uint8Array) {
+  private normalFont: string;
+  private gaijiFont: string;
+
+  public constructor(pes: Uint8Array, option?: ProviderOption) {
     this.pes = pes
     this.startTime = this.endTime = null
+    this.normalFont = option?.normalFont ?? 'sans-serif'
+    this.gaijiFont = option?.gaijiFont ?? this.normalFont
   }
 
   private width(): number {
@@ -1105,7 +1116,7 @@ export default class CanvasProvider {
     }
   }
 
-  private renderFont(character: string, font: string = 'serif'): HTMLCanvasElement {
+  private renderFont(character: string): HTMLCanvasElement {
     const canvas = document.createElement('canvas')
     canvas.width = this.shs + this.ssm_x
     canvas.height = this.svs + this.ssm_y
@@ -1116,9 +1127,9 @@ export default class CanvasProvider {
     }
 
     if(this.orn){
-      for(let dy = -1; dy <= 1; dy++){
-        for(let dx = -1; dx <= 1; dx++){
-          ctx.font = `${this.ssm_x}px ${font}`
+      for(let dy = -1; dy <= 1; dy++) {
+        for(let dx = -1; dx <= 1; dx++) {
+          ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}` 
           ctx.fillStyle = this.orn
           ctx.textBaseline = 'bottom'
           ctx.fillText(character, this.shs / 2 + dx, canvas.height - this.svs / 2 + dy)
@@ -1126,7 +1137,7 @@ export default class CanvasProvider {
       }
     }
 
-    ctx.font = `${this.ssm_x}px ${font}`
+    ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
     ctx.fillStyle = this.fg_color
     ctx.textBaseline = 'bottom'
     ctx.fillText(character, this.shs / 2, canvas.height - this.svs / 2)

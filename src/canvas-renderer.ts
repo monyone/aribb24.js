@@ -1,5 +1,10 @@
 import CanvasProvider from '@/canvas-provider'
 
+interface ProviderOption {
+  normalFont?: string,
+  gaijiFont?: string,
+}
+
 export default class CanvasRenderer {
   private media: HTMLMediaElement | null
   private track: TextTrack | null
@@ -8,13 +13,19 @@ export default class CanvasRenderer {
   private onCueChangeHandler: (() => void) | null
   private onResizeHandler: (() => void) | null
 
-  public constructor() {
+  private normalFont: string | undefined
+  private gaijiFont: string | undefined
+  
+  public constructor(option?: ProviderOption) {
     this.media = null
     this.track = null
     this.subtitleElement = null
     this.canvas = null
     this.onCueChangeHandler = null
     this.onResizeHandler = null
+
+    this.normalFont = option?.normalFont
+    this.gaijiFont = option?.gaijiFont
   }
 
   public attachMedia(media: HTMLMediaElement, subtitleElement: HTMLElement): void {
@@ -71,7 +82,11 @@ export default class CanvasRenderer {
       return
     }
 
-    const provider = new CanvasProvider(uint8array)
+    const provider = new CanvasProvider(uint8array, {
+      normalFont: this.normalFont,
+      gaijiFont: this.gaijiFont
+    })
+
     const cue = provider.render(pts)
     if (!cue) {
       return
