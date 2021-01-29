@@ -146,6 +146,7 @@ export default class CanvasRenderer {
     }
     if (!this.track) {
       this.track = this.media.addTextTrack('metadata', aribb24js_label, 'ja')
+      this.track.mode = 'hidden'
     }
     this.onCueChangeHandler = this.onCueChange.bind(this)
     this.track.addEventListener('cuechange', this.onCueChangeHandler)
