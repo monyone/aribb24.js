@@ -10,6 +10,7 @@ export default class CanvasRenderer {
   private track: TextTrack | null
   private subtitleElement: HTMLElement | null
   private canvas: HTMLCanvasElement | null
+  private mutationObserver: MutationObserver | null
   private onCueChangeHandler: (() => void) | null
   private onResizeHandler: (() => void) | null
 
@@ -21,6 +22,7 @@ export default class CanvasRenderer {
     this.track = null
     this.subtitleElement = null
     this.canvas = null
+    this.mutationObserver = null
     this.onCueChangeHandler = null
     this.onResizeHandler = null
 
@@ -167,6 +169,14 @@ export default class CanvasRenderer {
     window.addEventListener('resize', this.onResizeHandler)
     this.media.addEventListener('loadeddata', this.onResizeHandler)
     this.media.addEventListener('playing', this.onResizeHandler)
+
+    this.mutationObserver = new MutationObserver(() => {
+      this.onResize()
+    })
+    this.mutationObserver.observe(this.media, {
+      attributes: true,
+      attributeFilter: ['style']
+    })
   }
 
   private cleanupTrack(): void {
@@ -190,18 +200,23 @@ export default class CanvasRenderer {
   }
 
   private cleanupCanvas(): void {
-    if (!this.onResizeHandler || !this.media) {
-      return
+    if (this.onResizeHandler) {
+      window.removeEventListener('resize', this.onResizeHandler)
     }
-    window.removeEventListener('resize', this.onResizeHandler)
-    this.media.removeEventListener('loadeddata', this.onResizeHandler)
-    this.media.removeEventListener('playing', this.onResizeHandler)
-
+    if (this.onResizeHandler && this.media) {
+      this.media.removeEventListener('loadeddata', this.onResizeHandler)
+      this.media.removeEventListener('playing', this.onResizeHandler)
+    }
     this.onResizeHandler = null
+
+    if(this.mutationObserver){
+      this.mutationObserver.disconnect()
+      this.mutationObserver = null
+    }
 
     if (this.canvas && this.subtitleElement){
       this.subtitleElement.removeChild(this.canvas)
     }
-    this.canvas = null
+    this.canvas = this.subtitleElement = null
   }
 }
