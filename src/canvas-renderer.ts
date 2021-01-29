@@ -20,18 +20,26 @@ export default class CanvasRenderer {
   public attachMedia(media: HTMLMediaElement, subtitleElement: HTMLElement): void {
     this.media = media
     this.subtitleElement = subtitleElement ?? media.parentElement
-    this.getTrack()
-    this.getCanvas()
+    this.setupTrack()
+    this.setupCanvas()
   }
 
   public detachMedia(): void {
     this.cleanupCanvas()
     this.cleanupTrack()
-    this.media = null
+    this.media = this.subtitleElement = null
   }
 
   public dispose(): void {
     this.detachMedia()
+  }
+
+  public getCanvas(): HTMLCanvasElement | null {
+    return this.canvas
+  }
+
+  public refresh(): void {
+    this.onResize()
   }
 
   public show(): void {
@@ -108,7 +116,7 @@ export default class CanvasRenderer {
     this.onCueChange()
   }
 
-  private getTrack(): void {
+  private setupTrack(): void {
     if (!this.media) {
       return
     }
@@ -128,7 +136,7 @@ export default class CanvasRenderer {
     this.track.addEventListener('cuechange', this.onCueChangeHandler)
   }
 
-  private getCanvas(): void {
+  private setupCanvas(): void {
     if (!this.media || !this.subtitleElement){
       return
     }
