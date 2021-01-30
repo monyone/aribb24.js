@@ -735,7 +735,7 @@ export default class CanvasProvider {
         this.position_x * this.width_magnification(), 
         (this.position_y - this.height()) * this.height_magnification(),
         this.width() * this.width_magnification(),
-        this.height() * this.width_magnification()
+        this.height() * this.height_magnification()
       )
 
       this.move_relative_pos(1, 0)
@@ -750,7 +750,7 @@ export default class CanvasProvider {
         this.position_x * this.width_magnification(), 
         (this.position_y - this.height()) * this.height_magnification(),
         this.width() * this.width_magnification(),
-        this.height() * this.width_magnification()
+        this.height() * this.height_magnification()
       )
 
       this.move_relative_pos(1, 0)
@@ -765,7 +765,7 @@ export default class CanvasProvider {
         this.position_x * this.width_magnification(), 
         (this.position_y - this.height()) * this.height_magnification(),
         this.width() * this.width_magnification(),
-        this.height() * this.width_magnification()
+        this.height() * this.height_magnification()
       )
 
       this.move_relative_pos(1, 0)
@@ -780,7 +780,7 @@ export default class CanvasProvider {
         this.position_x * this.width_magnification(), 
         (this.position_y - this.height()) * this.height_magnification(),
         this.width() * this.width_magnification(),
-        this.height() * this.width_magnification()
+        this.height() * this.height_magnification()
       )
 
       this.move_relative_pos(1, 0)
