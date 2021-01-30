@@ -5,6 +5,7 @@ interface RendererOption {
   height?: number,
   normalFont?: string,
   gaijiFont?: string,
+  guessDuration?: number
 }
 
 export default class CanvasRenderer {
@@ -16,10 +17,7 @@ export default class CanvasRenderer {
   private onCueChangeHandler: (() => void) | null
   private onResizeHandler: (() => void) | null
 
-  private width: number | undefined
-  private height: number | undefined
-  private normalFont: string | undefined
-  private gaijiFont: string | undefined
+  private rendererOption: RendererOption | undefined
   
   public constructor(option?: RendererOption) {
     this.media = null
@@ -30,10 +28,7 @@ export default class CanvasRenderer {
     this.onCueChangeHandler = null
     this.onResizeHandler = null
 
-    this.width = option?.width
-    this.height = option?.height
-    this.normalFont = option?.normalFont
-    this.gaijiFont = option?.gaijiFont
+    this.rendererOption = option
   }
 
   public attachMedia(media: HTMLMediaElement, subtitleElement: HTMLElement): void {
@@ -95,10 +90,9 @@ export default class CanvasRenderer {
     const purpose_height = Math.max((this.media as any).videoHeight, Number.parseInt(style.height) * window.devicePixelRatio)
 
     const provider = new CanvasProvider(uint8array, {
-      width: (this.width ?? purpose_width),
-      height: (this.height ?? purpose_height),
-      normalFont: this.normalFont,
-      gaijiFont: this.gaijiFont
+      ... this.rendererOption,
+      width: (this.rendererOption?.width ?? purpose_width),
+      height: (this.rendererOption?.height ?? purpose_height),
     })
 
     const cue = provider.render(pts)

@@ -16,6 +16,7 @@ interface ProviderOption {
   height?: number,
   normalFont?: string,
   gaijiFont?: string,
+  guessDuration?: number,
 }
 
 export default class CanvasProvider {
@@ -77,12 +78,15 @@ export default class CanvasProvider {
   private stl: boolean = false
   private orn: string | null = null
 
-  private startTime: number | null;
-  private timeElapsed: number = 0;
-  private endTime: number | null;
+  private textLength: number = 0
 
-  private normalFont: string;
-  private gaijiFont: string;
+  private startTime: number | null
+  private timeElapsed: number = 0
+  private endTime: number | null
+  private endTimeGuessMagnification: number | null
+
+  private normalFont: string
+  private gaijiFont: string
 
   public constructor(pes: Uint8Array, option?: ProviderOption) {
     this.pes = pes
@@ -91,6 +95,7 @@ export default class CanvasProvider {
     this.purpose_height = option?.height ?? this.purpose_height
     this.normalFont = option?.normalFont ?? 'sans-serif'
     this.gaijiFont = option?.gaijiFont ?? this.normalFont
+    this.endTimeGuessMagnification = option?.guessDuration ?? null
   }
 
   private width(): number {
@@ -213,7 +218,9 @@ export default class CanvasProvider {
         0, 0, canvas.width, canvas.height
       )
 
-      const cue: VTTCue = new VTTCue(pts, !this.endTime ? Number.MAX_SAFE_INTEGER : this.endTime, '');
+      const endTime = this.endTime ??
+        (this.endTimeGuessMagnification ? pts + (this.textLength * this.endTimeGuessMagnification) : Number.MAX_SAFE_INTEGER)
+      const cue: VTTCue = new VTTCue(pts, endTime, '');
       (cue as any).canvas = canvas
       return cue
     }else{
@@ -666,6 +673,11 @@ export default class CanvasProvider {
     }
 
     if(entry.alphabet !== ALPHABETS.MACRO) {
+      if (!(this.text_size_x === 0.5 && this.text_size_y === 0.5)) {
+        // SSZ (ルビ) 以外の長さを取りたい
+        this.textLength += this.text_size_x
+      }
+
       //HLC
       if(this.hlc & 0b0001){
         fg_ctx.fillStyle = this.fg_color
