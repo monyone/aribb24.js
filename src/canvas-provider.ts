@@ -1000,6 +1000,8 @@ export default class CanvasProvider {
           }
         }
       }
+
+      this.move_relative_pos(1, 0)
     }
   }
 
