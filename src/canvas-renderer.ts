@@ -90,9 +90,13 @@ export default class CanvasRenderer {
       return
     }
 
+    const style = window.getComputedStyle(this.media)
+    const purpose_width = Math.max((this.media as any).videoWidth, Number.parseInt(style.width) * window.devicePixelRatio)
+    const purpose_height = Math.max((this.media as any).videoHeight, Number.parseInt(style.height) * window.devicePixelRatio)
+
     const provider = new CanvasProvider(uint8array, {
-      width: (this.width ?? (this.media as any).videoWidth) * window.devicePixelRatio,
-      height: (this.height ?? (this.media as any).videoHeight) * window.devicePixelRatio,
+      width: (this.width ?? purpose_width),
+      height: (this.height ?? purpose_height),
       normalFont: this.normalFont,
       gaijiFont: this.gaijiFont
     })
@@ -133,10 +137,13 @@ export default class CanvasRenderer {
     }
 
     const style = window.getComputedStyle(this.media)
+    const purpose_width = Math.max((this.media as any).videoWidth, Number.parseInt(style.width) * window.devicePixelRatio)
+    const purpose_height = Math.max((this.media as any).videoHeight, Number.parseInt(style.height) * window.devicePixelRatio)
+
     this.canvas.style.width = '100%'
     this.canvas.style.height = '100%'
-    this.canvas.width = ((this.media as any).videoWidth ?? Number.parseInt(style.width)) * window.devicePixelRatio
-    this.canvas.height = ((this.media as any).videoHeight ?? Number.parseInt(style.height)) * window.devicePixelRatio
+    this.canvas.width = purpose_width
+    this.canvas.height = purpose_height
 
     this.onCueChange()
   }

@@ -51,8 +51,8 @@ export default class CanvasProvider {
     [ALPHABETS.DRCS_15, new Map<number, Uint8Array>()],
   ])
 
-  private canvas_width: number = 960
-  private canvas_height: number = 540
+  private purpose_width: number = 960
+  private purpose_height: number = 540
 
   private swf_x: number = 960
   private swf_y: number = 540
@@ -87,8 +87,8 @@ export default class CanvasProvider {
   public constructor(pes: Uint8Array, option?: ProviderOption) {
     this.pes = pes
     this.startTime = this.endTime = null
-    this.canvas_width = option?.width ?? this.canvas_width
-    this.canvas_height = option?.height ?? this.canvas_height
+    this.purpose_width = option?.width ?? this.purpose_width
+    this.purpose_height = option?.height ?? this.purpose_height
     this.normalFont = option?.normalFont ?? 'sans-serif'
     this.gaijiFont = option?.gaijiFont ?? this.normalFont
   }
@@ -100,10 +100,16 @@ export default class CanvasProvider {
     return Math.floor((this.svs + this.ssm_y) * this.text_size_y)
   }
   private width_magnification(): number { 
-    return Math.ceil(this.canvas_width / this.swf_x)
+    return Math.ceil(this.purpose_width / this.swf_x)
   }
   private height_magnification(): number { 
-    return Math.ceil(this.canvas_height / this.swf_y)
+    return Math.ceil(this.purpose_height / this.swf_y)
+  }
+  private canvas_width(): number {
+    return this.swf_x * this.width_magnification()
+  }
+  private canvas_height(): number {
+    return this.swf_y * this.height_magnification()
   }
   
   private move_absolute_dot(x: number, y: number): void{
@@ -189,8 +195,8 @@ export default class CanvasProvider {
 
     if(this.fg_canvas && this.bg_canvas){
       const canvas = document.createElement('canvas')
-      canvas.width = this.canvas_width
-      canvas.height = this.canvas_height
+      canvas.width = this.canvas_width()
+      canvas.height = this.canvas_height()
       const ctx = canvas.getContext('2d')
       if(!ctx){
         return null
@@ -645,13 +651,13 @@ export default class CanvasProvider {
   private renderCharacter(key: number, entry: ALPHABET_ENTRY) {
     if(!this.fg_canvas){
       this.fg_canvas = document.createElement('canvas')
-      this.fg_canvas.width = this.canvas_width
-      this.fg_canvas.height = this.canvas_height
+      this.fg_canvas.width = this.canvas_width()
+      this.fg_canvas.height = this.canvas_height()
     }
     if(!this.bg_canvas){
       this.bg_canvas = document.createElement('canvas')
-      this.bg_canvas.width = this.canvas_width
-      this.bg_canvas.height = this.canvas_height
+      this.bg_canvas.width = this.canvas_width()
+      this.bg_canvas.height = this.canvas_height()
     }
 
     const fg_ctx = this.fg_canvas.getContext('2d')
