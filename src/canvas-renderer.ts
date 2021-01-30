@@ -133,10 +133,10 @@ export default class CanvasRenderer {
     }
 
     const style = window.getComputedStyle(this.media)
-    this.canvas.style.width = style.width
-    this.canvas.style.height = style.height
-    this.canvas.width = Number.parseInt(style.width, 10) * window.devicePixelRatio
-    this.canvas.height = Number.parseInt(style.height, 10) * window.devicePixelRatio
+    this.canvas.style.width = '100%'
+    this.canvas.style.height = '100%'
+    this.canvas.width = ((this.media as any).videoWidth ?? Number.parseInt(style.width)) * window.devicePixelRatio
+    this.canvas.height = ((this.media as any).videoHeight ?? Number.parseInt(style.height)) * window.devicePixelRatio
 
     this.onCueChange()
   }
