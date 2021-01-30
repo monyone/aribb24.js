@@ -100,10 +100,10 @@ export default class CanvasProvider {
     return Math.floor((this.svs + this.ssm_y) * this.text_size_y)
   }
   private width_magnification(): number { 
-    return this.canvas_width / this.swf_x
+    return Math.ceil(this.canvas_width / this.swf_x)
   }
   private height_magnification(): number { 
-    return this.canvas_height / this.swf_y
+    return Math.ceil(this.canvas_height / this.swf_y)
   }
   
   private move_absolute_dot(x: number, y: number): void{
