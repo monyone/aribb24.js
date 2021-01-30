@@ -3,6 +3,7 @@ import CanvasProvider from '@/canvas-provider'
 interface RendererOption {
   width?: number,
   height?: number,
+  forceStrokeColor?: string,
   normalFont?: string,
   gaijiFont?: string,
   guessDuration?: number

@@ -14,6 +14,7 @@ import ADDITIONAL_SYMBOL_SET from '@/constants/mapping/additional-symbol-set'
 interface ProviderOption {
   width?: number,
   height?: number,
+  forceStrokeColor?: string,
   normalFont?: string,
   gaijiFont?: string,
   guessDuration?: number,
@@ -77,12 +78,13 @@ export default class CanvasProvider {
   private hlc: number = 0
   private stl: boolean = false
   private orn: string | null = null
+  private forceOrn: string | null = null
 
   private textLength: number = 0
 
-  private startTime: number | null
+  private startTime: number | null = null
   private timeElapsed: number = 0
-  private endTime: number | null
+  private endTime: number | null = null
   private endTimeGuessMagnification: number | null
 
   private normalFont: string
@@ -90,7 +92,7 @@ export default class CanvasProvider {
 
   public constructor(pes: Uint8Array, option?: ProviderOption) {
     this.pes = pes
-    this.startTime = this.endTime = null
+    this.forceOrn = option?.forceStrokeColor ?? null
     this.purpose_width = option?.width ?? this.purpose_width
     this.purpose_height = option?.height ?? this.purpose_height
     this.normalFont = option?.normalFont ?? 'sans-serif'
@@ -963,8 +965,8 @@ export default class CanvasProvider {
       const width = Math.floor(this.ssm_x * this.text_size_x)
       const height = Math.floor(this.ssm_y * this.text_size_y)
       const depth = Math.floor((drcs.length * 8) / (width * height))
-      if(this.orn){
-        fg_ctx.fillStyle = this.orn
+      if(this.forceOrn ?? this.orn){
+        fg_ctx.fillStyle = this.forceOrn ?? this.orn ?? ''
         for(let dy = -2; dy <= 2; dy++){
           for(let dx = -2; dx <= 2; dx++){
             for(let y = 0; y < height; y++){
@@ -979,7 +981,7 @@ export default class CanvasProvider {
 
                 if(value > 0){
                   fg_ctx.fillRect(
-                    (this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x + dx) * this.width_magnification(),
+                    (this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x + (dx + 1)) * this.width_magnification(),
                     (this.position_y - this.height() + Math.floor(this.svs * this.text_size_y / 2) + y + dy) * this.height_magnification(),
                     1 * this.width_magnification(),
                     1 * this.height_magnification(),
@@ -1027,11 +1029,11 @@ export default class CanvasProvider {
       return canvas
     }
 
-    if(this.orn){
+    if(this.forceOrn ?? this.orn){
       for(let dy = -2; dy <= 2; dy++) {
         for(let dx = -2; dx <= 2; dx++) {
           ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}` 
-          ctx.fillStyle = this.orn
+          ctx.fillStyle = this.forceOrn ?? this.orn ?? ''
           ctx.textBaseline = 'middle'
           ctx.fillText(character, 
             (this.shs / 2 + dx) * this.width_magnification(),
