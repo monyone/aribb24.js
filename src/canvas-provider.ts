@@ -947,8 +947,8 @@ export default class CanvasProvider {
       const depth = Math.floor((drcs.length * 8) / (width * height))
       if(this.orn){
         fg_ctx.fillStyle = this.orn
-        for(let dy = -1; dy <= 1; dy++){
-          for(let dx = -1; dx <= 1; dx++){
+        for(let dy = -2; dy <= 2; dy++){
+          for(let dx = -2; dx <= 2; dx++){
             for(let y = 0; y < height; y++){
               for(let x = 0; x < width; x++){
                 let value = 0
@@ -1008,8 +1008,8 @@ export default class CanvasProvider {
     }
 
     if(this.orn){
-      for(let dy = -1; dy <= 1; dy++) {
-        for(let dx = -1; dx <= 1; dx++) {
+      for(let dy = -2; dy <= 2; dy++) {
+        for(let dx = -2; dx <= 2; dx++) {
           ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}` 
           ctx.fillStyle = this.orn
           ctx.textBaseline = 'middle'
