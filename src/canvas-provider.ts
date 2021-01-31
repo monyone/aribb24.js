@@ -226,20 +226,17 @@ export default class CanvasProvider {
     if (this.endTime) {
       const endTime = this.endTime
       const cue: VTTCue = new VTTCue(pts, endTime, '');
-      (cue as any).canvas = canvas;
-      (cue as any).undetermined = false
+      (cue as any).canvas = canvas
       return cue
     } else if(this.endTimeGuessMagnification) {
       const endTime = this.startTime + (this.textLength * this.endTimeGuessMagnification)
       const cue: VTTCue = new VTTCue(pts, endTime, '');
-      (cue as any).canvas = canvas;
-      (cue as any).undetermined = false
+      (cue as any).canvas = canvas
       return cue
     } else {
       const endTime = Number.MAX_SAFE_INTEGER
       const cue: VTTCue = new VTTCue(pts, endTime, '');
-      (cue as any).canvas = canvas;
-      (cue as any).undetermined = true
+      (cue as any).canvas = canvas
       return cue
     }
   }

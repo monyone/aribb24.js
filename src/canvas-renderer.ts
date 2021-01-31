@@ -14,6 +14,7 @@ export default class CanvasRenderer {
   private track: TextTrack | null = null
   private subtitleElement: HTMLElement | null = null
   private canvas: HTMLCanvasElement | null = null
+  private lastCueChangeCanvas: HTMLCanvasElement = document.createElement('canvas')
   private mutationObserver: MutationObserver | null = null
   private isOnSeeking: boolean = false
   
@@ -104,32 +105,46 @@ export default class CanvasRenderer {
       return
     }
 
-    const ctx = this.canvas.getContext('2d')
-    if (!ctx) { return }
-    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.lastCueChangeCanvas.width = this.canvas.width
+    this.lastCueChangeCanvas.height = this.canvas.height
+
+    const canvasContext = this.canvas.getContext('2d')
+    const lastCueChangeCanvasContext = this.lastCueChangeCanvas.getContext('2d')
+    if (!canvasContext) {
+      if (!lastCueChangeCanvasContext) { 
+        return
+      }
+      lastCueChangeCanvasContext.clearRect(0, 0, this.lastCueChangeCanvas.width, this.lastCueChangeCanvas.height);
+      return
+    }
+    canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     const activeCues = this.track.activeCues
     if (activeCues && activeCues.length > 0) {
       const lastCue = activeCues[activeCues.length - 1]
       const lastCanvas = (lastCue as any).canvas as HTMLCanvasElement 
-      const isUndetermined = (lastCue as any).undetermined ?? false
 
-      if (!this.isOnSeeking || !isUndetermined){
-        ctx.drawImage(lastCanvas, 0, 0, lastCanvas.width, lastCanvas.height, 0, 0, this.canvas.width, this.canvas.height)
+      if (!this.isOnSeeking){
+        canvasContext.drawImage(lastCanvas, 0, 0, lastCanvas.width, lastCanvas.height, 0, 0, this.canvas.width, this.canvas.height)
       }
 
       for (let i = 0; i < activeCues.length - 1; i++) {
         const cue = activeCues[i]
-        cue.endTime = lastCue.startTime;
-        (cue as any).undetermined = false
+        cue.endTime = lastCue.startTime
       }
+    }
+
+    if (lastCueChangeCanvasContext) {
+      lastCueChangeCanvasContext.drawImage(this.canvas,
+        0, 0, this.canvas.width, this.canvas.height,
+        0, 0, this.lastCueChangeCanvas.width, this.lastCueChangeCanvas.height
+      )
     }
   }
 
   private onSeeking() {
     this.isOnSeeking = true
-    this.onResize() // videoWidth 系の変化があるかも...?
-    // なかったら onCueChange だけでよい... (Undetermined な字幕は絶対消すので必要)
+    this.onCueChange()
   }
 
   private onSeeked() {
@@ -150,7 +165,19 @@ export default class CanvasRenderer {
     this.canvas.width = purpose_width
     this.canvas.height = purpose_height
 
-    this.onCueChange()
+    /*
+      このコードは高画質化(都度PESレンダリング方式) では使えない
+      その際は直前の onCueChange で描画したかをメモっておく
+      clearRect した後、描画した場合のみ再度描画を行えば良い
+      逆にメモ用キャンバスは今の方式だから必要なだけで将来的にはいらない
+    */    
+    const canvasContext = this.canvas.getContext('2d')
+    if (!canvasContext) { return }
+    canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    canvasContext.drawImage(this.lastCueChangeCanvas,
+      0, 0, this.lastCueChangeCanvas.width, this.lastCueChangeCanvas.height,
+      0, 0, this.canvas.width, this.canvas.height
+    )
   }
 
   private setupTrack(): void {
