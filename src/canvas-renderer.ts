@@ -10,25 +10,21 @@ interface RendererOption {
 }
 
 export default class CanvasRenderer {
-  private media: HTMLMediaElement | null
-  private track: TextTrack | null
-  private subtitleElement: HTMLElement | null
-  private canvas: HTMLCanvasElement | null
-  private mutationObserver: MutationObserver | null
-  private onCueChangeHandler: (() => void) | null
-  private onResizeHandler: (() => void) | null
+  private media: HTMLMediaElement | null = null
+  private track: TextTrack | null = null
+  private subtitleElement: HTMLElement | null = null
+  private canvas: HTMLCanvasElement | null = null
+  private mutationObserver: MutationObserver | null = null
+  private isOnSeeking: boolean = false
+  
+  private onCueChangeHandler: (() => void) | null = null
+  private onSeekingHandler: (() => void) | null = null
+  private onSeekedHandler: (() => void) | null = null
+  private onResizeHandler: (() => void) | null = null
 
   private rendererOption: RendererOption | undefined
   
   public constructor(option?: RendererOption) {
-    this.media = null
-    this.track = null
-    this.subtitleElement = null
-    this.canvas = null
-    this.mutationObserver = null
-    this.onCueChangeHandler = null
-    this.onResizeHandler = null
-
     this.rendererOption = option
   }
 
@@ -112,18 +108,32 @@ export default class CanvasRenderer {
     if (!ctx) { return }
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    const cues = this.track.activeCues
-    if (cues && cues.length > 0) {
-      const lastCue = cues[cues.length - 1]
-      const lastCanvas = (lastCue as any).canvas as HTMLCanvasElement
+    const activeCues = this.track.activeCues
+    if (activeCues && activeCues.length > 0) {
+      const lastCue = activeCues[activeCues.length - 1]
+      const lastCanvas = (lastCue as any).canvas as HTMLCanvasElement 
+      const isUndetermined = (lastCue as any).undetermined ?? false
 
-      ctx.drawImage(lastCanvas, 0, 0, lastCanvas.width, lastCanvas.height, 0, 0, this.canvas.width, this.canvas.height)
+      if (!this.isOnSeeking || !isUndetermined){
+        ctx.drawImage(lastCanvas, 0, 0, lastCanvas.width, lastCanvas.height, 0, 0, this.canvas.width, this.canvas.height)
+      }
 
-      for (let i = 0; i < cues.length - 1; i++) {
-        const cue = cues[i]
-        cue.endTime = lastCue.startTime
+      for (let i = 0; i < activeCues.length - 1; i++) {
+        const cue = activeCues[i]
+        cue.endTime = lastCue.startTime;
+        (cue as any).undetermined = false
       }
     }
+  }
+
+  private onSeeking() {
+    this.isOnSeeking = true
+    this.onResize() // videoWidth 系の変化があるかも...?
+    // なかったら onCueChange だけでよい... (Undetermined な字幕は絶対消すので必要)
+  }
+
+  private onSeeked() {
+    this.isOnSeeking = false
   }
 
   private onResize() {
@@ -161,7 +171,11 @@ export default class CanvasRenderer {
       this.track.mode = 'hidden'
     }
     this.onCueChangeHandler = this.onCueChange.bind(this)
+    this.onSeekingHandler = this.onSeeking.bind(this)
+    this.onSeekedHandler = this.onSeeked.bind(this)
     this.track.addEventListener('cuechange', this.onCueChangeHandler)
+    this.media.addEventListener('seeking', this.onSeekingHandler)
+    this.media.addEventListener('seeked', this.onSeekedHandler)
   }
 
   private setupCanvas(): void {
@@ -204,6 +218,16 @@ export default class CanvasRenderer {
     if (this.onCueChangeHandler) {
       this.track.removeEventListener('cuechange', this.onCueChangeHandler)
       this.onCueChangeHandler = null
+    }
+    if (this.media){
+      if (this.onSeekingHandler) {
+        this.media.removeEventListener('seeking', this.onSeekingHandler)
+        this.onSeekingHandler = null
+      }
+      if (this.onSeekedHandler) {
+        this.media.removeEventListener('seeked', this.onSeekedHandler)
+        this.onSeekedHandler = null
+      }
     }
 
     this.track = null

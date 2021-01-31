@@ -220,11 +220,25 @@ export default class CanvasProvider {
         0, 0, canvas.width, canvas.height
       )
 
-      const endTime = this.endTime ??
-        (this.endTimeGuessMagnification ? pts + (this.textLength * this.endTimeGuessMagnification) : Number.MAX_SAFE_INTEGER)
-      const cue: VTTCue = new VTTCue(pts, endTime, '');
-      (cue as any).canvas = canvas
-      return cue
+      if (this.endTime) {
+        const endTime = this.endTime
+        const cue: VTTCue = new VTTCue(pts, endTime, '');
+        (cue as any).canvas = canvas;
+        (cue as any).undetermined = false
+        return cue
+      } else if(this.endTimeGuessMagnification) {
+        const endTime = this.startTime + (this.textLength * this.endTimeGuessMagnification)
+        const cue: VTTCue = new VTTCue(pts, endTime, '');
+        (cue as any).canvas = canvas;
+        (cue as any).undetermined = false
+        return cue
+      } else {
+        const endTime = Number.MAX_SAFE_INTEGER
+        const cue: VTTCue = new VTTCue(pts, endTime, '');
+        (cue as any).canvas = canvas;
+        (cue as any).undetermined = true
+        return cue
+      }
     }else{
       return null
     }
