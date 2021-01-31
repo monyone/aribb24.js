@@ -200,10 +200,12 @@ export default class CanvasProvider {
       data_unit += 5 + data_unit_size
     }
 
+
+    const canvas = document.createElement('canvas')
+    canvas.width = this.canvas_width()
+    canvas.height = this.canvas_height()
+
     if(this.fg_canvas && this.bg_canvas){
-      const canvas = document.createElement('canvas')
-      canvas.width = this.canvas_width()
-      canvas.height = this.canvas_height()
       const ctx = canvas.getContext('2d')
       if(!ctx){
         return null
@@ -219,28 +221,26 @@ export default class CanvasProvider {
         0, 0, this.fg_canvas.width, this.fg_canvas.height,
         0, 0, canvas.width, canvas.height
       )
+    }
 
-      if (this.endTime) {
-        const endTime = this.endTime
-        const cue: VTTCue = new VTTCue(pts, endTime, '');
-        (cue as any).canvas = canvas;
-        (cue as any).undetermined = false
-        return cue
-      } else if(this.endTimeGuessMagnification) {
-        const endTime = this.startTime + (this.textLength * this.endTimeGuessMagnification)
-        const cue: VTTCue = new VTTCue(pts, endTime, '');
-        (cue as any).canvas = canvas;
-        (cue as any).undetermined = false
-        return cue
-      } else {
-        const endTime = Number.MAX_SAFE_INTEGER
-        const cue: VTTCue = new VTTCue(pts, endTime, '');
-        (cue as any).canvas = canvas;
-        (cue as any).undetermined = true
-        return cue
-      }
-    }else{
-      return null
+    if (this.endTime) {
+      const endTime = this.endTime
+      const cue: VTTCue = new VTTCue(pts, endTime, '');
+      (cue as any).canvas = canvas;
+      (cue as any).undetermined = false
+      return cue
+    } else if(this.endTimeGuessMagnification) {
+      const endTime = this.startTime + (this.textLength * this.endTimeGuessMagnification)
+      const cue: VTTCue = new VTTCue(pts, endTime, '');
+      (cue as any).canvas = canvas;
+      (cue as any).undetermined = false
+      return cue
+    } else {
+      const endTime = Number.MAX_SAFE_INTEGER
+      const cue: VTTCue = new VTTCue(pts, endTime, '');
+      (cue as any).canvas = canvas;
+      (cue as any).undetermined = true
+      return cue
     }
   }
 
