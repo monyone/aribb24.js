@@ -101,7 +101,7 @@ export default class CanvasRenderer {
   }
 
   private onCueChange() {
-    if (!this.track || !this.canvas) {
+    if (!this.media || !this.track || !this.canvas) {
       return
     }
 
@@ -124,13 +124,14 @@ export default class CanvasRenderer {
       const lastCue = activeCues[activeCues.length - 1]
       const lastCanvas = (lastCue as any).canvas as HTMLCanvasElement 
 
-      if (!this.isOnSeeking){
+      if (lastCue.endTime > this.media.currentTime && !this.isOnSeeking) { 
+        // なんか Win Firefox で Cue が endTime 過ぎても消えない場合があった、バグ?
         canvasContext.drawImage(lastCanvas, 0, 0, lastCanvas.width, lastCanvas.height, 0, 0, this.canvas.width, this.canvas.height)
       }
 
       for (let i = 0; i < activeCues.length - 1; i++) {
         const cue = activeCues[i]
-        cue.endTime = lastCue.startTime
+        cue.endTime = Math.min(cue.endTime, lastCue.startTime)
       }
     }
 
