@@ -9,6 +9,12 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
 * Fully compatible of [b24.js](https://github.com/xqq/b24.js) API
 * Colored rendering with font color and background color specified by data packet
 
+## Options
+
+* forceStrokeColor: Specify a color for always drawing character's stroke
+* normalFont: Specify a font for drawing normal characters
+* gainiFont: Specify a font for drawing ARIB gaiji characters
+
 ## Build
 
 ### Preparing
@@ -38,11 +44,16 @@ yarn run build
     hls.attachMedia(video);
     video.play();
 
-    var b24Renderer = new aribb24js.CanvasRenderer();
-    b24Renderer.init().then(function() {
-        b24Renderer.attachMedia(video);
-        // b24Renderer.attachMedia(video, subtitleElement) also accepted
+    var b24Renderer = new aribb24js.CanvasRenderer({
+      // Options are here!
+
+      // forceStrokeColor?: string,
+      // normalFont?: string,
+      // gaijiFont?: string,
     });
+    b24Renderer.attachMedia(video);
+    // b24Renderer.attachMedia(video, subtitleElement) also accepted
+
     hls.on(Hls.Events.FRAG_PARSING_PRIVATE_DATA, function (event, data) {
         for (var sample of data.samples) {
             b24Renderer.pushData(sample.pid, sample.data, sample.pts);
