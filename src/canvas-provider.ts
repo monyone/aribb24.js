@@ -19,6 +19,12 @@ interface ProviderOption {
   gaijiFont?: string,
 }
 
+interface ProviderResult {
+  startTime: number,
+  endTime: number,
+  canvas: HTMLCanvasElement,
+}
+
 export default class CanvasProvider {
   private pes: Uint8Array
 
@@ -70,29 +76,91 @@ export default class CanvasProvider {
   private position_x: number = -1
   private position_y: number = -1
 
-  private pallet = 0
-  private fg_color = pallets[this.pallet][7]
-  private bg_color = pallets[this.pallet][8]
+  private pallet: number = 0
+  private fg_color: string = pallets[this.pallet][7]
+  private bg_color: string = pallets[this.pallet][8]
 
   private hlc: number = 0
   private stl: boolean = false
   private orn: string | null = null
   private forceOrn: string | null = null
 
-  private startTime: number | null = null
+  private startTime: number
   private timeElapsed: number = 0
   private endTime: number | null = null
 
-  private normalFont: string
-  private gaijiFont: string
+  private normalFont: string = 'sans-serif'
+  private gaijiFont: string = this.normalFont
 
-  public constructor(pes: Uint8Array, option?: ProviderOption) {
+  public constructor(pes: Uint8Array, pts: number) {
     this.pes = pes
-    this.forceOrn = option?.forceStrokeColor ?? null
-    this.purpose_width = option?.width ?? this.purpose_width
-    this.purpose_height = option?.height ?? this.purpose_height
-    this.normalFont = option?.normalFont ?? 'sans-serif'
-    this.gaijiFont = option?.gaijiFont ?? this.normalFont
+    this.startTime = pts
+  }
+
+  private initialize(): void {
+    // デフォルト値の対応を上記ととること
+    this.fg_canvas = null
+    this.bg_canvas = null
+
+    this.GL = 0
+    this.GR = 2
+    this.G_BACK = [
+      G_SET_BY_ALPHABET.get(ALPHABETS.KANJI),
+      G_SET_BY_ALPHABET.get(ALPHABETS.ASCII),
+      G_SET_BY_ALPHABET.get(ALPHABETS.HIRAGANA),
+      G_DRCS_BY_ALPHABET.get(ALPHABETS.MACRO)
+    ]
+    this.DRCS_mapping = new Map([
+      [ALPHABETS.DRCS_0, new Map<number, Uint8Array>()],
+      [ALPHABETS.DRCS_1, new Map<number, Uint8Array>()],
+      [ALPHABETS.DRCS_2, new Map<number, Uint8Array>()],
+      [ALPHABETS.DRCS_3, new Map<number, Uint8Array>()],
+      [ALPHABETS.DRCS_4, new Map<number, Uint8Array>()],
+      [ALPHABETS.DRCS_5, new Map<number, Uint8Array>()],
+      [ALPHABETS.DRCS_6, new Map<number, Uint8Array>()],
+      [ALPHABETS.DRCS_7, new Map<number, Uint8Array>()],
+      [ALPHABETS.DRCS_8, new Map<number, Uint8Array>()],
+      [ALPHABETS.DRCS_9, new Map<number, Uint8Array>()],
+      [ALPHABETS.DRCS_10, new Map<number, Uint8Array>()],
+      [ALPHABETS.DRCS_11, new Map<number, Uint8Array>()],
+      [ALPHABETS.DRCS_12, new Map<number, Uint8Array>()],
+      [ALPHABETS.DRCS_13, new Map<number, Uint8Array>()],
+      [ALPHABETS.DRCS_14, new Map<number, Uint8Array>()],
+      [ALPHABETS.DRCS_15, new Map<number, Uint8Array>()],
+    ])
+
+    this.purpose_width = 960
+    this.purpose_height = 540
+
+    this.swf_x  = 960
+    this.swf_y = 540
+    this.sdf_x = 960
+    this.sdf_y = 540
+    this.sdp_x = 0
+    this.sdp_y = 0
+    this.ssm_x = 36
+    this.ssm_y = 36
+    this.shs = 4
+    this.svs = 24
+    this.text_size_x = 1
+    this.text_size_y = 1
+    this.position_x = -1
+    this.position_y = -1
+
+    this.pallet = 0
+    this.fg_color = pallets[this.pallet][7]
+    this.bg_color = pallets[this.pallet][8]
+
+    this.hlc = 0
+    this.stl = false
+    this.orn = null
+    this.forceOrn = null
+
+    this.timeElapsed = 0
+    this.endTime = null
+
+    this.normalFont = 'sans-serif'
+    this.gaijiFont = this.normalFont
   }
 
   private width(): number {
@@ -101,10 +169,10 @@ export default class CanvasProvider {
   private height(): number {
     return Math.floor((this.svs + this.ssm_y) * this.text_size_y)
   }
-  private width_magnification(): number { 
+  private width_magnification(): number {
     return Math.ceil(this.purpose_width / this.swf_x)
   }
-  private height_magnification(): number { 
+  private height_magnification(): number {
     return Math.ceil(this.purpose_height / this.swf_y)
   }
   private canvas_width(): number {
@@ -113,7 +181,7 @@ export default class CanvasProvider {
   private canvas_height(): number {
     return this.swf_y * this.height_magnification()
   }
-  
+
   private move_absolute_dot(x: number, y: number): void{
     this.position_x = x
     this.position_y = y
@@ -160,8 +228,14 @@ export default class CanvasProvider {
     this.position_y = this.position_y + this.height()
   }
 
-  public render(pts: number): VTTCue | null {
-    this.startTime = pts
+  public render(option?: ProviderOption): ProviderResult | null {
+    this.initialize()
+
+    this.forceOrn = option?.forceStrokeColor ?? null
+    this.purpose_width = option?.width ?? this.purpose_width
+    this.purpose_height = option?.height ?? this.purpose_height
+    this.normalFont = option?.normalFont ?? 'sans-serif'
+    this.gaijiFont = option?.gaijiFont ?? this.normalFont
 
     const data_identifer = this.pes[0]
     if(data_identifer != 0x80){
@@ -195,7 +269,6 @@ export default class CanvasProvider {
       data_unit += 5 + data_unit_size
     }
 
-
     const canvas = document.createElement('canvas')
     canvas.width = this.canvas_width()
     canvas.height = this.canvas_height()
@@ -218,17 +291,11 @@ export default class CanvasProvider {
       )
     }
 
-    if (this.endTime) {
-      const endTime = this.endTime
-      const cue: VTTCue = new VTTCue(pts, endTime, '');
-      (cue as any).canvas = canvas
-      return cue
-    } else {
-      const endTime = Number.MAX_SAFE_INTEGER
-      const cue: VTTCue = new VTTCue(pts, endTime, '');
-      (cue as any).canvas = canvas
-      return cue
-    }
+    return ({
+      startTime: this.startTime,
+      endTime: this.endTime ?? Number.MAX_SAFE_INTEGER,
+      canvas: canvas
+    })
   }
 
   private parseText(begin: number, end: number): void {

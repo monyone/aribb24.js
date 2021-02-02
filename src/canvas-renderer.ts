@@ -13,17 +13,17 @@ export default class CanvasRenderer {
   private track: TextTrack | null = null
   private subtitleElement: HTMLElement | null = null
   private canvas: HTMLCanvasElement | null = null
-  private lastCueChangeCanvas: HTMLCanvasElement = document.createElement('canvas')
   private mutationObserver: MutationObserver | null = null
   private isOnSeeking: boolean = false
-  
+  private onCueChangeDrawed: boolean = false
+
   private onCueChangeHandler: (() => void) | null = null
   private onSeekingHandler: (() => void) | null = null
   private onSeekedHandler: (() => void) | null = null
   private onResizeHandler: (() => void) | null = null
 
   private rendererOption: RendererOption | undefined
-  
+
   public constructor(option?: RendererOption) {
     this.rendererOption = option
   }
@@ -86,34 +86,33 @@ export default class CanvasRenderer {
     const purpose_width = Math.max((this.media as any).videoWidth, Number.parseInt(style.width) * window.devicePixelRatio)
     const purpose_height = Math.max((this.media as any).videoHeight, Number.parseInt(style.height) * window.devicePixelRatio)
 
-    const provider = new CanvasProvider(uint8array, {
+    const provider = new CanvasProvider(uint8array, pts)
+
+    const result = provider.render({
       ... this.rendererOption,
-      width: (this.rendererOption?.width ?? purpose_width),
-      height: (this.rendererOption?.height ?? purpose_height),
+      width: undefined, // ここはデフォルト値で負荷を軽くする
+      height: undefined, // ここはデフォルト値で負荷を軽くする
     })
 
-    const cue = provider.render(pts)
-    if (!cue) {
-      return
-    }
+    if (!result){ return }
+
+    const { startTime, endTime } = result
+
+    const cue = new VTTCue(startTime, endTime, '');
+    (cue as any).provider = provider
+
     this.track.addCue(cue)
   }
 
   private onCueChange() {
     if (!this.media || !this.track || !this.canvas) {
+      this.onCueChangeDrawed = false
       return
     }
 
-    this.lastCueChangeCanvas.width = this.canvas.width
-    this.lastCueChangeCanvas.height = this.canvas.height
-
     const canvasContext = this.canvas.getContext('2d')
-    const lastCueChangeCanvasContext = this.lastCueChangeCanvas.getContext('2d')
     if (!canvasContext) {
-      if (!lastCueChangeCanvasContext) { 
-        return
-      }
-      lastCueChangeCanvasContext.clearRect(0, 0, this.lastCueChangeCanvas.width, this.lastCueChangeCanvas.height);
+      this.onCueChangeDrawed = false
       return
     }
     canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -121,24 +120,27 @@ export default class CanvasRenderer {
     const activeCues = this.track.activeCues
     if (activeCues && activeCues.length > 0) {
       const lastCue = activeCues[activeCues.length - 1]
-      const lastCanvas = (lastCue as any).canvas as HTMLCanvasElement 
+      const provider: CanvasProvider = (lastCue as any).provider
+      const lastCanvas = provider.render({
+        ... this.rendererOption,
+        width: this.rendererOption?.width ?? this.canvas.width,
+        height: this.rendererOption?.height ?? this.canvas.height,
+      })?.canvas
 
-      if (lastCue.endTime > this.media.currentTime && !this.isOnSeeking) { 
+      if (lastCanvas && lastCue.endTime > this.media.currentTime && !this.isOnSeeking) {
         // なんか Win Firefox で Cue が endTime 過ぎても消えない場合があった、バグ?
         canvasContext.drawImage(lastCanvas, 0, 0, lastCanvas.width, lastCanvas.height, 0, 0, this.canvas.width, this.canvas.height)
+        this.onCueChangeDrawed = true
+      } else {
+        this.onCueChangeDrawed = false
       }
 
       for (let i = 0; i < activeCues.length - 1; i++) {
         const cue = activeCues[i]
         cue.endTime = Math.min(cue.endTime, lastCue.startTime)
       }
-    }
-
-    if (lastCueChangeCanvasContext) {
-      lastCueChangeCanvasContext.drawImage(this.canvas,
-        0, 0, this.canvas.width, this.canvas.height,
-        0, 0, this.lastCueChangeCanvas.width, this.lastCueChangeCanvas.height
-      )
+    } else{
+      this.onCueChangeDrawed = false
     }
   }
 
@@ -152,7 +154,7 @@ export default class CanvasRenderer {
   }
 
   private onResize() {
-    if (!this.canvas || !this.media) {
+    if (!this.canvas || !this.media || !this.track) {
       return
     }
 
@@ -165,19 +167,28 @@ export default class CanvasRenderer {
     this.canvas.width = purpose_width
     this.canvas.height = purpose_height
 
-    /*
-      このコードは高画質化(都度PESレンダリング方式) では使えない
-      その際は直前の onCueChange で描画したかをメモっておく
-      clearRect した後、描画した場合のみ再度描画を行えば良い
-      逆にメモ用キャンバスは今の方式だから必要なだけで将来的にはいらない
-    */    
     const canvasContext = this.canvas.getContext('2d')
     if (!canvasContext) { return }
     canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    canvasContext.drawImage(this.lastCueChangeCanvas,
-      0, 0, this.lastCueChangeCanvas.width, this.lastCueChangeCanvas.height,
-      0, 0, this.canvas.width, this.canvas.height
-    )
+
+    if (!this.onCueChangeDrawed) { return }
+
+    // onCueChange とほぼ同じだが、this.onCueChangeDrawed を変更しない
+    const activeCues = this.track.activeCues
+    if (activeCues && activeCues.length > 0) {
+      const lastCue = activeCues[activeCues.length - 1]
+      const provider: CanvasProvider = (lastCue as any).provider
+      const lastCanvas = provider.render({
+        ... this.rendererOption,
+        width: this.rendererOption?.width ?? this.canvas.width,
+        height: this.rendererOption?.height ?? this.canvas.height,
+      })?.canvas
+
+      if (lastCanvas && lastCue.endTime > this.media.currentTime && !this.isOnSeeking) {
+        // なんか Win Firefox で Cue が endTime 過ぎても消えない場合があった、バグ?
+        canvasContext.drawImage(lastCanvas, 0, 0, lastCanvas.width, lastCanvas.height, 0, 0, this.canvas.width, this.canvas.height)
+      }
+    }
   }
 
   private setupTrack(): void {
