@@ -748,7 +748,7 @@ export default class CanvasProvider {
         fg_ctx.fillStyle = this.fg_color
         fg_ctx.fillRect(
            this.position_x * this.width_magnification(),
-           (this.position_y - 2) * this.height_magnification(),
+           (this.position_y - 1) * this.height_magnification(),
            this.width() * this.width_magnification(),
            1 * this.height_magnification()
         )
@@ -756,8 +756,8 @@ export default class CanvasProvider {
       if(this.hlc & 0b0010){
         fg_ctx.fillStyle = this.fg_color
         fg_ctx.fillRect(
-          (this.position_x + this.width() - 2) * this.width_magnification(),
-          this.position_y * this.height_magnification(),
+          (this.position_x + this.width() - 1) * this.width_magnification(),
+          (this.position_y - this.height()) * this.height_magnification(),
           1 * this.width_magnification(),
           this.height() * this.height_magnification()
         )
@@ -775,7 +775,7 @@ export default class CanvasProvider {
         fg_ctx.fillStyle = this.fg_color
         fg_ctx.fillRect(
           this.position_x * this.width_magnification(),
-          this.position_y * this.height_magnification(),
+          (this.position_y - this.height()) * this.height_magnification(),
           1 * this.width_magnification(),
           this.height() * this.height_magnification()
         )
