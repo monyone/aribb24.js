@@ -98,9 +98,9 @@ export default class CanvasRenderer {
 
     const { startTime, endTime } = result
 
-    const cue = new VTTCue(startTime, endTime, '');
+    const CueClass = window.VTTCue ?? window.TextTrackCue
+    const cue = new CueClass(startTime, endTime, '');
     (cue as any).provider = provider
-
     this.track.addCue(cue)
   }
 
