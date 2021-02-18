@@ -1,12 +1,13 @@
 {
   "name": "aribb24.js",
-  "version": "0.0.29",
+  "version": "0.0.30",
   "main": "dist/aribb24.js",
   "types": "d.ts/index.d.ts",
   "files": [
     "dist/**/*",
     "d.ts/**/*",
-    "src/**/*"
+    "src/**/*",
+    "tsconfig.json"
   ],
   "author": "monyone <monyone.teihen@gmail.com>",
   "description": "an alternative implementation for b24.js",
