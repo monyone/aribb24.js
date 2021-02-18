@@ -28,7 +28,7 @@ export default class CanvasRenderer {
     this.rendererOption = option
   }
 
-  public attachMedia(media: HTMLMediaElement, subtitleElement: HTMLElement): void {
+  public attachMedia(media: HTMLMediaElement, subtitleElement?: HTMLElement): void {
     this.media = media
     this.subtitleElement = subtitleElement ?? media.parentElement
     this.setupTrack()
