@@ -6,6 +6,7 @@ interface RendererOption {
   forceStrokeColor?: string,
   normalFont?: string,
   gaijiFont?: string,
+  drcsReplacement?: boolean,
 }
 
 export default class CanvasRenderer {

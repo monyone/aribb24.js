@@ -9,7 +9,13 @@ import KANJI_MAPPING from './constants/mapping/kanji'
 import ASCII_MAPPING from './constants/mapping/ascii'
 import HIRAGANA_MAPPING from './constants/mapping/hiragana'
 import KATAKANA_MAPPING from './constants/mapping/katakana'
+
+import DRCS_NSZ_MAPPING from './constants/mapping/drcs-NSZ'
+
 import ADDITIONAL_SYMBOL_SET from './constants/mapping/additional-symbol-set'
+
+import SparkMD5 from 'spark-md5'
+
 
 interface ProviderOption {
   width?: number,
@@ -17,6 +23,7 @@ interface ProviderOption {
   forceStrokeColor?: string,
   normalFont?: string,
   gaijiFont?: string,
+  drcsReplacement?: boolean,
 }
 
 interface ProviderResult {
@@ -92,6 +99,8 @@ export default class CanvasProvider {
   private normalFont: string = 'sans-serif'
   private gaijiFont: string = this.normalFont
 
+  private drcsReplacement: boolean = false
+
   public constructor(pes: Uint8Array, pts: number) {
     this.pes = pes
     this.startTime = pts
@@ -161,6 +170,8 @@ export default class CanvasProvider {
 
     this.normalFont = 'sans-serif'
     this.gaijiFont = this.normalFont
+
+    this.drcsReplacement = false
   }
 
   private width(): number {
@@ -236,6 +247,7 @@ export default class CanvasProvider {
     this.purpose_height = option?.height ?? this.purpose_height
     this.normalFont = option?.normalFont ?? 'sans-serif'
     this.gaijiFont = option?.gaijiFont ?? this.normalFont
+    this.drcsReplacement = option?.drcsReplacement ?? false
 
     const data_identifer = this.pes[0]
     if(data_identifer != 0x80){
@@ -705,7 +717,7 @@ export default class CanvasProvider {
           const height = this.pes[begin + 3]
           const depth_bits = depth.toString(2).length - depth.toString(2).replace(/0*$/, '').length
           const length = Math.floor(width * height * depth_bits / 8)
-          const drcs = this.pes.slice(begin + 4, begin + 4 + length)
+          const drcs = new Uint8Array(Array.prototype.slice.call(this.pes, begin + 4, begin + 4 + length)) // for IE11
 
           if(bytes === 1){
             const index = ((CharacterCode & 0x0F00) >> 8) + 0x40
@@ -1025,55 +1037,69 @@ export default class CanvasProvider {
       if(!fg_ctx){
         return
       }
-      const width = Math.floor(this.ssm_x * this.text_size_x)
-      const height = Math.floor(this.ssm_y * this.text_size_y)
-      const depth = Math.floor((drcs.length * 8) / (width * height))
-      if(this.forceOrn ?? this.orn){
-        fg_ctx.fillStyle = this.forceOrn ?? this.orn ?? ''
-        for(let dy = -2; dy <= 2; dy++){
-          for(let dx = -2; dx <= 2; dx++){
-            for(let y = 0; y < height; y++){
-              for(let x = 0; x < width; x++){
-                let value = 0
-                for(let d = 0; d < depth; d++){
-                  const byte = Math.floor(((((y * width) + x) * depth) + d) / 8)
-                  const index = 7 - (((((y * width) + x) * depth) + d) % 8)
-                  value *= 2
-                  value += drcs[byte] & (1 << index) >> index
-                }
 
-                if(value > 0){
-                  fg_ctx.fillRect(
-                    (this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x + (dx + 1)) * this.width_magnification(),
-                    (this.position_y - this.height() + Math.floor(this.svs * this.text_size_y / 2) + y + dy) * this.height_magnification(),
-                    1 * this.width_magnification(),
-                    1 * this.height_magnification(),
-                  )
+      const drcs_hash = SparkMD5.ArrayBuffer.hash(drcs)
+      if (this.drcsReplacement && DRCS_NSZ_MAPPING.has(drcs_hash)) {
+        const font_canvas = this.renderFont(DRCS_NSZ_MAPPING.get(drcs_hash)!)
+        fg_ctx.drawImage(
+          font_canvas,
+          0, 0, font_canvas.width, font_canvas.height,
+          this.position_x * this.width_magnification(),
+          (this.position_y - this.height()) * this.height_magnification(),
+          this.width() * this.width_magnification(),
+          this.height() * this.height_magnification()
+        )
+      } else {
+        const width = Math.floor(this.ssm_x * this.text_size_x)
+        const height = Math.floor(this.ssm_y * this.text_size_y)
+        const depth = Math.floor((drcs.length * 8) / (width * height))
+        if(this.forceOrn ?? this.orn){
+        fg_ctx.fillStyle = this.forceOrn ?? this.orn ?? ''
+          for(let dy = -2; dy <= 2; dy++){
+            for(let dx = -2; dx <= 2; dx++){
+              for(let y = 0; y < height; y++){
+                for(let x = 0; x < width; x++){
+                  let value = 0
+                  for(let d = 0; d < depth; d++){
+                    const byte = Math.floor(((((y * width) + x) * depth) + d) / 8)
+                    const index = 7 - (((((y * width) + x) * depth) + d) % 8)
+                    value *= 2
+                    value += drcs[byte] & (1 << index) >> index
+                  }
+
+                  if(value > 0){
+                    fg_ctx.fillRect(
+                      (this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x + (dx + 1)) * this.width_magnification(),
+                      (this.position_y - this.height() + Math.floor(this.svs * this.text_size_y / 2) + y + dy) * this.height_magnification(),
+                      1 * this.width_magnification(),
+                      1 * this.height_magnification(),
+                    )
+                  }
                 }
               }
             }
           }
         }
-      }
 
-      fg_ctx.fillStyle = this.fg_color
-      for(let y = 0; y < height; y++){
-        for(let x = 0; x < width; x++){
-          let value = 0
-          for(let d = 0; d < depth; d++){
-            const byte = Math.floor(((((y * width) + x) * depth) + d) / 8)
-            const index = 7 - (((((y * width) + x) * depth) + d) % 8)
-            value *= 2
-            value += ((drcs[byte] & (1 << index)) >> index)
-          }
+        fg_ctx.fillStyle = this.fg_color
+        for(let y = 0; y < height; y++){
+          for(let x = 0; x < width; x++){
+            let value = 0
+            for(let d = 0; d < depth; d++){
+              const byte = Math.floor(((((y * width) + x) * depth) + d) / 8)
+              const index = 7 - (((((y * width) + x) * depth) + d) % 8)
+              value *= 2
+              value += ((drcs[byte] & (1 << index)) >> index)
+            }
 
-          if(value > 0){
-            fg_ctx.fillRect(
-              (this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x) * this.width_magnification(),
-              (this.position_y - this.height() + Math.floor(this.svs * this.text_size_y / 2) + y) * this.height_magnification(),
-              1 * this.width_magnification(),
-              1 * this.height_magnification(),
-            )
+            if(value > 0){
+              fg_ctx.fillRect(
+                (this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x) * this.width_magnification(),
+                (this.position_y - this.height() + Math.floor(this.svs * this.text_size_y / 2) + y) * this.height_magnification(),
+                1 * this.width_magnification(),
+                1 * this.height_magnification(),
+              )
+            }
           }
         }
       }
