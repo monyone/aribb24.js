@@ -1,4 +1,4 @@
-import CanvasProvider from '@/canvas-provider'
+import CanvasProvider from './canvas-provider'
 
 interface RendererOption {
   width?: number,

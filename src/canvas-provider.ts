@@ -1,15 +1,15 @@
-import { JIS8, ESC, CSI } from '@/constants/jis8'
-import { ALPHABETS, ALPHABET_ENTRY } from '@/constants/jis8'
-import { G_SET_BY_ALPHABET, G_SET_BY_F } from '@/constants/jis8'
-import { G_DRCS_BY_ALPHABET, G_DRCS_BY_F } from '@/constants/jis8'
+import { JIS8, ESC, CSI } from './constants/jis8'
+import { ALPHABETS, ALPHABET_ENTRY } from './constants/jis8'
+import { G_SET_BY_ALPHABET, G_SET_BY_F } from './constants/jis8'
+import { G_DRCS_BY_ALPHABET, G_DRCS_BY_F } from './constants/jis8'
 
-import pallets from '@/constants/color-table'
+import pallets from './constants/color-table'
 
-import KANJI_MAPPING from '@/constants/mapping/kanji'
-import ASCII_MAPPING from '@/constants/mapping/ascii'
-import HIRAGANA_MAPPING from '@/constants/mapping/hiragana'
-import KATAKANA_MAPPING from '@/constants/mapping/katakana'
-import ADDITIONAL_SYMBOL_SET from '@/constants/mapping/additional-symbol-set'
+import KANJI_MAPPING from './constants/mapping/kanji'
+import ASCII_MAPPING from './constants/mapping/ascii'
+import HIRAGANA_MAPPING from './constants/mapping/hiragana'
+import KATAKANA_MAPPING from './constants/mapping/katakana'
+import ADDITIONAL_SYMBOL_SET from './constants/mapping/additional-symbol-set'
 
 interface ProviderOption {
   width?: number,
