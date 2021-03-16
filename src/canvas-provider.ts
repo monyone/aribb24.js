@@ -18,6 +18,7 @@ import SparkMD5 from 'spark-md5'
 
 
 interface ProviderOption {
+  canvas?: HTMLCanvasElement,
   width?: number,
   height?: number,
   forceStrokeColor?: string,
@@ -29,14 +30,13 @@ interface ProviderOption {
 interface ProviderResult {
   startTime: number,
   endTime: number,
-  canvas: HTMLCanvasElement,
 }
 
 export default class CanvasProvider {
   private pes: Uint8Array
 
-  private fg_canvas: HTMLCanvasElement | null = null
-  private bg_canvas: HTMLCanvasElement | null = null
+  private option_canvas: HTMLCanvasElement | null = null
+  private render_canvas: HTMLCanvasElement | null = null
 
   private GL: number = 0
   private GR: number = 2
@@ -108,8 +108,8 @@ export default class CanvasProvider {
 
   private initialize(): void {
     // デフォルト値の対応を上記ととること
-    this.fg_canvas = null
-    this.bg_canvas = null
+    this.render_canvas = null
+    this.option_canvas = null
 
     this.GL = 0
     this.GR = 2
@@ -141,7 +141,7 @@ export default class CanvasProvider {
     this.purpose_width = 960
     this.purpose_height = 540
 
-    this.swf_x  = 960
+    this.swf_x = 960
     this.swf_y = 540
     this.sdf_x = 960
     this.sdf_y = 540
@@ -242,9 +242,11 @@ export default class CanvasProvider {
   public render(option?: ProviderOption): ProviderResult | null {
     this.initialize()
 
+    this.option_canvas = option?.canvas ?? null
+
     this.forceOrn = option?.forceStrokeColor ?? null
-    this.purpose_width = option?.width ?? this.purpose_width
-    this.purpose_height = option?.height ?? this.purpose_height
+    this.purpose_width = option?.width ?? option?.canvas?.width ?? this.purpose_width
+    this.purpose_height = option?.height ?? option?.canvas?.height ?? this.purpose_height
     this.normalFont = option?.normalFont ?? 'sans-serif'
     this.gaijiFont = option?.gaijiFont ?? this.normalFont
     this.drcsReplacement = option?.drcsReplacement ?? false
@@ -281,32 +283,25 @@ export default class CanvasProvider {
       data_unit += 5 + data_unit_size
     }
 
-    const canvas = document.createElement('canvas')
-    canvas.width = this.canvas_width()
-    canvas.height = this.canvas_height()
-
-    if(this.fg_canvas && this.bg_canvas){
-      const ctx = canvas.getContext('2d')
-      if(!ctx){
-        return null
+    if (this.option_canvas && this.render_canvas) {
+      const ctx = this.option_canvas.getContext('2d')
+      if(ctx){
+        ctx.clearRect(0, 0, this.option_canvas.width, this.option_canvas.height)
+        ctx.drawImage(
+          this.render_canvas,
+          0, 0, this.render_canvas.width, this.render_canvas.height,
+          0, 0, this.option_canvas.width, this.option_canvas.height
+        )
       }
+    }
 
-      ctx.drawImage(
-        this.bg_canvas,
-        0, 0, this.bg_canvas.width, this.bg_canvas.height,
-        0, 0, canvas.width, canvas.height
-      )
-      ctx.drawImage(
-        this.fg_canvas,
-        0, 0, this.fg_canvas.width, this.fg_canvas.height,
-        0, 0, canvas.width, canvas.height
-      )
+    if (this.render_canvas) {
+      this.render_canvas.width = this.render_canvas.height = 0 // free canvas memory
     }
 
     return ({
       startTime: this.startTime,
       endTime: this.endTime ?? Number.MAX_SAFE_INTEGER,
-      canvas: canvas
     })
   }
 
@@ -738,27 +733,31 @@ export default class CanvasProvider {
   }
 
   private renderCharacter(key: number, entry: ALPHABET_ENTRY) {
-    if(!this.fg_canvas){
-      this.fg_canvas = document.createElement('canvas')
-      this.fg_canvas.width = this.canvas_width()
-      this.fg_canvas.height = this.canvas_height()
-    }
-    if(!this.bg_canvas){
-      this.bg_canvas = document.createElement('canvas')
-      this.bg_canvas.width = this.canvas_width()
-      this.bg_canvas.height = this.canvas_height()
+    if (!this.option_canvas){ return }
+
+    if (this.option_canvas && !this.render_canvas) {
+      this.render_canvas = document.createElement('canvas')
+      this.render_canvas.width = this.canvas_width()
+      this.render_canvas.height = this.canvas_height()
     }
 
-    const fg_ctx = this.fg_canvas.getContext('2d')
-    if(!fg_ctx){
-      return
-    }
+    const ctx = this.render_canvas?.getContext('2d')
+    if (!ctx) { return }
 
     if(entry.alphabet !== ALPHABETS.MACRO) {
+      // background
+      ctx.fillStyle = this.bg_color
+      ctx.fillRect(
+         this.position_x * this.width_magnification(),
+         (this.position_y - this.height()) * this.height_magnification(),
+         this.width() * this.width_magnification(),
+         this.height() * this.width_magnification()
+      )
+
       //HLC
       if(this.hlc & 0b0001){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(
+        ctx.fillStyle = this.fg_color
+        ctx.fillRect(
            this.position_x * this.width_magnification(),
            (this.position_y - 1) * this.height_magnification(),
            this.width() * this.width_magnification(),
@@ -766,8 +765,8 @@ export default class CanvasProvider {
         )
       }
       if(this.hlc & 0b0010){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(
+        ctx.fillStyle = this.fg_color
+        ctx.fillRect(
           (this.position_x + this.width() - 1) * this.width_magnification(),
           (this.position_y - this.height()) * this.height_magnification(),
           1 * this.width_magnification(),
@@ -775,8 +774,8 @@ export default class CanvasProvider {
         )
       }
       if(this.hlc & 0b0100){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(
+        ctx.fillStyle = this.fg_color
+        ctx.fillRect(
           this.position_x * this.width_magnification(),
           (this.position_y - this.height()) * this.height_magnification(),
           this.width() * this.width_magnification(), 
@@ -784,8 +783,8 @@ export default class CanvasProvider {
         )
       }
       if(this.hlc & 0b1000){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(
+        ctx.fillStyle = this.fg_color
+        ctx.fillRect(
           this.position_x * this.width_magnification(),
           (this.position_y - this.height()) * this.height_magnification(),
           1 * this.width_magnification(),
@@ -795,26 +794,14 @@ export default class CanvasProvider {
 
       // STL
       if(this.stl){
-        fg_ctx.fillStyle = this.fg_color
-        fg_ctx.fillRect(
+        ctx.fillStyle = this.fg_color
+        ctx.fillRect(
           this.position_x * this.width_magnification(),
           (this.position_y - 1) * this.height_magnification(),
           this.width() * this.width_magnification(),
           1 * this.height_magnification()
         )
       }
-
-      const bg_ctx = this.bg_canvas.getContext('2d')
-      if(!bg_ctx){
-        return
-      }
-      bg_ctx.fillStyle = this.bg_color
-      bg_ctx.fillRect(
-         this.position_x * this.width_magnification(),
-         (this.position_y - this.height()) * this.height_magnification(),
-         this.width() * this.width_magnification(),
-         this.height() * this.width_magnification()
-      )
     }
 
     if (entry.alphabet === ALPHABETS.KANJI) {
@@ -824,7 +811,7 @@ export default class CanvasProvider {
       const character = KANJI_MAPPING[index]
 
       const font_canvas = this.renderFont(character)
-      fg_ctx.drawImage(
+      ctx.drawImage(
         font_canvas,
         0, 0, font_canvas.width, font_canvas.height,
         this.position_x * this.width_magnification(), 
@@ -832,6 +819,7 @@ export default class CanvasProvider {
         this.width() * this.width_magnification(),
         this.height() * this.height_magnification()
       )
+      font_canvas.width = font_canvas.height = 0
 
       this.move_relative_pos(1, 0)
     }else if(entry.alphabet === ALPHABETS.ASCII) {
@@ -839,7 +827,7 @@ export default class CanvasProvider {
       const character = ASCII_MAPPING[index]
 
       const font_canvas = this.renderFont(character)
-      fg_ctx.drawImage(
+      ctx.drawImage(
         font_canvas,
         0, 0, font_canvas.width, font_canvas.height,
         this.position_x * this.width_magnification(), 
@@ -847,6 +835,7 @@ export default class CanvasProvider {
         this.width() * this.width_magnification(),
         this.height() * this.height_magnification()
       )
+      font_canvas.width = font_canvas.height = 0
 
       this.move_relative_pos(1, 0)
     }else if(entry.alphabet === ALPHABETS.HIRAGANA) {
@@ -854,7 +843,7 @@ export default class CanvasProvider {
       const character = HIRAGANA_MAPPING[index]
 
       const font_canvas = this.renderFont(character)
-      fg_ctx.drawImage(
+      ctx.drawImage(
         font_canvas,
         0, 0, font_canvas.width, font_canvas.height,
         this.position_x * this.width_magnification(), 
@@ -862,6 +851,7 @@ export default class CanvasProvider {
         this.width() * this.width_magnification(),
         this.height() * this.height_magnification()
       )
+      font_canvas.width = font_canvas.height = 0
 
       this.move_relative_pos(1, 0)
     }else if(entry.alphabet === ALPHABETS.KATAKANA) {
@@ -869,7 +859,7 @@ export default class CanvasProvider {
       const character = KATAKANA_MAPPING[index]
 
       const font_canvas = this.renderFont(character)
-      fg_ctx.drawImage(
+      ctx.drawImage(
         font_canvas,
         0, 0, font_canvas.width, font_canvas.height,
         this.position_x * this.width_magnification(), 
@@ -877,6 +867,7 @@ export default class CanvasProvider {
         this.width() * this.width_magnification(),
         this.height() * this.height_magnification()
       )
+      font_canvas.width = font_canvas.height = 0
 
       this.move_relative_pos(1, 0)
     }else if(entry.alphabet === ALPHABETS.MACRO) {
@@ -1033,15 +1024,10 @@ export default class CanvasProvider {
         return
       }
 
-      const fg_ctx = this.fg_canvas.getContext('2d')
-      if(!fg_ctx){
-        return
-      }
-
       const drcs_hash = SparkMD5.ArrayBuffer.hash(drcs)
       if (this.drcsReplacement && DRCS_NSZ_MAPPING.has(drcs_hash)) {
         const font_canvas = this.renderFont(DRCS_NSZ_MAPPING.get(drcs_hash)!)
-        fg_ctx.drawImage(
+        ctx.drawImage(
           font_canvas,
           0, 0, font_canvas.width, font_canvas.height,
           this.position_x * this.width_magnification(),
@@ -1049,12 +1035,13 @@ export default class CanvasProvider {
           this.width() * this.width_magnification(),
           this.height() * this.height_magnification()
         )
+        font_canvas.width = font_canvas.height = 0
       } else {
         const width = Math.floor(this.ssm_x * this.text_size_x)
         const height = Math.floor(this.ssm_y * this.text_size_y)
         const depth = Math.floor((drcs.length * 8) / (width * height))
         if(this.forceOrn ?? this.orn){
-        fg_ctx.fillStyle = this.forceOrn ?? this.orn ?? ''
+          ctx.fillStyle = this.forceOrn ?? this.orn ?? ''
           for(let dy = -2; dy <= 2; dy++){
             for(let dx = -2; dx <= 2; dx++){
               for(let y = 0; y < height; y++){
@@ -1068,7 +1055,7 @@ export default class CanvasProvider {
                   }
 
                   if(value > 0){
-                    fg_ctx.fillRect(
+                    ctx.fillRect(
                       (this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x + (dx + 1)) * this.width_magnification(),
                       (this.position_y - this.height() + Math.floor(this.svs * this.text_size_y / 2) + y + dy) * this.height_magnification(),
                       1 * this.width_magnification(),
@@ -1081,7 +1068,7 @@ export default class CanvasProvider {
           }
         }
 
-        fg_ctx.fillStyle = this.fg_color
+        ctx.fillStyle = this.fg_color
         for(let y = 0; y < height; y++){
           for(let x = 0; x < width; x++){
             let value = 0
@@ -1093,7 +1080,7 @@ export default class CanvasProvider {
             }
 
             if(value > 0){
-              fg_ctx.fillRect(
+              ctx.fillRect(
                 (this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x) * this.width_magnification(),
                 (this.position_y - this.height() + Math.floor(this.svs * this.text_size_y / 2) + y) * this.height_magnification(),
                 1 * this.width_magnification(),

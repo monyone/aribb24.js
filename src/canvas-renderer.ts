@@ -122,15 +122,17 @@ export default class CanvasRenderer {
     if (activeCues && activeCues.length > 0) {
       const lastCue = activeCues[activeCues.length - 1]
       const provider: CanvasProvider = (lastCue as any).provider
-      const lastCanvas = provider.render({
-        ... this.rendererOption,
-        width: this.rendererOption?.width ?? this.canvas.width,
-        height: this.rendererOption?.height ?? this.canvas.height,
-      })?.canvas
+      
+      if ((lastCue.startTime <= this.media.currentTime && this.media.currentTime <= lastCue.endTime) && !this.isOnSeeking) {
+        // なんか Win Firefox で Cue が endTime 過ぎても activeCues から消えない場合があった、バグ?
 
-      if (lastCanvas && lastCue.endTime > this.media.currentTime && !this.isOnSeeking) {
-        // なんか Win Firefox で Cue が endTime 過ぎても消えない場合があった、バグ?
-        canvasContext.drawImage(lastCanvas, 0, 0, lastCanvas.width, lastCanvas.height, 0, 0, this.canvas.width, this.canvas.height)
+  　　　provider.render({
+          ... this.rendererOption,
+          canvas: this.canvas ?? undefined,
+          width: this.rendererOption?.width ?? this.canvas.width,
+          height: this.rendererOption?.height ?? this.canvas.height,
+        })
+
         this.onCueChangeDrawed = true
       } else {
         this.onCueChangeDrawed = false
@@ -179,15 +181,14 @@ export default class CanvasRenderer {
     if (activeCues && activeCues.length > 0) {
       const lastCue = activeCues[activeCues.length - 1]
       const provider: CanvasProvider = (lastCue as any).provider
-      const lastCanvas = provider.render({
-        ... this.rendererOption,
-        width: this.rendererOption?.width ?? this.canvas.width,
-        height: this.rendererOption?.height ?? this.canvas.height,
-      })?.canvas
 
-      if (lastCanvas && lastCue.endTime > this.media.currentTime && !this.isOnSeeking) {
-        // なんか Win Firefox で Cue が endTime 過ぎても消えない場合があった、バグ?
-        canvasContext.drawImage(lastCanvas, 0, 0, lastCanvas.width, lastCanvas.height, 0, 0, this.canvas.width, this.canvas.height)
+      if ((lastCue.startTime <= this.media.currentTime && this.media.currentTime <= lastCue.endTime) && !this.isOnSeeking) {
+  　　　provider.render({
+          ... this.rendererOption,
+          canvas: this.canvas ?? undefined,
+          width: this.rendererOption?.width ?? this.canvas.width,
+          height: this.rendererOption?.height ?? this.canvas.height,
+        })
       }
     }
   }
