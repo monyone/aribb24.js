@@ -295,9 +295,12 @@ export default class CanvasProvider {
       }
     }
 
+    // 後片付け (強参照の放棄)
     if (this.render_canvas) {
       this.render_canvas.width = this.render_canvas.height = 0 // free canvas memory
+      this.render_canvas = null
     }
+    this.option_canvas = null
 
     return ({
       startTime: this.startTime,
