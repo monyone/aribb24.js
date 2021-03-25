@@ -14,6 +14,7 @@ import DRCS_NSZ_MAPPING from './constants/mapping/drcs-NSZ'
 
 import ADDITIONAL_SYMBOL_SET from './constants/mapping/additional-symbol-set'
 
+import CRC16 from './utils/crc16-ccitt'
 import SparkMD5 from 'spark-md5'
 
 
@@ -237,6 +238,14 @@ export default class CanvasProvider {
     }
     this.position_x = this.sdp_x
     this.position_y = this.position_y + this.height()
+  }
+
+  public check(): boolean {
+    const PES_data_packet_header_length = this.pes[2] & 0x0F
+    const data_group_begin = (3 + PES_data_packet_header_length)
+    const data_group_size = (this.pes[data_group_begin + 3] << 8) + this.pes[data_group_begin + 4]
+
+    return CRC16(this.pes, data_group_begin) === 0;
   }
 
   public render(option?: ProviderOption): ProviderResult | null {

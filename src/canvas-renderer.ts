@@ -88,6 +88,7 @@ export default class CanvasRenderer {
     const purpose_height = Math.max((this.media as any).videoHeight, Number.parseInt(style.height) * window.devicePixelRatio)
 
     const provider = new CanvasProvider(uint8array, pts)
+    if (!provider.check()) { return }
 
     const result = provider.render({
       ... this.rendererOption,
