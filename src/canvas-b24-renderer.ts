@@ -9,7 +9,7 @@ interface RendererOption {
   drcsReplacement?: boolean,
 }
 
-export default class CanvasRenderer {
+export default class CanvasB24Renderer {
   private media: HTMLMediaElement | null = null
   private track: TextTrack | null = null
   private subtitleElement: HTMLElement | null = null

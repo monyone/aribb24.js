@@ -14,6 +14,7 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
 * forceStrokeColor: Specify a color for always drawing character's stroke
 * normalFont: Specify a font for drawing normal characters
 * gainiFont: Specify a font for drawing ARIB gaiji characters
+* drcsReplacement: Replace DRCS to text if possible
 
 ## Build
 
@@ -33,6 +34,40 @@ yarn run build
 
 ## Getting Started 
 
+### with native player and hls.js (for id3 timedmetadata inserted stream)
+
+```html
+<script src="hls.min.js"></script>
+<script src="aribb24.js"></script>
+<video id="videoElement"></video>
+<script>
+    var video = document.getElementById('videoElement');
+
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = videoSrc;
+    } else if (Hls.isSupported()) {
+        var hls = new Hls();
+        hls.loadSource(videoSrc);
+        hls.attachMedia(video);
+    }
+
+    video.play();
+    var b24Renderer = new aribb24js.CanvasID3Renderer({
+      // Options are here!
+
+      // forceStrokeColor?: string,
+      // normalFont?: string,
+      // gaijiFont?: string,
+      // drcsReplacement?: boolean
+    });
+    b24Renderer.attachMedia(video);
+    // b24Renderer.attachMedia(video, subtitleElement) also accepted
+</script>
+```
+
+
+### with hls-b24.js (for private_stream_1 inserted stream)
+
 ```html
 <script src="hls.min.js"></script>
 <script src="aribb24.js"></script>
@@ -44,12 +79,13 @@ yarn run build
     hls.attachMedia(video);
     video.play();
 
-    var b24Renderer = new aribb24js.CanvasRenderer({
+    var b24Renderer = new aribb24js.CanvasB24Renderer({
       // Options are here!
 
       // forceStrokeColor?: string,
       // normalFont?: string,
       // gaijiFont?: string,
+      // drcsReplacement?: boolean
     });
     b24Renderer.attachMedia(video);
     // b24Renderer.attachMedia(video, subtitleElement) also accepted

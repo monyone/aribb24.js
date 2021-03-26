@@ -260,6 +260,10 @@ export default class CanvasProvider {
     this.gaijiFont = option?.gaijiFont ?? this.normalFont
     this.drcsReplacement = option?.drcsReplacement ?? false
 
+    if (!this.check()) {
+      return null
+    }
+
     const data_identifer = this.pes[0]
     if(data_identifer != 0x80){
       return null
