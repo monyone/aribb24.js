@@ -362,7 +362,7 @@ export default class CanvasProvider {
         this.move_relative_pos(0, -1)
         begin += 1
       } else if (this.pes[begin] === JIS8.CS) {
-        if(this.startTime && this.timeElapsed > 0){
+        if(this.startTime != null && this.timeElapsed > 0){
           this.endTime = this.startTime + this.timeElapsed
         }
         begin += 1
@@ -700,7 +700,7 @@ export default class CanvasProvider {
       } else if (this.pes[begin] === JIS8.TIME) {
         if(this.pes[begin + 1] == 0x20){
           const P2 = this.pes[begin + 2] & 0x3F
-          this.timeElapsed = P2 / 10
+          this.timeElapsed += P2 / 10
           begin += 3
         }else if(this.pes[begin + 1] == 0x28){
           return
