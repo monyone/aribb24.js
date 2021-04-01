@@ -96,7 +96,7 @@ export default class CanvasID3Renderer {
     if (activeCues && activeCues.length > 0) {
       const lastCue = activeCues[activeCues.length - 1] as any
 
-      // mark for bug in hls.js
+      // mark for endTime value not infinite bug in hls.js
       if (!lastCue.marked) { lastCue.endTime = Number.MAX_SAFE_INTEGER; }
       lastCue.marked = true;
 

@@ -42,13 +42,14 @@ yarn run build
 <video id="videoElement"></video>
 <script>
     var video = document.getElementById('videoElement');
+    var videoSrc = 'something.m3u8';
 
-    if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = videoSrc;
-    } else if (Hls.isSupported()) {
+    if (Hls.isSupported()) {
         var hls = new Hls();
         hls.loadSource(videoSrc);
         hls.attachMedia(video);
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = videoSrc;
     }
 
     video.play();
@@ -97,3 +98,10 @@ yarn run build
     }
 </script>
 ```
+
+## Limitations
+
+* CanvasID3Renderer in Android Chrome with native HLS player dose not work
+    * Because not support id3 timedmetadata in Android Chrome
+* CanvasID3Renderer in Legacy Edge with native HLS player does not work
+    * Bacause can't modify DataCue in Legacy Edge
