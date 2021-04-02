@@ -30,6 +30,7 @@ export default class CanvasB24Renderer {
   }
 
   public attachMedia(media: HTMLMediaElement, subtitleElement?: HTMLElement): void {
+    this.detachMedia()
     this.media = media
     this.subtitleElement = subtitleElement ?? media.parentElement
     this.setupTrack()
