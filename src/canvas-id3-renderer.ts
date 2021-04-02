@@ -4,6 +4,7 @@ interface RendererOption {
   width?: number,
   height?: number,
   forceStrokeColor?: string,
+  forceBackgroundColor?: string,
   normalFont?: string,
   gaijiFont?: string,
   drcsReplacement?: boolean,

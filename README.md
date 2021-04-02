@@ -12,6 +12,7 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
 ## Options
 
 * forceStrokeColor: Specify a color for always drawing character's stroke
+* forceBackgroundColor: Specify a color for always drawing character's background
 * normalFont: Specify a font for drawing normal characters
 * gainiFont: Specify a font for drawing ARIB gaiji characters
 * drcsReplacement: Replace DRCS to text if possible
@@ -57,6 +58,7 @@ yarn run build
       // Options are here!
 
       // forceStrokeColor?: string,
+      // forceBackgroundColor?: string,
       // normalFont?: string,
       // gaijiFont?: string,
       // drcsReplacement?: boolean
@@ -84,6 +86,7 @@ yarn run build
       // Options are here!
 
       // forceStrokeColor?: string,
+      // forceBackgroundColor?: string,
       // normalFont?: string,
       // gaijiFont?: string,
       // drcsReplacement?: boolean

@@ -23,6 +23,7 @@ interface ProviderOption {
   width?: number,
   height?: number,
   forceStrokeColor?: string,
+  forceBackgroundColor?: string,
   normalFont?: string,
   gaijiFont?: string,
   drcsReplacement?: boolean,
@@ -87,11 +88,12 @@ export default class CanvasProvider {
   private pallet: number = 0
   private fg_color: string = pallets[this.pallet][7]
   private bg_color: string = pallets[this.pallet][8]
+  private force_bg_color: string | null = null;
 
   private hlc: number = 0
   private stl: boolean = false
   private orn: string | null = null
-  private forceOrn: string | null = null
+  private force_orn: string | null = null
 
   private startTime: number
   private timeElapsed: number = 0
@@ -160,11 +162,12 @@ export default class CanvasProvider {
     this.pallet = 0
     this.fg_color = pallets[this.pallet][7]
     this.bg_color = pallets[this.pallet][8]
+    this.force_bg_color = null
 
     this.hlc = 0
     this.stl = false
     this.orn = null
-    this.forceOrn = null
+    this.force_orn = null
 
     this.timeElapsed = 0
     this.endTime = null
@@ -253,7 +256,8 @@ export default class CanvasProvider {
 
     this.option_canvas = option?.canvas ?? null
 
-    this.forceOrn = option?.forceStrokeColor ?? null
+    this.force_orn = option?.forceStrokeColor ?? null
+    this.force_bg_color = option?.forceBackgroundColor ?? null
     this.purpose_width = option?.width ?? option?.canvas?.width ?? this.purpose_width
     this.purpose_height = option?.height ?? option?.canvas?.height ?? this.purpose_height
     this.normalFont = option?.normalFont ?? 'sans-serif'
@@ -762,7 +766,7 @@ export default class CanvasProvider {
 
     if(entry.alphabet !== ALPHABETS.MACRO) {
       // background
-      ctx.fillStyle = this.bg_color
+      ctx.fillStyle = this.force_bg_color ?? this.bg_color
       ctx.fillRect(
          this.position_x * this.width_magnification(),
          (this.position_y - this.height()) * this.height_magnification(),
@@ -1056,8 +1060,8 @@ export default class CanvasProvider {
         const width = Math.floor(this.ssm_x * this.text_size_x)
         const height = Math.floor(this.ssm_y * this.text_size_y)
         const depth = Math.floor((drcs.length * 8) / (width * height))
-        if(this.forceOrn ?? this.orn){
-          ctx.fillStyle = this.forceOrn ?? this.orn ?? ''
+        if(this.force_orn ?? this.orn){
+          ctx.fillStyle = this.force_orn ?? this.orn ?? ''
           for(let dy = -2; dy <= 2; dy++){
             for(let dx = -2; dx <= 2; dx++){
               for(let y = 0; y < height; y++){
@@ -1121,11 +1125,11 @@ export default class CanvasProvider {
       return canvas
     }
 
-    if(this.forceOrn ?? this.orn){
+    if(this.force_orn ?? this.orn){
       for(let dy = -2; dy <= 2; dy++) {
         for(let dx = -2; dx <= 2; dx++) {
           ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}` 
-          ctx.fillStyle = this.forceOrn ?? this.orn ?? ''
+          ctx.fillStyle = this.force_orn ?? this.orn ?? ''
           ctx.textBaseline = 'middle'
           ctx.fillText(character, 
             (this.shs / 2 + dx) * this.width_magnification(),
