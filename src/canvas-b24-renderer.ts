@@ -14,6 +14,7 @@ export default class CanvasB24Renderer {
   private track: TextTrack | null = null
   private subtitleElement: HTMLElement | null = null
   private canvas: HTMLCanvasElement | null = null
+  private resizeObserver: ResizeObserver | null = null
   private mutationObserver: MutationObserver | null = null
   private isOnSeeking: boolean = false
   private onCueChangeDrawed: boolean = false
@@ -159,7 +160,7 @@ export default class CanvasB24Renderer {
   }
 
   private onResize() {
-    if (!this.canvas || !this.media || !this.track) {
+    if (!this.canvas || !this.media) {
       return
     }
 
@@ -167,10 +168,12 @@ export default class CanvasB24Renderer {
     const purpose_width = Math.max((this.media as any).videoWidth, Number.parseInt(style.width) * window.devicePixelRatio)
     const purpose_height = Math.max((this.media as any).videoHeight, Number.parseInt(style.height) * window.devicePixelRatio)
 
-    this.canvas.style.width = '100%'
-    this.canvas.style.height = '100%'
     this.canvas.width = purpose_width
     this.canvas.height = purpose_height
+
+    if (!this.track) {
+      return
+    }
 
     const canvasContext = this.canvas.getContext('2d')
     if (!canvasContext) { return }
@@ -228,21 +231,32 @@ export default class CanvasB24Renderer {
     this.canvas.style.position = 'absolute'
     this.canvas.style.top = this.canvas.style.left = '0'
     this.canvas.style.pointerEvents = 'none'
+    this.canvas.style.width = '100%'
+    this.canvas.style.height = '100%'
+
     this.onResize()
 
     this.subtitleElement.appendChild(this.canvas)
-    this.onResizeHandler = this.onResize.bind(this)
-    window.addEventListener('resize', this.onResizeHandler)
-    this.media.addEventListener('loadeddata', this.onResizeHandler)
-    this.media.addEventListener('playing', this.onResizeHandler)
 
-    this.mutationObserver = new MutationObserver(() => {
-      this.onResize()
-    })
-    this.mutationObserver.observe(this.media, {
-      attributes: true,
-      attributeFilter: ['style']
-    })
+    if (window.ResizeObserver) {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.onResize()
+      })
+      this.resizeObserver.observe(this.media)
+    } else {
+      this.onResizeHandler = this.onResize.bind(this)
+      window.addEventListener('resize', this.onResizeHandler)
+
+      if (window.MutationObserver) {
+        this.mutationObserver = new MutationObserver(() => {
+          this.onResize()
+        })
+        this.mutationObserver.observe(this.media, {
+          attributes: true,
+          attributeFilter: ['class', 'style']
+        })
+      }
+    }
   }
 
   private cleanupTrack(): void {
@@ -278,19 +292,20 @@ export default class CanvasB24Renderer {
   private cleanupCanvas(): void {
     if (this.onResizeHandler) {
       window.removeEventListener('resize', this.onResizeHandler)
+      this.onResizeHandler = null
     }
-    if (this.onResizeHandler && this.media) {
-      this.media.removeEventListener('loadeddata', this.onResizeHandler)
-      this.media.removeEventListener('playing', this.onResizeHandler)
-    }
-    this.onResizeHandler = null
 
-    if(this.mutationObserver){
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect()
+      this.resizeObserver = null
+    }
+
+    if (this.mutationObserver) {
       this.mutationObserver.disconnect()
       this.mutationObserver = null
     }
 
-    if (this.canvas && this.subtitleElement){
+    if (this.canvas && this.subtitleElement) {
       this.subtitleElement.removeChild(this.canvas)
     }
     this.canvas = this.subtitleElement = null
