@@ -31,6 +31,7 @@ export default class CanvasID3Renderer {
   }
 
   public attachMedia(media: HTMLMediaElement, subtitleElement?: HTMLElement): void {
+    this.detachMedia()
     this.media = media
     this.subtitleElement = subtitleElement ?? media.parentElement
     this.setupTrack()
@@ -201,7 +202,8 @@ export default class CanvasID3Renderer {
     if (textTrack.kind !== 'metadata') { return; }
 
     if (textTrack.inBandMetadataTrackDispatchType === 'com.apple.streaming' || textTrack.label === 'id3') {
-      this.track = textTrack;
+      this.cleanupTrack()
+      this.track = textTrack
 
       this.track.mode = 'hidden'
       this.onCueChangeHandler = this.onCueChange.bind(this)
@@ -228,10 +230,7 @@ export default class CanvasID3Renderer {
       }
     }
 
-    if (!this.track) {
-      this.onAddtrackHandler = this.onAddtrack.bind(this)
-      this.media.textTracks.addEventListener('addtrack', this.onAddtrackHandler)
-    } else {
+    if (this.track) {
       this.track.mode = 'hidden'
       this.onCueChangeHandler = this.onCueChange.bind(this)
       this.onSeekingHandler = this.onSeeking.bind(this)
@@ -240,6 +239,9 @@ export default class CanvasID3Renderer {
       this.media.addEventListener('seeking', this.onSeekingHandler)
       this.media.addEventListener('seeked', this.onSeekedHandler)
     }
+
+    this.onAddtrackHandler = this.onAddtrack.bind(this)
+    this.media.textTracks.addEventListener('addtrack', this.onAddtrackHandler)
   }
 
   private setupCanvas(): void {
