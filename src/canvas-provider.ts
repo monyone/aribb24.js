@@ -22,6 +22,8 @@ interface ProviderOption {
   canvas?: HTMLCanvasElement,
   width?: number,
   height?: number,
+  data_identifer?: number,
+  data_group_id?: number,
   forceStrokeColor?: string,
   forceBackgroundColor?: string,
   normalFont?: string,
@@ -254,6 +256,9 @@ export default class CanvasProvider {
   public render(option?: ProviderOption): ProviderResult | null {
     this.initialize()
 
+    const purpose_data_identifer = option?.data_identifer ?? 0x80 // default: caption
+    const purpose_data_group_id = option?.data_group_id ?? 0x01 // default: 1st language
+
     this.option_canvas = option?.canvas ?? null
 
     this.force_orn = option?.forceStrokeColor ?? null
@@ -269,7 +274,7 @@ export default class CanvasProvider {
     }
 
     const data_identifer = this.pes[0]
-    if(data_identifer != 0x80){
+    if(data_identifer != purpose_data_identifer){
       return null
     }
 
@@ -279,7 +284,7 @@ export default class CanvasProvider {
     const data_group_size = (this.pes[data_group_begin + 3] << 8) + this.pes[data_group_begin + 4]
 
     // 本当は字幕管理データから画面サイズを求めるべきだが...
-    if ((data_group_id & 0x0F) !== 1) { // とりあえず第一言語字幕だけとる
+    if ((data_group_id & 0x0F) !== purpose_data_group_id) {
       return null
     }
 

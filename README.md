@@ -11,7 +11,9 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
 
 ## Options
 
-* forceStrokeColor: Specify a color for always drawing character's stroke
+* data_identifer: Specify number 0x80 (caption) or 0x81 (superimpose). default: 0x80 (caption)
+* data_group_id: Specify number 0x01 (1st language) or 0x02 (2nd language). default: 0x01 (1st language)
+* forceStrokeColor: Specify a color for always drawing character's stroke.
 * forceBackgroundColor: Specify a color for always drawing character's background
 * normalFont: Specify a font for drawing normal characters
 * gainiFont: Specify a font for drawing ARIB gaiji characters
@@ -104,6 +106,9 @@ yarn run build
 
 ## Limitations
 
+* mutiple CanvasID3Renderer different option for same video dose not work
+    * show caption and superimpose by CanvasID3Renderer are not work
+    * Because Safari doesn't have GetCueById API
 * CanvasID3Renderer in Android Chrome with native HLS player dose not work
     * Because not support id3 timedmetadata in Android Chrome
 * CanvasID3Renderer in Legacy Edge with native HLS player does not work

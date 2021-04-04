@@ -3,6 +3,8 @@ import CanvasProvider from './canvas-provider'
 interface RendererOption {
   width?: number,
   height?: number,
+  data_identifer?: number,
+  data_group_id?: number,
   forceStrokeColor?: string,
   forceBackgroundColor?: string,
   normalFont?: string,
@@ -29,7 +31,11 @@ export default class CanvasID3Renderer {
   private rendererOption: RendererOption | undefined
 
   public constructor(option?: RendererOption) {
-    this.rendererOption = option
+    this.rendererOption = {
+      data_identifer: 0x80, // default: caption
+      data_group_id: 0x01, // default: 1st language
+      ... option
+    }
   }
 
   public attachMedia(media: HTMLMediaElement, subtitleElement?: HTMLElement): void {

@@ -3,6 +3,8 @@ import CanvasProvider from './canvas-provider'
 interface RendererOption {
   width?: number,
   height?: number,
+  data_identifer?: number,
+  data_group_id?: number,
   forceStrokeColor?: string,
   forceBackgroundColor?: string,
   normalFont?: string,
@@ -26,9 +28,17 @@ export default class CanvasB24Renderer {
   private onResizeHandler: (() => void) | null = null
 
   private rendererOption: RendererOption | undefined
+  private data_identifer: number
+  private data_group_id: number
 
   public constructor(option?: RendererOption) {
-    this.rendererOption = option
+    this.data_identifer = option?.data_identifer ?? 0x80 // default: caption
+    this.data_group_id = option?.data_group_id ?? 0x01 // default: 1st language
+    this.rendererOption = {
+      ... option,
+      data_identifer: this.data_identifer,
+      data_group_id: this.data_group_id,
+    }
   }
 
   public attachMedia(media: HTMLMediaElement, subtitleElement?: HTMLElement): void {
@@ -204,7 +214,7 @@ export default class CanvasB24Renderer {
       return
     }
 
-    const aribb24js_label = 'ARIB B24 Japanese'
+    const aribb24js_label = `ARIB B24 Japanese (data_identifer=0x${this.data_identifer.toString(16)}, data_group_id=${this.data_group_id})`
     for (let i = 0; i < this.media.textTracks.length; i++) {
       const track = this.media.textTracks[i]
       if (track.label === aribb24js_label) {
