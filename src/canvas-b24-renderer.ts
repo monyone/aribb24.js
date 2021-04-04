@@ -239,13 +239,15 @@ export default class CanvasB24Renderer {
 
     this.subtitleElement.appendChild(this.canvas)
 
+    this.onResizeHandler = this.onResize.bind(this)
+    this.media.addEventListener('loadeddata', this.onResizeHandler)
+
     if (window.ResizeObserver) {
       this.resizeObserver = new ResizeObserver(() => {
         this.onResize()
       })
       this.resizeObserver.observe(this.media)
     } else {
-      this.onResizeHandler = this.onResize.bind(this)
       window.addEventListener('resize', this.onResizeHandler)
 
       if (window.MutationObserver) {
@@ -293,6 +295,10 @@ export default class CanvasB24Renderer {
   private cleanupCanvas(): void {
     if (this.onResizeHandler) {
       window.removeEventListener('resize', this.onResizeHandler)
+      if (this.media) {
+        this.media.removeEventListener('loadeddata', this.onResizeHandler)
+      }
+
       this.onResizeHandler = null
     }
 
@@ -309,6 +315,6 @@ export default class CanvasB24Renderer {
     if (this.canvas && this.subtitleElement) {
       this.subtitleElement.removeChild(this.canvas)
     }
-    this.canvas = this.subtitleElement = null
+    this.canvas =  null
   }
 }
