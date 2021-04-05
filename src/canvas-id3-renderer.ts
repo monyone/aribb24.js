@@ -14,27 +14,35 @@ interface RendererOption {
 
 export default class CanvasID3Renderer {
   private media: HTMLMediaElement | null = null
-  private track: TextTrack | null = null
+  private id3Track: TextTrack | null = null
+  private b24Track: TextTrack | null = null
   private subtitleElement: HTMLElement | null = null
   private canvas: HTMLCanvasElement | null = null
   private resizeObserver: ResizeObserver | null = null
   private mutationObserver: MutationObserver | null = null
   private isOnSeeking: boolean = false
-  private onCueChangeDrawed: boolean = false
+  private onB24CueChangeDrawed: boolean = false
 
-  private onAddtrackHandler: ((event: TrackEvent) => void) | null = null
-  private onCueChangeHandler: (() => void) | null = null
+  private onID3AddtrackHandler: ((event: TrackEvent) => void) | null = null
+  private onID3CueChangeHandler: (() => void) | null = null
+
+  private onB24CueChangeHandler: (() => void) | null = null
+
   private onSeekingHandler: (() => void) | null = null
   private onSeekedHandler: (() => void) | null = null
   private onResizeHandler: (() => void) | null = null
 
   private rendererOption: RendererOption | undefined
+  private data_identifer: number
+  private data_group_id: number
 
   public constructor(option?: RendererOption) {
+    this.data_identifer = option?.data_identifer ?? 0x80 // default: caption
+    this.data_group_id = option?.data_group_id ?? 0x01 // default: 1st language
     this.rendererOption = {
-      data_identifer: 0x80, // default: caption
-      data_group_id: 0x01, // default: 1st language
-      ... option
+      ... option,
+      data_identifer: this.data_identifer,
+      data_group_id: this.data_group_id,
     }
   }
 
@@ -65,20 +73,20 @@ export default class CanvasID3Renderer {
   }
 
   public show(): void {
-    if (!this.track) {
+    if (!this.b24Track) {
       return
     }
 
-    this.track.mode = 'hidden'
-    this.onCueChange()
+    this.b24Track.mode = 'hidden'
+    this.onB24CueChange()
   }
 
   public hide(): void {
-    if (!this.track) {
+    if (!this.b24Track) {
       return
     }
 
-    this.track.mode = 'disabled'
+    this.b24Track.mode = 'disabled'
     if (!this.canvas) {
       return
     }
@@ -88,41 +96,61 @@ export default class CanvasID3Renderer {
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
   }
 
-  private onCueChange() {
-    if (!this.media || !this.track || !this.canvas) {
-      this.onCueChangeDrawed = false
+  private onID3CueChange() {
+    if (!this.media || !this.id3Track || !this.b24Track) {
+      return
+    }
+
+    if (this.isOnSeeking) { return }
+
+    const CueClass = window.VTTCue ?? window.TextTrackCue
+
+    const activeCues = this.id3Track.activeCues ?? []
+    for (let i = 0; i < activeCues.length; i++) {
+      const id3_cue = activeCues[i] as any;
+      const start_time = id3_cue.startTime;
+
+      const binary = window.atob(id3_cue.value.data || id3_cue.value.info);
+      const pes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) { pes[i] = binary.charCodeAt(i); }
+
+      const provider: CanvasProvider = new CanvasProvider(pes, start_time);
+      const estimate = provider.render(this.rendererOption) // detect target b24 data and calc endTime
+      if (estimate == null) { continue; }
+
+      const end_time = estimate.endTime;
+
+      if (start_time <= this.media.currentTime && this.media.currentTime <= end_time) {
+        // なんか Win Firefox で Cue が endTime 過ぎても activeCues から消えない場合があった、バグ?
+        const b24_cue = new CueClass(start_time, end_time, '');
+        (b24_cue as any).data = pes;
+
+        this.b24Track.addCue(b24_cue);
+      }
+    }
+  }
+
+  private onB24CueChange() {
+    if (!this.media || !this.b24Track || !this.canvas) {
+      this.onB24CueChangeDrawed = false
       return
     }
 
     const canvasContext = this.canvas.getContext('2d')
     if (!canvasContext) {
-      this.onCueChangeDrawed = false
+      this.onB24CueChangeDrawed = false
       return
     }
     canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    const activeCues = this.track.activeCues
+    const activeCues = this.b24Track.activeCues
     if (activeCues && activeCues.length > 0) {
       const lastCue = activeCues[activeCues.length - 1] as any
 
-      // mark for endTime value not infinite bug in hls.js
-      if (!lastCue.marked) { lastCue.endTime = Number.MAX_SAFE_INTEGER; }
-      lastCue.marked = true;
-
-      const binary = window.atob(lastCue.value.data || lastCue.value.info);
-      const pes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) { pes[i] = binary.charCodeAt(i); }
-
-      const provider: CanvasProvider = new CanvasProvider(pes, lastCue.startTime);
-      const estimate = provider.render() // calc endTime
-      if (estimate != null && estimate.endTime !== Number.MAX_SAFE_INTEGER) {
-        lastCue.endTime = estimate.endTime;
-      }
-
       if ((lastCue.startTime <= this.media.currentTime && this.media.currentTime <= lastCue.endTime) && !this.isOnSeeking) {
         // なんか Win Firefox で Cue が endTime 過ぎても activeCues から消えない場合があった、バグ?
-        // Safari の id3 は終了時刻が求まったタイミングで値を上書きされるので、改めて上書きしてチェック
 
+        const provider: CanvasProvider = new CanvasProvider(lastCue.data, lastCue.startTime);
         provider.render({
           ... this.rendererOption,
           canvas: this.canvas ?? undefined,
@@ -130,9 +158,9 @@ export default class CanvasID3Renderer {
           height: this.rendererOption?.height ?? this.canvas.height,
         })
 
-        this.onCueChangeDrawed = true
+        this.onB24CueChangeDrawed = true
       } else {
-        this.onCueChangeDrawed = false
+        this.onB24CueChangeDrawed = false
       }
 
       for (let i = 0; i < activeCues.length - 1; i++) {
@@ -140,13 +168,13 @@ export default class CanvasID3Renderer {
         cue.endTime = Math.min(cue.endTime, lastCue.startTime)
       }
     } else{
-      this.onCueChangeDrawed = false
+      this.onB24CueChangeDrawed = false
     }
   }
 
   private onSeeking() {
     this.isOnSeeking = true
-    this.onCueChange()
+    this.onB24CueChange()
   }
 
   private onSeeked() {
@@ -165,7 +193,7 @@ export default class CanvasID3Renderer {
     this.canvas.width = purpose_width
     this.canvas.height = purpose_height
 
-    if (!this.track) {
+    if (!this.b24Track) {
       return;
     }
 
@@ -173,26 +201,17 @@ export default class CanvasID3Renderer {
     if (!canvasContext) { return }
     canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    if (!this.onCueChangeDrawed) { return }
+    if (!this.onB24CueChangeDrawed) { return }
 
-    // onCueChange とほぼ同じだが、this.onCueChangeDrawed を変更しない
-    const activeCues = this.track.activeCues
+    // onB24CueChange とほぼ同じだが、this.onB24CueChangeDrawed を変更しない
+    const activeCues = this.b24Track.activeCues
     if (activeCues && activeCues.length > 0) {
       const lastCue = activeCues[activeCues.length - 1] as any
 
-      if (!lastCue.marked) { return }
-
-      const binary = window.atob(lastCue.value.data || lastCue.value.info);
-      const pes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) { pes[i] = binary.charCodeAt(i); }
-
-      const provider: CanvasProvider = new CanvasProvider(pes, lastCue.startTime);
-      const estimate = provider.render() // calc endTime
-      if (estimate != null && estimate.endTime !== Number.MAX_SAFE_INTEGER) {
-        lastCue.endTime = estimate.endTime;
-      }
-
       if ((lastCue.startTime <= this.media.currentTime && this.media.currentTime <= lastCue.endTime) && !this.isOnSeeking) {
+        // なんか Win Firefox で Cue が endTime 過ぎても activeCues から消えない場合があった、バグ?
+
+        const provider: CanvasProvider = new CanvasProvider(lastCue.data, lastCue.startTime);
         provider.render({
           ... this.rendererOption,
           canvas: this.canvas ?? undefined,
@@ -203,7 +222,7 @@ export default class CanvasID3Renderer {
     }
   }
 
-  private onAddtrack(event: TrackEvent): void {
+  private onID3Addtrack(event: TrackEvent): void {
     if (!this.media) {
       return;
     }
@@ -212,16 +231,15 @@ export default class CanvasID3Renderer {
     if (textTrack.kind !== 'metadata') { return; }
 
     if (textTrack.inBandMetadataTrackDispatchType === 'com.apple.streaming' || textTrack.label === 'id3') {
-      this.cleanupTrack()
-      this.track = textTrack
+      if (this.id3Track && this.onID3CueChangeHandler) {
+        this.id3Track.removeEventListener('cuechange', this.onID3CueChangeHandler)
+        this.onID3CueChangeHandler = null
+      }
+      this.id3Track = textTrack
 
-      this.track.mode = 'hidden'
-      this.onCueChangeHandler = this.onCueChange.bind(this)
-      this.onSeekingHandler = this.onSeeking.bind(this)
-      this.onSeekedHandler = this.onSeeked.bind(this)
-      this.track.addEventListener('cuechange', this.onCueChangeHandler)
-      this.media.addEventListener('seeking', this.onSeekingHandler)
-      this.media.addEventListener('seeked', this.onSeekedHandler) 
+      this.id3Track.mode = 'hidden'
+      this.onID3CueChangeHandler = this.onID3CueChange.bind(this)
+      this.id3Track.addEventListener('cuechange', this.onID3CueChangeHandler)
     }
   }
 
@@ -230,28 +248,45 @@ export default class CanvasID3Renderer {
       return
     }
 
+    const aribb24js_label = `ARIB B24 Japanese (data_identifer=0x${this.data_identifer.toString(16)}, data_group_id=${this.data_group_id})`
+    for (let i = 0; i < this.media.textTracks.length; i++) {
+      const track = this.media.textTracks[i]
+      if (track.label === aribb24js_label) {
+        this.b24Track = track
+        break
+      }
+    }
+    if (!this.b24Track) {
+      this.b24Track = this.media.addTextTrack('metadata', aribb24js_label, 'ja')
+      this.b24Track.mode = 'hidden'
+    }
+
+    this.onB24CueChangeHandler = this.onB24CueChange.bind(this)
+    this.b24Track.addEventListener('cuechange', this.onB24CueChangeHandler)
+
     for (let i = 0; i < this.media.textTracks.length; i++) {
       const track = this.media.textTracks[i];
 
       if (track.kind !== 'metadata') { continue; }
       if (track.inBandMetadataTrackDispatchType === 'com.apple.streaming' || track.label === 'id3') {
-        this.track = track;
+        this.id3Track = track;
         break;
       }
     }
 
-    if (this.track) {
-      this.track.mode = 'hidden'
-      this.onCueChangeHandler = this.onCueChange.bind(this)
-      this.onSeekingHandler = this.onSeeking.bind(this)
-      this.onSeekedHandler = this.onSeeked.bind(this)
-      this.track.addEventListener('cuechange', this.onCueChangeHandler)
-      this.media.addEventListener('seeking', this.onSeekingHandler)
-      this.media.addEventListener('seeked', this.onSeekedHandler)
+    if (this.id3Track) {
+      this.id3Track.mode = 'hidden'
+      this.onID3CueChangeHandler = this.onID3CueChange.bind(this)
+      this.id3Track.addEventListener('cuechange', this.onID3CueChangeHandler)
     }
 
-    this.onAddtrackHandler = this.onAddtrack.bind(this)
-    this.media.textTracks.addEventListener('addtrack', this.onAddtrackHandler)
+    this.onID3AddtrackHandler = this.onID3Addtrack.bind(this)
+    this.media.textTracks.addEventListener('addtrack', this.onID3AddtrackHandler)
+
+    this.onSeekingHandler = this.onSeeking.bind(this)
+    this.onSeekedHandler = this.onSeeked.bind(this)
+    this.media.addEventListener('seeking', this.onSeekingHandler)
+    this.media.addEventListener('seeked', this.onSeekedHandler)
   }
 
   private setupCanvas(): void {
@@ -293,14 +328,15 @@ export default class CanvasID3Renderer {
   }
 
   private cleanupTrack(): void {
-    if (!this.track) {
-      return
+    if (this.b24Track && this.onB24CueChangeHandler) {
+      this.b24Track.removeEventListener('cuechange', this.onB24CueChangeHandler)
+      this.onB24CueChangeHandler = null
+    }
+    if (this.id3Track && this.onID3CueChangeHandler) {
+      this.id3Track.removeEventListener('cuechange', this.onID3CueChangeHandler)
+      this.onID3CueChangeHandler = null
     }
 
-    if (this.onCueChangeHandler) {
-      this.track.removeEventListener('cuechange', this.onCueChangeHandler)
-      this.onCueChangeHandler = null
-    }
     if (this.media){
       if (this.onSeekingHandler) {
         this.media.removeEventListener('seeking', this.onSeekingHandler)
@@ -310,13 +346,13 @@ export default class CanvasID3Renderer {
         this.media.removeEventListener('seeked', this.onSeekedHandler)
         this.onSeekedHandler = null
       }
-      if (this.onAddtrackHandler) {
-        this.media.textTracks.removeEventListener('addtrack', this.onAddtrackHandler)
-        this.onAddtrackHandler = null
+      if (this.onID3AddtrackHandler) {
+        this.media.textTracks.removeEventListener('addtrack', this.onID3AddtrackHandler)
+        this.onID3AddtrackHandler = null
       }
     }
 
-    this.track = null
+    this.b24Track = this.id3Track = null
   }
 
   private cleanupCanvas(): void {

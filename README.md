@@ -106,9 +106,6 @@ yarn run build
 
 ## Limitations
 
-* mutiple CanvasID3Renderer different option for same video dose not work
-    * show caption and superimpose by CanvasID3Renderer are not work
-    * Because Safari doesn't have GetCueById API
 * CanvasID3Renderer in Android Chrome with native HLS player dose not work
     * Because not support id3 timedmetadata in Android Chrome
 * CanvasID3Renderer in Legacy Edge with native HLS player does not work
