@@ -125,7 +125,28 @@ export default class CanvasID3Renderer {
         const b24_cue = new CueClass(start_time, end_time, '');
         (b24_cue as any).data = pes;
 
-        this.b24Track.addCue(b24_cue);
+        if (window.VTTCue) {
+          this.b24Track.addCue(b24_cue)
+        } else if (window.TextTrackCue) {
+          const hasCue = Array.prototype.some.call(this.b24Track.cues ?? [], (target) => {
+            return target.startTime === start_time
+          })
+          if (hasCue) { continue }
+
+          if (this.b24Track.cues) {
+            const removed_cues: TextTrackCue[] = [];
+            for (let i = this.b24Track.cues.length - 1; i >= 0; i--) {
+              if (this.b24Track.cues[i].startTime >= start_time) {
+                removed_cues.push(this.b24Track.cues[i])
+                this.b24Track.removeCue(this.b24Track.cues[i])
+              }
+            }
+            this.b24Track.addCue(b24_cue)
+            for (let i = removed_cues.length - 1; i >= 0; i--) {
+              this.b24Track.addCue(removed_cues[i])
+            }
+          }
+        }
       }
     }
   }
@@ -166,7 +187,7 @@ export default class CanvasID3Renderer {
       for (let i = activeCues.length - 2; i >= 0; i--) {
         const cue = activeCues[i]
         cue.endTime = Math.min(cue.endTime, lastCue.startTime)
-        if (cue.startTime === cue.endTime) {
+        if (cue.startTime === cue.endTime) { // .. if duplicate subtitle appeared 
           this.b24Track.removeCue(cue);
         }
       }

@@ -113,10 +113,32 @@ export default class CanvasB24Renderer {
 
     const { startTime, endTime } = result
 
-    const CueClass = window.VTTCue ?? window.TextTrackCue
+    const CueClass = window.VTTCue ?? window.TextTrackCue;
     const cue = new CueClass(startTime, endTime, '');
-    (cue as any).provider = provider
-    this.track.addCue(cue)
+    (cue as any).provider = provider;
+
+    if (window.VTTCue) {
+      this.track.addCue(cue)
+    } else if (window.TextTrackCue) {
+      const hasCue = Array.prototype.some.call(this.track.cues ?? [], (target) => {
+        return target.startTime === startTime
+      })
+      if (hasCue) { return }
+
+      if (this.track.cues) {
+         const removed_cues: TextTrackCue[] = [];
+         for (let i = this.track.cues.length - 1; i >= 0; i--) {
+           if (this.track.cues[i].startTime >= cue.startTime) {
+             removed_cues.push(this.track.cues[i])
+             this.track.removeCue(this.track.cues[i])
+           }
+         }
+         this.track.addCue(cue)
+         for (let i = removed_cues.length - 1; i >= 0; i--) {
+          this.track.addCue(removed_cues[i])
+         }
+      }
+    }
   }
 
   private onCueChange() {
@@ -155,7 +177,7 @@ export default class CanvasB24Renderer {
       for (let i = activeCues.length - 2; i >= 0; i--) {
         const cue = activeCues[i]
         cue.endTime = Math.min(cue.endTime, lastCue.startTime)
-        if (cue.startTime === cue.endTime) {
+        if (cue.startTime === cue.endTime) { // if duplicate subtitle appeared ..
           this.track.removeCue(cue);
         }
       }
