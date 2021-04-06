@@ -152,9 +152,12 @@ export default class CanvasB24Renderer {
         this.onCueChangeDrawed = false
       }
 
-      for (let i = 0; i < activeCues.length - 1; i++) {
+      for (let i = activeCues.length - 2; i >= 0; i--) {
         const cue = activeCues[i]
         cue.endTime = Math.min(cue.endTime, lastCue.startTime)
+        if (cue.startTime === cue.endTime) {
+          this.track.removeCue(cue);
+        }
       }
     } else{
       this.onCueChangeDrawed = false

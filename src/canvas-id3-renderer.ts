@@ -163,9 +163,12 @@ export default class CanvasID3Renderer {
         this.onB24CueChangeDrawed = false
       }
 
-      for (let i = 0; i < activeCues.length - 1; i++) {
+      for (let i = activeCues.length - 2; i >= 0; i--) {
         const cue = activeCues[i]
         cue.endTime = Math.min(cue.endTime, lastCue.startTime)
+        if (cue.startTime === cue.endTime) {
+          this.b24Track.removeCue(cue);
+        }
       }
     } else{
       this.onB24CueChangeDrawed = false
