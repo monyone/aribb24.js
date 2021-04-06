@@ -758,6 +758,10 @@ export default class CanvasProvider {
   }
 
   private renderCharacter(key: number, entry: ALPHABET_ENTRY) {
+    if (this.position_x < 0 || this.position_y < 0){
+      this.move_absolute_pos(0, 0)
+    }
+
     if (!this.option_canvas){ return }
 
     if (this.option_canvas && !this.render_canvas) {
