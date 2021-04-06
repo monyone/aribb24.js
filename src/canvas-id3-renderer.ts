@@ -331,6 +331,15 @@ export default class CanvasID3Renderer {
   }
 
   private cleanupTrack(): void {
+    if (this.b24Track) {
+      const cues = this.b24Track.cues
+      if (cues) {
+        for (let i = cues.length - 1; i >= 0; i--) {
+          this.b24Track.removeCue(cues[i])
+        }
+      }
+    }
+
     if (this.b24Track && this.onB24CueChangeHandler) {
       this.b24Track.removeEventListener('cuechange', this.onB24CueChangeHandler)
       this.onB24CueChangeHandler = null

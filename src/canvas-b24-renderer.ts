@@ -276,18 +276,16 @@ export default class CanvasB24Renderer {
   }
 
   private cleanupTrack(): void {
-    if (!this.track) {
-      return
-    }
-
-    const cues = this.track.cues
-    if (cues) {
-      for (let i = cues.length - 1; i >= 0; i--) {
-        this.track.removeCue(cues[i])
+    if (this.track) {
+      const cues = this.track.cues
+      if (cues) {
+        for (let i = cues.length - 1; i >= 0; i--) {
+          this.track.removeCue(cues[i])
+        }
       }
     }
 
-    if (this.onCueChangeHandler) {
+    if (this.track && this.onCueChangeHandler) {
       this.track.removeEventListener('cuechange', this.onCueChangeHandler)
       this.onCueChangeHandler = null
     }
