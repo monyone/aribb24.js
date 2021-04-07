@@ -108,5 +108,3 @@ yarn run build
 
 * CanvasID3Renderer in Android Chrome with native HLS player dose not work
     * Because not support id3 timedmetadata in Android Chrome
-* CanvasID3Renderer in Legacy Edge with native HLS player does not work
-    * Bacause can't modify DataCue in Legacy Edge

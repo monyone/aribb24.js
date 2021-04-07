@@ -111,7 +111,25 @@ export default class CanvasID3Renderer {
       const id3_cue = activeCues[i] as any;
       const start_time = id3_cue.startTime;
 
-      const binary = window.atob(id3_cue.value.data || id3_cue.value.info);
+      let base64 = null;
+      if (this.id3Track.inBandMetadataTrackDispatchType === '15260DFFFF49443320FF49443320000F'){ // Legacy Edge
+        const array = new Uint8Array(id3_cue.data);
+        let flag = false;
+        base64 = "";
+        for (let i = 6 + 4 + 4 + 4 + 2 + 2; i < array.length - 1; i++) {
+          if (array[i] === 103 && array[i + 1] === 80){ flag = true; } // duty hack!
+          if (!flag) { continue; }
+          base64 += String.fromCharCode(array[i]);
+        }
+      } else if (this.id3Track.inBandMetadataTrackDispatchType === 'com.apple.streaming') { // Safari
+        base64 = id3_cue.value.info
+      } else if (this.id3Track.label === 'id3') { // hls.js
+        base64 = id3_cue.value.data
+      }
+
+      if (!base64) { continue; }
+
+      const binary = window.atob(base64);
       const pes = new Uint8Array(binary.length);
       for (let i = 0; i < binary.length; i++) { pes[i] = binary.charCodeAt(i); }
 
@@ -255,7 +273,11 @@ export default class CanvasID3Renderer {
     const textTrack = event.track!;
     if (textTrack.kind !== 'metadata') { return; }
 
-    if (textTrack.inBandMetadataTrackDispatchType === 'com.apple.streaming' || textTrack.label === 'id3') {
+    if ( textTrack.inBandMetadataTrackDispatchType === '15260DFFFF49443320FF49443320000F'
+      || textTrack.inBandMetadataTrackDispatchType === 'com.apple.streaming'
+      || textTrack.label === 'id3'
+    ) {
+
       if (this.id3Track && this.onID3CueChangeHandler) {
         this.id3Track.removeEventListener('cuechange', this.onID3CueChangeHandler)
         this.onID3CueChangeHandler = null
@@ -293,7 +315,11 @@ export default class CanvasID3Renderer {
       const track = this.media.textTracks[i];
 
       if (track.kind !== 'metadata') { continue; }
-      if (track.inBandMetadataTrackDispatchType === 'com.apple.streaming' || track.label === 'id3') {
+
+      if ( track.inBandMetadataTrackDispatchType === '15260DFFFF49443320FF49443320000F'
+        || track.inBandMetadataTrackDispatchType === 'com.apple.streaming'
+        || track.label === 'id3'
+      ) {
         this.id3Track = track;
         break;
       }
