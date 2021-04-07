@@ -29,6 +29,7 @@ interface ProviderOption {
   normalFont?: string,
   gaijiFont?: string,
   drcsReplacement?: boolean,
+  keepAspectRatio?: boolean,
 }
 
 interface ProviderResult {
@@ -309,11 +310,27 @@ export default class CanvasProvider {
       const ctx = this.option_canvas.getContext('2d')
       if(ctx){
         ctx.clearRect(0, 0, this.option_canvas.width, this.option_canvas.height)
-        ctx.drawImage(
-          this.render_canvas,
-          0, 0, this.render_canvas.width, this.render_canvas.height,
-          0, 0, this.option_canvas.width, this.option_canvas.height
-        )
+        if (!(option?.keepAspectRatio)) {
+          ctx.drawImage(
+            this.render_canvas,
+            0, 0, this.render_canvas.width, this.render_canvas.height,
+            0, 0, this.option_canvas.width, this.option_canvas.height
+          )
+        } else {
+          const x_magnification = this.option_canvas.width / this.swf_x;
+          const y_magnification = this.option_canvas.height / this.swf_y;
+          const magnification = Math.min(x_magnification, y_magnification);
+          const width = this.swf_x * magnification;
+          const height = this.swf_y * magnification;
+          const x_margin = (this.option_canvas.width - width) / 2
+          const y_margin = (this.option_canvas.height - height) / 2
+
+          ctx.drawImage(
+            this.render_canvas,
+            0, 0, this.render_canvas.width, this.render_canvas.height,
+            x_margin, y_margin, width, height
+          )
+        }
       }
     }
 

@@ -10,6 +10,7 @@ interface RendererOption {
   normalFont?: string,
   gaijiFont?: string,
   drcsReplacement?: boolean,
+  keepAspectRatio?: boolean,
 }
 
 export default class CanvasID3Renderer {
@@ -211,8 +212,8 @@ export default class CanvasID3Renderer {
     }
 
     const style = window.getComputedStyle(this.media)
-    const purpose_width = Math.max((this.media as any).videoWidth, Number.parseInt(style.width) * window.devicePixelRatio)
-    const purpose_height = Math.max((this.media as any).videoHeight, Number.parseInt(style.height) * window.devicePixelRatio)
+    const purpose_width = Math.max(this.rendererOption?.keepAspectRatio ? 0 : (this.media as any).videoWidth, Number.parseInt(style.width) * window.devicePixelRatio)
+    const purpose_height = Math.max(this.rendererOption?.keepAspectRatio ? 0 : (this.media as any).videoHeight, Number.parseInt(style.height) * window.devicePixelRatio)
 
     this.canvas.width = purpose_width
     this.canvas.height = purpose_height
