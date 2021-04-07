@@ -780,7 +780,7 @@ export default class CanvasProvider {
          this.position_x * this.width_magnification(),
          (this.position_y - this.height()) * this.height_magnification(),
          this.width() * this.width_magnification(),
-         this.height() * this.width_magnification()
+         this.height() * this.height_magnification()
       )
 
       //HLC
@@ -1127,7 +1127,7 @@ export default class CanvasProvider {
   private renderFont(character: string): HTMLCanvasElement {
     const canvas = document.createElement('canvas')
     canvas.width = (this.shs + this.ssm_x) * this.width_magnification()
-    canvas.height = (this.svs + this.ssm_y) * this.height_magnification()
+    canvas.height = (this.svs + this.ssm_y) * this.width_magnification() // フォント分なので縦長にならないようにする
 
     const ctx = canvas.getContext('2d')
     if(!ctx){
@@ -1142,7 +1142,7 @@ export default class CanvasProvider {
           ctx.textBaseline = 'middle'
           ctx.fillText(character, 
             (this.shs / 2 + dx) * this.width_magnification(),
-            (canvas.height / 2 + dy * this.height_magnification())
+            (canvas.height / 2 + dy * this.width_magnification())
           )
         }
       }
