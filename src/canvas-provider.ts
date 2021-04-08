@@ -1089,8 +1089,8 @@ export default class CanvasProvider {
         const orn = this.force_orn ?? this.orn
         if (orn && (!this.force_orn || !this.isSameColor(this.fg_color, this.force_orn))) {
           ctx.fillStyle = orn
-          for(let dy = -2; dy <= 2; dy++){
-            for(let dx = -2; dx <= 2; dx++){
+          for(let dy = -2 * this.height_magnification(); dy <= 2 * this.height_magnification(); dy++){
+            for(let dx = -2 * this.width_magnification(); dx <= 2 * this.width_magnification(); dx++){
               for(let y = 0; y < height; y++){
                 for(let x = 0; x < width; x++){
                   let value = 0
@@ -1103,10 +1103,10 @@ export default class CanvasProvider {
 
                   if(value > 0){
                     ctx.fillRect(
-                      (this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x + (dx + 1)) * this.width_magnification(),
-                      (this.position_y - this.height() + Math.floor(this.svs * this.text_size_y / 2) + y + dy) * this.height_magnification(),
-                      1 * this.width_magnification(),
-                      1 * this.height_magnification(),
+                      (this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x) * this.width_magnification() + (dx + 1),
+                      (this.position_y - this.height() + Math.floor(this.svs * this.text_size_y / 2) + y) * this.height_magnification() + dy,
+                      1,
+                      1,
                     )
                   }
                 }
@@ -1154,14 +1154,14 @@ export default class CanvasProvider {
 
     const orn = this.force_orn ?? this.orn
     if (orn && (!this.force_orn || !this.isSameColor(this.fg_color, this.force_orn))) {
-      for(let dy = -2; dy <= 2; dy++) {
-        for(let dx = -2; dx <= 2; dx++) {
+      for(let dy = -2 * this.width_magnification(); dy <= 2 * this.width_magnification(); dy++) {
+        for(let dx = -2 * this.width_magnification(); dx <= 2 * this.width_magnification(); dx++) {
           ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}` 
           ctx.fillStyle = orn
           ctx.textBaseline = 'middle'
           ctx.fillText(character, 
-            (this.shs / 2 + dx) * this.width_magnification(),
-            (canvas.height / 2 + dy * this.width_magnification())
+            (this.shs / 2) * this.width_magnification() + dx,
+            (canvas.height / 2) + dy
           )
         }
       }
