@@ -122,7 +122,7 @@ export default class CanvasID3Renderer {
           base64 += String.fromCharCode(array[i]);
         }
       } else if (this.id3Track.inBandMetadataTrackDispatchType === 'com.apple.streaming') { // Safari
-        base64 = id3_cue.value.info
+        base64 = id3_cue.value.data
       } else if (this.id3Track.label === 'id3') { // hls.js
         base64 = id3_cue.value.data
       }
