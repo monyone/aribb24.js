@@ -230,11 +230,26 @@ export default class CanvasID3Renderer {
     }
 
     const style = window.getComputedStyle(this.media)
-    const purpose_width = Math.max(this.rendererOption?.keepAspectRatio ? 0 : (this.media as any).videoWidth, Number.parseInt(style.width) * window.devicePixelRatio)
-    const purpose_height = Math.max(this.rendererOption?.keepAspectRatio ? 0 : (this.media as any).videoHeight, Number.parseInt(style.height) * window.devicePixelRatio)
+    const media_width = Number.parseInt(style.width) * window.devicePixelRatio
+    const media_height = Number.parseInt(style.height) * window.devicePixelRatio
+    const video_width = (this.media as any).videoWidth
+    const video_height = (this.media as any).videoHeight
 
-    this.canvas.width = purpose_width
-    this.canvas.height = purpose_height
+    if (this.rendererOption?.keepAspectRatio) {
+      const ratio = Math.max(video_width / media_width, video_height / media_height)
+      const video_ratio_width = ratio * media_width
+      const video_ratio_height = ratio * media_height
+
+      this.canvas.width = Math.round(media_width)
+      this.canvas.height = Math.round(media_height)
+
+      /* 今の時点では封印せざる得ない */
+      //this.canvas.width = Math.round(Math.max(video_ratio_width, media_width))
+      //this.canvas.height = Math.round(Math.max(video_ratio_height, media_height))
+    } else {
+      this.canvas.width = Math.round(Math.max(video_width, media_width))
+      this.canvas.height = Math.round(Math.max(video_height, media_height))
+    }
 
     if (!this.b24Track) {
       return;
@@ -356,7 +371,7 @@ export default class CanvasID3Renderer {
     this.subtitleElement.appendChild(this.canvas)
 
     this.onResizeHandler = this.onResize.bind(this)
-    this.media.addEventListener('loadeddata', this.onResizeHandler)
+    this.media.addEventListener('resize', this.onResizeHandler)
 
     if (window.ResizeObserver) {
       this.resizeObserver = new ResizeObserver(() => {
@@ -419,7 +434,7 @@ export default class CanvasID3Renderer {
     if (this.onResizeHandler) {
       window.removeEventListener('resize', this.onResizeHandler)
       if (this.media) {
-         this.media.removeEventListener('loadeddata', this.onResizeHandler)
+         this.media.removeEventListener('resize', this.onResizeHandler)
       }
 
       this.onResizeHandler = null
