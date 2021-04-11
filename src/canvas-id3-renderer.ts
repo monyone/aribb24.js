@@ -23,6 +23,7 @@ export default class CanvasID3Renderer {
   private rawCanvas: HTMLCanvasElement | null = null
   private resizeObserver: ResizeObserver | null = null
   private mutationObserver: MutationObserver | null = null
+  private isShowing: boolean = true
   private isOnSeeking: boolean = false
   private onB24CueChangeDrawed: boolean = false
 
@@ -81,23 +82,12 @@ export default class CanvasID3Renderer {
   }
 
   public show(): void {
-    if (!this.b24Track) {
-      return
-    }
-
-    this.b24Track.mode = 'hidden'
-    this.onB24CueChange()
+    this.isShowing = true
+    this.onResize()
   }
 
   public hide(): void {
-    if (!this.b24Track) {
-      return
-    }
-
-    this.b24Track.mode = 'disabled'
-    if (!this.viewCanvas) {
-      return
-    }
+    this.isShowing = true
 
     if (this.viewCanvas) {
       const viewContext = this.viewCanvas.getContext('2d')
@@ -216,7 +206,7 @@ export default class CanvasID3Renderer {
 
         const provider: CanvasProvider = new CanvasProvider(lastCue.data, lastCue.startTime);
 
-        if (this.viewCanvas) {
+        if (this.isShowing && this.viewCanvas) {
           provider.render({
             ... this.rendererOption,
             canvas: this.viewCanvas,
@@ -225,7 +215,7 @@ export default class CanvasID3Renderer {
           })
         }
 
-        if (this.rawCanvas) {
+        if (this.isShowing && this.rawCanvas) {
           provider.render({
             ... this.rendererOption,
             canvas: this.rawCanvas,
@@ -311,7 +301,7 @@ export default class CanvasID3Renderer {
 
         const provider: CanvasProvider = new CanvasProvider(lastCue.data, lastCue.startTime);
 
-        if (this.viewCanvas) {
+        if (this.isShowing && this.viewCanvas) {
           provider.render({
             ... this.rendererOption,
             canvas: this.viewCanvas,
@@ -320,7 +310,7 @@ export default class CanvasID3Renderer {
           })
         }
 
-        if (this.rawCanvas) {
+        if (this.isShowing && this.rawCanvas) {
           provider.render({
             ... this.rendererOption,
             canvas: this.rawCanvas,

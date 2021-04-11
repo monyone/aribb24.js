@@ -22,6 +22,7 @@ export default class CanvasB24Renderer {
   private rawCanvas: HTMLCanvasElement | null = null
   private resizeObserver: ResizeObserver | null = null
   private mutationObserver: MutationObserver | null = null
+  private isShowing: boolean = true
   private isOnSeeking: boolean = false
   private onCueChangeDrawed: boolean = false
 
@@ -76,20 +77,12 @@ export default class CanvasB24Renderer {
   }
 
   public show(): void {
-    if (!this.track) {
-      return
-    }
-
-    this.track.mode = 'hidden'
-    this.onCueChange()
+    this.isShowing = true
+    this.onResize()
   }
 
   public hide(): void {
-    if (!this.track) {
-      return
-    }
-
-    this.track.mode = 'disabled'
+    this.isShowing = false
 
     if (this.viewCanvas) {
       const viewContext = this.viewCanvas.getContext('2d')
@@ -181,7 +174,7 @@ export default class CanvasB24Renderer {
         // なんか Win Firefox で Cue が endTime 過ぎても activeCues から消えない場合があった、バグ?
 
         // render view canvas
-        if (this.viewCanvas) {
+        if (this.isShowing && this.viewCanvas) {
           provider.render({
             ... this.rendererOption,
             canvas: this.viewCanvas,
@@ -191,7 +184,7 @@ export default class CanvasB24Renderer {
         }
 
         // render raw canvas
-        if (this.rawCanvas) {
+        if (this.isShowing && this.rawCanvas) {
           provider.render({
             ... this.rendererOption,
             canvas: this.rawCanvas,
@@ -274,7 +267,7 @@ export default class CanvasB24Renderer {
       const provider: CanvasProvider = (lastCue as any).provider
 
       if ((lastCue.startTime <= this.media.currentTime && this.media.currentTime <= lastCue.endTime) && !this.isOnSeeking) {
-        if (this.viewCanvas) {
+        if (this.isShowing && this.viewCanvas) {
           provider.render({
             ... this.rendererOption,
             canvas: this.viewCanvas,
@@ -283,7 +276,7 @@ export default class CanvasB24Renderer {
           })
         }
 
-        if (this.rawCanvas) {
+        if (this.isShowing && this.rawCanvas) {
           provider.render({
             ... this.rendererOption,
             canvas: this.rawCanvas,
