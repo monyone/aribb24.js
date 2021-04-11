@@ -18,6 +18,8 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
 * normalFont: Specify a font for drawing normal characters
 * gainiFont: Specify a font for drawing ARIB gaiji characters
 * drcsReplacement: Replace DRCS to text if possible
+* keepAspectRatio: keep caption's aspect ratio in any container. default: true
+* enableRawCanvas: enable raw video resolution canvas. it can get getRawCanvas method.
 
 ## Build
 

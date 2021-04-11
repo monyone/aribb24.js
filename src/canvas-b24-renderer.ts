@@ -11,13 +11,15 @@ interface RendererOption {
   gaijiFont?: string,
   drcsReplacement?: boolean,
   keepAspectRatio?: boolean,
+  enableRawCanvas?: boolean,
 }
 
 export default class CanvasB24Renderer {
   private media: HTMLMediaElement | null = null
   private track: TextTrack | null = null
   private subtitleElement: HTMLElement | null = null
-  private canvas: HTMLCanvasElement | null = null
+  private viewCanvas: HTMLCanvasElement | null = null
+  private rawCanvas: HTMLCanvasElement | null = null
   private resizeObserver: ResizeObserver | null = null
   private mutationObserver: MutationObserver | null = null
   private isOnSeeking: boolean = false
@@ -39,6 +41,7 @@ export default class CanvasB24Renderer {
       ... option,
       data_identifer: this.data_identifer,
       data_group_id: this.data_group_id,
+      keepAspectRatio: option?.keepAspectRatio ?? true, // default: true
     }
   }
 
@@ -60,8 +63,12 @@ export default class CanvasB24Renderer {
     this.detachMedia()
   }
 
-  public getCanvas(): HTMLCanvasElement | null {
-    return this.canvas
+  public getViewCanvas(): HTMLCanvasElement | null {
+    return this.viewCanvas
+  }
+
+  public getRawCanvas(): HTMLCanvasElement | null {
+    return this.rawCanvas
   }
 
   public refresh(): void {
@@ -83,13 +90,20 @@ export default class CanvasB24Renderer {
     }
 
     this.track.mode = 'disabled'
-    if (!this.canvas) {
-      return
+
+    if (this.viewCanvas) {
+      const viewContext = this.viewCanvas.getContext('2d')
+      if (viewContext) {
+        viewContext.clearRect(0, 0, this.viewCanvas.width, this.viewCanvas.height);
+      }
     }
 
-    const ctx = this.canvas.getContext('2d')
-    if (!ctx) { return }
-    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    if (this.rawCanvas) {
+      const rawContext = this.rawCanvas.getContext('2d')
+      if (rawContext) {
+        rawContext.clearRect(0, 0, this.rawCanvas.width, this.rawCanvas.height);
+      }
+    }
   }
 
   public pushData(pid: number, uint8array: Uint8Array, pts: number): void {
@@ -139,17 +153,24 @@ export default class CanvasB24Renderer {
   }
 
   private onCueChange() {
-    if (!this.media || !this.track || !this.canvas) {
+    if (!this.media || !this.track) {
       this.onCueChangeDrawed = false
       return
     }
 
-    const canvasContext = this.canvas.getContext('2d')
-    if (!canvasContext) {
-      this.onCueChangeDrawed = false
-      return
+    if (this.viewCanvas) {
+      const viewContext = this.viewCanvas.getContext('2d')
+      if (viewContext) {
+        viewContext.clearRect(0, 0, this.viewCanvas.width, this.viewCanvas.height);
+      }
     }
-    canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    if (this.rawCanvas) {
+      const rawContext = this.rawCanvas.getContext('2d')
+      if (rawContext) {
+        rawContext.clearRect(0, 0, this.rawCanvas.width, this.rawCanvas.height);
+      }
+    }
 
     const activeCues = this.track.activeCues
     if (activeCues && activeCues.length > 0) {
@@ -159,12 +180,26 @@ export default class CanvasB24Renderer {
       if ((lastCue.startTime <= this.media.currentTime && this.media.currentTime <= lastCue.endTime) && !this.isOnSeeking) {
         // なんか Win Firefox で Cue が endTime 過ぎても activeCues から消えない場合があった、バグ?
 
-  　　　provider.render({
-          ... this.rendererOption,
-          canvas: this.canvas ?? undefined,
-          width: this.rendererOption?.width ?? this.canvas.width,
-          height: this.rendererOption?.height ?? this.canvas.height,
-        })
+        // render view canvas
+        if (this.viewCanvas) {
+          provider.render({
+            ... this.rendererOption,
+            canvas: this.viewCanvas,
+            width: this.rendererOption?.width ?? this.viewCanvas.width,
+            height: this.rendererOption?.height ?? this.viewCanvas.height,
+          })
+        }
+
+        // render raw canvas
+        if (this.rawCanvas) {
+          provider.render({
+            ... this.rendererOption,
+            canvas: this.rawCanvas,
+            width: this.rawCanvas.width,
+            height: this.rawCanvas.height,
+            keepAspectRatio: true,
+          })
+        }
 
         this.onCueChangeDrawed = true
       } else {
@@ -193,7 +228,7 @@ export default class CanvasB24Renderer {
   }
 
   private onResize() {
-    if (!this.canvas || !this.media) {
+    if (!this.media) {
       return
     }
 
@@ -203,29 +238,32 @@ export default class CanvasB24Renderer {
     const video_width = (this.media as any).videoWidth
     const video_height = (this.media as any).videoHeight
 
-    if (this.rendererOption?.keepAspectRatio) {
-      const ratio = Math.max(video_width / media_width, video_height / media_height)
-      const video_ratio_width = ratio * media_width
-      const video_ratio_height = ratio * media_height
-
-      this.canvas.width = Math.round(media_width)
-      this.canvas.height = Math.round(media_height)
-
-      /* 今の時点では封印せざる得ない */
-      //this.canvas.width = Math.round(Math.max(video_ratio_width, media_width))
-      //this.canvas.height = Math.round(Math.max(video_ratio_height, media_height))
-    } else {
-      this.canvas.width = Math.round(Math.max(video_width, media_width))
-      this.canvas.height = Math.round(Math.max(video_height, media_height))
+    if (this.viewCanvas) {
+      this.viewCanvas.width = Math.round(media_width)
+      this.viewCanvas.height = Math.round(media_height)
+    }
+    if (this.rawCanvas) {
+      this.rawCanvas.width = video_width
+      this.rawCanvas.height = video_height
     }
 
     if (!this.track) {
       return
     }
 
-    const canvasContext = this.canvas.getContext('2d')
-    if (!canvasContext) { return }
-    canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    if (this.viewCanvas) {
+      const viewContext = this.viewCanvas.getContext('2d')
+      if (viewContext) {
+        viewContext.clearRect(0, 0, this.viewCanvas.width, this.viewCanvas.height);
+      }
+    }
+
+    if (this.rawCanvas) {
+      const rawContext = this.rawCanvas.getContext('2d')
+      if (rawContext) {
+        rawContext.clearRect(0, 0, this.rawCanvas.width, this.rawCanvas.height);
+      }
+    }
 
     if (!this.onCueChangeDrawed) { return }
 
@@ -236,12 +274,24 @@ export default class CanvasB24Renderer {
       const provider: CanvasProvider = (lastCue as any).provider
 
       if ((lastCue.startTime <= this.media.currentTime && this.media.currentTime <= lastCue.endTime) && !this.isOnSeeking) {
-  　　　provider.render({
-          ... this.rendererOption,
-          canvas: this.canvas ?? undefined,
-          width: this.rendererOption?.width ?? this.canvas.width,
-          height: this.rendererOption?.height ?? this.canvas.height,
-        })
+        if (this.viewCanvas) {
+          provider.render({
+            ... this.rendererOption,
+            canvas: this.viewCanvas,
+            width: this.rendererOption?.width ?? this.viewCanvas.width,
+            height: this.rendererOption?.height ?? this.viewCanvas.height,
+          })
+        }
+
+        if (this.rawCanvas) {
+          provider.render({
+            ... this.rendererOption,
+            canvas: this.rawCanvas,
+            width: this.rawCanvas.width,
+            height: this.rawCanvas.height,
+            keepAspectRatio: true,
+          })
+        }
       }
     }
   }
@@ -275,16 +325,20 @@ export default class CanvasB24Renderer {
     if (!this.media || !this.subtitleElement){
       return
     }
-    this.canvas = document.createElement('canvas')
-    this.canvas.style.position = 'absolute'
-    this.canvas.style.top = this.canvas.style.left = '0'
-    this.canvas.style.pointerEvents = 'none'
-    this.canvas.style.width = '100%'
-    this.canvas.style.height = '100%'
+    this.viewCanvas = document.createElement('canvas')
+    this.viewCanvas.style.position = 'absolute'
+    this.viewCanvas.style.top = this.viewCanvas.style.left = '0'
+    this.viewCanvas.style.pointerEvents = 'none'
+    this.viewCanvas.style.width = '100%'
+    this.viewCanvas.style.height = '100%'
+
+    if (this.rendererOption?.enableRawCanvas) {
+      this.rawCanvas = document.createElement('canvas')
+    }
 
     this.onResize()
 
-    this.subtitleElement.appendChild(this.canvas)
+    this.subtitleElement.appendChild(this.viewCanvas)
 
     this.onResizeHandler = this.onResize.bind(this)
     this.media.addEventListener('resize', this.onResizeHandler)
@@ -357,9 +411,9 @@ export default class CanvasB24Renderer {
       this.mutationObserver = null
     }
 
-    if (this.canvas && this.subtitleElement) {
-      this.subtitleElement.removeChild(this.canvas)
+    if (this.viewCanvas && this.subtitleElement) {
+      this.subtitleElement.removeChild(this.viewCanvas)
     }
-    this.canvas =  null
+    this.viewCanvas = this.rawCanvas = null
   }
 }
