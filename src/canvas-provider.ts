@@ -30,6 +30,7 @@ interface ProviderOption {
   gaijiFont?: string,
   drcsReplacement?: boolean,
   keepAspectRatio?: boolean,
+  useStrokeText?: boolean,
 }
 
 interface ProviderResult {
@@ -106,6 +107,7 @@ export default class CanvasProvider {
   private gaijiFont: string = this.normalFont
 
   private drcsReplacement: boolean = false
+  private useStrokeText: boolean = false
 
   public constructor(pes: Uint8Array, pts: number) {
     this.pes = pes
@@ -179,6 +181,7 @@ export default class CanvasProvider {
     this.gaijiFont = this.normalFont
 
     this.drcsReplacement = false
+    this.useStrokeText = false
   }
 
   private width(): number {
@@ -269,6 +272,7 @@ export default class CanvasProvider {
     this.normalFont = option?.normalFont ?? 'sans-serif'
     this.gaijiFont = option?.gaijiFont ?? this.normalFont
     this.drcsReplacement = option?.drcsReplacement ?? false
+    this.useStrokeText = option?.useStrokeText ?? false
 
     if (!this.check()) {
       return null
@@ -1152,17 +1156,30 @@ export default class CanvasProvider {
       return canvas
     }
 
-    const orn = this.force_orn ?? this.orn
-    if (orn && (!this.force_orn || !this.isSameColor(this.fg_color, this.force_orn))) {
-      for(let dy = -2 * this.width_magnification(); dy <= 2 * this.width_magnification(); dy++) {
-        for(let dx = -2 * this.width_magnification(); dx <= 2 * this.width_magnification(); dx++) {
+    {
+      const orn = this.force_orn ?? this.orn
+      if (orn && (!this.force_orn || !this.isSameColor(this.fg_color, this.force_orn))) {
+        if (this.useStrokeText) {
           ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}` 
-          ctx.fillStyle = orn
+          ctx.strokeStyle = orn
           ctx.textBaseline = 'middle'
-          ctx.fillText(character, 
-            (this.shs / 2) * this.width_magnification() + dx,
-            (canvas.height / 2) + dy
+          ctx.lineWidth = 5 * this.width_magnification()
+          ctx.strokeText(character, 
+            (this.shs / 2) * this.width_magnification(),
+            (canvas.height / 2)
           )
+        } else {
+          for(let dy = -2 * this.width_magnification(); dy <= 2 * this.width_magnification(); dy++) {
+            for(let dx = -2 * this.width_magnification(); dx <= 2 * this.width_magnification(); dx++) {
+              ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}` 
+              ctx.fillStyle = orn
+              ctx.textBaseline = 'middle'
+              ctx.fillText(character, 
+                (this.shs / 2) * this.width_magnification() + dx,
+                (canvas.height / 2) + dy
+              )
+            }
+          }
         }
       }
     }

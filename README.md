@@ -20,6 +20,7 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
 * drcsReplacement: Replace DRCS to text if possible
 * keepAspectRatio: keep caption's aspect ratio in any container. default: true
 * enableRawCanvas: enable raw video resolution canvas. it can get getRawCanvas method.
+* useStrokeText: use render outer stroke by strokeText API
 
 ## Build
 

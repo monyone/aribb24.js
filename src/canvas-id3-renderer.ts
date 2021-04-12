@@ -12,6 +12,7 @@ interface RendererOption {
   drcsReplacement?: boolean,
   keepAspectRatio?: boolean,
   enableRawCanvas?: boolean,
+  useStrokeText?: boolean,
 }
 
 export default class CanvasID3Renderer {
