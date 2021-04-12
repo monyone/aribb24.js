@@ -407,6 +407,15 @@ export default class CanvasB24Renderer {
     if (this.viewCanvas && this.subtitleElement) {
       this.subtitleElement.removeChild(this.viewCanvas)
     }
+
+    if (this.viewCanvas) {
+      this.viewCanvas.width = this.viewCanvas.height = 0
+    }
+
+    if (this.rawCanvas) {
+      this.rawCanvas.width = this.rawCanvas.height = 0
+    }
+
     this.viewCanvas = this.rawCanvas = null
   }
 }
