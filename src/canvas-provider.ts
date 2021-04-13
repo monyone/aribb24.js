@@ -1164,10 +1164,11 @@ export default class CanvasProvider {
           ctx.strokeStyle = orn
           ctx.lineJoin = 'round'
           ctx.textBaseline = 'middle'
+          ctx.textAlign = "center"
           ctx.lineWidth = 5 * this.width_magnification()
           ctx.strokeText(character, 
-            (this.shs / 2) * this.width_magnification(),
-            (canvas.height / 2)
+            canvas.width / 2,
+            canvas.height / 2,
           )
         } else {
           for(let dy = -2 * this.width_magnification(); dy <= 2 * this.width_magnification(); dy++) {
@@ -1175,9 +1176,10 @@ export default class CanvasProvider {
               ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}` 
               ctx.fillStyle = orn
               ctx.textBaseline = 'middle'
+              ctx.textAlign = "center"
               ctx.fillText(character, 
-                (this.shs / 2) * this.width_magnification() + dx,
-                (canvas.height / 2) + dy
+                canvas.width / 2 + dx,
+                canvas.height / 2 + dy,
               )
             }
           }
@@ -1188,7 +1190,8 @@ export default class CanvasProvider {
     ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
     ctx.fillStyle = this.fg_color
     ctx.textBaseline = 'middle'
-    ctx.fillText(character, (this.shs / 2) * this.width_magnification(), canvas.height / 2)
+    ctx.textAlign = "center"
+    ctx.fillText(character, canvas.width / 2, canvas.height / 2)
 
     return canvas
   }
