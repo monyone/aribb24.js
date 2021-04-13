@@ -1162,6 +1162,7 @@ export default class CanvasProvider {
         if (this.useStrokeText) {
           ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}` 
           ctx.strokeStyle = orn
+          ctx.lineJoin = 'round'
           ctx.textBaseline = 'middle'
           ctx.lineWidth = 5 * this.width_magnification()
           ctx.strokeText(character, 
