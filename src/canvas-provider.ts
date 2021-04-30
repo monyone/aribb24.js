@@ -1102,12 +1102,12 @@ export default class CanvasProvider {
                     const byte = Math.floor(((((y * width) + x) * depth) + d) / 8)
                     const index = 7 - (((((y * width) + x) * depth) + d) % 8)
                     value *= 2
-                    value += drcs[byte] & (1 << index) >> index
+                    value += ((drcs[byte] & (1 << index)) >> index)
                   }
 
                   if(value > 0){
                     ctx.fillRect(
-                      (this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x) * this.width_magnification() + (dx + 1),
+                      (this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x) * this.width_magnification()  + dx,
                       (this.position_y - this.height() + Math.floor(this.svs * this.text_size_y / 2) + y) * this.height_magnification() + dy,
                       1,
                       1,
