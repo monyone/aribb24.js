@@ -17,6 +17,7 @@ import ADDITIONAL_SYMBOL_SET from './constants/mapping/additional-symbol-set'
 import CRC16 from './utils/crc16-ccitt'
 import SparkMD5 from 'spark-md5'
 
+const SIZE_MAGNIFICATION = 2; // 奇数の height 時に SSZ で改行を行う場合があるため、全体をN倍して半分サイズに備える
 
 interface ProviderOption {
   canvas?: HTMLCanvasElement,
@@ -71,19 +72,19 @@ export default class CanvasProvider {
     [ALPHABETS.DRCS_15, new Map<number, Uint8Array>()],
   ])
 
-  private purpose_width: number = 960
-  private purpose_height: number = 540
+  private purpose_width: number = 960 * SIZE_MAGNIFICATION
+  private purpose_height: number = 540 * SIZE_MAGNIFICATION
 
-  private swf_x: number = 960
-  private swf_y: number = 540
-  private sdf_x: number = 960
-  private sdf_y: number = 540
-  private sdp_x: number = 0
-  private sdp_y: number = 0
-  private ssm_x: number = 36
-  private ssm_y: number = 36
-  private shs: number = 4
-  private svs: number = 24
+  private swf_x: number = 960 * SIZE_MAGNIFICATION
+  private swf_y: number = 540 * SIZE_MAGNIFICATION
+  private sdf_x: number = 960 * SIZE_MAGNIFICATION
+  private sdf_y: number = 540 * SIZE_MAGNIFICATION
+  private sdp_x: number = 0   * SIZE_MAGNIFICATION
+  private sdp_y: number = 0   * SIZE_MAGNIFICATION
+  private ssm_x: number = 36  * SIZE_MAGNIFICATION
+  private ssm_y: number = 36  * SIZE_MAGNIFICATION
+  private shs: number = 4  * SIZE_MAGNIFICATION
+  private svs: number = 24 * SIZE_MAGNIFICATION
   private text_size_x: number = 1
   private text_size_y: number = 1
   private position_x: number = -1
@@ -146,19 +147,19 @@ export default class CanvasProvider {
       [ALPHABETS.DRCS_15, new Map<number, Uint8Array>()],
     ])
 
-    this.purpose_width = 960
-    this.purpose_height = 540
+    this.purpose_width = 960  * SIZE_MAGNIFICATION
+    this.purpose_height = 540 * SIZE_MAGNIFICATION
 
-    this.swf_x = 960
-    this.swf_y = 540
-    this.sdf_x = 960
-    this.sdf_y = 540
-    this.sdp_x = 0
-    this.sdp_y = 0
-    this.ssm_x = 36
-    this.ssm_y = 36
-    this.shs = 4
-    this.svs = 24
+    this.swf_x = 960 * SIZE_MAGNIFICATION
+    this.swf_y = 540 * SIZE_MAGNIFICATION
+    this.sdf_x = 960 * SIZE_MAGNIFICATION
+    this.sdf_y = 540 * SIZE_MAGNIFICATION
+    this.sdp_x = 0   * SIZE_MAGNIFICATION
+    this.sdp_y = 0   * SIZE_MAGNIFICATION
+    this.ssm_x = 36  * SIZE_MAGNIFICATION
+    this.ssm_y = 36  * SIZE_MAGNIFICATION
+    this.shs = 4  * SIZE_MAGNIFICATION
+    this.svs = 24 * SIZE_MAGNIFICATION
     this.text_size_x = 1
     this.text_size_y = 1
     this.position_x = -1
@@ -583,14 +584,14 @@ export default class CanvasProvider {
               return
             }
             if(P1 === 5){
-              this.swf_x = 1920
-              this.swf_y = 1080
+              this.swf_x = 1920 * SIZE_MAGNIFICATION
+              this.swf_y = 1080 * SIZE_MAGNIFICATION
             }else if(P1 === 7){
-              this.swf_x = 960
-              this.swf_y = 540
+              this.swf_x = 960 * SIZE_MAGNIFICATION
+              this.swf_y = 540 * SIZE_MAGNIFICATION
             }else if(P1 == 9){
-              this.swf_x = 720
-              this.swf_y = 480
+              this.swf_x = 720 * SIZE_MAGNIFICATION
+              this.swf_y = 480 * SIZE_MAGNIFICATION
             }else{
               return
             }
@@ -611,8 +612,8 @@ export default class CanvasProvider {
               P2 += this.pes[index] & 0x0F
               index++
             }
-            this.sdf_x = P1
-            this.sdf_y = P2
+            this.sdf_x = P1 * SIZE_MAGNIFICATION
+            this.sdf_y = P2 * SIZE_MAGNIFICATION
             break
           }else if(this.pes[last] === CSI.SSM){
             let index = begin + 1
@@ -628,8 +629,8 @@ export default class CanvasProvider {
               P2 += this.pes[index] & 0x0F
               index++
             }
-            this.ssm_x = P1
-            this.ssm_y = P2
+            this.ssm_x = P1 * SIZE_MAGNIFICATION
+            this.ssm_y = P2 * SIZE_MAGNIFICATION
             break
           }else if(this.pes[last] === CSI.SHS){
             let index = begin + 1
@@ -639,7 +640,7 @@ export default class CanvasProvider {
               P1 += this.pes[index] & 0x0F
               index++
             }
-            this.shs = P1
+            this.shs = P1 * SIZE_MAGNIFICATION
             break
           }else if(this.pes[last] === CSI.SVS){
             let index = begin + 1
@@ -649,7 +650,7 @@ export default class CanvasProvider {
               P1 += this.pes[index] & 0x0F
               index++
             }
-            this.svs = P1
+            this.svs = P1 * SIZE_MAGNIFICATION
             break
           }else if(this.pes[last] === CSI.PLD){
             break
@@ -673,8 +674,8 @@ export default class CanvasProvider {
               P2 += this.pes[index] & 0x0F
               index++
             }
-            this.sdp_x = P1
-            this.sdp_y = P2
+            this.sdp_x = P1 * SIZE_MAGNIFICATION
+            this.sdp_y = P2 * SIZE_MAGNIFICATION
             break
           }else if(this.pes[last] === CSI.ACPS){
             let index = begin + 1
@@ -690,7 +691,7 @@ export default class CanvasProvider {
               P2 += this.pes[index] & 0x0F
               index++
             }
-            this.move_absolute_dot(P1, P2)
+            this.move_absolute_dot(P1 * SIZE_MAGNIFICATION, P2 * SIZE_MAGNIFICATION)
             break
           }else if(this.pes[last] === CSI.TCC){
             break
