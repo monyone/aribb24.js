@@ -1094,8 +1094,8 @@ export default class CanvasProvider {
         const orn = this.force_orn ?? this.orn
         if (orn && (!this.force_orn || !this.isSameColor(this.fg_color, this.force_orn))) {
           ctx.fillStyle = orn
-          for(let dy = -2 * this.height_magnification(); dy <= 2 * this.height_magnification(); dy++){
-            for(let dx = -2 * this.width_magnification(); dx <= 2 * this.width_magnification(); dx++){
+          for(let dy = -2 * SIZE_MAGNIFICATION * this.height_magnification(); dy <= 2 * SIZE_MAGNIFICATION * this.height_magnification(); dy++){
+            for(let dx = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dx <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dx++){
               for(let y = 0; y < height; y++){
                 for(let x = 0; x < width; x++){
                   let value = 0
@@ -1166,14 +1166,14 @@ export default class CanvasProvider {
           ctx.lineJoin = 'round'
           ctx.textBaseline = 'middle'
           ctx.textAlign = "center"
-          ctx.lineWidth = 5 * this.width_magnification()
+          ctx.lineWidth = 5 * SIZE_MAGNIFICATION * this.width_magnification()
           ctx.strokeText(character, 
             canvas.width / 2,
             canvas.height / 2,
           )
         } else {
-          for(let dy = -2 * this.width_magnification(); dy <= 2 * this.width_magnification(); dy++) {
-            for(let dx = -2 * this.width_magnification(); dx <= 2 * this.width_magnification(); dx++) {
+          for(let dy = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dy <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dy++) {
+            for(let dx = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dx <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dx++) {
               ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}` 
               ctx.fillStyle = orn
               ctx.textBaseline = 'middle'
