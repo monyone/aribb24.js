@@ -1088,14 +1088,14 @@ export default class CanvasProvider {
         )
         font_canvas.width = font_canvas.height = 0
       } else {
-        const width = Math.floor(this.ssm_x * this.text_size_x)
-        const height = Math.floor(this.ssm_y * this.text_size_y)
+        const width = Math.floor(this.ssm_x * this.text_size_x / SIZE_MAGNIFICATION)
+        const height = Math.floor(this.ssm_y * this.text_size_y / SIZE_MAGNIFICATION)
         const depth = Math.floor((drcs.length * 8) / (width * height))
         const orn = this.force_orn ?? this.orn
         if (orn && (!this.force_orn || !this.isSameColor(this.fg_color, this.force_orn))) {
           ctx.fillStyle = orn
-          for(let dy = -2 * SIZE_MAGNIFICATION * this.height_magnification(); dy <= 2 * SIZE_MAGNIFICATION * this.height_magnification(); dy++){
-            for(let dx = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dx <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dx++){
+          for(let dy = -2 * this.height_magnification(); dy <= 2 * this.height_magnification(); dy++){
+            for(let dx = -2 * this.width_magnification(); dx <= 2 * this.width_magnification(); dx++){
               for(let y = 0; y < height; y++){
                 for(let x = 0; x < width; x++){
                   let value = 0
@@ -1108,10 +1108,10 @@ export default class CanvasProvider {
 
                   if(value > 0){
                     ctx.fillRect(
-                      (this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x) * this.width_magnification()  + dx,
-                      (this.position_y - this.height() + Math.floor(this.svs * this.text_size_y / 2) + y) * this.height_magnification() + dy,
-                      1,
-                      1,
+                      (this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x * SIZE_MAGNIFICATION) * this.width_magnification()  + dx * SIZE_MAGNIFICATION,
+                      (this.position_y - this.height() + Math.floor(this.svs * this.text_size_y / 2) + y * SIZE_MAGNIFICATION) * this.height_magnification() + dy * SIZE_MAGNIFICATION,
+                      1 * SIZE_MAGNIFICATION * this.width_magnification(),
+                      1 * SIZE_MAGNIFICATION * this.height_magnification(),
                     )
                   }
                 }
@@ -1133,10 +1133,10 @@ export default class CanvasProvider {
 
             if(value > 0){
               ctx.fillRect(
-                (this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x) * this.width_magnification(),
-                (this.position_y - this.height() + Math.floor(this.svs * this.text_size_y / 2) + y) * this.height_magnification(),
-                1 * this.width_magnification(),
-                1 * this.height_magnification(),
+                (this.position_x -             0 + Math.floor(this.shs * this.text_size_x / 2) + x * SIZE_MAGNIFICATION) * this.width_magnification(),
+                (this.position_y - this.height() + Math.floor(this.svs * this.text_size_y / 2) + y * SIZE_MAGNIFICATION) * this.height_magnification(),
+                1 * SIZE_MAGNIFICATION * this.width_magnification(),
+                1 * SIZE_MAGNIFICATION * this.height_magnification(),
               )
             }
           }
