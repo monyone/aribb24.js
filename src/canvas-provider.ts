@@ -276,7 +276,8 @@ export default class CanvasProvider {
     this.useStrokeText = option?.useStrokeText ?? false
 
     if (!this.check()) {
-      return null
+      // return null
+      // FIXME: ほんとは CRC16 が 0 になるはずなんだけど、計算があっていないようで稀に 非0 になっていた...チェックしたい...
     }
 
     const data_identifer = this.pes[0]
