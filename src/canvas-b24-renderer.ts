@@ -106,7 +106,7 @@ export default class CanvasB24Renderer {
     }
 
     const provider = new CanvasProvider(uint8array, pts)
-    if (!provider.check()) { return }
+    // if (!provider.check()) { return }
 
     const result = provider.render({
       ... this.rendererOption,
