@@ -105,14 +105,36 @@ export default class CanvasID3Renderer {
     }
   }
 
+  public pushData(pts: number, uint8array: Uint8Array): void {
+    let base64 = "";
+    for (let i = 6 + 4 + 4 + 4 + 2 + 2; i < uint8array.length; i++) {
+      if (uint8array[i] === 0) { break; }
+      base64 += String.fromCharCode(uint8array[i]);
+    }
+
+    const binary = window.atob(base64);
+    const pes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) { pes[i] = binary.charCodeAt(i); }
+
+    const provider: CanvasProvider = new CanvasProvider(pes, pts);
+    const estimate = provider.render({
+      ... this.rendererOption,
+      width: undefined, // ここはデフォルト値で負荷を軽くする
+      height: undefined, // ここはデフォルト値で負荷を軽くする
+    })
+    if (estimate == null) { return; }
+
+    const end_time = estimate.endTime;
+
+    this.addB24Cue(pts, end_time, pes)
+  }
+
   private onID3CueChange() {
     if (!this.media || !this.id3Track || !this.b24Track) {
       return
     }
 
     if (this.isOnSeeking) { return }
-
-    const CueClass = window.VTTCue ?? window.TextTrackCue
 
     const activeCues = this.id3Track.activeCues ?? []
     for (let i = 0; i < activeCues.length; i++) {
@@ -124,14 +146,13 @@ export default class CanvasID3Renderer {
         const array = new Uint8Array(id3_cue.data);
         let flag = false;
         base64 = "";
-        for (let i = 6 + 4 + 4 + 4 + 2 + 2; i < array.length - 1; i++) {
-          if (array[i] === 103 && array[i + 1] === 80){ flag = true; } // duty hack!
-          if (!flag) { continue; }
+        for (let i = 6 + 4 + 4 + 4 + 2 + 2; i < array.length; i++) {
+          if (array[i] === 0) { break; }
           base64 += String.fromCharCode(array[i]);
         }
       } else if (this.id3Track.inBandMetadataTrackDispatchType === 'com.apple.streaming') { // Safari
         base64 = id3_cue.value.data
-      } else if (this.id3Track.label === 'id3') { // hls.js
+      } else if (this.id3Track.label === 'id3') { // hls.js (disabled)
         base64 = id3_cue.value.data
       }
 
@@ -142,37 +163,52 @@ export default class CanvasID3Renderer {
       for (let i = 0; i < binary.length; i++) { pes[i] = binary.charCodeAt(i); }
 
       const provider: CanvasProvider = new CanvasProvider(pes, start_time);
-      const estimate = provider.render(this.rendererOption) // detect target b24 data and calc endTime
+      const estimate = provider.render({
+        ... this.rendererOption,
+        width: undefined, // ここはデフォルト値で負荷を軽くする
+        height: undefined, // ここはデフォルト値で負荷を軽くする
+      })
       if (estimate == null) { continue; }
 
       const end_time = estimate.endTime;
 
       if (start_time <= this.media.currentTime && this.media.currentTime <= end_time) {
         // なんか Win Firefox で Cue が endTime 過ぎても activeCues から消えない場合があった、バグ?
-        const b24_cue = new CueClass(start_time, end_time, '');
-        (b24_cue as any).data = pes;
 
-        if (window.VTTCue) {
-          this.b24Track.addCue(b24_cue)
-        } else if (window.TextTrackCue) {
-          const hasCue = Array.prototype.some.call(this.b24Track.cues ?? [], (target) => {
-            return target.startTime === start_time
-          })
-          if (hasCue) { continue }
+        this.addB24Cue(start_time, end_time, pes)
+      }
+    }
+  }
 
-          if (this.b24Track.cues) {
-            const removed_cues: TextTrackCue[] = [];
-            for (let i = this.b24Track.cues.length - 1; i >= 0; i--) {
-              if (this.b24Track.cues[i].startTime >= start_time) {
-                removed_cues.push(this.b24Track.cues[i])
-                this.b24Track.removeCue(this.b24Track.cues[i])
-              }
-            }
-            this.b24Track.addCue(b24_cue)
-            for (let i = removed_cues.length - 1; i >= 0; i--) {
-              this.b24Track.addCue(removed_cues[i])
-            }
+  private addB24Cue (start_time: number, end_time: number, data: Uint8Array) {
+    if (!this.b24Track) {
+      return
+    }
+
+    const CueClass = window.VTTCue ?? window.TextTrackCue
+
+    const b24_cue = new CueClass(start_time, end_time, '');
+    (b24_cue as any).data = data;
+
+    if (window.VTTCue) {
+      this.b24Track.addCue(b24_cue)
+    } else if (window.TextTrackCue) {
+      const hasCue = Array.prototype.some.call(this.b24Track.cues ?? [], (target) => {
+        return target.startTime === start_time
+      })
+      if (hasCue) { return; }
+
+      if (this.b24Track.cues) {
+        const removed_cues: TextTrackCue[] = [];
+        for (let i = this.b24Track.cues.length - 1; i >= 0; i--) {
+          if (this.b24Track.cues[i].startTime >= start_time) {
+            removed_cues.push(this.b24Track.cues[i])
+            this.b24Track.removeCue(this.b24Track.cues[i])
           }
+        }
+        this.b24Track.addCue(b24_cue)
+        for (let i = removed_cues.length - 1; i >= 0; i--) {
+          this.b24Track.addCue(removed_cues[i])
         }
       }
     }
@@ -334,7 +370,7 @@ export default class CanvasID3Renderer {
 
     if ( textTrack.inBandMetadataTrackDispatchType === '15260DFFFF49443320FF49443320000F'
       || textTrack.inBandMetadataTrackDispatchType === 'com.apple.streaming'
-      || textTrack.label === 'id3'
+      /* || textTrack.label === 'id3' // hls.js は id3 の endTime が infinite ではなく当該セグメントの末尾になるため、手動で入れる */
     ) {
 
       if (this.id3Track && this.onID3CueChangeHandler) {
@@ -377,7 +413,7 @@ export default class CanvasID3Renderer {
 
       if ( track.inBandMetadataTrackDispatchType === '15260DFFFF49443320FF49443320000F'
         || track.inBandMetadataTrackDispatchType === 'com.apple.streaming'
-        || track.label === 'id3'
+        /* || track.label === 'id3' // hls.js は id3 の endTime が infinite ではなく当該セグメントの末尾になるため、手動で入れる */
       ) {
         this.id3Track = track;
         break;

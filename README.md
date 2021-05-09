@@ -50,15 +50,6 @@ yarn run build
     var video = document.getElementById('videoElement');
     var videoSrc = 'something.m3u8';
 
-    if (Hls.isSupported()) {
-        var hls = new Hls();
-        hls.loadSource(videoSrc);
-        hls.attachMedia(video);
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = videoSrc;
-    }
-
-    video.play();
     var b24Renderer = new aribb24js.CanvasID3Renderer({
       // Options are here!
 
@@ -68,8 +59,24 @@ yarn run build
       // gaijiFont?: string,
       // drcsReplacement?: boolean
     });
-    b24Renderer.attachMedia(video);
     // b24Renderer.attachMedia(video, subtitleElement) also accepted
+    b24Renderer.attachMedia(video);
+
+    if (Hls.isSupported()) {
+        var hls = new Hls();
+        hls.on(Hls.Events.FRAG_PARSING_METADATA, function (event, data) {
+          for (var sample of data.samples) {
+            b24Renderer.pushData(sample.pts, sample.data);
+          }
+        }
+
+        hls.loadSource(videoSrc);
+        hls.attachMedia(video);
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = videoSrc;
+    }
+
+    video.play();
 </script>
 ```
 
