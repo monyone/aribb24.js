@@ -1,4 +1,5 @@
 import CanvasProvider from './canvas-provider'
+import FrequentlyTextTrack from './utils/texttrack'
 
 interface RendererOption {
   width?: number,
@@ -13,6 +14,7 @@ interface RendererOption {
   keepAspectRatio?: boolean,
   enableRawCanvas?: boolean,
   useStrokeText?: boolean,
+  useTextTrackPolling?: boolean,
 }
 
 export default class CanvasB24Renderer {
@@ -166,9 +168,8 @@ export default class CanvasB24Renderer {
       }
     }
 
-    const activeCues = this.track.activeCues
-    if (activeCues && activeCues.length > 0) {
-      const lastCue = activeCues[activeCues.length - 1]
+    if (this.track.activeCues && this.track.activeCues.length > 0) {
+      const lastCue = this.track.activeCues[this.track.activeCues.length - 1]
       const provider: CanvasProvider = (lastCue as any).provider
       
       if ((lastCue.startTime <= this.media.currentTime && this.media.currentTime <= lastCue.endTime) && !this.isOnSeeking) {
@@ -200,8 +201,8 @@ export default class CanvasB24Renderer {
         this.onCueChangeDrawed = false
       }
 
-      for (let i = activeCues.length - 2; i >= 0; i--) {
-        const cue = activeCues[i]
+      for (let i = this.track.activeCues.length - 2; i >= 0; i--) {
+        const cue = this.track.activeCues[i]
         cue.endTime = Math.min(cue.endTime, lastCue.startTime)
         if (cue.startTime === cue.endTime) { // if duplicate subtitle appeared ..
           this.track.removeCue(cue);
@@ -262,9 +263,8 @@ export default class CanvasB24Renderer {
     if (!this.onCueChangeDrawed) { return }
 
     // onCueChange とほぼ同じだが、this.onCueChangeDrawed を変更しない
-    const activeCues = this.track.activeCues
-    if (activeCues && activeCues.length > 0) {
-      const lastCue = activeCues[activeCues.length - 1]
+    if (this.track.activeCues && this.track.activeCues.length > 0) {
+      const lastCue = this.track.activeCues[this.track.activeCues.length - 1]
       const provider: CanvasProvider = (lastCue as any).provider
 
       if ((lastCue.startTime <= this.media.currentTime && this.media.currentTime <= lastCue.endTime) && !this.isOnSeeking) {
@@ -295,17 +295,22 @@ export default class CanvasB24Renderer {
       return
     }
 
-    const aribb24js_label = `ARIB B24 Japanese (data_identifer=0x${this.data_identifer.toString(16)}, data_group_id=${this.data_group_id})`
-    for (let i = 0; i < this.media.textTracks.length; i++) {
-      const track = this.media.textTracks[i]
-      if (track.label === aribb24js_label) {
-        this.track = track
-        break
+    if (this.rendererOption?.useTextTrackPolling) {
+      this.track = new FrequentlyTextTrack(this.media);
+      (this.track as any).startPolling();
+    } else {
+      const aribb24js_label = `ARIB B24 Japanese (data_identifer=0x${this.data_identifer.toString(16)}, data_group_id=${this.data_group_id})`
+      for (let i = 0; i < this.media.textTracks.length; i++) {
+        const track = this.media.textTracks[i]
+        if (track.label === aribb24js_label) {
+          this.track = track
+          break
+        }
       }
-    }
-    if (!this.track) {
-      this.track = this.media.addTextTrack('metadata', aribb24js_label, 'ja')
-      this.track.mode = 'hidden'
+      if (!this.track) {
+        this.track = this.media.addTextTrack('metadata', aribb24js_label, 'ja')
+        this.track.mode = 'hidden'
+      }
     }
     this.onCueChangeHandler = this.onCueChange.bind(this)
     this.onSeekingHandler = this.onSeeking.bind(this)
@@ -359,10 +364,13 @@ export default class CanvasB24Renderer {
 
   private cleanupTrack(): void {
     if (this.track) {
-      const cues = this.track.cues
-      if (cues) {
-        for (let i = cues.length - 1; i >= 0; i--) {
-          this.track.removeCue(cues[i])
+      if (this.rendererOption?.useTextTrackPolling) {
+        (this.track as any).stopPolling();
+      } else {
+        if (this.track.cues) {
+          for (let i = this.track.cues.length - 1; i >= 0; i--) {
+            this.track.removeCue(this.track.cues[i])
+          }
         }
       }
     }

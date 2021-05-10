@@ -1,4 +1,5 @@
 import CanvasProvider from './canvas-provider'
+import FrequentlyTextTrack from './utils/texttrack'
 
 interface RendererOption {
   width?: number,
@@ -13,6 +14,7 @@ interface RendererOption {
   keepAspectRatio?: boolean,
   enableRawCanvas?: boolean,
   useStrokeText?: boolean,
+  useTextTrackPolling?: boolean,
 }
 
 export default class CanvasID3Renderer {
@@ -234,9 +236,8 @@ export default class CanvasID3Renderer {
       }
     }
 
-    const activeCues = this.b24Track.activeCues
-    if (activeCues && activeCues.length > 0) {
-      const lastCue = activeCues[activeCues.length - 1] as any
+    if (this.b24Track.activeCues && this.b24Track.activeCues.length > 0) {
+      const lastCue = this.b24Track.activeCues[this.b24Track.activeCues.length - 1] as any
 
       if ((lastCue.startTime <= this.media.currentTime && this.media.currentTime <= lastCue.endTime) && !this.isOnSeeking) {
         // なんか Win Firefox で Cue が endTime 過ぎても activeCues から消えない場合があった、バグ?
@@ -267,8 +268,8 @@ export default class CanvasID3Renderer {
         this.onB24CueChangeDrawed = false
       }
 
-      for (let i = activeCues.length - 2; i >= 0; i--) {
-        const cue = activeCues[i]
+      for (let i = this.b24Track.activeCues.length - 2; i >= 0; i--) {
+        const cue = this.b24Track.activeCues[i]
         cue.endTime = Math.min(cue.endTime, lastCue.startTime)
         if (cue.startTime === cue.endTime) { // .. if duplicate subtitle appeared 
           this.b24Track.removeCue(cue);
@@ -329,9 +330,8 @@ export default class CanvasID3Renderer {
     if (!this.onB24CueChangeDrawed) { return }
 
     // onB24CueChange とほぼ同じだが、this.onB24CueChangeDrawed を変更しない
-    const activeCues = this.b24Track.activeCues
-    if (activeCues && activeCues.length > 0) {
-      const lastCue = activeCues[activeCues.length - 1] as any
+    if (this.b24Track.activeCues && this.b24Track.activeCues.length > 0) {
+      const lastCue = this.b24Track.activeCues[this.b24Track.activeCues.length - 1] as any
 
       if ((lastCue.startTime <= this.media.currentTime && this.media.currentTime <= lastCue.endTime) && !this.isOnSeeking) {
         // なんか Win Firefox で Cue が endTime 過ぎても activeCues から消えない場合があった、バグ?
@@ -390,17 +390,22 @@ export default class CanvasID3Renderer {
       return
     }
 
-    const aribb24js_label = `ARIB B24 Japanese (data_identifer=0x${this.data_identifer.toString(16)}, data_group_id=${this.data_group_id})`
-    for (let i = 0; i < this.media.textTracks.length; i++) {
-      const track = this.media.textTracks[i]
-      if (track.label === aribb24js_label) {
-        this.b24Track = track
-        break
+    if (this.rendererOption?.useTextTrackPolling) {
+      this.b24Track = new FrequentlyTextTrack(this.media);
+      (this.b24Track as any).startPolling();
+    } else {
+      const aribb24js_label = `ARIB B24 Japanese (data_identifer=0x${this.data_identifer.toString(16)}, data_group_id=${this.data_group_id})`
+      for (let i = 0; i < this.media.textTracks.length; i++) {
+        const track = this.media.textTracks[i]
+        if (track.label === aribb24js_label) {
+          this.b24Track = track
+          break
+        }
       }
-    }
-    if (!this.b24Track) {
-      this.b24Track = this.media.addTextTrack('metadata', aribb24js_label, 'ja')
-      this.b24Track.mode = 'hidden'
+      if (!this.b24Track) {
+        this.b24Track = this.media.addTextTrack('metadata', aribb24js_label, 'ja')
+        this.b24Track.mode = 'hidden'
+      }
     }
 
     this.onB24CueChangeHandler = this.onB24CueChange.bind(this)
@@ -479,10 +484,13 @@ export default class CanvasID3Renderer {
 
   private cleanupTrack(): void {
     if (this.b24Track) {
-      const cues = this.b24Track.cues
-      if (cues) {
-        for (let i = cues.length - 1; i >= 0; i--) {
-          this.b24Track.removeCue(cues[i])
+      if (this.rendererOption?.useTextTrackPolling) {
+        (this.b24Track as any).stopPolling();
+      } else {
+        if (this.b24Track.cues) {
+          for (let i = this.b24Track.cues.length - 1; i >= 0; i--) {
+            this.b24Track.removeCue(this.b24Track.cues[i])
+          }
         }
       }
     }
