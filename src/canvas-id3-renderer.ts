@@ -88,7 +88,7 @@ export default class CanvasID3Renderer {
   }
 
   public hide(): void {
-    this.isShowing = true
+    this.isShowing = false
 
     if (this.viewCanvas) {
       const viewContext = this.viewCanvas.getContext('2d')
