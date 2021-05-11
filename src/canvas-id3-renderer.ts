@@ -147,7 +147,6 @@ export default class CanvasID3Renderer {
         while (array[begin] !== 0) { begin++; }
         pes = (Array.prototype.slice.call(array, begin + 1, end) as any);
       } else if (this.id3Track.inBandMetadataTrackDispatchType === 'com.apple.streaming') { // Safari
-        console.log(id3_cue.value.info, id3_cue.value.data)
         pes = new Uint8Array(id3_cue.value.data);
       } else if (this.id3Track.label === 'id3') { // hls.js (disabled)
         pes = new Uint8Array(id3_cue.value.data);
