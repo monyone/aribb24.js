@@ -1,5 +1,5 @@
 import CanvasProvider from './canvas-provider'
-import FrequentlyTextTrack from './utils/texttrack'
+import HighResTextTrack from './utils/high-res-texttrack'
 
 interface RendererOption {
   width?: number,
@@ -14,7 +14,7 @@ interface RendererOption {
   keepAspectRatio?: boolean,
   enableRawCanvas?: boolean,
   useStrokeText?: boolean,
-  useTextTrackPolling?: boolean,
+  useHighResTextTrack?: boolean,
 }
 
 export default class CanvasB24Renderer {
@@ -295,8 +295,8 @@ export default class CanvasB24Renderer {
       return
     }
 
-    if (this.rendererOption?.useTextTrackPolling) {
-      this.track = new FrequentlyTextTrack(this.media);
+    if (this.rendererOption?.useHighResTextTrack) {
+      this.track = new HighResTextTrack(this.media);
       (this.track as any).startPolling();
     } else {
       const aribb24js_label = `ARIB B24 Japanese (data_identifer=0x${this.data_identifer.toString(16)}, data_group_id=${this.data_group_id})`
@@ -364,7 +364,7 @@ export default class CanvasB24Renderer {
 
   private cleanupTrack(): void {
     if (this.track) {
-      if (this.rendererOption?.useTextTrackPolling) {
+      if (this.rendererOption?.useHighResTextTrack) {
         (this.track as any).stopPolling();
       } else {
         if (this.track.cues) {

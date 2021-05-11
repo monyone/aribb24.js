@@ -1,4 +1,4 @@
-class FrequentlyMetadataTextTrackCueList extends Array<TextTrackCue> implements TextTrackCueList{
+class HighResMetadataTextTrackCueList extends Array<TextTrackCue> implements TextTrackCueList{
   public addCue(cue: TextTrackCue) {
     this.push(cue);
   }
@@ -15,17 +15,16 @@ class FrequentlyMetadataTextTrackCueList extends Array<TextTrackCue> implements 
   }
 }
 
-export default class FrequentlyMetadataTextTrack extends EventTarget implements TextTrack {
+export default class HighResMetadataTextTrack implements TextTrack {
 
   private media: HTMLMediaElement;
-  private all: FrequentlyMetadataTextTrackCueList = new FrequentlyMetadataTextTrackCueList();
-  private active: FrequentlyMetadataTextTrackCueList = new FrequentlyMetadataTextTrackCueList();
+  private all: HighResMetadataTextTrackCueList = new HighResMetadataTextTrackCueList();
+  private active: HighResMetadataTextTrackCueList = new HighResMetadataTextTrackCueList();
 
   private readonly polling_handler: (() => any) = this.polling.bind(this);
   private polling_id: number | null = null;
 
   public constructor(media: HTMLMediaElement) {
-    super();
     this.media = media;
   }
 
@@ -44,13 +43,34 @@ export default class FrequentlyMetadataTextTrack extends EventTarget implements 
     const new_active = this.activeCues;
 
     if (old_active.length !== new_active.length) {
-      this.dispatchEvent(new Event('cuechange'));
-      if (this.oncuechange) { this.oncuechange(new Event('cuechange')); }
+      let event: CustomEvent | null = null;
+      try {
+        event = new CustomEvent('cuechange');
+      } catch { // for IE11
+        event = document.createEvent('CustomEvent');
+        event.initCustomEvent('cuechange', false, false, {});
+      }
+
+      if (event != null) {
+        this.dispatchEvent(event);
+        if (this.oncuechange) { this.oncuechange.call(this, event); }
+      }
     } else {
       for (let i = 0; i < new_active.length; i++) {
         if (old_active[i].startTime !== new_active[i].startTime || old_active[i].endTime !== new_active[i].endTime) {
-          this.dispatchEvent(new Event('cuechange'));
-          if (this.oncuechange) { this.oncuechange(new Event('cuechange')); }
+          let event: CustomEvent | null = null;
+          try {
+            event = new CustomEvent('cuechange');
+          } catch { // for IE11
+            event = document.createEvent('CustomEvent');
+            event.initCustomEvent('cuechange', false, false, {});
+          }
+
+          if (event != null) {
+            this.dispatchEvent(event);
+            if (this.oncuechange) { this.oncuechange.call(this, event); }
+            break;
+          }
         }
       }
     }
@@ -60,7 +80,7 @@ export default class FrequentlyMetadataTextTrack extends EventTarget implements 
 
   public readonly cues: TextTrackCueList = this.all;
   public get activeCues(): TextTrackCueList {
-    const in_range_cues = new FrequentlyMetadataTextTrackCueList(... this.all.filter((cue) => {
+    const in_range_cues = new HighResMetadataTextTrackCueList(... this.all.filter((cue) => {
       return (cue.startTime <= this.media.currentTime && this.media.currentTime <= cue.endTime);
     }))
 
@@ -96,4 +116,20 @@ export default class FrequentlyMetadataTextTrack extends EventTarget implements 
   public readonly mode: TextTrackMode = "hidden";
   public readonly inBandMetadataTrackDispatchType: string = "";
   public readonly sourceBuffer = null;
+
+  // for ie11 (EventTarget を継承できないため)
+  private listeners: ((this: TextTrack, ev: Event) => any)[] = [];
+  public addEventListener(type: 'cuechange', listener: (this: TextTrack, ev: Event) => any) {
+    this.listeners.push(listener);
+  }
+  public removeEventListener(type: 'cuechange', listener: (this: TextTrack, ev: Event) => any) {
+    const index = this.listeners.findIndex((cb) => cb === listener);
+    if (index < 0) { return; }
+    this.listeners.splice(index, 1);
+  }
+  public dispatchEvent(ev: Event): boolean {
+    if (ev.type !== 'cuechange') { return true; }
+    this.listeners.forEach((listener) => listener.call(this, ev));
+    return true;
+  }
 }

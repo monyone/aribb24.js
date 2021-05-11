@@ -21,6 +21,7 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
 * keepAspectRatio: keep caption's aspect ratio in any container. default: true
 * enableRawCanvas: enable raw video resolution canvas. it can get getRawCanvas method.
 * useStrokeText: use render outer stroke by strokeText API
+* useHighResTextTrack: use polling instead of native cuechange event handling.
 
 ## Build
 
