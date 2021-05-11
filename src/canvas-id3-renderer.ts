@@ -108,15 +108,11 @@ export default class CanvasID3Renderer {
   }
 
   public pushData(pts: number, uint8array: Uint8Array): void {
-    let base64 = "";
-    for (let i = 6 + 4 + 4 + 4 + 2 + 2; i < uint8array.length; i++) {
-      if (uint8array[i] === 0) { break; }
-      base64 += String.fromCharCode(uint8array[i]);
-    }
-
-    const binary = window.atob(base64);
-    const pes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) { pes[i] = binary.charCodeAt(i); }
+    const array = new Uint8Array(uint8array);
+    const end = 6 + 4 + (((array[6] & 0x7F) << 21) | ((array[7] & 0x7F) << 14) | ((array[8] & 0x7F) << 7) | ((array[9] & 0x7F) << 0));
+    let begin = 6 + 4 + 4 + 4 + 2;
+    while (array[begin] !== 0) { begin++; }
+    const pes: Uint8Array = (Array.prototype.slice.call(array, begin + 1, end) as any);
 
     const provider: CanvasProvider = new CanvasProvider(pes, pts);
     const estimate = provider.render({
@@ -143,26 +139,21 @@ export default class CanvasID3Renderer {
       const id3_cue = activeCues[i] as any;
       const start_time = id3_cue.startTime;
 
-      let base64 = null;
+      let pes: Uint8Array | null = null;
       if (this.id3Track.inBandMetadataTrackDispatchType === '15260DFFFF49443320FF49443320000F'){ // Legacy Edge
         const array = new Uint8Array(id3_cue.data);
-        let flag = false;
-        base64 = "";
-        for (let i = 6 + 4 + 4 + 4 + 2 + 2; i < array.length; i++) {
-          if (array[i] === 0) { break; }
-          base64 += String.fromCharCode(array[i]);
-        }
+        const end = 6 + 4 + (((array[6] & 0x7F) << 21) | ((array[7] & 0x7F) << 14) | ((array[8] & 0x7F) << 7) | ((array[9] & 0x7F) << 0));
+        let begin = 6 + 4 + 4 + 4 + 2;
+        while (array[begin] !== 0) { begin++; }
+        pes = (Array.prototype.slice.call(array, begin + 1, end) as any);
       } else if (this.id3Track.inBandMetadataTrackDispatchType === 'com.apple.streaming') { // Safari
-        base64 = id3_cue.value.data
+        console.log(id3_cue.value.info, id3_cue.value.data)
+        pes = new Uint8Array(id3_cue.value.data);
       } else if (this.id3Track.label === 'id3') { // hls.js (disabled)
-        base64 = id3_cue.value.data
+        pes = new Uint8Array(id3_cue.value.data);
       }
 
-      if (!base64) { continue; }
-
-      const binary = window.atob(base64);
-      const pes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) { pes[i] = binary.charCodeAt(i); }
+      if (!pes) { continue; }
 
       const provider: CanvasProvider = new CanvasProvider(pes, start_time);
       const estimate = provider.render({
