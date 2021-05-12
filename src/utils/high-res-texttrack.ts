@@ -57,7 +57,7 @@ export default class HighResMetadataTextTrack implements TextTrack {
       }
     } else {
       for (let i = 0; i < new_active.length; i++) {
-        if (old_active[i].startTime !== new_active[i].startTime || old_active[i].endTime !== new_active[i].endTime) {
+        if (old_active[i] !==  new_active[i]) {
           let event: CustomEvent | null = null;
           try {
             event = new CustomEvent('cuechange');

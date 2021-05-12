@@ -1,5 +1,6 @@
 import CanvasProvider from './canvas-provider'
 import HighResTextTrack from './utils/high-res-texttrack'
+import { readID3Size, binaryISO85591ToString, binaryUTF8ToString, base64ToUint8Array} from './utils/binary'
 
 interface RendererOption {
   width?: number,
@@ -13,6 +14,7 @@ interface RendererOption {
   drcsReplacement?: boolean,
   keepAspectRatio?: boolean,
   enableRawCanvas?: boolean,
+  enableAutoInBandMetadataDetection?: boolean,
   useStrokeText?: boolean,
   useHighResTextTrack?: boolean,
 }
@@ -107,14 +109,8 @@ export default class CanvasID3Renderer {
     }
   }
 
-  public pushData(pts: number, uint8array: Uint8Array): void {
-    const array = new Uint8Array(uint8array);
-    const end = 6 + 4 + (((array[6] & 0x7F) << 21) | ((array[7] & 0x7F) << 14) | ((array[8] & 0x7F) << 7) | ((array[9] & 0x7F) << 0));
-    let begin = 6 + 4 + 4 + 4 + 2;
-    while (array[begin] !== 0) { begin++; }
-    const pes: Uint8Array = (Array.prototype.slice.call(array, begin + 1, end) as any);
-
-    const provider: CanvasProvider = new CanvasProvider(pes, pts);
+  public pushRawData(pts: number, data: Uint8Array): void {
+    const provider: CanvasProvider = new CanvasProvider(data, pts);
     const estimate = provider.render({
       ... this.rendererOption,
       width: undefined, // ここはデフォルト値で負荷を軽くする
@@ -124,7 +120,117 @@ export default class CanvasID3Renderer {
 
     const end_time = estimate.endTime;
 
-    this.addB24Cue(pts, end_time, pes)
+    this.addB24Cue(pts, end_time, data)
+  }
+
+  // for b24.js compatibility
+  public pushData(pid: number, uint8array: Uint8Array, pts: number): void {
+    this.pushRawData(pts, uint8array);
+  }
+
+  private pushID3v2PRIVData(pts: number, owner: string, data: Uint8Array): void {
+    if (owner !== 'aribb24.js') { return; }
+    this.pushRawData(pts, data);
+  }
+
+  private pushID3v2TXXXData(pts: number, description: string, text: string): void {
+    if (description !== 'aribb24.js') { return; }
+
+    const data = base64ToUint8Array(text);
+    this.pushRawData(pts, data);
+  }
+
+  public pushID3v2Data(pts: number, data: Uint8Array): void {
+    for (let begin = 0; begin < data.length;) {
+      const id3_start = begin;
+
+      if (begin + 3 >= data.length) { break; }
+      if (!(data[begin + 0] === 0x49 && data[begin + 1] === 0x44 && data[begin + 2] === 0x33)) { break; }
+      begin += 3 + 2 /* version */ + 1 /* flag */;
+
+      if (begin + 4 >= data.length) { break; }
+      const id3_size = readID3Size(data, begin + 0, begin + 4);
+      begin += 4;
+
+      const id3_end = id3_start + 3 + 2 + 1 + 4 + id3_size;
+      if (id3_end >= data.length) { break; }
+
+      for (let frame = begin; frame < id3_end;) {
+        const frame_begin = frame;
+
+        if (frame + 4 >= data.length) { break; }
+        const frame_name = binaryISO85591ToString(data, frame + 0, frame + 4);
+        frame += 4;
+
+        if (frame + 4 >= data.length) { break; }
+        const frame_size = readID3Size(data, frame + 0, frame + 4);
+        frame += 4 + 2 /* flag */;
+
+        const frame_end = frame_begin + 4 + 4 + 2 + frame_size;
+        if (frame_end >= data.length) { break; }
+
+        if (frame_name === 'PRIV') {
+          const PRIV_begin = frame;
+          const PRIV_end = frame_end;
+
+          while (data[frame] !== 0 && frame < frame_end) { frame++; }
+
+          const owner = binaryISO85591ToString(data, PRIV_begin, frame);
+          const pes = new Uint8Array(Array.prototype.slice.call(data, frame + 1, PRIV_end));
+          this.pushID3v2PRIVData(pts, owner, pes);
+        } else if (frame_name === 'TXXX') {
+          const encoding = data[frame + 0];
+          const description_begin = frame + 1;
+
+          if (encoding === 0x03) { // UTF-8
+            while (data[frame] !== 0 && frame < frame_end) { frame++; }
+            const description_end = frame;
+            frame += 1;
+
+            const data_begin = frame;
+            while (data[frame] !== 0 && frame < frame_end) { frame++; }
+            const data_end = frame;
+
+            const description = binaryUTF8ToString(data, description_begin, description_end);
+            const text = binaryUTF8ToString(data, data_begin, data_end);
+            this.pushID3v2TXXXData(pts, description, text);
+          } else if(encoding === 0x00) { // Laten-1
+            while (data[frame] !== 0 && frame < frame_end) { frame++; }
+            const description_end = frame;
+            frame += 1;
+
+            const data_begin = frame;
+            while (data[frame] !== 0 && frame < frame_end) { frame++; }
+            const data_end = frame;
+
+            const description = binaryISO85591ToString(data, description_begin, description_end);
+            const text = binaryISO85591ToString(data, data_begin, data_end);
+            this.pushID3v2TXXXData(pts, description, text);
+          }
+        }
+
+        frame = frame_end;
+      }
+
+      begin = id3_start + 3 + 2 + 1 + 4 + id3_size;
+      if (begin + 3 >= data.length) { continue; }
+      // id3 footer
+      if (!(data[begin + 0] === 0x33 && data[begin + 1] === 0x44 && data[begin + 2] === 0x49)) { continue; }
+      begin += 3 + 2 /* version */ + 1 /* flags */ + 4 /* size */;
+    }
+  }
+
+  public setInBandMetadataTextTrack(track: TextTrack): void {
+    if (this.id3Track && this.onID3CueChangeHandler) {
+      this.id3Track.removeEventListener('cuechange', this.onID3CueChangeHandler)
+      this.onID3CueChangeHandler = null
+    }
+
+    this.id3Track = track
+
+    this.id3Track.mode = 'hidden'
+    this.onID3CueChangeHandler = this.onID3CueChange.bind(this)
+    this.id3Track.addEventListener('cuechange', this.onID3CueChangeHandler)
   }
 
   private onID3CueChange() {
@@ -139,35 +245,26 @@ export default class CanvasID3Renderer {
       const id3_cue = activeCues[i] as any;
       const start_time = id3_cue.startTime;
 
-      let pes: Uint8Array | null = null;
       if (this.id3Track.inBandMetadataTrackDispatchType === '15260DFFFF49443320FF49443320000F'){ // Legacy Edge
-        const array = new Uint8Array(id3_cue.data);
-        const end = 6 + 4 + (((array[6] & 0x7F) << 21) | ((array[7] & 0x7F) << 14) | ((array[8] & 0x7F) << 7) | ((array[9] & 0x7F) << 0));
-        let begin = 6 + 4 + 4 + 4 + 2;
-        while (array[begin] !== 0) { begin++; }
-        pes = (Array.prototype.slice.call(array, begin + 1, end) as any);
+        this.pushID3v2Data(start_time, id3_cue.data);
       } else if (this.id3Track.inBandMetadataTrackDispatchType === 'com.apple.streaming') { // Safari
-        pes = new Uint8Array(id3_cue.value.data);
-      } else if (this.id3Track.label === 'id3') { // hls.js (disabled)
-        pes = new Uint8Array(id3_cue.value.data);
-      }
-
-      if (!pes) { continue; }
-
-      const provider: CanvasProvider = new CanvasProvider(pes, start_time);
-      const estimate = provider.render({
-        ... this.rendererOption,
-        width: undefined, // ここはデフォルト値で負荷を軽くする
-        height: undefined, // ここはデフォルト値で負荷を軽くする
-      })
-      if (estimate == null) { continue; }
-
-      const end_time = estimate.endTime;
-
-      if (start_time <= this.media.currentTime && this.media.currentTime <= end_time) {
-        // なんか Win Firefox で Cue が endTime 過ぎても activeCues から消えない場合があった、バグ?
-
-        this.addB24Cue(start_time, end_time, pes)
+        if (id3_cue.value.key === 'PRIV') {
+          this.pushID3v2PRIVData(start_time, id3_cue.value.info, new Uint8Array(id3_cue.value.data));
+        } else if (id3_cue.value.key === 'TXXX') {
+          this.pushID3v2TXXXData(start_time, id3_cue.value.info, id3_cue.value.data);
+        }
+      } else if (this.id3Track.label === 'id3') { // hls.js
+        if (id3_cue.value.key === 'PRIV') {
+          this.pushID3v2PRIVData(start_time, id3_cue.value.info, new Uint8Array(id3_cue.value.data));
+        } else if (id3_cue.value.key === 'TXXX') {
+          this.pushID3v2TXXXData(start_time, id3_cue.value.info, id3_cue.value.data);
+        }
+      } else if (this.id3Track.label === 'Timed Metadata') { // video.js
+        if (id3_cue.frame.key === 'PRIV') {
+          this.pushID3v2PRIVData(start_time, id3_cue.frame.owner, new Uint8Array(id3_cue.frame.data));
+        } else if (id3_cue.frame.key === 'TXXX') {
+          this.pushID3v2TXXXData(start_time, id3_cue.frame.description, id3_cue.frame.data);
+        }
       }
     }
   }
@@ -358,20 +455,11 @@ export default class CanvasID3Renderer {
     const textTrack = event.track!;
     if (textTrack.kind !== 'metadata') { return; }
 
-    if ( textTrack.inBandMetadataTrackDispatchType === '15260DFFFF49443320FF49443320000F'
-      || textTrack.inBandMetadataTrackDispatchType === 'com.apple.streaming'
-      /* || textTrack.label === 'id3' // hls.js は id3 の endTime が infinite ではなく当該セグメントの末尾になるため、手動で入れる */
+    if ( textTrack.inBandMetadataTrackDispatchType === '15260DFFFF49443320FF49443320000F' // Legacy Edge
+      || textTrack.inBandMetadataTrackDispatchType === 'com.apple.streaming' // Safari
+      || textTrack.label === 'id3' // hls.js
     ) {
-
-      if (this.id3Track && this.onID3CueChangeHandler) {
-        this.id3Track.removeEventListener('cuechange', this.onID3CueChangeHandler)
-        this.onID3CueChangeHandler = null
-      }
-      this.id3Track = textTrack
-
-      this.id3Track.mode = 'hidden'
-      this.onID3CueChangeHandler = this.onID3CueChange.bind(this)
-      this.id3Track.addEventListener('cuechange', this.onID3CueChangeHandler)
+      this.setInBandMetadataTextTrack(textTrack);
     }
   }
 
@@ -401,28 +489,24 @@ export default class CanvasID3Renderer {
     this.onB24CueChangeHandler = this.onB24CueChange.bind(this)
     this.b24Track.addEventListener('cuechange', this.onB24CueChangeHandler)
 
-    for (let i = 0; i < this.media.textTracks.length; i++) {
-      const track = this.media.textTracks[i];
+    if (this.rendererOption?.enableAutoInBandMetadataDetection) {
+      for (let i = 0; i < this.media.textTracks.length; i++) {
+        const track = this.media.textTracks[i];
 
-      if (track.kind !== 'metadata') { continue; }
+        if (track.kind !== 'metadata') { continue; }
 
-      if ( track.inBandMetadataTrackDispatchType === '15260DFFFF49443320FF49443320000F'
-        || track.inBandMetadataTrackDispatchType === 'com.apple.streaming'
-        /* || track.label === 'id3' // hls.js は id3 の endTime が infinite ではなく当該セグメントの末尾になるため、手動で入れる */
-      ) {
-        this.id3Track = track;
-        break;
+        if ( track.inBandMetadataTrackDispatchType === '15260DFFFF49443320FF49443320000F' // Legacy Edge
+          || track.inBandMetadataTrackDispatchType === 'com.apple.streaming' // Safari
+          || track.label === 'id3' // hls.js
+        ) {
+          this.setInBandMetadataTextTrack(track);
+          break;
+        }
       }
-    }
 
-    if (this.id3Track) {
-      this.id3Track.mode = 'hidden'
-      this.onID3CueChangeHandler = this.onID3CueChange.bind(this)
-      this.id3Track.addEventListener('cuechange', this.onID3CueChangeHandler)
+      this.onID3AddtrackHandler = this.onID3Addtrack.bind(this)
+      this.media.textTracks.addEventListener('addtrack', this.onID3AddtrackHandler)
     }
-
-    this.onID3AddtrackHandler = this.onID3Addtrack.bind(this)
-    this.media.textTracks.addEventListener('addtrack', this.onID3AddtrackHandler)
 
     this.onSeekingHandler = this.onSeeking.bind(this)
     this.onSeekedHandler = this.onSeeked.bind(this)
@@ -475,7 +559,7 @@ export default class CanvasID3Renderer {
   private cleanupTrack(): void {
     if (this.b24Track) {
       if (this.rendererOption?.useHighResTextTrack) {
-        (this.b24Track as any).stopPolling();
+        (this.b24Track as any).endPolling();
       } else {
         if (this.b24Track.cues) {
           for (let i = this.b24Track.cues.length - 1; i >= 0; i--) {

@@ -20,6 +20,7 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
 * drcsReplacement: Replace DRCS to text if possible
 * keepAspectRatio: keep caption's aspect ratio in any container. default: true
 * enableRawCanvas: enable raw video resolution canvas. it can get getRawCanvas method.
+* enableAutoInBandMetadataDetection: enable id3 TextTrack auto detection. (for use iOS Safari must enable this option)
 * useStrokeText: use render outer stroke by strokeText API
 * useHighResTextTrack: use polling instead of native cuechange event handling.
 
@@ -41,7 +42,7 @@ yarn run build
 
 ## Getting Started 
 
-### with native player and hls.js (for id3 timedmetadata inserted stream)
+### with native player and hls.js (for id3 timed-metadata inserted stream)
 
 ```html
 <script src="hls.min.js"></script>
@@ -51,7 +52,7 @@ yarn run build
     var video = document.getElementById('videoElement');
     var videoSrc = 'something.m3u8';
 
-    var b24Renderer = new aribb24js.CanvasID3Renderer({
+    var renderer = new aribb24js.CanvasRenderer({
       // Options are here!
 
       // forceStrokeColor?: string,
@@ -59,15 +60,16 @@ yarn run build
       // normalFont?: string,
       // gaijiFont?: string,
       // drcsReplacement?: boolean
+      enableAutoInBandMetadataDetection: !Hls.isSupported(), // FRAG_PARSING_METADATA instead of auto detection
     });
-    // b24Renderer.attachMedia(video, subtitleElement) also accepted
-    b24Renderer.attachMedia(video);
+    // renderer.attachMedia(video, subtitleElement) also accepted
+    renderer.attachMedia(video);
 
     if (Hls.isSupported()) {
         var hls = new Hls();
         hls.on(Hls.Events.FRAG_PARSING_METADATA, function (event, data) {
           for (var sample of data.samples) {
-            b24Renderer.pushData(sample.pts, sample.data);
+            renderer.pushID3v2Data(sample.pts, sample.data);
           }
         }
 
@@ -81,6 +83,59 @@ yarn run build
 </script>
 ```
 
+### with video.js (for id3 timed-metadata inserted stream)
+
+```html
+<link href="video-js.css" rel="stylesheet" />
+<script src="video.min.js"></script>
+<script src="aribb24.js"></script>
+<video id="videoElement"></video>
+<script>
+    var video = document.getElementById('videoElement');
+    var videoSrc = 'something.m3u8';
+
+    var aribb24Renderer = new aribb24js.CanvasRenderer({
+      // Options are here!
+
+      // forceStrokeColor?: string,
+      // forceBackgroundColor?: string,
+      // normalFont?: string,
+      // gaijiFont?: string,
+      // drcsReplacement?: boolean
+      useHighResTextTrack: true, // for IE11 (avoid video.js error on IE11)
+      enableAutoInBandMetadataDetection: false
+    })
+
+    var player = videojs(video);
+    aribb24Renderer.attachMedia(video);
+    console.log(document.getElementById('video').querySelector('.vjs-control-bar'))
+    document.getElementById('video').querySelector('.vjs-control-bar').style.zIndex = 1;
+
+    const track = player.addTextTrack('subtitles', 'aribb24.js')
+    if (track.mode === 'showing') {
+        aribb24Renderer.show();
+    } else {
+        aribb24Renderer.hide();
+    }
+
+    player.textTracks().addEventListener('addtrack', function (event) {
+        var track = event.track;
+        if (track.label === 'Timed Metadata') {
+            aribb24Renderer.setInBandMetadataTextTrack(track);
+        }
+    })
+
+    track.addEventListener('modechange', function (event) {
+        if (track.mode === 'showing') {
+            aribb24Renderer.show();
+        } else {
+            aribb24Renderer.hide();
+        }
+    })
+
+    player.src(videoSrc);
+</script>
+```
 
 ### with hls-b24.js (for private_stream_1 inserted stream)
 
@@ -95,7 +150,7 @@ yarn run build
     hls.attachMedia(video);
     video.play();
 
-    var b24Renderer = new aribb24js.CanvasB24Renderer({
+    var renderer = new aribb24js.CanvasRenderer({
       // Options are here!
 
       // forceStrokeColor?: string,
@@ -104,12 +159,12 @@ yarn run build
       // gaijiFont?: string,
       // drcsReplacement?: boolean
     });
-    b24Renderer.attachMedia(video);
-    // b24Renderer.attachMedia(video, subtitleElement) also accepted
+    renderer.attachMedia(video);
+    // renderer.attachMedia(video, subtitleElement) also accepted
 
     hls.on(Hls.Events.FRAG_PARSING_PRIVATE_DATA, function (event, data) {
         for (var sample of data.samples) {
-            b24Renderer.pushData(sample.pid, sample.data, sample.pts);
+            renderer.pushData(sample.pid, sample.data, sample.pts);
         }
     }
 </script>
