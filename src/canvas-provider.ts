@@ -862,64 +862,28 @@ export default class CanvasProvider {
       const index = ch1 * (0x7E - 0x21 + 1) + ch2
       const character = KANJI_MAPPING[index]
 
-      const font_canvas = this.renderFont(character)
-      ctx.drawImage(
-        font_canvas,
-        0, 0, font_canvas.width, font_canvas.height,
-        this.position_x * this.width_magnification(), 
-        (this.position_y - this.height()) * this.height_magnification(),
-        this.width() * this.width_magnification(),
-        this.height() * this.height_magnification()
-      )
-      font_canvas.width = font_canvas.height = 0
+      this.renderFont(character)
 
       this.move_relative_pos(1, 0)
     }else if(entry.alphabet === ALPHABETS.ASCII) {
       const index = key - 0x21
       const character = ASCII_MAPPING[index]
 
-      const font_canvas = this.renderFont(character)
-      ctx.drawImage(
-        font_canvas,
-        0, 0, font_canvas.width, font_canvas.height,
-        this.position_x * this.width_magnification(), 
-        (this.position_y - this.height()) * this.height_magnification(),
-        this.width() * this.width_magnification(),
-        this.height() * this.height_magnification()
-      )
-      font_canvas.width = font_canvas.height = 0
+      this.renderFont(character)
 
       this.move_relative_pos(1, 0)
     }else if(entry.alphabet === ALPHABETS.HIRAGANA) {
       const index = key - 0x21
       const character = HIRAGANA_MAPPING[index]
 
-      const font_canvas = this.renderFont(character)
-      ctx.drawImage(
-        font_canvas,
-        0, 0, font_canvas.width, font_canvas.height,
-        this.position_x * this.width_magnification(), 
-        (this.position_y - this.height()) * this.height_magnification(),
-        this.width() * this.width_magnification(),
-        this.height() * this.height_magnification()
-      )
-      font_canvas.width = font_canvas.height = 0
+      this.renderFont(character)
 
       this.move_relative_pos(1, 0)
     }else if(entry.alphabet === ALPHABETS.KATAKANA) {
       const index = key - 0x21
       const character = KATAKANA_MAPPING[index]
 
-      const font_canvas = this.renderFont(character)
-      ctx.drawImage(
-        font_canvas,
-        0, 0, font_canvas.width, font_canvas.height,
-        this.position_x * this.width_magnification(), 
-        (this.position_y - this.height()) * this.height_magnification(),
-        this.width() * this.width_magnification(),
-        this.height() * this.height_magnification()
-      )
-      font_canvas.width = font_canvas.height = 0
+      this.renderFont(character)
 
       this.move_relative_pos(1, 0)
     }else if(entry.alphabet === ALPHABETS.MACRO) {
@@ -1078,16 +1042,7 @@ export default class CanvasProvider {
 
       const drcs_hash = SparkMD5.ArrayBuffer.hash(drcs)
       if (this.drcsReplacement && DRCS_NSZ_MAPPING.has(drcs_hash)) {
-        const font_canvas = this.renderFont(DRCS_NSZ_MAPPING.get(drcs_hash)!)
-        ctx.drawImage(
-          font_canvas,
-          0, 0, font_canvas.width, font_canvas.height,
-          this.position_x * this.width_magnification(),
-          (this.position_y - this.height()) * this.height_magnification(),
-          this.width() * this.width_magnification(),
-          this.height() * this.height_magnification()
-        )
-        font_canvas.width = font_canvas.height = 0
+        this.renderFont(DRCS_NSZ_MAPPING.get(drcs_hash)!)
       } else {
         const width = Math.floor(this.ssm_x * this.text_size_x / SIZE_MAGNIFICATION)
         const height = Math.floor(this.ssm_y * this.text_size_y / SIZE_MAGNIFICATION)
@@ -1148,15 +1103,17 @@ export default class CanvasProvider {
     }
   }
 
-  private renderFont(character: string): HTMLCanvasElement {
-    const canvas = document.createElement('canvas')
-    canvas.width = (this.shs + this.ssm_x) * this.width_magnification()
-    canvas.height = (this.svs + this.ssm_y) * this.width_magnification() // フォント分なので縦長にならないようにする
+  private renderFont(character: string): void {
+    if (!this.render_canvas) { return; }
 
-    const ctx = canvas.getContext('2d')
-    if(!ctx){
-      return canvas
-    }
+    const ctx = this.render_canvas?.getContext('2d')
+    if (!ctx) { return; }
+
+    const center_x = (this.position_x + this.width() / 2) * this.width_magnification();
+    const center_y = (this.position_y - this.height() / 2) * this.height_magnification();
+
+    ctx.translate(center_x, center_y);
+    ctx.scale(this.text_size_x, this.text_size_y * (this.height_magnification() / this.width_magnification()));
 
     {
       const orn = this.force_orn ?? this.orn
@@ -1168,21 +1125,15 @@ export default class CanvasProvider {
           ctx.textBaseline = 'middle'
           ctx.textAlign = "center"
           ctx.lineWidth = 5 * SIZE_MAGNIFICATION * this.width_magnification()
-          ctx.strokeText(character, 
-            canvas.width / 2,
-            canvas.height / 2,
-          )
+          ctx.strokeText(character, 0, 0);
         } else {
           for(let dy = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dy <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dy++) {
-            for(let dx = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dx <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dx++) {
+            for(let dx = -2 * SIZE_MAGNIFICATION * this.height_magnification(); dx <= 2 * SIZE_MAGNIFICATION * this.height_magnification(); dx++) {
               ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}` 
               ctx.fillStyle = orn
               ctx.textBaseline = 'middle'
               ctx.textAlign = "center"
-              ctx.fillText(character, 
-                canvas.width / 2 + dx,
-                canvas.height / 2 + dy,
-              )
+              ctx.fillText(character, 0 + dx, 0 + dy);
             }
           }
         }
@@ -1193,9 +1144,9 @@ export default class CanvasProvider {
     ctx.fillStyle = this.fg_color
     ctx.textBaseline = 'middle'
     ctx.textAlign = "center"
-    ctx.fillText(character, canvas.width / 2, canvas.height / 2)
+    ctx.fillText(character, 0, 0);
 
-    return canvas
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
   private static getRGBAColorCode(color: string | undefined): string | null {
