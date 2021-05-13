@@ -1128,7 +1128,7 @@ export default class CanvasProvider {
           ctx.strokeText(character, 0, 0);
         } else {
           for(let dy = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dy <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dy++) {
-            for(let dx = -2 * SIZE_MAGNIFICATION * this.height_magnification(); dx <= 2 * SIZE_MAGNIFICATION * this.height_magnification(); dx++) {
+            for(let dx = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dx <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dx++) {
               ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}` 
               ctx.fillStyle = orn
               ctx.textBaseline = 'middle'
