@@ -266,8 +266,8 @@ export default class CanvasProvider {
 
     this.option_canvas = option?.canvas ?? null
 
-    this.force_orn = option?.forceStrokeColor ?? null
-    this.force_bg_color = option?.forceBackgroundColor ?? null
+    this.force_orn = CanvasProvider.getRGBAColorCode(option?.forceStrokeColor) ?? null
+    this.force_bg_color = CanvasProvider.getRGBAColorCode(option?.forceBackgroundColor) ?? null
     this.purpose_width = option?.width ?? option?.canvas?.width ?? this.purpose_width
     this.purpose_height = option?.height ?? option?.canvas?.height ?? this.purpose_height
     this.normalFont = option?.normalFont ?? 'sans-serif'
@@ -1093,7 +1093,7 @@ export default class CanvasProvider {
         const height = Math.floor(this.ssm_y * this.text_size_y / SIZE_MAGNIFICATION)
         const depth = Math.floor((drcs.length * 8) / (width * height))
         const orn = this.force_orn ?? this.orn
-        if (orn && (!this.force_orn || !this.isSameColor(this.fg_color, this.force_orn))) {
+        if (orn && (!this.force_orn || this.force_orn !== this.fg_color)) {
           ctx.fillStyle = orn
           for(let dy = -2 * this.height_magnification(); dy <= 2 * this.height_magnification(); dy++){
             for(let dx = -2 * this.width_magnification(); dx <= 2 * this.width_magnification(); dx++){
@@ -1160,7 +1160,7 @@ export default class CanvasProvider {
 
     {
       const orn = this.force_orn ?? this.orn
-      if (orn && (!this.force_orn || !this.isSameColor(this.fg_color, this.force_orn))) {
+      if (orn && (!this.force_orn || this.force_orn !== this.fg_color)) {
         if (this.useStrokeText) {
           ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}` 
           ctx.strokeStyle = orn
@@ -1198,28 +1198,22 @@ export default class CanvasProvider {
     return canvas
   }
 
-  private isSameColor(color1: string, color2: string): boolean | undefined {
-    const color1_canvas = document.createElement('canvas');
-    color1_canvas.width = color1_canvas.height = 1;
-    const color1_ctx = color1_canvas.getContext('2d');
-    if (!color1_ctx) { return undefined; }
-    color1_ctx.fillStyle = color1;
-    color1_ctx.fillRect(0, 0, color1_canvas.width, color1_canvas.height);
-    const [color1_r, color1_g, color1_b, color1_a]  = color1_ctx.getImageData(0, 0, 1, 1).data
+  private static getRGBAColorCode(color: string | undefined): string | null {
+    if (color == null) { return null; }
 
-    const color2_canvas = document.createElement('canvas');
-    color2_canvas.width = color2_canvas.height = 1;
-    const color2_ctx = color2_canvas.getContext('2d');
-    if (!color2_ctx) { return undefined; }
-    color2_ctx.fillStyle = color2;
-    color2_ctx.fillRect(0, 0, color2_canvas.width, color2_canvas.height);
-    const [color2_r, color2_g, color2_b, color2_a]  = color2_ctx.getImageData(0, 0, 1, 1).data
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 1;
 
-    const result = (color1_r === color2_r) && (color1_g === color2_g) && (color1_b === color2_b) && (color1_a === color2_a)
+    const ctx = canvas.getContext('2d');
+    if (!ctx) { return null; }
 
-    color1_canvas.width = color1_canvas.height = 0
-    color2_canvas.width = color2_canvas.height = 0
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const [R, G, B, A] = ctx.getImageData(0, 0, 1, 1).data
 
-    return result;
+    const code = `#${R.toString(16).padStart(2, '0')}${G.toString(16).padStart(2, '0')}${B.toString(16).padStart(2, '0')}${A.toString(16).padStart(2, '0')}`
+
+    canvas.width = canvas.height = 0;
+    return code;
   }
 }

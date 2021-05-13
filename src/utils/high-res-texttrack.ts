@@ -32,7 +32,7 @@ export default class HighResMetadataTextTrack implements TextTrack {
     this.polling_id = window.requestAnimationFrame(this.polling_handler);
   }
 
-  public endPolling() {
+  public stopPolling() {
     if (this.polling_id == null) { return; }
     window.cancelAnimationFrame(this.polling_id);
     this.polling_id = null;

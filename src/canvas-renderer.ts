@@ -53,6 +53,7 @@ export default class CanvasID3Renderer {
       data_identifer: this.data_identifer,
       data_group_id: this.data_group_id,
       keepAspectRatio: option?.keepAspectRatio ?? true, // default: true
+      useStrokeText: option?.useStrokeText ?? true, // default: true
     }
   }
 
@@ -559,7 +560,7 @@ export default class CanvasID3Renderer {
   private cleanupTrack(): void {
     if (this.b24Track) {
       if (this.rendererOption?.useHighResTextTrack) {
-        (this.b24Track as any).endPolling();
+        (this.b24Track as any).stopPolling();
       } else {
         if (this.b24Track.cues) {
           for (let i = this.b24Track.cues.length - 1; i >= 0; i--) {
