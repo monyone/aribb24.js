@@ -1113,34 +1113,43 @@ export default class CanvasProvider {
     const center_y = (this.position_y - this.height() / 2) * this.height_magnification();
 
     ctx.translate(center_x, center_y);
-    ctx.scale(this.text_size_x, this.text_size_y * (this.height_magnification() / this.width_magnification()));
+    ctx.scale(this.text_size_x * this.width_magnification(), this.text_size_y * this.height_magnification());
 
     {
       const orn = this.force_orn ?? this.orn
       if (orn && (!this.force_orn || this.force_orn !== this.fg_color)) {
         if (this.useStrokeText) {
-          ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}` 
+          ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
           ctx.strokeStyle = orn
           ctx.lineJoin = 'round'
           ctx.textBaseline = 'middle'
           ctx.textAlign = "center"
-          ctx.lineWidth = 5 * SIZE_MAGNIFICATION * this.width_magnification()
+          ctx.lineWidth = 5 * SIZE_MAGNIFICATION
           ctx.strokeText(character, 0, 0);
         } else {
+          // TODO: deprecated!!
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.translate(center_x, center_y);
+          ctx.scale(this.text_size_x, this.text_size_y * this.height_magnification() / this.width_magnification());
+
           for(let dy = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dy <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dy++) {
             for(let dx = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dx <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dx++) {
-              ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}` 
+              ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
               ctx.fillStyle = orn
               ctx.textBaseline = 'middle'
               ctx.textAlign = "center"
               ctx.fillText(character, 0 + dx, 0 + dy);
             }
           }
+
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.translate(center_x, center_y);
+          ctx.scale(this.text_size_x * this.width_magnification(), this.text_size_y * this.height_magnification());
         }
       }
     }
 
-    ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
+    ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
     ctx.fillStyle = this.fg_color
     ctx.textBaseline = 'middle'
     ctx.textAlign = "center"
