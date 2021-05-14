@@ -14,7 +14,7 @@ interface RendererOption {
   drcsReplacement?: boolean,
   keepAspectRatio?: boolean,
   enableRawCanvas?: boolean,
-  enableAutoInBandMetadataDetection?: boolean,
+  enableAutoInBandMetadataTextTrackDetection?: boolean,
   useStrokeText?: boolean,
   useHighResTextTrack?: boolean,
 }
@@ -490,7 +490,7 @@ export default class CanvasID3Renderer {
     this.onB24CueChangeHandler = this.onB24CueChange.bind(this)
     this.b24Track.addEventListener('cuechange', this.onB24CueChangeHandler)
 
-    if (this.rendererOption?.enableAutoInBandMetadataDetection) {
+    if (this.rendererOption?.enableAutoInBandMetadataTextTrackDetection) {
       for (let i = 0; i < this.media.textTracks.length; i++) {
         const track = this.media.textTracks[i];
 

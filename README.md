@@ -20,9 +20,14 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
 * drcsReplacement: Replace DRCS to text if possible
 * keepAspectRatio: keep caption's aspect ratio in any container. (default: true)
 * enableRawCanvas: enable raw video resolution canvas. it can get getRawCanvas method.
-* enableAutoInBandMetadataDetection: enable id3 TextTrack auto detection. (for use iOS Safari must enable this option)
 * useStrokeText: use render outer stroke by strokeText API. (default: true)
 * useHighResTextTrack: use polling instead of native cuechange event handling.
+* enableAutoInBandMetadataTextTrackDetection: enable InBand Metadata (id3) TextTrack auto detection.
+    * Recommended enableAutoInBandMetadataTextTrackDetection Settings
+        * Safari (iOS, iPadOS, Mac OS) Native HLS Player: true
+        * Legacy Edge Native HLS Player: true 
+        * hls.js : false (Please use FRAG_PARSING_METADATA event instead of this option)
+        * video.js : false (Please set video.js's Timed Metadata TextTrack manually)
 
 ## Build
 
@@ -60,7 +65,7 @@ yarn run build
       // normalFont?: string,
       // gaijiFont?: string,
       // drcsReplacement?: boolean
-      enableAutoInBandMetadataDetection: !Hls.isSupported(), // FRAG_PARSING_METADATA instead of auto detection
+      enableAutoInBandMetadataTextTrackDetection: !Hls.isSupported(), // FRAG_PARSING_METADATA instead of auto detection
     });
     // renderer.attachMedia(video, subtitleElement) also accepted
     renderer.attachMedia(video);
@@ -103,7 +108,7 @@ yarn run build
       // gaijiFont?: string,
       // drcsReplacement?: boolean
       useHighResTextTrack: true, // for IE11 (avoid video.js error on IE11)
-      enableAutoInBandMetadataDetection: false
+      enableAutoInBandMetadataTextTrackDetection: false
     })
 
     var player = videojs(video);
