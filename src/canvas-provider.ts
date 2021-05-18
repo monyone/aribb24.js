@@ -798,7 +798,7 @@ export default class CanvasProvider {
 
     if(entry.alphabet !== ALPHABETS.MACRO) {
       // background
-      ctx.fillStyle = this.force_bg_color ?? this.bg_color
+      ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(this.force_bg_color ?? this.bg_color)
       ctx.fillRect(
          this.position_x * this.width_magnification(),
          (this.position_y - this.height()) * this.height_magnification(),
@@ -808,7 +808,7 @@ export default class CanvasProvider {
 
       //HLC
       if(this.hlc & 0b0001){
-        ctx.fillStyle = this.fg_color
+        ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(this.fg_color)
         ctx.fillRect(
            this.position_x * this.width_magnification(),
            (this.position_y - 1) * this.height_magnification(),
@@ -817,7 +817,7 @@ export default class CanvasProvider {
         )
       }
       if(this.hlc & 0b0010){
-        ctx.fillStyle = this.fg_color
+        ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(this.fg_color)
         ctx.fillRect(
           (this.position_x + this.width() - 1) * this.width_magnification(),
           (this.position_y - this.height()) * this.height_magnification(),
@@ -826,7 +826,7 @@ export default class CanvasProvider {
         )
       }
       if(this.hlc & 0b0100){
-        ctx.fillStyle = this.fg_color
+        ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(this.fg_color)
         ctx.fillRect(
           this.position_x * this.width_magnification(),
           (this.position_y - this.height()) * this.height_magnification(),
@@ -835,7 +835,7 @@ export default class CanvasProvider {
         )
       }
       if(this.hlc & 0b1000){
-        ctx.fillStyle = this.fg_color
+        ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(this.fg_color)
         ctx.fillRect(
           this.position_x * this.width_magnification(),
           (this.position_y - this.height()) * this.height_magnification(),
@@ -846,7 +846,7 @@ export default class CanvasProvider {
 
       // STL
       if(this.stl){
-        ctx.fillStyle = this.fg_color
+        ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(this.fg_color)
         ctx.fillRect(
           this.position_x * this.width_magnification(),
           (this.position_y - 1) * this.height_magnification(),
@@ -1049,7 +1049,7 @@ export default class CanvasProvider {
         const depth = Math.floor((drcs.length * 8) / (width * height))
         const orn = this.force_orn ?? this.orn
         if (orn && (!this.force_orn || this.force_orn !== this.fg_color)) {
-          ctx.fillStyle = orn
+          ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(orn)
           for(let dy = -2 * this.height_magnification(); dy <= 2 * this.height_magnification(); dy++){
             for(let dx = -2 * this.width_magnification(); dx <= 2 * this.width_magnification(); dx++){
               for(let y = 0; y < height; y++){
@@ -1076,7 +1076,7 @@ export default class CanvasProvider {
           }
         }
 
-        ctx.fillStyle = this.fg_color
+        ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(this.fg_color)
         for(let y = 0; y < height; y++){
           for(let x = 0; x < width; x++){
             let value = 0
@@ -1120,7 +1120,7 @@ export default class CanvasProvider {
       if (orn && (!this.force_orn || this.force_orn !== this.fg_color)) {
         if (this.useStrokeText) {
           ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
-          ctx.strokeStyle = orn
+          ctx.strokeStyle = CanvasProvider.getRGBAfromColorCode(orn)
           ctx.lineJoin = 'round'
           ctx.textBaseline = 'middle'
           ctx.textAlign = "center"
@@ -1135,7 +1135,7 @@ export default class CanvasProvider {
           for(let dy = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dy <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dy++) {
             for(let dx = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dx <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dx++) {
               ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
-              ctx.fillStyle = orn
+              ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(orn)
               ctx.textBaseline = 'middle'
               ctx.textAlign = "center"
               ctx.fillText(character, 0 + dx, 0 + dy);
@@ -1150,7 +1150,7 @@ export default class CanvasProvider {
     }
 
     ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
-    ctx.fillStyle = this.fg_color
+    ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(this.fg_color)
     ctx.textBaseline = 'middle'
     ctx.textAlign = "center"
     ctx.fillText(character, 0, 0);
@@ -1175,5 +1175,16 @@ export default class CanvasProvider {
 
     canvas.width = canvas.height = 0;
     return code;
+  }
+
+  private static getRGBAfromColorCode(color: string | undefined): string {
+    if (color == null) { return ''; }
+
+    const R = Number.parseInt(color.substring(1, 3), 16);
+    const G = Number.parseInt(color.substring(3, 5), 16);
+    const B = Number.parseInt(color.substring(5, 7), 16);
+    const A = Number.parseInt(color.substring(7, 9), 16);
+
+    return `rgba(${R}, ${G}, ${B}, ${A / 255})`;
   }
 }
