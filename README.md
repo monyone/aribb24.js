@@ -22,12 +22,12 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
 * enableRawCanvas: enable raw video resolution canvas. it can get getRawCanvas method.
 * useStrokeText: use render outer stroke by strokeText API. (default: true)
 * useHighResTextTrack: use polling instead of native cuechange event handling.
-* enableAutoInBandMetadataTextTrackDetection: enable InBand Metadata (id3) TextTrack auto detection.
+* enableAutoInBandMetadataTextTrackDetection: enable InBand Metadata (id3) TextTrack auto detection. (default: true)
     * Recommended enableAutoInBandMetadataTextTrackDetection Settings
         * Safari (iOS, iPadOS, Mac OS) Native HLS Player: true
         * Legacy Edge Native HLS Player: true 
         * hls.js : false (Please use FRAG_PARSING_METADATA event instead of this option)
-        * video.js : false (Please set video.js's Timed Metadata TextTrack manually)
+        * video.js : false (Please set video.js's Timed Metadata TextTrack manually, not supported auto detection.)
 
 ## Build
 

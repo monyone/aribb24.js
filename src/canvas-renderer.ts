@@ -53,6 +53,7 @@ export default class CanvasID3Renderer {
       data_identifer: this.data_identifer,
       data_group_id: this.data_group_id,
       keepAspectRatio: option?.keepAspectRatio ?? true, // default: true
+      enableAutoInBandMetadataTextTrackDetection: option?.enableAutoInBandMetadataTextTrackDetection ?? true, // default: true
       useStrokeText: option?.useStrokeText ?? true, // default: true
     }
   }
