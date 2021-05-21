@@ -248,7 +248,7 @@ export default class CanvasID3Renderer {
       const start_time = id3_cue.startTime;
 
       if (this.id3Track.inBandMetadataTrackDispatchType === '15260DFFFF49443320FF49443320000F'){ // Legacy Edge
-        this.pushID3v2Data(start_time, id3_cue.data);
+        this.pushID3v2Data(start_time, new Uint8Array(id3_cue.data));
       } else if (this.id3Track.inBandMetadataTrackDispatchType === 'com.apple.streaming') { // Safari
         if (id3_cue.value.key === 'PRIV') {
           this.pushID3v2PRIVData(start_time, id3_cue.value.info, new Uint8Array(id3_cue.value.data));
