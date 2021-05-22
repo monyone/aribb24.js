@@ -58,14 +58,14 @@ yarn run build
     var videoSrc = 'something.m3u8';
 
     var renderer = new aribb24js.CanvasRenderer({
-      // Options are here!
+        // Options are here!
 
-      // forceStrokeColor?: string,
-      // forceBackgroundColor?: string,
-      // normalFont?: string,
-      // gaijiFont?: string,
-      // drcsReplacement?: boolean
-      enableAutoInBandMetadataTextTrackDetection: !Hls.isSupported(), // FRAG_PARSING_METADATA instead of auto detection
+        // forceStrokeColor?: string,
+        // forceBackgroundColor?: string,
+        // normalFont?: string,
+        // gaijiFont?: string,
+        // drcsReplacement?: boolean
+        enableAutoInBandMetadataTextTrackDetection: !Hls.isSupported(), // FRAG_PARSING_METADATA instead of auto detection
     });
     // renderer.attachMedia(video, subtitleElement) also accepted
     renderer.attachMedia(video);
@@ -73,9 +73,9 @@ yarn run build
     if (Hls.isSupported()) {
         var hls = new Hls();
         hls.on(Hls.Events.FRAG_PARSING_METADATA, function (event, data) {
-          for (var sample of data.samples) {
-            renderer.pushID3v2Data(sample.pts, sample.data);
-          }
+            for (var sample of data.samples) {
+                renderer.pushID3v2Data(sample.pts, sample.data);
+            }
         }
 
         hls.loadSource(videoSrc);
@@ -100,20 +100,18 @@ yarn run build
     var videoSrc = 'something.m3u8';
 
     var aribb24Renderer = new aribb24js.CanvasRenderer({
-      // Options are here!
+        // Options are here!
 
-      // forceStrokeColor?: string,
-      // forceBackgroundColor?: string,
-      // normalFont?: string,
-      // gaijiFont?: string,
-      // drcsReplacement?: boolean
-      useHighResTextTrack: true, // for IE11 (avoid video.js error on IE11)
-      enableAutoInBandMetadataTextTrackDetection: false
+        // forceStrokeColor?: string,
+        // forceBackgroundColor?: string,
+        // normalFont?: string,
+        // gaijiFont?: string,
+        // drcsReplacement?: boolean
+        useHighResTextTrack: true, // for IE11 (avoid video.js error on IE11)
     })
 
     var player = videojs(video);
     aribb24Renderer.attachMedia(video);
-    console.log(document.getElementById('video').querySelector('.vjs-control-bar'))
     document.getElementById('video').querySelector('.vjs-control-bar').style.zIndex = 1;
 
     const track = player.addTextTrack('subtitles', 'aribb24.js')
@@ -139,6 +137,50 @@ yarn run build
     })
 
     player.src(videoSrc);
+</script>
+```
+
+### with shaka-player (for id3 timed-metadata inserted stream)
+
+```html
+<script src="mux.min.js"></script>
+<script src="shaka-player.ui.js"></script>
+<link rel="stylesheet" href="controls.css">
+<video id="videoElement"></video>
+<script>
+    var video = document.getElementById('videoElement');
+    var videoSrc = 'something.m3u8';
+
+    var aribb24Renderer = new aribb24js.CanvasRenderer({
+        // Options are here!
+
+        // forceStrokeColor?: string,
+        // forceBackgroundColor?: string,
+        // normalFont?: string,
+        // gaijiFont?: string,
+        // drcsReplacement?: boolean
+    })
+
+    shaka.polyfill.installAll();
+    if (shaka.Player.isBrowserSupported()) {
+        var player = new shaka.Player(video);
+        aribb24Renderer.attachMedia(video);
+
+        player.addEventListener('metadata', function (payload) {
+            var startTime = data.startTime;
+            var key = data.payload.key;
+
+            if (key === 'PRIV') {
+                var owner = data.payload.owner;
+                var binary = data.payload.data;
+                aribb24Renderer.pushID3v2PRIVData(startTime, owner, binary);
+            } else if(key === 'TXXX') {
+                var description = data.payload.description;
+                var base64 = data.payload.data;
+                aribb24Renderer.pushID3v2TXXXData(startTime, description, base64);
+            }
+        })
+     }
 </script>
 ```
 
@@ -177,5 +219,5 @@ yarn run build
 
 ## Limitations
 
-* CanvasID3Renderer in Android Chrome with native HLS player dose not work
+* CanvasRenderer in Android Chrome with native HLS player dose not work
     * Because not support id3 timedmetadata in Android Chrome
