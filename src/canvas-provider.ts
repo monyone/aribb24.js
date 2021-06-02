@@ -1127,7 +1127,7 @@ export default class CanvasProvider {
           ctx.lineJoin = 'round'
           ctx.textBaseline = 'middle'
           ctx.textAlign = "center"
-          ctx.lineWidth = 5 * SIZE_MAGNIFICATION
+          ctx.lineWidth = 4 * SIZE_MAGNIFICATION
           ctx.strokeText(character, 0, 0);
         } else {
           // TODO: deprecated!!
