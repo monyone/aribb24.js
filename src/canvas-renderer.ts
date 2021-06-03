@@ -130,12 +130,12 @@ export default class CanvasID3Renderer {
     this.pushRawData(pts, uint8array);
   }
 
-  private pushID3v2PRIVData(pts: number, owner: string, data: Uint8Array): void {
+  public pushID3v2PRIVData(pts: number, owner: string, data: Uint8Array): void {
     if (owner !== 'aribb24.js') { return; }
     this.pushRawData(pts, data);
   }
 
-  private pushID3v2TXXXData(pts: number, description: string, text: string): void {
+  public pushID3v2TXXXData(pts: number, description: string, text: string): void {
     if (description !== 'aribb24.js') { return; }
 
     const data = base64ToUint8Array(text);
