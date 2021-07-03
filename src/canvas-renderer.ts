@@ -20,7 +20,7 @@ interface RendererOption {
 }
 
 export default class CanvasID3Renderer {
-  private media: HTMLMediaElement | null = null
+  private media: HTMLVideoElement | null = null
   private id3Track: TextTrack | null = null
   private b24Track: TextTrack | null = null
   private subtitleElement: HTMLElement | null = null
@@ -58,7 +58,7 @@ export default class CanvasID3Renderer {
     }
   }
 
-  public attachMedia(media: HTMLMediaElement, subtitleElement?: HTMLElement): void {
+  public attachMedia(media: HTMLVideoElement, subtitleElement?: HTMLElement): void {
     this.detachMedia()
     this.media = media
     this.subtitleElement = subtitleElement ?? media.parentElement
@@ -120,9 +120,13 @@ export default class CanvasID3Renderer {
     })
     if (estimate == null) { return; }
 
-    const end_time = estimate.endTime;
-
+    const end_time = Number.isFinite(estimate.endTime) ? estimate.endTime : Number.MAX_SAFE_INTEGER;
     this.addB24Cue(pts, end_time, data)
+  }
+
+  public pushBase64Data(pts: number, base64: string): void {
+    const data = base64ToUint8Array(base64);
+    this.pushRawData(pts, data);
   }
 
   // for b24.js compatibility
@@ -137,9 +141,7 @@ export default class CanvasID3Renderer {
 
   public pushID3v2TXXXData(pts: number, description: string, text: string): void {
     if (description !== 'aribb24.js') { return; }
-
-    const data = base64ToUint8Array(text);
-    this.pushRawData(pts, data);
+    this.pushBase64Data(pts, text);
   }
 
   public pushID3v2Data(pts: number, data: Uint8Array): void {
@@ -386,8 +388,8 @@ export default class CanvasID3Renderer {
     const style = window.getComputedStyle(this.media)
     const media_width = Number.parseInt(style.width) * window.devicePixelRatio
     const media_height = Number.parseInt(style.height) * window.devicePixelRatio
-    const video_width = (this.media as any).videoWidth
-    const video_height = (this.media as any).videoHeight
+    const video_width = this.media.videoWidth
+    const video_height = this.media.videoHeight
 
     if (this.viewCanvas) {
       this.viewCanvas.width = Math.round(media_width)

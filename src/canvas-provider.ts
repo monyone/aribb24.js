@@ -352,7 +352,7 @@ export default class CanvasProvider {
 
     return ({
       startTime: this.startTime,
-      endTime: this.endTime ?? Number.MAX_SAFE_INTEGER,
+      endTime: this.endTime ?? Number.POSITIVE_INFINITY
     })
   }
 
