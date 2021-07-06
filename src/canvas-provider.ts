@@ -109,7 +109,7 @@ export default class CanvasProvider {
   private gaijiFont: string = this.normalFont
 
   private drcsReplacement: boolean = false
-  private drcsReplaceMapping: Map<string, string> = new Map<string, string>(DRCS_NSZ_MAPPING);
+  private drcsReplaceMapping: Map<string, string> = new Map<string, string>();
 
   private useStrokeText: boolean = false
 
@@ -185,8 +185,8 @@ export default class CanvasProvider {
     this.gaijiFont = this.normalFont
 
     this.drcsReplacement = false
-    this.drcsReplaceMapping = new Map<string, string>(DRCS_NSZ_MAPPING);
-    
+    this.drcsReplaceMapping = new Map<string, string>();
+
     this.useStrokeText = false
   }
 
@@ -278,7 +278,7 @@ export default class CanvasProvider {
     this.normalFont = option?.normalFont ?? 'sans-serif'
     this.gaijiFont = option?.gaijiFont ?? this.normalFont
     this.drcsReplacement = option?.drcsReplacement ?? false
-    this.drcsReplaceMapping = new Map<string, string>([... this.drcsReplaceMapping, ... Object.entries(option?.drcsReplaceMapping ?? {})])
+    this.drcsReplaceMapping = new Map<string, string>([... DRCS_NSZ_MAPPING, ... Object.entries(option?.drcsReplaceMapping ?? {})])
     this.useStrokeText = option?.useStrokeText ?? false
 
     if (!this.check()) {
