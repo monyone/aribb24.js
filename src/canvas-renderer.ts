@@ -12,6 +12,7 @@ interface RendererOption {
   normalFont?: string,
   gaijiFont?: string,
   drcsReplacement?: boolean,
+  drcsReplaceMapping?: Record<string, string>,
   keepAspectRatio?: boolean,
   enableRawCanvas?: boolean,
   enableAutoInBandMetadataTextTrackDetection?: boolean,

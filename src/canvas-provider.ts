@@ -30,6 +30,7 @@ interface ProviderOption {
   normalFont?: string,
   gaijiFont?: string,
   drcsReplacement?: boolean,
+  drcsReplaceMapping?: Record<string, string>,
   keepAspectRatio?: boolean,
   useStrokeText?: boolean,
 }
@@ -108,6 +109,8 @@ export default class CanvasProvider {
   private gaijiFont: string = this.normalFont
 
   private drcsReplacement: boolean = false
+  private drcsReplaceMapping: Map<string, string> = new Map<string, string>(DRCS_NSZ_MAPPING);
+
   private useStrokeText: boolean = false
 
   public constructor(pes: Uint8Array, pts: number) {
@@ -182,6 +185,8 @@ export default class CanvasProvider {
     this.gaijiFont = this.normalFont
 
     this.drcsReplacement = false
+    this.drcsReplaceMapping = new Map<string, string>(DRCS_NSZ_MAPPING);
+    
     this.useStrokeText = false
   }
 
@@ -273,6 +278,7 @@ export default class CanvasProvider {
     this.normalFont = option?.normalFont ?? 'sans-serif'
     this.gaijiFont = option?.gaijiFont ?? this.normalFont
     this.drcsReplacement = option?.drcsReplacement ?? false
+    this.drcsReplaceMapping = new Map<string, string>([... this.drcsReplaceMapping, ... Object.entries(option?.drcsReplaceMapping ?? {})])
     this.useStrokeText = option?.useStrokeText ?? false
 
     if (!this.check()) {
@@ -1044,8 +1050,8 @@ export default class CanvasProvider {
       }
 
       const drcs_hash = SparkMD5.ArrayBuffer.hash(drcs)
-      if (this.drcsReplacement && DRCS_NSZ_MAPPING.has(drcs_hash)) {
-        this.renderFont(DRCS_NSZ_MAPPING.get(drcs_hash)!)
+      if (this.drcsReplacement && this.drcsReplaceMapping.has(drcs_hash)) {
+        this.renderFont(this.drcsReplaceMapping.get(drcs_hash)!)
       } else {
         const width = Math.floor(this.ssm_x * this.text_size_x / SIZE_MAGNIFICATION)
         const height = Math.floor(this.ssm_y * this.text_size_y / SIZE_MAGNIFICATION)
