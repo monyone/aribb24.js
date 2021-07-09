@@ -33,14 +33,14 @@ export default class CanvasID3Renderer {
   private isOnSeeking: boolean = false
   private onB24CueChangeDrawed: boolean = false
 
-  private onID3AddtrackHandler: ((event: TrackEvent) => void) | null = null
-  private onID3CueChangeHandler: (() => void) | null = null
+  private readonly onID3AddtrackHandler: ((event: TrackEvent) => void) = this.onID3Addtrack.bind(this);
+  private readonly onID3CueChangeHandler: (() => void) = this.onID3CueChange.bind(this);
+  private readonly onB24CueChangeHandler: (() => void)  = this.onB24CueChange.bind(this);
 
-  private onB24CueChangeHandler: (() => void) | null = null
-
-  private onSeekingHandler: (() => void) | null = null
-  private onSeekedHandler: (() => void) | null = null
-  private onResizeHandler: (() => void) | null = null
+  private readonly onCanplayHandler: (() => void) = this.onCanplay.bind(this);
+  private readonly onSeekingHandler: (() => void) = this.onSeeking.bind(this);
+  private readonly onSeekedHandler: (() => void) = this.onSeeked.bind(this);
+  private readonly onResizeHandler: (() => void) = this.onResize.bind(this);
 
   private rendererOption: RendererOption | undefined
   private data_identifer: number
@@ -63,6 +63,7 @@ export default class CanvasID3Renderer {
     this.detachMedia()
     this.media = media
     this.subtitleElement = subtitleElement ?? media.parentElement
+    this.media.addEventListener('canplay', this.onCanplayHandler)
     this.setupTrack()
     this.setupCanvas()
   }
@@ -70,6 +71,7 @@ export default class CanvasID3Renderer {
   public detachMedia(): void {
     this.cleanupCanvas()
     this.cleanupTrack()
+    this.media?.removeEventListener('canplay', this.onCanplayHandler)
     this.media = this.subtitleElement = null
   }
 
@@ -226,15 +228,11 @@ export default class CanvasID3Renderer {
   }
 
   public setInBandMetadataTextTrack(track: TextTrack): void {
-    if (this.id3Track && this.onID3CueChangeHandler) {
-      this.id3Track.removeEventListener('cuechange', this.onID3CueChangeHandler)
-      this.onID3CueChangeHandler = null
-    }
+    this.id3Track?.removeEventListener('cuechange', this.onID3CueChangeHandler)
 
     this.id3Track = track
 
     this.id3Track.mode = 'hidden'
-    this.onID3CueChangeHandler = this.onID3CueChange.bind(this)
     this.id3Track.addEventListener('cuechange', this.onID3CueChangeHandler)
   }
 
@@ -372,6 +370,15 @@ export default class CanvasID3Renderer {
     }
   }
 
+  private onCanplay() {
+    if (this.id3Track) {
+      this.id3Track.mode = 'hidden';
+    }
+    if (this.b24Track) {
+      this.b24Track.mode = 'hidden';
+    }
+  }
+
   private onSeeking() {
     this.isOnSeeking = true
     this.onB24CueChange()
@@ -475,7 +482,7 @@ export default class CanvasID3Renderer {
 
     if (this.rendererOption?.useHighResTextTrack) {
       this.b24Track = new HighResTextTrack(this.media);
-      (this.b24Track as any).startPolling();
+      (this.b24Track as HighResTextTrack).startPolling();
     } else {
       const aribb24js_label = `ARIB B24 Japanese (data_identifer=0x${this.data_identifer.toString(16)}, data_group_id=${this.data_group_id})`
       for (let i = 0; i < this.media.textTracks.length; i++) {
@@ -491,7 +498,6 @@ export default class CanvasID3Renderer {
       }
     }
 
-    this.onB24CueChangeHandler = this.onB24CueChange.bind(this)
     this.b24Track.addEventListener('cuechange', this.onB24CueChangeHandler)
 
     if (this.rendererOption?.enableAutoInBandMetadataTextTrackDetection) {
@@ -509,12 +515,9 @@ export default class CanvasID3Renderer {
         }
       }
 
-      this.onID3AddtrackHandler = this.onID3Addtrack.bind(this)
       this.media.textTracks.addEventListener('addtrack', this.onID3AddtrackHandler)
     }
 
-    this.onSeekingHandler = this.onSeeking.bind(this)
-    this.onSeekedHandler = this.onSeeked.bind(this)
     this.media.addEventListener('seeking', this.onSeekingHandler)
     this.media.addEventListener('seeked', this.onSeekedHandler)
   }
@@ -538,7 +541,6 @@ export default class CanvasID3Renderer {
 
     this.subtitleElement.appendChild(this.viewCanvas)
 
-    this.onResizeHandler = this.onResize.bind(this)
     this.media.addEventListener('resize', this.onResizeHandler)
 
     if (window.ResizeObserver) {
@@ -564,7 +566,7 @@ export default class CanvasID3Renderer {
   private cleanupTrack(): void {
     if (this.b24Track) {
       if (this.rendererOption?.useHighResTextTrack) {
-        (this.b24Track as any).stopPolling();
+        (this.b24Track as HighResTextTrack).stopPolling();
       } else {
         if (this.b24Track.cues) {
           for (let i = this.b24Track.cues.length - 1; i >= 0; i--) {
@@ -574,42 +576,20 @@ export default class CanvasID3Renderer {
       }
     }
 
-    if (this.b24Track && this.onB24CueChangeHandler) {
-      this.b24Track.removeEventListener('cuechange', this.onB24CueChangeHandler)
-      this.onB24CueChangeHandler = null
-    }
-    if (this.id3Track && this.onID3CueChangeHandler) {
-      this.id3Track.removeEventListener('cuechange', this.onID3CueChangeHandler)
-      this.onID3CueChangeHandler = null
-    }
+    this.b24Track?.removeEventListener('cuechange', this.onB24CueChangeHandler)
 
-    if (this.media){
-      if (this.onSeekingHandler) {
-        this.media.removeEventListener('seeking', this.onSeekingHandler)
-        this.onSeekingHandler = null
-      }
-      if (this.onSeekedHandler) {
-        this.media.removeEventListener('seeked', this.onSeekedHandler)
-        this.onSeekedHandler = null
-      }
-      if (this.onID3AddtrackHandler) {
-        this.media.textTracks.removeEventListener('addtrack', this.onID3AddtrackHandler)
-        this.onID3AddtrackHandler = null
-      }
-    }
+    this.id3Track?.removeEventListener('cuechange', this.onID3CueChangeHandler)
+
+    this.media?.removeEventListener('seeking', this.onSeekingHandler)
+    this.media?.removeEventListener('seeked', this.onSeekedHandler)
+    this.media?.textTracks.removeEventListener('addtrack', this.onID3AddtrackHandler)
 
     this.b24Track = this.id3Track = null
   }
 
   private cleanupCanvas(): void {
-    if (this.onResizeHandler) {
-      window.removeEventListener('resize', this.onResizeHandler)
-      if (this.media) {
-         this.media.removeEventListener('resize', this.onResizeHandler)
-      }
-
-      this.onResizeHandler = null
-    }
+    window.removeEventListener('resize', this.onResizeHandler)
+    this.media?.removeEventListener('resize', this.onResizeHandler)
 
     if (this.resizeObserver) {
       this.resizeObserver.disconnect()
