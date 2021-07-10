@@ -2,6 +2,8 @@ import CanvasProvider from './canvas-provider'
 import HighResTextTrack from './utils/high-res-texttrack'
 import { readID3Size, binaryISO85591ToString, binaryUTF8ToString, base64ToUint8Array} from './utils/binary'
 
+const DETECT_TIMEUPDATE_SEEKING_RANGE = 1;
+
 interface RendererOption {
   width?: number,
   height?: number,
@@ -18,7 +20,6 @@ interface RendererOption {
   enableAutoInBandMetadataTextTrackDetection?: boolean,
   useStrokeText?: boolean,
   useHighResTextTrack?: boolean,
-  useTimeupdate?: boolean,
 }
 
 export default class CanvasID3Renderer {
@@ -68,9 +69,7 @@ export default class CanvasID3Renderer {
     this.subtitleElement = subtitleElement ?? media.parentElement
 
     this.media.addEventListener('canplay', this.onCanplayHandler)
-    if (this.rendererOption?.useTimeupdate) {
-      this.media.addEventListener('timeupdate', this.onTimeupdateHandler)
-    }
+    this.media.addEventListener('timeupdate', this.onTimeupdateHandler)
 
     this.setupTrack()
     this.setupCanvas()
@@ -291,7 +290,7 @@ export default class CanvasID3Renderer {
     if (this.isOnSeeking) { return }
 
     const activeCues = this.id3Track.activeCues ?? []
-    for (let i = activeCues.length; i >= 0; i--) {
+    for (let i = activeCues.length - 1; i >= 0; i--) {
       if (this.pushID3v2Cue(activeCues[i])) { break; }
     }
   }
@@ -406,7 +405,12 @@ export default class CanvasID3Renderer {
       this.prevCurrentTime = this.media.currentTime;
       return;
     }
+
     if (this.isOnSeeking) {
+      this.prevCurrentTime = this.media.currentTime;
+      return;
+    }
+    if (Math.abs(this.media.currentTime - this.prevCurrentTime) > DETECT_TIMEUPDATE_SEEKING_RANGE) {
       this.prevCurrentTime = this.media.currentTime;
       return;
     }
@@ -419,9 +423,9 @@ export default class CanvasID3Renderer {
     const cues = [ dummyCue, ... this.id3Track.cues]
     {
       let begin = 0, end = cues.length;
-      while (begin + 1< end) {
+      while (begin + 1 < end) {
         const currentTime = this.prevCurrentTime;
-        const middle = Math.floor((begin + end )/ 2);
+        const middle = Math.floor((begin + end) / 2);
         const startTime = cues[middle].startTime;
   
         if (currentTime < startTime) {
@@ -434,9 +438,9 @@ export default class CanvasID3Renderer {
     }
     {
       let begin = 0, end = cues.length;
-      while (begin + 1< end) {
+      while (begin + 1 < end) {
         const currentTime = this.media.currentTime;
-        const middle = Math.floor((begin + end )/ 2);
+        const middle = Math.floor((begin + end) / 2);
         const startTime = cues[middle].startTime;
   
         if (currentTime < startTime) {
