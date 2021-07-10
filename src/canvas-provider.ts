@@ -1188,7 +1188,7 @@ export default class CanvasProvider {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     const [R, G, B, A] = ctx.getImageData(0, 0, 1, 1).data
 
-    const code = `#${R.toString(16).padStart(2, '0')}${G.toString(16).padStart(2, '0')}${B.toString(16).padStart(2, '0')}${A.toString(16).padStart(2, '0')}`
+    const code = `#${R.toString(16).toUpperCase().padStart(2, '0')}${G.toString(16).toUpperCase().padStart(2, '0')}${B.toString(16).toUpperCase().padStart(2, '0')}${A.toString(16).toUpperCase().padStart(2, '0')}`
 
     canvas.width = canvas.height = 0;
     return code;
