@@ -255,19 +255,36 @@ export default class CanvasProvider {
     this.position_y = this.position_y + this.height()
   }
 
-  public check(): boolean {
-    const PES_data_packet_header_length = this.pes[2] & 0x0F
-    const data_group_begin = (3 + PES_data_packet_header_length)
-    const data_group_size = (this.pes[data_group_begin + 3] << 8) + this.pes[data_group_begin + 4]
+  public static detect(pes: Uint8Array , option?: ProviderOption): boolean {
+    const purpose_data_identifer = option?.data_identifer ?? 0x80; // default: caption
+    const purpose_data_group_id = option?.data_group_id ?? 0x01; // default: 1st language
 
-    return CRC16(this.pes, data_group_begin) === 0;
+    if (pes.length <= 0) { return false; }  
+    const data_identifer = pes[0];
+    if(data_identifer !== purpose_data_identifer){
+      return false;
+    }
+
+    if (pes.length <= 2) { return false; }
+    const PES_data_packet_header_length = pes[2] & 0x0F;
+    const data_group_begin = (3 + PES_data_packet_header_length);
+    if (pes.length <= data_group_begin) { return false; }
+    const data_group_id = (pes[data_group_begin + 0] & 0xFC) >> 2;
+
+    if ((data_group_id & 0x0F) !== purpose_data_group_id) {
+      return false
+    }
+
+    if (CRC16(pes, data_group_begin) !== 0) {
+      //return false; // CRCチェックに失敗する事があるため無効
+      return true;
+    } else {
+      return true;
+    }
   }
 
   public render(option?: ProviderOption): ProviderResult | null {
     this.initialize()
-
-    const purpose_data_identifer = option?.data_identifer ?? 0x80 // default: caption
-    const purpose_data_group_id = option?.data_group_id ?? 0x01 // default: 1st language
 
     this.option_canvas = option?.canvas ?? null
 
@@ -281,25 +298,14 @@ export default class CanvasProvider {
     this.drcsReplaceMapping = new Map<string, string>([... DRCS_NSZ_MAPPING, ... Object.entries(option?.drcsReplaceMapping ?? {})])
     this.useStrokeText = option?.useStrokeText ?? false
 
-    if (!this.check()) {
-      // return null
-      // FIXME: ほんとは CRC16 が 0 になるはずなんだけど、計算があっていないようで稀に 非0 になっていた...チェックしたい...
-    }
-
-    const data_identifer = this.pes[0]
-    if(data_identifer != purpose_data_identifer){
-      return null
+    if (!CanvasProvider.detect(this.pes, option)) {
+      return null;
     }
 
     const PES_data_packet_header_length = this.pes[2] & 0x0F
     const data_group_begin = (3 + PES_data_packet_header_length)
     const data_group_id = (this.pes[data_group_begin + 0] & 0xFC) >> 2
     const data_group_size = (this.pes[data_group_begin + 3] << 8) + this.pes[data_group_begin + 4]
-
-    // 本当は字幕管理データから画面サイズを求めるべきだが...
-    if ((data_group_id & 0x0F) !== purpose_data_group_id) {
-      return null
-    }
 
     let data_unit = data_group_begin + 9
     while (data_unit < data_group_begin + (5 + data_group_size)) {
@@ -1050,8 +1056,10 @@ export default class CanvasProvider {
       }
 
       const drcs_hash = SparkMD5.ArrayBuffer.hash(drcs)
-      if (this.drcsReplacement && this.drcsReplaceMapping.has(drcs_hash)) {
-        this.renderFont(this.drcsReplaceMapping.get(drcs_hash)!)
+      if (this.drcsReplacement && this.drcsReplaceMapping.has(drcs_hash.toLowerCase())) {
+        this.renderFont(this.drcsReplaceMapping.get(drcs_hash.toLowerCase())!)
+      } else  if (this.drcsReplacement && this.drcsReplaceMapping.has(drcs_hash.toUpperCase())) {
+        this.renderFont(this.drcsReplaceMapping.get(drcs_hash.toUpperCase())!)
       } else {
         const width = Math.floor(this.ssm_x * this.text_size_x / SIZE_MAGNIFICATION)
         const height = Math.floor(this.ssm_y * this.text_size_y / SIZE_MAGNIFICATION)

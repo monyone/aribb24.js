@@ -18,6 +18,7 @@ interface RendererOption {
   enableAutoInBandMetadataTextTrackDetection?: boolean,
   useStrokeText?: boolean,
   useHighResTextTrack?: boolean,
+  useTimeupdate?: boolean,
 }
 
 export default class CanvasID3Renderer {
@@ -29,6 +30,7 @@ export default class CanvasID3Renderer {
   private rawCanvas: HTMLCanvasElement | null = null
   private resizeObserver: ResizeObserver | null = null
   private mutationObserver: MutationObserver | null = null
+  private prevCurrentTime: number | null = null
   private isShowing: boolean = true
   private isOnSeeking: boolean = false
   private onB24CueChangeDrawed: boolean = false
@@ -37,6 +39,7 @@ export default class CanvasID3Renderer {
   private readonly onID3CueChangeHandler: (() => void) = this.onID3CueChange.bind(this);
   private readonly onB24CueChangeHandler: (() => void)  = this.onB24CueChange.bind(this);
 
+  private readonly onTimeupdateHandler: (() => void) = this.onTimeupdate.bind(this);
   private readonly onCanplayHandler: (() => void) = this.onCanplay.bind(this);
   private readonly onSeekingHandler: (() => void) = this.onSeeking.bind(this);
   private readonly onSeekedHandler: (() => void) = this.onSeeked.bind(this);
@@ -63,7 +66,12 @@ export default class CanvasID3Renderer {
     this.detachMedia()
     this.media = media
     this.subtitleElement = subtitleElement ?? media.parentElement
+
     this.media.addEventListener('canplay', this.onCanplayHandler)
+    if (this.rendererOption?.useTimeupdate) {
+      this.media.addEventListener('timeupdate', this.onTimeupdateHandler)
+    }
+
     this.setupTrack()
     this.setupCanvas()
   }
@@ -71,7 +79,10 @@ export default class CanvasID3Renderer {
   public detachMedia(): void {
     this.cleanupCanvas()
     this.cleanupTrack()
+
     this.media?.removeEventListener('canplay', this.onCanplayHandler)
+    this.media?.removeEventListener('timeupdate', this.onTimeupdateHandler)
+
     this.media = this.subtitleElement = null
   }
 
@@ -114,40 +125,42 @@ export default class CanvasID3Renderer {
     }
   }
 
-  public pushRawData(pts: number, data: Uint8Array): void {
+  public pushRawData(pts: number, data: Uint8Array): boolean {
     const provider: CanvasProvider = new CanvasProvider(data, pts);
     const estimate = provider.render({
       ... this.rendererOption,
       width: undefined, // ここはデフォルト値で負荷を軽くする
       height: undefined, // ここはデフォルト値で負荷を軽くする
     })
-    if (estimate == null) { return; }
+    if (estimate == null) { return false; }
 
     const end_time = Number.isFinite(estimate.endTime) ? estimate.endTime : Number.MAX_SAFE_INTEGER;
-    this.addB24Cue(pts, end_time, data)
+    return this.addB24Cue(pts, end_time, data)
   }
 
-  public pushBase64Data(pts: number, base64: string): void {
+  public pushBase64Data(pts: number, base64: string): boolean {
     const data = base64ToUint8Array(base64);
-    this.pushRawData(pts, data);
+    return this.pushRawData(pts, data);
   }
 
   // for b24.js compatibility
-  public pushData(pid: number, uint8array: Uint8Array, pts: number): void {
-    this.pushRawData(pts, uint8array);
+  public pushData(pid: number, uint8array: Uint8Array, pts: number): boolean {
+    return this.pushRawData(pts, uint8array);
   }
 
-  public pushID3v2PRIVData(pts: number, owner: string, data: Uint8Array): void {
-    if (owner !== 'aribb24.js') { return; }
-    this.pushRawData(pts, data);
+  public pushID3v2PRIVData(pts: number, owner: string, data: Uint8Array): boolean {
+    if (owner !== 'aribb24.js') { return false; }
+    return this.pushRawData(pts, data);
   }
 
-  public pushID3v2TXXXData(pts: number, description: string, text: string): void {
-    if (description !== 'aribb24.js') { return; }
-    this.pushBase64Data(pts, text);
+  public pushID3v2TXXXData(pts: number, description: string, text: string): boolean {
+    if (description !== 'aribb24.js') { return false; }
+    return this.pushBase64Data(pts, text);
   }
 
-  public pushID3v2Data(pts: number, data: Uint8Array): void {
+  public pushID3v2Data(pts: number, data: Uint8Array): boolean {
+    let result = false;
+    
     for (let begin = 0; begin < data.length;) {
       const id3_start = begin;
 
@@ -184,7 +197,8 @@ export default class CanvasID3Renderer {
 
           const owner = binaryISO85591ToString(data, PRIV_begin, frame);
           const pes = new Uint8Array(Array.prototype.slice.call(data, frame + 1, PRIV_end));
-          this.pushID3v2PRIVData(pts, owner, pes);
+
+          if (this.pushID3v2PRIVData(pts, owner, pes)) { result = true; }
         } else if (frame_name === 'TXXX') {
           const encoding = data[frame + 0];
           const description_begin = frame + 1;
@@ -200,7 +214,8 @@ export default class CanvasID3Renderer {
 
             const description = binaryUTF8ToString(data, description_begin, description_end);
             const text = binaryUTF8ToString(data, data_begin, data_end);
-            this.pushID3v2TXXXData(pts, description, text);
+
+            if (this.pushID3v2TXXXData(pts, description, text)) { result = true; }
           } else if(encoding === 0x00) { // Laten-1
             while (data[frame] !== 0 && frame < frame_end) { frame++; }
             const description_end = frame;
@@ -212,7 +227,8 @@ export default class CanvasID3Renderer {
 
             const description = binaryISO85591ToString(data, description_begin, description_end);
             const text = binaryISO85591ToString(data, data_begin, data_end);
-            this.pushID3v2TXXXData(pts, description, text);
+
+            if (this.pushID3v2TXXXData(pts, description, text)) { result = true; }
           }
         }
 
@@ -225,57 +241,64 @@ export default class CanvasID3Renderer {
       if (!(data[begin + 0] === 0x33 && data[begin + 1] === 0x44 && data[begin + 2] === 0x49)) { continue; }
       begin += 3 + 2 /* version */ + 1 /* flags */ + 4 /* size */;
     }
+
+    return result;
   }
 
   public setInBandMetadataTextTrack(track: TextTrack): void {
     this.id3Track?.removeEventListener('cuechange', this.onID3CueChangeHandler)
 
     this.id3Track = track
-
     this.id3Track.mode = 'hidden'
+
     this.id3Track.addEventListener('cuechange', this.onID3CueChangeHandler)
   }
 
-  private onID3CueChange() {
-    if (!this.media || !this.id3Track || !this.b24Track) {
-      return
+  private pushID3v2Cue(cue: TextTrackCue): boolean {
+    if (!this.id3Track) { return false; }
+
+    const start_time = cue.startTime;
+    const id3_cue = cue as any;
+
+    if (this.id3Track.inBandMetadataTrackDispatchType === '15260DFFFF49443320FF49443320000F'){ // Legacy Edge
+      return this.pushID3v2Data(start_time, new Uint8Array(id3_cue.data));
+    } else if (this.id3Track.inBandMetadataTrackDispatchType === 'com.apple.streaming') { // Safari
+      if (id3_cue.value.key === 'PRIV') {
+        return this.pushID3v2PRIVData(start_time, id3_cue.value.info, new Uint8Array(id3_cue.value.data));
+      } else if (id3_cue.value.key === 'TXXX') {
+        return this.pushID3v2TXXXData(start_time, id3_cue.value.info, id3_cue.value.data);
+      }
+    } else if (this.id3Track.label === 'id3') { // hls.js
+      if (id3_cue.value.key === 'PRIV') {
+        return this.pushID3v2PRIVData(start_time, id3_cue.value.info, new Uint8Array(id3_cue.value.data));
+      } else if (id3_cue.value.key === 'TXXX') {
+        return this.pushID3v2TXXXData(start_time, id3_cue.value.info, id3_cue.value.data);
+      }
+    } else if (this.id3Track.label === 'Timed Metadata') { // video.js
+      if (id3_cue.frame.key === 'PRIV') {
+        return this.pushID3v2PRIVData(start_time, id3_cue.frame.owner, new Uint8Array(id3_cue.frame.data));
+      } else if (id3_cue.frame.key === 'TXXX') {
+        return this.pushID3v2TXXXData(start_time, id3_cue.frame.description, id3_cue.frame.data);
+      }
     }
+
+    return false;
+  }
+
+  private onID3CueChange() {
+    if (!this.id3Track) { return }
 
     if (this.isOnSeeking) { return }
 
     const activeCues = this.id3Track.activeCues ?? []
-    for (let i = 0; i < activeCues.length; i++) {
-      const id3_cue = activeCues[i] as any;
-      const start_time = id3_cue.startTime;
-
-      if (this.id3Track.inBandMetadataTrackDispatchType === '15260DFFFF49443320FF49443320000F'){ // Legacy Edge
-        this.pushID3v2Data(start_time, new Uint8Array(id3_cue.data));
-      } else if (this.id3Track.inBandMetadataTrackDispatchType === 'com.apple.streaming') { // Safari
-        if (id3_cue.value.key === 'PRIV') {
-          this.pushID3v2PRIVData(start_time, id3_cue.value.info, new Uint8Array(id3_cue.value.data));
-        } else if (id3_cue.value.key === 'TXXX') {
-          this.pushID3v2TXXXData(start_time, id3_cue.value.info, id3_cue.value.data);
-        }
-      } else if (this.id3Track.label === 'id3') { // hls.js
-        if (id3_cue.value.key === 'PRIV') {
-          this.pushID3v2PRIVData(start_time, id3_cue.value.info, new Uint8Array(id3_cue.value.data));
-        } else if (id3_cue.value.key === 'TXXX') {
-          this.pushID3v2TXXXData(start_time, id3_cue.value.info, id3_cue.value.data);
-        }
-      } else if (this.id3Track.label === 'Timed Metadata') { // video.js
-        if (id3_cue.frame.key === 'PRIV') {
-          this.pushID3v2PRIVData(start_time, id3_cue.frame.owner, new Uint8Array(id3_cue.frame.data));
-        } else if (id3_cue.frame.key === 'TXXX') {
-          this.pushID3v2TXXXData(start_time, id3_cue.frame.description, id3_cue.frame.data);
-        }
-      }
+    for (let i = activeCues.length; i >= 0; i--) {
+      if (this.pushID3v2Cue(activeCues[i])) { break; }
     }
   }
 
-  private addB24Cue (start_time: number, end_time: number, data: Uint8Array) {
-    if (!this.b24Track) {
-      return
-    }
+  private addB24Cue (start_time: number, end_time: number, data: Uint8Array): boolean {
+    if (!this.b24Track) { return false; }
+    if (!CanvasProvider.detect(data, this.rendererOption)) { return false; }
 
     const CueClass = window.VTTCue ?? window.TextTrackCue
 
@@ -288,7 +311,7 @@ export default class CanvasID3Renderer {
       const hasCue = Array.prototype.some.call(this.b24Track.cues ?? [], (target) => {
         return target.startTime === start_time
       })
-      if (hasCue) { return; }
+      if (hasCue) { return false; }
 
       if (this.b24Track.cues) {
         const removed_cues: TextTrackCue[] = [];
@@ -304,6 +327,8 @@ export default class CanvasID3Renderer {
         }
       }
     }
+
+    return true;
   }
 
   private onB24CueChange() {
@@ -368,6 +393,83 @@ export default class CanvasID3Renderer {
     } else{
       this.onB24CueChangeDrawed = false
     }
+  }
+
+  private onTimeupdate() {
+    if (!this.media) { return; } 
+    if (this.prevCurrentTime == null) {
+      this.prevCurrentTime = this.media.currentTime;
+      return;
+    }
+    
+    if (!this.id3Track || !this.id3Track.cues || this.id3Track.cues.length === 0) { 
+      this.prevCurrentTime = this.media.currentTime;
+      return;
+    }
+    if (this.isOnSeeking) {
+      this.prevCurrentTime = this.media.currentTime;
+      return;
+    }
+
+    const CueClass = window.VTTCue ?? window.TextTrackCue;
+    const dummyCue = new CueClass(0, this.id3Track.cues[0].startTime, '');
+    let prevIndex: number | null = null;
+    let currIndex: number | null = null;
+
+    const cues = [ dummyCue, ... this.id3Track.cues]
+    {
+      let begin = 0, end = cues.length;
+      while (begin + 1< end) {
+        const currentTime = this.prevCurrentTime;
+        const middle = Math.floor((begin + end )/ 2);
+        const startTime = cues[middle].startTime;
+  
+        if (currentTime < startTime) {
+          end = middle;
+        } else {
+          begin = middle;
+        }
+      }
+      prevIndex = begin;
+    }
+    {
+      let begin = 0, end = cues.length;
+      while (begin + 1< end) {
+        const currentTime = this.media.currentTime;
+        const middle = Math.floor((begin + end )/ 2);
+        const startTime = cues[middle].startTime;
+  
+        if (currentTime < startTime) {
+          end = middle;
+        } else {
+          begin = middle;
+        }
+      }
+      currIndex = begin;
+    }
+
+    if (prevIndex === null || currIndex === null || prevIndex === currIndex){
+      this.prevCurrentTime = this.media.currentTime;
+      return;
+    }
+
+    if (prevIndex < currIndex) {
+      for (let index = currIndex; index > prevIndex; index--) {
+        const cue = cues[index];
+        if (cue === dummyCue) { continue; }
+
+        if (this.pushID3v2Cue(cue)) { break; }
+      }
+    } else {
+      for (let index = prevIndex; index < currIndex; index++) {
+        const cue = cues[index];
+        if (cue === dummyCue) { continue; }
+
+        if (this.pushID3v2Cue(cue)) { break; }
+      }
+    }
+
+    this.prevCurrentTime = this.media.currentTime;
   }
 
   private onCanplay() {
