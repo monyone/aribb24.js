@@ -21,6 +21,7 @@ interface RendererOption {
   enableAutoInBandMetadataTextTrackDetection?: boolean,
   useStrokeText?: boolean,
   useHighResTextTrack?: boolean,
+  useHighResTimeupdate?: boolean,
 }
 
 export default class CanvasID3Renderer {
@@ -33,6 +34,7 @@ export default class CanvasID3Renderer {
   private resizeObserver: ResizeObserver | null = null
   private mutationObserver: MutationObserver | null = null
   private prevCurrentTime: number | null = null
+  private highResTimeupdatePollingId: number | null = null
   private isShowing: boolean = true
   private isOnSeeking: boolean = false
   private onB24CueChangeDrawed: boolean = false
@@ -41,8 +43,11 @@ export default class CanvasID3Renderer {
   private readonly onID3CueChangeHandler: (() => void) = this.onID3CueChange.bind(this);
   private readonly onB24CueChangeHandler: (() => void)  = this.onB24CueChange.bind(this);
 
+  private readonly onHighResTimeupdateHandler: (() => void) =this.onHighResTimeupdate.bind(this);
   private readonly onTimeupdateHandler: (() => void) = this.onTimeupdate.bind(this);
   private readonly onCanplayHandler: (() => void) = this.onCanplay.bind(this);
+  private readonly onPlayHandler: (() => void) = this.onPlay.bind(this);
+  private readonly onPauseHandler: (() => void) = this.onPause.bind(this);
   private readonly onSeekingHandler: (() => void) = this.onSeeking.bind(this);
   private readonly onSeekedHandler: (() => void) = this.onSeeked.bind(this);
   private readonly onResizeHandler: (() => void) = this.onResize.bind(this);
@@ -70,7 +75,12 @@ export default class CanvasID3Renderer {
     this.subtitleElement = subtitleElement ?? media.parentElement
 
     this.media.addEventListener('canplay', this.onCanplayHandler)
-    this.media.addEventListener('timeupdate', this.onTimeupdateHandler)
+    if (this.rendererOption?.useHighResTimeupdate) {
+      this.media.addEventListener('play', this.onPlayHandler)
+      this.media.addEventListener('pause', this.onPauseHandler)
+    } else {
+      this.media.addEventListener('timeupdate', this.onTimeupdateHandler)
+    }
     this.prevCurrentTime = null;
 
     this.setupTrack()
@@ -82,6 +92,9 @@ export default class CanvasID3Renderer {
     this.cleanupTrack()
 
     this.media?.removeEventListener('canplay', this.onCanplayHandler)
+    this.media?.removeEventListener('play', this.onPlayHandler)
+    this.media?.removeEventListener('pause', this.onPauseHandler)
+    this.onPause();
     this.media?.removeEventListener('timeupdate', this.onTimeupdateHandler)
     this.prevCurrentTime = null;
 
@@ -400,6 +413,11 @@ export default class CanvasID3Renderer {
     }
   }
 
+  private onHighResTimeupdate() {
+    this.onTimeupdate();
+    this.highResTimeupdatePollingId = window.requestAnimationFrame(this.onHighResTimeupdateHandler);
+  }
+
   private onTimeupdate() {
     if (!this.media) { return; } 
     if (this.prevCurrentTime == null) {
@@ -421,12 +439,11 @@ export default class CanvasID3Renderer {
       return;
     }
 
-    const CueClass = window.VTTCue ?? window.TextTrackCue;
     const dummyCue = new DummyCue(Number.NEGATIVE_INFINITY, this.id3Track.cues[0].startTime);
     let prevIndex: number | null = null;
     let currIndex: number | null = null;
 
-    const cues = [ dummyCue ]; // ... this.id3Track.cues
+    const cues: TextTrackCue[] = [ dummyCue ]; // ... this.id3Track.cues
     for (let i = 0; i < this.id3Track.cues.length; i++) {
       cues.push(this.id3Track.cues[i]);
     }
@@ -496,6 +513,23 @@ export default class CanvasID3Renderer {
 
     if (this.media != null && this.prevCurrentTime == null) {
       this.prevCurrentTime = this.media.currentTime - Number.MIN_VALUE;
+    }
+
+    if (this.rendererOption?.useHighResTimeupdate) {
+      this.onPlay();
+    }
+  }
+
+  private onPlay() {
+    if (this.highResTimeupdatePollingId == null) {
+      this.onHighResTimeupdate();
+    }
+  }
+
+  private onPause() {
+    if (this.highResTimeupdatePollingId != null) {
+      window.cancelAnimationFrame(this.highResTimeupdatePollingId);
+      this.highResTimeupdatePollingId = null;
     }
   }
 
