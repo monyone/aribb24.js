@@ -514,10 +514,6 @@ export default class CanvasID3Renderer {
     if (this.media != null && this.prevCurrentTime == null) {
       this.prevCurrentTime = this.media.currentTime - Number.MIN_VALUE;
     }
-
-    if (this.rendererOption?.useHighResTimeupdate) {
-      this.onPlay();
-    }
   }
 
   private onPlay() {
