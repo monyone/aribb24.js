@@ -292,10 +292,13 @@ export default class CanvasID3Renderer {
 
     if (this.isOnSeeking) { return }
 
+    /*
     const activeCues = this.id3Track.activeCues ?? []
     for (let i = activeCues.length - 1; i >= 0; i--) {
       if (this.pushID3v2Cue(activeCues[i])) { break; }
     }
+    */
+    this.onTimeupdate();
   }
 
   private addB24Cue (start_time: number, end_time: number, data: Uint8Array): boolean {
