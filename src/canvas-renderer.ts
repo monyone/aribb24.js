@@ -1,5 +1,6 @@
 import CanvasProvider from './canvas-provider'
 import HighResTextTrack from './utils/high-res-texttrack'
+import DummyCue from './utils/dummy-cue'
 import { readID3Size, binaryISO85591ToString, binaryUTF8ToString, base64ToUint8Array} from './utils/binary'
 
 const DETECT_TIMEUPDATE_SEEKING_RANGE = 1;
@@ -70,6 +71,7 @@ export default class CanvasID3Renderer {
 
     this.media.addEventListener('canplay', this.onCanplayHandler)
     this.media.addEventListener('timeupdate', this.onTimeupdateHandler)
+    this.prevCurrentTime = null;
 
     this.setupTrack()
     this.setupCanvas()
@@ -81,6 +83,7 @@ export default class CanvasID3Renderer {
 
     this.media?.removeEventListener('canplay', this.onCanplayHandler)
     this.media?.removeEventListener('timeupdate', this.onTimeupdateHandler)
+    this.prevCurrentTime = null;
 
     this.media = this.subtitleElement = null
   }
@@ -416,11 +419,15 @@ export default class CanvasID3Renderer {
     }
 
     const CueClass = window.VTTCue ?? window.TextTrackCue;
-    const dummyCue = new CueClass(0, this.id3Track.cues[0].startTime, '');
+    const dummyCue = new DummyCue(Number.NEGATIVE_INFINITY, this.id3Track.cues[0].startTime);
     let prevIndex: number | null = null;
     let currIndex: number | null = null;
 
-    const cues = [ dummyCue, ... this.id3Track.cues]
+    const cues = [ dummyCue ]; // ... this.id3Track.cues
+    for (let i = 0; i < this.id3Track.cues.length; i++) {
+      cues.push(this.id3Track.cues[i]);
+    }
+
     {
       let begin = 0, end = cues.length;
       while (begin + 1 < end) {
@@ -482,6 +489,10 @@ export default class CanvasID3Renderer {
     }
     if (this.b24Track) {
       this.b24Track.mode = 'hidden';
+    }
+
+    if (this.media != null && this.prevCurrentTime == null) {
+      this.prevCurrentTime = this.media.currentTime - Number.MIN_VALUE;
     }
   }
 

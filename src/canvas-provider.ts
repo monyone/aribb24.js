@@ -288,6 +288,7 @@ export default class CanvasProvider {
 
     this.option_canvas = option?.canvas ?? null
 
+    // その他オプション類
     this.force_orn = CanvasProvider.getRGBAColorCode(option?.forceStrokeColor) ?? null
     this.force_bg_color = CanvasProvider.getRGBAColorCode(option?.forceBackgroundColor) ?? null
     this.purpose_width = option?.width ?? option?.canvas?.width ?? this.purpose_width
@@ -295,8 +296,20 @@ export default class CanvasProvider {
     this.normalFont = option?.normalFont ?? 'sans-serif'
     this.gaijiFont = option?.gaijiFont ?? this.normalFont
     this.drcsReplacement = option?.drcsReplacement ?? false
-    this.drcsReplaceMapping = new Map<string, string>([... DRCS_NSZ_MAPPING, ... Object.entries(option?.drcsReplaceMapping ?? {})])
+
+    // IE11 では以下は動かない...
+    // this.drcsReplaceMapping = new Map<string, string>([... DRCS_NSZ_MAPPING, ... Object.entries(option?.drcsReplaceMapping ?? {})])
+    this.drcsReplaceMapping = new Map<string, string>(DRCS_NSZ_MAPPING);
+    {
+      const entries = Object.entries(option?.drcsReplaceMapping ?? {})
+      for (let i = 0; i < entries.length; i++) {
+        const entry = entries[i];
+        this.drcsReplaceMapping.set(entry[0], entry[1]);
+      }
+    }
+
     this.useStrokeText = option?.useStrokeText ?? false
+    // その他オプション類終わり
 
     if (!CanvasProvider.detect(this.pes, option)) {
       return null;
