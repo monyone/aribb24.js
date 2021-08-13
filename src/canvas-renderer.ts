@@ -179,30 +179,30 @@ export default class CanvasID3Renderer {
     for (let begin = 0; begin < data.length;) {
       const id3_start = begin;
 
-      if (begin + 3 >= data.length) { break; }
+      if (begin + 3 > data.length) { break; }
       if (!(data[begin + 0] === 0x49 && data[begin + 1] === 0x44 && data[begin + 2] === 0x33)) { break; }
       begin += 3 + 2 /* version */ + 1 /* flag */;
 
-      if (begin + 4 >= data.length) { break; }
+      if (begin + 4 > data.length) { break; }
       const id3_size = readID3Size(data, begin + 0, begin + 4);
       begin += 4;
 
       const id3_end = id3_start + 3 + 2 + 1 + 4 + id3_size;
-      if (id3_end >= data.length) { break; }
+      if (id3_end > data.length) { break; }
 
       for (let frame = begin; frame < id3_end;) {
         const frame_begin = frame;
 
-        if (frame + 4 >= data.length) { break; }
+        if (frame + 4 > data.length) { break; }
         const frame_name = binaryISO85591ToString(data, frame + 0, frame + 4);
         frame += 4;
 
-        if (frame + 4 >= data.length) { break; }
+        if (frame + 4 > data.length) { break; }
         const frame_size = readID3Size(data, frame + 0, frame + 4);
         frame += 4 + 2 /* flag */;
 
         const frame_end = frame_begin + 4 + 4 + 2 + frame_size;
-        if (frame_end >= data.length) { break; }
+        if (frame_end > data.length) { break; }
 
         if (frame_name === 'PRIV') {
           const PRIV_begin = frame;
@@ -251,7 +251,7 @@ export default class CanvasID3Renderer {
       }
 
       begin = id3_start + 3 + 2 + 1 + 4 + id3_size;
-      if (begin + 3 >= data.length) { continue; }
+      if (begin + 3 > data.length) { continue; }
       // id3 footer
       if (!(data[begin + 0] === 0x33 && data[begin + 1] === 0x44 && data[begin + 2] === 0x49)) { continue; }
       begin += 3 + 2 /* version */ + 1 /* flags */ + 4 /* size */;
