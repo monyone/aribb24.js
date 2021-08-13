@@ -179,7 +179,7 @@ export default class CanvasID3Renderer {
     for (let begin = 0; begin < data.length;) {
       const id3_start = begin;
 
-      if (begin + 3 > data.length) { break; }
+      if (begin + 2 > data.length) { break; }
       if (!(data[begin + 0] === 0x49 && data[begin + 1] === 0x44 && data[begin + 2] === 0x33)) { break; }
       begin += 3 + 2 /* version */ + 1 /* flag */;
 
