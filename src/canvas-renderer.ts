@@ -8,7 +8,7 @@ const DETECT_TIMEUPDATE_SEEKING_RANGE = 1;
 interface RendererOption {
   width?: number,
   height?: number,
-  data_identifer?: number,
+  data_identifier?: number,
   data_group_id?: number,
   forceStrokeColor?: string,
   forceBackgroundColor?: string,
@@ -53,15 +53,15 @@ export default class CanvasID3Renderer {
   private readonly onResizeHandler: (() => void) = this.onResize.bind(this);
 
   private rendererOption: RendererOption | undefined
-  private data_identifer: number
+  private data_identifier: number
   private data_group_id: number
 
   public constructor(option?: RendererOption) {
-    this.data_identifer = option?.data_identifer ?? 0x80 // default: caption
+    this.data_identifier = option?.data_identifier ?? 0x80 // default: caption
     this.data_group_id = option?.data_group_id ?? 0x01 // default: 1st language
     this.rendererOption = {
       ... option,
-      data_identifer: this.data_identifer,
+      data_identifier: this.data_identifier,
       data_group_id: this.data_group_id,
       keepAspectRatio: option?.keepAspectRatio ?? true, // default: true
       enableAutoInBandMetadataTextTrackDetection: option?.enableAutoInBandMetadataTextTrackDetection ?? true, // default: true
@@ -150,6 +150,7 @@ export default class CanvasID3Renderer {
     if (estimate == null) { return false; }
 
     const end_time = Number.isFinite(estimate.endTime) ? estimate.endTime : Number.MAX_SAFE_INTEGER;
+    console.log(pts, end_time);
     return this.addB24Cue(pts, end_time, data)
   }
 
@@ -634,7 +635,7 @@ export default class CanvasID3Renderer {
       this.b24Track = new HighResTextTrack(this.media);
       (this.b24Track as HighResTextTrack).startPolling();
     } else {
-      const aribb24js_label = `ARIB B24 Japanese (data_identifer=0x${this.data_identifer.toString(16)}, data_group_id=${this.data_group_id})`
+      const aribb24js_label = `ARIB B24 Japanese (data_identifier=0x${this.data_identifier.toString(16)}, data_group_id=${this.data_group_id})`
       for (let i = 0; i < this.media.textTracks.length; i++) {
         const track = this.media.textTracks[i]
         if (track.label === aribb24js_label) {

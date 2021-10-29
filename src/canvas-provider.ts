@@ -23,7 +23,7 @@ interface ProviderOption {
   canvas?: HTMLCanvasElement,
   width?: number,
   height?: number,
-  data_identifer?: number,
+  data_identifier?: number,
   data_group_id?: number,
   forceStrokeColor?: string,
   forceBackgroundColor?: string,
@@ -256,12 +256,12 @@ export default class CanvasProvider {
   }
 
   public static detect(pes: Uint8Array , option?: ProviderOption): boolean {
-    const purpose_data_identifer = option?.data_identifer ?? 0x80; // default: caption
+    const purpose_data_identifier = option?.data_identifier ?? 0x80; // default: caption
     const purpose_data_group_id = option?.data_group_id ?? 0x01; // default: 1st language
 
     if (pes.length <= 0) { return false; }  
-    const data_identifer = pes[0];
-    if(data_identifer !== purpose_data_identifer){
+    const data_identifier = pes[0];
+    if(data_identifier !== purpose_data_identifier){
       return false;
     }
 
