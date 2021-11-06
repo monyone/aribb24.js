@@ -150,7 +150,6 @@ export default class CanvasID3Renderer {
     if (estimate == null) { return false; }
 
     const end_time = Number.isFinite(estimate.endTime) ? estimate.endTime : Number.MAX_SAFE_INTEGER;
-    console.log(pts, end_time);
     return this.addB24Cue(pts, end_time, data)
   }
 
