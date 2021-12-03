@@ -5,7 +5,7 @@ module.exports = {
     "aribb24": {
       import: path.resolve(__dirname, 'src', 'index.ts')
     },
-    "aribb24-embeded": {
+    "aribb24-embedded": {
       import: path.resolve(__dirname, 'src', 'embedded.ts')
     }
   },
