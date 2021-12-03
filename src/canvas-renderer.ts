@@ -22,10 +22,10 @@ interface RendererOption {
   useStroke?: boolean,
   useHighResTextTrack?: boolean,
   useHighResTimeupdate?: boolean,
-  useEmbeddedFont?: boolean,
 }
 
 export default class CanvasID3Renderer {
+
   private media: HTMLVideoElement | null = null
   private id3Track: TextTrack | null = null
   private b24Track: TextTrack | null = null
@@ -68,10 +68,6 @@ export default class CanvasID3Renderer {
       enableAutoInBandMetadataTextTrackDetection: option?.enableAutoInBandMetadataTextTrackDetection ?? true, // default: true
       useStroke: option?.useStroke ?? true, // default: true
     }
-  }
-
-  public static loadEmbeddedFont(): Promise<boolean> {
-    return CanvasProvider.loadEmbeddedFont()
   }
 
   public attachMedia(media: HTMLVideoElement, subtitleElement?: HTMLElement): void {

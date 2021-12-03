@@ -19,7 +19,7 @@ import CRC16 from './utils/crc16-ccitt'
 import SparkMD5 from 'spark-md5'
 
 const SIZE_MAGNIFICATION = 2; // 奇数の height 時に SSZ で改行を行う場合があるため、全体をN倍して半分サイズに備える
-let ADDITIONAL_SYMBOLS: Map<string, PathElement> | null = null;
+let EMBEDDED_GLYPH: Map<string, PathElement> | null = null;
 
 interface ProviderOption {
   canvas?: HTMLCanvasElement,
@@ -35,7 +35,6 @@ interface ProviderOption {
   drcsReplaceMapping?: Record<string, string>,
   keepAspectRatio?: boolean,
   useStroke?: boolean,
-  useEmbeddedFont?: boolean,
 }
 
 interface ProviderResult {
@@ -116,20 +115,14 @@ export default class CanvasProvider {
   private drcsReplaceMapping: Map<string, string> = new Map<string, string>();
 
   private useStroke: boolean = false
-  private useEmbeddedFont: boolean = false
 
   public constructor(pes: Uint8Array, pts: number) {
     this.pes = pes
     this.startTime = pts
   }
 
-  public static loadEmbeddedFont(): Promise<boolean> {
-    return import(/* webpackChunkName: "embedded_arib_additional_font" */ './constants/mapping/additional-symbols').then((module) => {
-      ADDITIONAL_SYMBOLS = module.default;
-      return true;
-    }).catch(() => {
-      return false;
-    })
+  public static setEmbeddedGlyph(embeded: Map<string, PathElement>): void {
+    EMBEDDED_GLYPH = embeded;
   }
 
   private initialize(): void {
@@ -202,7 +195,6 @@ export default class CanvasProvider {
     this.drcsReplaceMapping = new Map<string, string>();
 
     this.useStroke = false
-    this.useEmbeddedFont = false
   }
 
   private width(): number {
@@ -324,7 +316,6 @@ export default class CanvasProvider {
     }
 
     this.useStroke = option?.useStroke ?? false
-    this.useEmbeddedFont = option?.useEmbeddedFont ?? false
     // その他オプション類終わり
 
     if (!CanvasProvider.detect(this.pes, option)) {
@@ -1152,8 +1143,8 @@ export default class CanvasProvider {
   private renderFont(character: string): void {
     if (!this.render_canvas) { return; }
 
-    if (this.useEmbeddedFont && ADDITIONAL_SYMBOLS != null && ADDITIONAL_SYMBOLS.has(character)) {
-      const {viewBox, path} = ADDITIONAL_SYMBOLS.get(character)!;
+    if (EMBEDDED_GLYPH != null && EMBEDDED_GLYPH.has(character)) {
+      const {viewBox, path} = EMBEDDED_GLYPH.get(character)!;
       this.renderPath(viewBox, path);
       return
     }
