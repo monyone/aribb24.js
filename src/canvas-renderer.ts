@@ -19,9 +19,10 @@ interface RendererOption {
   keepAspectRatio?: boolean,
   enableRawCanvas?: boolean,
   enableAutoInBandMetadataTextTrackDetection?: boolean,
-  useStrokeText?: boolean,
+  useStroke?: boolean,
   useHighResTextTrack?: boolean,
   useHighResTimeupdate?: boolean,
+  useEmbeddedFont?: boolean,
 }
 
 export default class CanvasID3Renderer {
@@ -65,7 +66,7 @@ export default class CanvasID3Renderer {
       data_group_id: this.data_group_id,
       keepAspectRatio: option?.keepAspectRatio ?? true, // default: true
       enableAutoInBandMetadataTextTrackDetection: option?.enableAutoInBandMetadataTextTrackDetection ?? true, // default: true
-      useStrokeText: option?.useStrokeText ?? true, // default: true
+      useStroke: option?.useStroke ?? true, // default: true
     }
   }
 

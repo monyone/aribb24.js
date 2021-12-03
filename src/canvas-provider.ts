@@ -12,7 +12,7 @@ import KATAKANA_MAPPING from './constants/mapping/katakana'
 
 import DRCS_NSZ_MAPPING from './constants/mapping/drcs-NSZ'
 
-import ADDITIONAL_SYMBOL_SET from './constants/mapping/additional-symbol-set'
+import ADDITIONAL_SYMBOLS from './constants/mapping/additional-symbols'
 
 import CRC16 from './utils/crc16-ccitt'
 import SparkMD5 from 'spark-md5'
@@ -32,7 +32,8 @@ interface ProviderOption {
   drcsReplacement?: boolean,
   drcsReplaceMapping?: Record<string, string>,
   keepAspectRatio?: boolean,
-  useStrokeText?: boolean,
+  useStroke?: boolean,
+  useEmbeddedFont?: boolean,
 }
 
 interface ProviderResult {
@@ -111,7 +112,8 @@ export default class CanvasProvider {
   private drcsReplacement: boolean = false
   private drcsReplaceMapping: Map<string, string> = new Map<string, string>();
 
-  private useStrokeText: boolean = false
+  private useStroke: boolean = false
+  private useEmbeddedFont: boolean = false
 
   public constructor(pes: Uint8Array, pts: number) {
     this.pes = pes
@@ -187,7 +189,8 @@ export default class CanvasProvider {
     this.drcsReplacement = false
     this.drcsReplaceMapping = new Map<string, string>();
 
-    this.useStrokeText = false
+    this.useStroke = false
+    this.useEmbeddedFont = false
   }
 
   private width(): number {
@@ -308,7 +311,8 @@ export default class CanvasProvider {
       }
     }
 
-    this.useStrokeText = option?.useStrokeText ?? false
+    this.useStroke = option?.useStroke ?? false
+    this.useEmbeddedFont = option?.useEmbeddedFont ?? false
     // その他オプション類終わり
 
     if (!CanvasProvider.detect(this.pes, option)) {
@@ -1136,6 +1140,12 @@ export default class CanvasProvider {
   private renderFont(character: string): void {
     if (!this.render_canvas) { return; }
 
+    if (this.useEmbeddedFont && ADDITIONAL_SYMBOLS.has(character)) {
+      const {viewBox, path} = ADDITIONAL_SYMBOLS.get(character)!;
+      this.renderPath(viewBox, path);
+      return
+    }
+
     const ctx = this.render_canvas?.getContext('2d')
     if (!ctx) { return; }
 
@@ -1148,8 +1158,8 @@ export default class CanvasProvider {
     {
       const orn = this.force_orn ?? this.orn
       if (orn && (!this.force_orn || this.force_orn !== this.fg_color)) {
-        if (this.useStrokeText) {
-          ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
+        if (this.useStroke) {
+          ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOLS.has(character) ? this.gaijiFont : this.normalFont}`
           ctx.strokeStyle = CanvasProvider.getRGBAfromColorCode(orn)
           ctx.lineJoin = 'round'
           ctx.textBaseline = 'middle'
@@ -1164,7 +1174,7 @@ export default class CanvasProvider {
 
           for(let dy = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dy <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dy++) {
             for(let dx = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dx <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dx++) {
-              ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
+              ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOLS.has(character) ? this.gaijiFont : this.normalFont}`
               ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(orn)
               ctx.textBaseline = 'middle'
               ctx.textAlign = "center"
@@ -1179,11 +1189,54 @@ export default class CanvasProvider {
       }
     }
 
-    ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
+    ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOLS.has(character) ? this.gaijiFont : this.normalFont}`
     ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(this.fg_color)
     ctx.textBaseline = 'middle'
     ctx.textAlign = "center"
     ctx.fillText(character, 0, 0);
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+
+  private renderPath(viewBox: [number, number, number, number], path: string): void {
+    if (!this.render_canvas) { return; }
+
+    const ctx = this.render_canvas?.getContext('2d')
+    if (!ctx) { return; }
+
+    const origin_x = (this.position_x + this.shs / 2) * this.width_magnification()
+    const origin_y = (this.position_y - this.height() + this.svs / 2) * this.height_magnification()
+    ctx.translate(origin_x, origin_y)
+
+    const [sx, sy, dx, dy] = viewBox
+    const width = dx - sx
+    const height = dy - sy
+    ctx.scale(this.ssm_y / width, this.ssm_y / height);
+    ctx.translate(sx, sy);
+
+    {
+      const orn = this.force_orn ?? this.orn
+      if (orn && (!this.force_orn || this.force_orn !== this.fg_color)) {
+        if (this.useStroke) {
+          ctx.strokeStyle = CanvasProvider.getRGBAfromColorCode(orn)
+          ctx.lineJoin = 'round'
+          ctx.lineWidth = 4 * Math.max(width / this.ssm_y, height / this.ssm_y) * SIZE_MAGNIFICATION
+          ctx.stroke(new Path2D(path));
+        } else {
+          for(let dy = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dy <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dy++) {
+            for(let dx = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dx <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dx++) {
+              ctx.translate(dx, dy)
+              ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(orn)
+              ctx.fill(new Path2D(path));
+              ctx.translate(-dx, -dy)
+            }
+          }
+        }
+      }
+    }
+
+    ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(this.fg_color)
+    ctx.fill(new Path2D(path));
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
