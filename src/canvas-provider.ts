@@ -12,12 +12,14 @@ import KATAKANA_MAPPING from './constants/mapping/katakana'
 
 import DRCS_NSZ_MAPPING from './constants/mapping/drcs-NSZ'
 
-import ADDITIONAL_SYMBOLS from './constants/mapping/additional-symbols'
+import ADDITIONAL_SYMBOL_SET from './constants/mapping/additional-symbol-set'
+import { PathElement } from './constants/mapping/additional-symbols'
 
 import CRC16 from './utils/crc16-ccitt'
 import SparkMD5 from 'spark-md5'
 
 const SIZE_MAGNIFICATION = 2; // 奇数の height 時に SSZ で改行を行う場合があるため、全体をN倍して半分サイズに備える
+let ADDITIONAL_SYMBOLS: Map<string, PathElement> | null = null;
 
 interface ProviderOption {
   canvas?: HTMLCanvasElement,
@@ -40,6 +42,7 @@ interface ProviderResult {
   startTime: number,
   endTime: number,
 }
+
 
 export default class CanvasProvider {
   private pes: Uint8Array
@@ -118,6 +121,15 @@ export default class CanvasProvider {
   public constructor(pes: Uint8Array, pts: number) {
     this.pes = pes
     this.startTime = pts
+  }
+
+  public static loadEmbeddedFont(): Promise<boolean> {
+    return import(/* webpackChunkName: "embedded_arib_additional_font" */ './constants/mapping/additional-symbols').then((module) => {
+      ADDITIONAL_SYMBOLS = module.default;
+      return true;
+    }).catch(() => {
+      return false;
+    })
   }
 
   private initialize(): void {
@@ -1140,7 +1152,7 @@ export default class CanvasProvider {
   private renderFont(character: string): void {
     if (!this.render_canvas) { return; }
 
-    if (this.useEmbeddedFont && ADDITIONAL_SYMBOLS.has(character)) {
+    if (this.useEmbeddedFont && ADDITIONAL_SYMBOLS != null && ADDITIONAL_SYMBOLS.has(character)) {
       const {viewBox, path} = ADDITIONAL_SYMBOLS.get(character)!;
       this.renderPath(viewBox, path);
       return
@@ -1159,7 +1171,7 @@ export default class CanvasProvider {
       const orn = this.force_orn ?? this.orn
       if (orn && (!this.force_orn || this.force_orn !== this.fg_color)) {
         if (this.useStroke) {
-          ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOLS.has(character) ? this.gaijiFont : this.normalFont}`
+          ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
           ctx.strokeStyle = CanvasProvider.getRGBAfromColorCode(orn)
           ctx.lineJoin = 'round'
           ctx.textBaseline = 'middle'
@@ -1174,7 +1186,7 @@ export default class CanvasProvider {
 
           for(let dy = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dy <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dy++) {
             for(let dx = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dx <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dx++) {
-              ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOLS.has(character) ? this.gaijiFont : this.normalFont}`
+              ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
               ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(orn)
               ctx.textBaseline = 'middle'
               ctx.textAlign = "center"
@@ -1189,7 +1201,7 @@ export default class CanvasProvider {
       }
     }
 
-    ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOLS.has(character) ? this.gaijiFont : this.normalFont}`
+    ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
     ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(this.fg_color)
     ctx.textBaseline = 'middle'
     ctx.textAlign = "center"

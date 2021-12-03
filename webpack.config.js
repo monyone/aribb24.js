@@ -4,6 +4,7 @@ module.exports = {
   entry: path.resolve(__dirname, 'src', 'index.ts'),
   output: {
     filename: 'aribb24.js',
+    chunkFilename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
     library: 'aribb24js',
     libraryTarget: 'umd',

@@ -70,6 +70,10 @@ export default class CanvasID3Renderer {
     }
   }
 
+  public static loadEmbeddedFont(): Promise<boolean> {
+    return CanvasProvider.loadEmbeddedFont()
+  }
+
   public attachMedia(media: HTMLVideoElement, subtitleElement?: HTMLElement): void {
     this.detachMedia()
     this.media = media
