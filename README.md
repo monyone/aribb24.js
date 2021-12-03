@@ -22,7 +22,7 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
     * currently, replace to full-width character only supported.
 * keepAspectRatio: keep caption's aspect ratio in any container. (default: true)
 * enableRawCanvas: enable raw video resolution canvas. it can get getRawCanvas method.
-* useStrokeText: use render outer stroke by strokeText API. (default: true)
+* useStroke: use render outer stroke by strokeText or stroke (strokeText or stroke) API. (default: true)
 * useHighResTextTrack: use polling instead of native cuechange event for b24 TextTrackCue handling.
 * useHighResTimeupdate: use polling instead of native timeupdate event for id3 TextTrackCue handling.
 * enableAutoInBandMetadataTextTrackDetection: enable InBand Metadata (id3) TextTrack auto detection. (default: true)
@@ -31,6 +31,7 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
         * Legacy Edge Native HLS Player: true 
         * hls.js : false (Please use FRAG_PARSING_METADATA event instead of this option)
         * video.js : false (Please set video.js's Timed Metadata TextTrack manually, not supported auto detection.)
+* useEmbeddedFont: use embedded font for arib symbol. IE11 not supported.
 
 ## Build
 
