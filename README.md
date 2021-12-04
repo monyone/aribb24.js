@@ -16,7 +16,7 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
 * This Project based on [b24.js](https://github.com/xqq/b24.js).
     * The pioneer of ARIB caption feature for web browser. Much inspire it. Thanks!
 * Many feature based on [TVCaptionMod2](https://github.com/xtne6f/TVCaptionMod2).
-    * Much Feedback about this project and inspire it. Thanks!
+    * Much Feedback about this project and inspired by it. Thanks!
 
 ## Options
 
