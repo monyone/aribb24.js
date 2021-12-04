@@ -1150,7 +1150,7 @@ export default class CanvasProvider {
     }
 
     const useGaijiFont = ADDITIONAL_SYMBOL_SET.has(character)
-    if (useGaijiFont) { character = '\u{fe0e}'+ character }
+    if (useGaijiFont) { character += '\u{fe0e}' }
 
     const ctx = this.render_canvas?.getContext('2d')
     if (!ctx) { return; }
