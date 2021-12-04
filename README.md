@@ -9,6 +9,15 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
 * Fully compatible of [b24.js](https://github.com/xqq/b24.js) API
 * Colored rendering with font color and background color specified by data packet
 
+## Special Thanks
+
+* Use [和田研中丸ゴシック2004ARIB](https://ja.osdn.net/projects/jis2004/wiki/FrontPage) glyph data for embedded rendering to ARIB symbol.
+    * It's a public domain font. aribb24-embedded.js use this font data for ARIB symbol rendering. Thanks!
+* This Project based on [b24.js](https://github.com/xqq/b24.js).
+    * The pioneer of ARIB caption feature for web browser. Much inspire it. Thanks!
+* Many feature based on [TVCaptionMod2](https://github.com/xtne6f/TVCaptionMod2).
+    * Much Feedback about this project and inspire it. Thanks!
+
 ## Options
 
 * data_identifer: Specify number 0x80 (caption) or 0x81 (superimpose). default: 0x80 (caption)
@@ -31,7 +40,6 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
         * Legacy Edge Native HLS Player: true 
         * hls.js : false (Please use FRAG_PARSING_METADATA event instead of this option)
         * video.js : false (Please set video.js's Timed Metadata TextTrack manually, not supported auto detection.)
-* useEmbeddedFont: use embedded font for arib symbol. IE11 not supported.
 
 ## Build
 
