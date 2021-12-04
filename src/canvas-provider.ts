@@ -1149,6 +1149,9 @@ export default class CanvasProvider {
       return
     }
 
+    const useGaijiFont = ADDITIONAL_SYMBOL_SET.has(character)
+    if (useGaijiFont) { character = '\u{fe0e}'+ character }
+
     const ctx = this.render_canvas?.getContext('2d')
     if (!ctx) { return; }
 
@@ -1162,7 +1165,7 @@ export default class CanvasProvider {
       const orn = this.force_orn ?? this.orn
       if (orn && (!this.force_orn || this.force_orn !== this.fg_color)) {
         if (this.useStroke) {
-          ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
+          ctx.font = `${this.ssm_x}px ${useGaijiFont ? this.gaijiFont : this.normalFont}`
           ctx.strokeStyle = CanvasProvider.getRGBAfromColorCode(orn)
           ctx.lineJoin = 'round'
           ctx.textBaseline = 'middle'
@@ -1177,7 +1180,7 @@ export default class CanvasProvider {
 
           for(let dy = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dy <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dy++) {
             for(let dx = -2 * SIZE_MAGNIFICATION * this.width_magnification(); dx <= 2 * SIZE_MAGNIFICATION * this.width_magnification(); dx++) {
-              ctx.font = `${this.ssm_x * this.width_magnification()}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
+              ctx.font = `${this.ssm_x * this.width_magnification()}px ${useGaijiFont ? this.gaijiFont : this.normalFont}`
               ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(orn)
               ctx.textBaseline = 'middle'
               ctx.textAlign = "center"
@@ -1192,7 +1195,7 @@ export default class CanvasProvider {
       }
     }
 
-    ctx.font = `${this.ssm_x}px ${ADDITIONAL_SYMBOL_SET.has(character) ? this.gaijiFont : this.normalFont}`
+    ctx.font = `${this.ssm_x}px ${useGaijiFont ? this.gaijiFont : this.normalFont}`
     ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(this.fg_color)
     ctx.textBaseline = 'middle'
     ctx.textAlign = "center"
