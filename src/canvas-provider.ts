@@ -12,8 +12,8 @@ import KATAKANA_MAPPING from './constants/mapping/katakana'
 
 import DRCS_NSZ_MAPPING from './constants/mapping/drcs-NSZ'
 
-import ADDITIONAL_SYMBOL_SET from './constants/mapping/additional-symbol-set'
-import { PathElement } from './constants/mapping/additional-symbols'
+import ADDITIONAL_SYMBOLS_SET from './constants/mapping/additional-symbols-set'
+import { PathElement } from './constants/mapping/additional-symbols-glyph'
 
 import CRC16 from './utils/crc16-ccitt'
 import SparkMD5 from 'spark-md5'
@@ -1149,7 +1149,7 @@ export default class CanvasProvider {
       return
     }
 
-    const useGaijiFont = ADDITIONAL_SYMBOL_SET.has(character)
+    const useGaijiFont = ADDITIONAL_SYMBOLS_SET.has(character)
     if (useGaijiFont) { character += '\u{fe0e}' }
 
     const ctx = this.render_canvas?.getContext('2d')
