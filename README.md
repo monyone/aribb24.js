@@ -11,12 +11,12 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
 
 ## Special Thanks
 
-* Use [和田研中丸ゴシック2004ARIB](https://ja.osdn.net/projects/jis2004/wiki/FrontPage) glyph data for embedded rendering to ARIB symbol.
-    * It's a public domain font. aribb24-embedded.js use this font data for ARIB symbol rendering. Thanks!
-* This Project based on [b24.js](https://github.com/xqq/b24.js).
-    * The pioneer of ARIB caption feature for web browser. Much inspire it. Thanks!
-* Many feature based on [TVCaptionMod2](https://github.com/xtne6f/TVCaptionMod2).
-    * Much Feedback about this project and inspired by it. Thanks!
+* Use glyph data from [和田研中丸ゴシック2004ARIB](https://ja.osdn.net/projects/jis2004/wiki/FrontPage) for ARIB additional symbol rendering.
+    * aribb24-embedded.js utilizes embedded glyph data exported from the font which is released under public domain license.
+* Inspired by [b24.js](https://github.com/xqq/b24.js).
+    * The pioneer of ARIB caption feature rendering on Web
+* Influenced by [TVCaptionMod2](https://github.com/xtne6f/TVCaptionMod2).
+    * Got lots of feedback form the project author and heavily inspired by it.
 
 ## Options
 
@@ -234,3 +234,5 @@ yarn run build
 
 * CanvasRenderer in Android Chrome with native HLS player dose not work
     * Because not support id3 timedmetadata in Android Chrome
+* aribb24-embedded.js on IE11 requires [path2d-polyfill](https://github.com/nilzona/path2d-polyfill).
+    * Embedded font use Path2D. IE11 does not support this feature.
