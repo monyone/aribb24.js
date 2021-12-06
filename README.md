@@ -14,7 +14,7 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
 * Use glyph data from [和田研中丸ゴシック2004ARIB](https://ja.osdn.net/projects/jis2004/wiki/FrontPage) for ARIB additional symbol rendering.
     * aribb24-embedded.js utilizes embedded glyph data exported from the font which is released under public domain license.
 * Inspired by [b24.js](https://github.com/xqq/b24.js).
-    * The pioneer of ARIB caption feature rendering on Web.
+    * The pioneer of ARIB caption rendering on Web.
 * Influenced by [TVCaptionMod2](https://github.com/xtne6f/TVCaptionMod2).
     * Got lots of feedback form the project author and heavily inspired by it.
 
