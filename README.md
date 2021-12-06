@@ -32,6 +32,7 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
 * keepAspectRatio: keep caption's aspect ratio in any container. (default: true)
 * enableRawCanvas: enable raw video resolution canvas. it can get getRawCanvas method.
 * useStroke: use render outer stroke by strokeText or stroke (strokeText or stroke) API. (default: true)
+* usePUA: use PUA (Private Use Area) instead of unicode 5.2 (for Windows TV Gothic)
 * useHighResTextTrack: use polling instead of native cuechange event for b24 TextTrackCue handling.
 * useHighResTimeupdate: use polling instead of native timeupdate event for id3 TextTrackCue handling.
 * enableAutoInBandMetadataTextTrackDetection: enable InBand Metadata (id3) TextTrack auto detection. (default: true)

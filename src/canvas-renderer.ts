@@ -22,6 +22,7 @@ interface RendererOption {
   useStroke?: boolean,
   useHighResTextTrack?: boolean,
   useHighResTimeupdate?: boolean,
+  usePUA?: boolean,
 }
 
 export default class CanvasID3Renderer {

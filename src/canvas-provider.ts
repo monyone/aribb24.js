@@ -6,6 +6,8 @@ import { G_DRCS_BY_ALPHABET, G_DRCS_BY_F } from './constants/jis8'
 import pallets from './constants/color-table'
 
 import KANJI_MAPPING from './constants/mapping/kanji'
+import ADDITIONAL_SYMBOLS_PUA_MAPPING from './constants/mapping/additional-symbols-pua'
+import ADDITIONAL_SYMBOLS_UNICODE_MAPPING from './constants/mapping/additional-symbols-unicode'
 import ASCII_MAPPING from './constants/mapping/ascii'
 import HIRAGANA_MAPPING from './constants/mapping/hiragana'
 import KATAKANA_MAPPING from './constants/mapping/katakana'
@@ -35,6 +37,7 @@ interface ProviderOption {
   drcsReplaceMapping?: Record<string, string>,
   keepAspectRatio?: boolean,
   useStroke?: boolean,
+  usePUA?: boolean,
 }
 
 interface ProviderResult {
@@ -115,6 +118,7 @@ export default class CanvasProvider {
   private drcsReplaceMapping: Map<string, string> = new Map<string, string>();
 
   private useStroke: boolean = false
+  private usePUA: boolean = false
 
   public constructor(pes: Uint8Array, pts: number) {
     this.pes = pes
@@ -195,6 +199,7 @@ export default class CanvasProvider {
     this.drcsReplaceMapping = new Map<string, string>();
 
     this.useStroke = false
+    this.usePUA = false
   }
 
   private width(): number {
@@ -316,6 +321,7 @@ export default class CanvasProvider {
     }
 
     this.useStroke = option?.useStroke ?? false
+    this.usePUA = option?.usePUA ?? false
     // その他オプション類終わり
 
     if (!CanvasProvider.detect(this.pes, option)) {
@@ -895,9 +901,20 @@ export default class CanvasProvider {
       const ch1 = ((key & 0xFF00) >> 8) - 0x21
       const ch2 = ((key & 0x00FF) >> 0) - 0x21
       const index = ch1 * (0x7E - 0x21 + 1) + ch2
-      const character = KANJI_MAPPING[index]
 
-      this.renderFont(character)
+      const additional_symbol = ((0x75 - 0x21) * (0x7E - 0x21 + 1)) + 0
+      if (index < additional_symbol) {
+        const character = KANJI_MAPPING[index]
+        this.renderFont(character)
+      } else {
+        if (this.usePUA) {
+          const character = ADDITIONAL_SYMBOLS_PUA_MAPPING[index - additional_symbol]
+          this.renderFont(character)
+        } else {
+          const character = ADDITIONAL_SYMBOLS_UNICODE_MAPPING[index - additional_symbol]
+          this.renderFont(character)
+        }
+      }
 
       this.move_relative_pos(1, 0)
     }else if(entry.alphabet === ALPHABETS.ASCII) {
