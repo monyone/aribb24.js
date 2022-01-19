@@ -140,11 +140,11 @@ export const G_SET_BY_ALPHABET = new Map<number, ALPHABET_ENTRY>([
   ],
   [
     ALPHABETS.JIS_X0213_2004_KANJI_1,
-    { bytes: 1, alphabet: ALPHABETS.JIS_X0213_2004_KANJI_1 },
+    { bytes: 2, alphabet: ALPHABETS.JIS_X0213_2004_KANJI_1 },
   ],
   [
     ALPHABETS.JIS_X0213_2004_KANJI_2,
-    { bytes: 1, alphabet: ALPHABETS.JIS_X0213_2004_KANJI_2 },
+    { bytes: 2, alphabet: ALPHABETS.JIS_X0213_2004_KANJI_2 },
   ],
   [
     ALPHABETS.ADDITIONAL_SYMBOLS,
@@ -163,10 +163,10 @@ export const G_SET_BY_F = new Map<number, ALPHABET_ENTRY>([
   [0x36, { bytes: 1, alphabet: ALPHABETS.P_ASCII }],
   [0x37, { bytes: 1, alphabet: ALPHABETS.P_HIRAGANA }],
   [0x38, { bytes: 1, alphabet: ALPHABETS.P_KATAKANA }],
-  [0x39, { bytes: 1, alphabet: ALPHABETS.JIS_X0201_KATAKANA }],
-  [0x3a, { bytes: 1, alphabet: ALPHABETS.JIS_X0213_2004_KANJI_1 }],
-  [0x3b, { bytes: 1, alphabet: ALPHABETS.JIS_X0213_2004_KANJI_2 }],
-  [0x3c, { bytes: 2, alphabet: ALPHABETS.ADDITIONAL_SYMBOLS }],
+  [0x49, { bytes: 1, alphabet: ALPHABETS.JIS_X0201_KATAKANA }],
+  [0x39, { bytes: 2, alphabet: ALPHABETS.JIS_X0213_2004_KANJI_1 }],
+  [0x3a, { bytes: 2, alphabet: ALPHABETS.JIS_X0213_2004_KANJI_2 }],
+  [0x3b, { bytes: 2, alphabet: ALPHABETS.ADDITIONAL_SYMBOLS }],
 ])
 
 export const G_DRCS_BY_ALPHABET = new Map<number, ALPHABET_ENTRY>([
