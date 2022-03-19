@@ -29,6 +29,8 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
 * drcsReplacement: Replace DRCS to text if possible
 * drcsReplaceMapping: add more DRCS Mapping by Object (ex. { md5: character })
     * currently, replace to full-width character only supported.
+* PRACallback: specify PRA callback for SuperImpose
+    * Type Definition is PRA (index: number) => unknown
 * keepAspectRatio: keep caption's aspect ratio in any container. (default: true)
 * enableRawCanvas: enable raw video resolution canvas. it can get getRawCanvas method.
 * useStroke: use render outer stroke by strokeText or stroke (strokeText or stroke) API. (default: true)

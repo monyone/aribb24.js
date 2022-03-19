@@ -43,6 +43,7 @@ interface ProviderOption {
 interface ProviderResult {
   startTime: number,
   endTime: number,
+  PRA: number | null
 }
 
 
@@ -110,6 +111,7 @@ export default class CanvasProvider {
   private startTime: number
   private timeElapsed: number = 0
   private endTime: number | null = null
+  private PRA: number | null = null
 
   private normalFont: string = 'sans-serif'
   private gaijiFont: string = this.normalFont
@@ -191,6 +193,7 @@ export default class CanvasProvider {
 
     this.timeElapsed = 0
     this.endTime = null
+    this.PRA = null
 
     this.normalFont = 'sans-serif'
     this.gaijiFont = this.normalFont
@@ -390,7 +393,8 @@ export default class CanvasProvider {
 
     return ({
       startTime: this.startTime,
-      endTime: this.endTime ?? Number.POSITIVE_INFINITY
+      endTime: this.endTime ?? Number.POSITIVE_INFINITY,
+      PRA: this.PRA
     })
   }
 
@@ -756,6 +760,14 @@ export default class CanvasProvider {
           }else if(this.pes[last] === CSI.SCR){
             break
           }else if(this.pes[last] === CSI.PRA){
+            let index = begin + 1
+            let P1 = 0
+            while (this.pes[index] != 0x20){
+              P1 *= 10
+              P1 += this.pes[index] & 0x0F
+              index++
+            }
+            this.PRA = P1
             break
           }else if(this.pes[last] === CSI.ACS){
             break

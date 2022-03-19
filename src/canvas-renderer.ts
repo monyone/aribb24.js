@@ -16,6 +16,7 @@ interface RendererOption {
   gaijiFont?: string,
   drcsReplacement?: boolean,
   drcsReplaceMapping?: Record<string, string>,
+  PRACallback?: (index: number) => unknown,
   keepAspectRatio?: boolean,
   enableRawCanvas?: boolean,
   enableAutoInBandMetadataTextTrackDetection?: boolean,
@@ -380,12 +381,16 @@ export default class CanvasID3Renderer {
         const provider: CanvasProvider = new CanvasProvider(lastCue.data, lastCue.startTime);
 
         if (this.isShowing && this.viewCanvas) {
-          provider.render({
+          const result = provider.render({
             ... this.rendererOption,
             canvas: this.viewCanvas,
             width: this.rendererOption?.width ?? this.viewCanvas.width,
             height: this.rendererOption?.height ?? this.viewCanvas.height,
           })
+
+          if (result?.PRA != null) {
+             this.rendererOption?.PRACallback?.(result.PRA);
+          }
         }
 
         if (this.isShowing && this.rawCanvas) {
