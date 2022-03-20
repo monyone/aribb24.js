@@ -14,6 +14,7 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     library: 'aribb24js',
     libraryTarget: 'umd',
+    globalObject: 'this'
   },
 
   resolve: {
