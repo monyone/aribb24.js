@@ -375,21 +375,24 @@ export default class CanvasProvider {
           foreign.setAttribute('width', `${this.swf_x}`)
           foreign.setAttribute('font-size', `${this.ssm_x}`)
           foreign.setAttribute('letter-spacing', `${this.shs}`)
-          foreign.style.lineHeight = `${this.height() / this.ssm_y}`
+          foreign.style.lineHeight = `${this.height()}px`
 
           root = document.createElement('div')
           root.style.display = 'flex'
           root.style.flexWrap = 'nowrap'
           root.style.flexDirection = 'column'
+          root.style.willChange = 'transform'
 
           line = document.createElement('div')
           line.style.display = 'flex'
           line.style.flex = 'none'
           line.style.flexWrap = 'nowrap'
           line.style.flexDirection = 'row'
+          line.style.height = `${region.ey - region.oy}px`
 
           const span = document.createElement('span')
-          span.style.width = `${region.ox / this.swf_x * 100}%`
+          span.style.width = `${region.ox}px`
+          span.style.height = `${region.ex - region.oy}px`
           span.style.flex = 'none'
 
           bg = document.createElement('span')
@@ -398,6 +401,7 @@ export default class CanvasProvider {
           bg.style.flex = 'none'
           bg.style.flexWrap = 'nowrap'
           bg.style.flexDirection = 'row'
+          bg.style.height = `${region.ey - region.oy}px`
 
           line.appendChild(span)
           line.appendChild(bg)
@@ -412,6 +416,7 @@ export default class CanvasProvider {
           line.style.flex = 'none'
           line.style.flexWrap = 'nowrap'
           line.style.flexDirection = 'row'
+          line.style.height = `${region.ey - region.oy}px`
 
           bg = document.createElement('span')
           bg.style.backgroundColor = `${region.bg_color}`
@@ -420,9 +425,11 @@ export default class CanvasProvider {
           bg.style.flex = 'none'
           bg.style.flexWrap = 'nowrap'
           bg.style.flexDirection = 'row'
+          bg.style.height = `${region.ey - region.oy}px`
 
           const span = document.createElement('span')
-          span.style.width = `${region.ox / this.swf_x * 100}%`
+          span.style.width = `${region.ox}px`
+          span.style.height = `${region.ex - region.oy}px`
           span.style.flex = 'none'
 
           line.appendChild(span)
@@ -438,9 +445,11 @@ export default class CanvasProvider {
           bg.style.flex = 'none'
           bg.style.flexWrap = 'nowrap'
           bg.style.flexDirection = 'row'
+          bg.style.height = `${region.ey - region.oy}px`
 
           const span = document.createElement('span')
-          span.style.width = `${(region.ox - previous.ex) / this.swf_x * 100}%`
+          span.style.width = `${region.ox - previous.ex}px`
+          span.style.height = `${region.ex - region.oy}px`
           span.style.flex = 'none'
 
           line!.appendChild(span)
@@ -450,6 +459,12 @@ export default class CanvasProvider {
           bg = document.createElement('span')
           bg.style.backgroundColor = `${region.bg_color}`
           bg.style.whiteSpace = `pre-line`
+          bg.style.display = 'inline-flex'
+          bg.style.flex = 'none'
+          bg.style.flexWrap = 'nowrap'
+          bg.style.flexDirection = 'row'
+          bg.style.whiteSpace = `pre-line`
+          bg.style.height = `${region.ey - region.oy}px`
 
           line!.appendChild(bg)
         }
@@ -1158,15 +1173,14 @@ export default class CanvasProvider {
 
         canvas.width = width + 4
         canvas.height = height + 4
-        canvas.style.width =  `${this.ssm_x + 4}px`
-        canvas.style.height = `${this.ssm_y + 4}px`
+        canvas.style.width =  `${this.ssm_x + 4 * SIZE_MAGNIFICATION}px`
+        canvas.style.height = `${this.ssm_y + 4 * SIZE_MAGNIFICATION}px`
 
         const ctx = canvas.getContext('2d')
         if (!ctx) { return; }
 
         if (this.style_changed || this.text_type === 'SSZ') {
           const content = document.createElement('span');
-          content.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml')
           content.style.color = CanvasProvider.getRGBAfromColorCode(this.fg_color)
           content.style.fontSize = `inherit`
           content.style.letterSpacing = `inherit`
@@ -1272,7 +1286,6 @@ export default class CanvasProvider {
 
     if (this.style_changed || this.text_type === 'SSZ') {
       const content = document.createElement('span');
-      content.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml')
       content.style.color = CanvasProvider.getRGBAfromColorCode(this.fg_color)
       content.style.fontSize = `inherit`
       content.style.letterSpacing = `inherit`
@@ -1323,11 +1336,14 @@ export default class CanvasProvider {
 
     if (useGaijiFont) { character += '\u{fe0e}' }
 
-    if (!region.content.lastChild || region.content.lastChild.nodeType !== Node.TEXT_NODE) {
-      region.content.appendChild(document.createTextNode(''));
-    }
-    const textNode = region.content.lastChild!
-    textNode.textContent += character
+    const span = document.createElement('span');
+    span.style.display = `inline-block`
+    span.style.width = `${this.ssm_x + this.shs}px`
+    span.style.textAlign = `center`
+    span.style.whiteSpace = `pre-line`
+    span.textContent = character
+    region.content.appendChild(span)
+
     region.ex += this.width()
     region.length += 1
   }
@@ -1338,7 +1354,7 @@ export default class CanvasProvider {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
     svg.setAttribute('viewBox', `${viewBox[0]} ${viewBox[1]} ${viewBox[2]} ${viewBox[3]}`)
     svg.style.verticalAlign = `text-bottom`
-    svg.style.width = `${this.ssm_x}px`
+    svg.style.width = `${this.ssm_x + this.shs}px`
     svg.style.height = `${this.ssm_y}px`
 
     const elem = document.createElementNS('http://www.w3.org/2000/svg', 'path')
