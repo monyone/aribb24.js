@@ -1213,6 +1213,10 @@ export default class CanvasProvider {
             content.style.textDecoration = `underline ${CanvasProvider.getRGBAfromColorCode(this.fg_color)}`
           }
 
+          if (this.flc !== 0x0F) {
+            content.style.animation = `flc-${this.flc} 1s infinite`
+          }
+
           this.regions.push({
             text_type: this.text_type,
             ox: this.position_x,
@@ -1320,9 +1324,12 @@ export default class CanvasProvider {
         }
         content.style.textShadow = shadow
       }
-
-      //content.style.border = `1px solid ${CanvasProvider.getRGBAfromColorCode(this.fg_color)}`
-
+      
+      // FIXME: it too wrong
+      if (this.hlc !== 0) {
+        content.style.border = `1px solid ${CanvasProvider.getRGBAfromColorCode(this.fg_color)}`
+      }
+      // FIXME: it too wrong
       if (this.stl) {
         content.style.textDecoration = `underline ${CanvasProvider.getRGBAfromColorCode(this.fg_color)}`
       }
