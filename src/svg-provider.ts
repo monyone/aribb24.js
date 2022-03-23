@@ -114,6 +114,7 @@ export default class CanvasProvider {
   private stl: boolean = false
   private orn: string | null = null
   private force_orn: string | null = null
+  private flc: number = 15
 
   private regions: Region[] = []
   private style_changed = true
@@ -278,6 +279,18 @@ export default class CanvasProvider {
       }
 
       this.svg.setAttribute('viewBox', `0 0 ${this.swf_x} ${this.swf_y}`)
+
+      {
+        const foreign = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+        const style = document.createElement('style')
+
+        style.textContent  = ''
+        style.textContent += `@keyframes flc-0 { from { opacity: 0; } to { opacity: 1; } }`
+        style.textContent += `@keyframes flc-7 { from { opacity: 1; } to { opacity: 0; } }`
+
+        foreign.appendChild(style)
+        this.svg.appendChild(foreign)
+      }
 
       const small = this.regions.filter((region) => region.text_type === 'SSZ');
       small.sort((r1, r2) => {
@@ -703,6 +716,9 @@ export default class CanvasProvider {
           begin += 2
         }
       } else if (this.pes[begin] === JIS8.FLC) {
+        const index = this.pes[begin] & 0x0F;
+        this.flc = index
+        this.style_changed = true
         begin += 2
       } else if (this.pes[begin] === JIS8.CDC) {
         return
@@ -1309,6 +1325,10 @@ export default class CanvasProvider {
 
       if (this.stl) {
         content.style.textDecoration = `underline ${CanvasProvider.getRGBAfromColorCode(this.fg_color)}`
+      }
+
+      if (this.flc !== 0x0F) {
+        content.style.animation = `flc-${this.flc} 1s infinite`
       }
 
       this.regions.push({
