@@ -18,7 +18,7 @@ import ADDITIONAL_SYMBOLS_SET from './constants/mapping/additional-symbols-set'
 import { PathElement } from './constants/mapping/additional-symbols-glyph'
 
 import CRC16 from './utils/crc16-ccitt'
-import SparkMD5 from 'spark-md5'
+import MD5 from './utils/md5'
 
 const SIZE_MAGNIFICATION = 2; // 奇数の height 時に SSZ で改行を行う場合があるため、全体をN倍して半分サイズに備える
 let EMBEDDED_GLYPH: Map<string, PathElement> | null = null;
@@ -1104,7 +1104,7 @@ export default class CanvasProvider {
         return
       }
 
-      const drcs_hash = SparkMD5.ArrayBuffer.hash(drcs)
+      const drcs_hash = MD5(drcs.buffer)
       if (this.drcsReplacement && this.drcsReplaceMapping.has(drcs_hash.toLowerCase())) {
         this.renderFont(this.drcsReplaceMapping.get(drcs_hash.toLowerCase())!)
       } else  if (this.drcsReplacement && this.drcsReplaceMapping.has(drcs_hash.toUpperCase())) {
