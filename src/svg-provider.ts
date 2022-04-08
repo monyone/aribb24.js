@@ -1188,10 +1188,11 @@ export default class CanvasProvider {
         const height = Math.floor(this.ssm_y * this.text_size_y / SIZE_MAGNIFICATION)
         const depth = Math.floor((drcs.length * 8) / (width * height))
 
-        canvas.width = width + 4
-        canvas.height = height + 4
-        canvas.style.width =  `${this.ssm_x + 4 * SIZE_MAGNIFICATION}px`
-        canvas.style.height = `${this.ssm_y + 4 * SIZE_MAGNIFICATION}px`
+        canvas.width = width + 4 + Math.floor(this.shs * this.text_size_x / 2 / SIZE_MAGNIFICATION)
+        canvas.height = height + 4 + Math.floor(this.svs * this.text_size_y / 2 / SIZE_MAGNIFICATION)
+        canvas.style.width =  `${this.ssm_x + 4 * SIZE_MAGNIFICATION + Math.floor(this.shs * this.text_size_x / 2)}px`
+        canvas.style.height = `${this.ssm_y + 4 * SIZE_MAGNIFICATION + Math.floor(this.svs * this.text_size_y / 2)}px`
+        canvas.style.verticalAlign = "top"
 
         const ctx = canvas.getContext('2d')
         if (!ctx) { return; }
@@ -1251,8 +1252,8 @@ export default class CanvasProvider {
 
                   if (value > 0) {
                     ctx.fillRect(
-                      2 + Math.floor(this.shs * this.text_size_x / 2) + x + dx,
-                      2 + Math.floor(this.svs * this.text_size_y / 2) + y + dy,
+                      2 + Math.floor(this.shs * this.text_size_x / 2 / SIZE_MAGNIFICATION) + x + dx,
+                      2 + Math.floor(this.svs * this.text_size_y / 2 / SIZE_MAGNIFICATION) + y + dy,
                       1,
                       1,
                     )
@@ -1276,8 +1277,8 @@ export default class CanvasProvider {
 
             if(value > 0){
               ctx.fillRect(
-                2 + Math.floor(this.shs * this.text_size_x / 2) + x,
-                2 + Math.floor(this.svs * this.text_size_y / 2) + y,
+                2 + Math.floor(this.shs * this.text_size_x / 2 / SIZE_MAGNIFICATION) + x,
+                2 + Math.floor(this.svs * this.text_size_y / 2 / SIZE_MAGNIFICATION) + y,
                 1,
                 1,
               )
