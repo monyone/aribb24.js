@@ -1187,14 +1187,14 @@ export default class CanvasProvider {
         span.style.display = `inline-block`
         span.style.width = `${this.ssm_x + this.shs}px`
         const canvas = document.createElement('canvas');
-        const width = Math.floor(this.ssm_x * this.text_size_x / SIZE_MAGNIFICATION)
-        const height = Math.floor(this.ssm_y * this.text_size_y / SIZE_MAGNIFICATION)
+        const width = Math.floor(this.ssm_x / SIZE_MAGNIFICATION)
+        const height = Math.floor(this.ssm_y / SIZE_MAGNIFICATION)
         const depth = Math.floor((drcs.length * 8) / (width * height))
 
-        canvas.width = width + 4 + Math.floor(this.shs * this.text_size_x / 2 / SIZE_MAGNIFICATION)
-        canvas.height = height + 4 + Math.floor(this.svs * this.text_size_y / 2 / SIZE_MAGNIFICATION)
-        canvas.style.width =  `${this.ssm_x + 4 * SIZE_MAGNIFICATION + Math.floor(this.shs * this.text_size_x / 2)}px`
-        canvas.style.height = `${this.ssm_y + 4 * SIZE_MAGNIFICATION + Math.floor(this.svs * this.text_size_y / 2)}px`
+        canvas.width = width + 4 + Math.floor(this.shs / 2 / SIZE_MAGNIFICATION)
+        canvas.height = height + 4 + Math.floor(this.svs / 2 / SIZE_MAGNIFICATION)
+        canvas.style.width =  `${this.ssm_x + 4 * SIZE_MAGNIFICATION + Math.floor(this.shs / 2)}px`
+        canvas.style.height = `${this.ssm_y + 4 * SIZE_MAGNIFICATION + Math.floor(this.svs / 2)}px`
         canvas.style.verticalAlign = `top`
 
         const ctx = canvas.getContext('2d')
@@ -1255,8 +1255,8 @@ export default class CanvasProvider {
 
                   if (value > 0) {
                     ctx.fillRect(
-                      2 + Math.floor(this.shs * this.text_size_x / 2 / SIZE_MAGNIFICATION) + x + dx,
-                      2 + Math.floor(this.svs * this.text_size_y / 2 / SIZE_MAGNIFICATION) + y + dy,
+                      2 + Math.floor(this.shs / 2 / SIZE_MAGNIFICATION) + x + dx,
+                      2 + Math.floor(this.svs / 2 / SIZE_MAGNIFICATION) + y + dy,
                       1,
                       1,
                     )
@@ -1280,8 +1280,8 @@ export default class CanvasProvider {
 
             if(value > 0){
               ctx.fillRect(
-                2 + Math.floor(this.shs * this.text_size_x / 2 / SIZE_MAGNIFICATION) + x,
-                2 + Math.floor(this.svs * this.text_size_y / 2 / SIZE_MAGNIFICATION) + y,
+                2 + Math.floor(this.shs / 2 / SIZE_MAGNIFICATION) + x,
+                2 + Math.floor(this.svs / 2 / SIZE_MAGNIFICATION) + y,
                 1,
                 1,
               )
