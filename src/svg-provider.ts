@@ -1183,6 +1183,9 @@ export default class CanvasProvider {
       } else  if (this.drcsReplacement && this.drcsReplaceMapping.has(drcs_hash.toUpperCase())) {
         this.renderFont(this.drcsReplaceMapping.get(drcs_hash.toUpperCase())!)
       } else {
+        const span = document.createElement('span');
+        span.style.display = `inline-block`
+        span.style.width = `${this.ssm_x + this.shs}px`
         const canvas = document.createElement('canvas');
         const width = Math.floor(this.ssm_x * this.text_size_x / SIZE_MAGNIFICATION)
         const height = Math.floor(this.ssm_y * this.text_size_y / SIZE_MAGNIFICATION)
@@ -1192,7 +1195,7 @@ export default class CanvasProvider {
         canvas.height = height + 4 + Math.floor(this.svs * this.text_size_y / 2 / SIZE_MAGNIFICATION)
         canvas.style.width =  `${this.ssm_x + 4 * SIZE_MAGNIFICATION + Math.floor(this.shs * this.text_size_x / 2)}px`
         canvas.style.height = `${this.ssm_y + 4 * SIZE_MAGNIFICATION + Math.floor(this.svs * this.text_size_y / 2)}px`
-        canvas.style.verticalAlign = "top"
+        canvas.style.verticalAlign = `top`
 
         const ctx = canvas.getContext('2d')
         if (!ctx) { return; }
@@ -1286,7 +1289,8 @@ export default class CanvasProvider {
           }
         }
 
-        region.content.appendChild(canvas)
+        span.appendChild(canvas)
+        region.content.appendChild(span)
         region.ex += this.width()
         region.length += 1
       }
