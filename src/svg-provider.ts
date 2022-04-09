@@ -1191,11 +1191,15 @@ export default class CanvasProvider {
         const height = Math.floor(this.ssm_y / SIZE_MAGNIFICATION)
         const depth = Math.floor((drcs.length * 8) / (width * height))
 
-        canvas.width = width + 4 + Math.floor(this.shs / 2 / SIZE_MAGNIFICATION)
-        canvas.height = height + 4 + Math.floor(this.svs / 2 / SIZE_MAGNIFICATION)
-        canvas.style.width =  `${this.ssm_x + 4 * SIZE_MAGNIFICATION + Math.floor(this.shs / 2)}px`
-        canvas.style.height = `${this.ssm_y + 4 * SIZE_MAGNIFICATION + Math.floor(this.svs / 2)}px`
+        const outlineWidth = 2
+        const outlineHeight = 2
+        canvas.width = width + outlineWidth * 2 / this.text_size_x
+        canvas.height = height + outlineHeight * 2 / this.text_size_y
+        canvas.style.width =  `${this.ssm_x + outlineWidth * 2 / this.text_size_x * SIZE_MAGNIFICATION}px`
+        canvas.style.height = `${this.ssm_y + outlineHeight * 2 / this.text_size_y * SIZE_MAGNIFICATION}px`
         canvas.style.verticalAlign = `top`
+        canvas.style.marginLeft = `${Math.floor(this.shs / 2 - outlineWidth / this.text_size_x * SIZE_MAGNIFICATION)}px`
+        canvas.style.marginTop = `${Math.floor(this.svs / 2 - outlineHeight / this.text_size_y * SIZE_MAGNIFICATION)}px`
 
         const ctx = canvas.getContext('2d')
         if (!ctx) { return; }
@@ -1206,8 +1210,6 @@ export default class CanvasProvider {
           content.style.fontSize = `inherit`
           content.style.letterSpacing = `inherit`
           content.style.lineHeight = `inherit`
-          content.style.marginLeft = `-2px`
-          content.style.marginTop = `-2px`
 
           // FIXME: it too wrong
           if (this.hlc !== 0) {
@@ -1241,8 +1243,8 @@ export default class CanvasProvider {
         const orn = this.force_orn ?? this.orn
         if (orn && (!this.force_orn || this.force_orn !== this.fg_color)) {
           ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(orn)
-          for(let dy = -2; dy <= 2; dy++){
-            for(let dx = -2; dx <= 2; dx++){
+          for(let dy = -outlineHeight / this.text_size_y; dy <= outlineHeight / this.text_size_y; dy++){
+            for(let dx = -outlineWidth/ this.text_size_x; dx <= outlineWidth / this.text_size_x; dx++){
               for(let y = 0; y < height; y++){
                 for(let x = 0; x < width; x++){
                   let value = 0
@@ -1255,8 +1257,8 @@ export default class CanvasProvider {
 
                   if (value > 0) {
                     ctx.fillRect(
-                      2 + Math.floor(this.shs / 2 / SIZE_MAGNIFICATION) + x + dx,
-                      2 + Math.floor(this.svs / 2 / SIZE_MAGNIFICATION) + y + dy,
+                      outlineWidth / this.text_size_x + x + dx,
+                      outlineHeight / this.text_size_y + y + dy,
                       1,
                       1,
                     )
@@ -1280,8 +1282,8 @@ export default class CanvasProvider {
 
             if(value > 0){
               ctx.fillRect(
-                2 + Math.floor(this.shs / 2 / SIZE_MAGNIFICATION) + x,
-                2 + Math.floor(this.svs / 2 / SIZE_MAGNIFICATION) + y,
+                outlineWidth / this.text_size_x + x,
+                outlineHeight / this.text_size_y + y,
                 1,
                 1,
               )
