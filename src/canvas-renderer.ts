@@ -5,7 +5,7 @@ import { readID3Size, binaryISO85591ToString, binaryUTF8ToString, base64ToUint8A
 
 const DETECT_TIMEUPDATE_SEEKING_RANGE = 1;
 
-interface RendererOption {
+export interface RendererOption {
   width?: number,
   height?: number,
   data_identifier?: number,
