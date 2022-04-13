@@ -23,7 +23,7 @@ import MD5 from './utils/md5'
 const SIZE_MAGNIFICATION = 2; // 奇数の height 時に SSZ で改行を行う場合があるため、全体をN倍して半分サイズに備える
 let EMBEDDED_GLYPH: Map<string, PathElement> | null = null;
 
-interface ProviderOption {
+export interface ProviderOption {
   canvas?: HTMLCanvasElement,
   width?: number,
   height?: number,
@@ -40,7 +40,7 @@ interface ProviderOption {
   usePUA?: boolean,
 }
 
-interface ProviderResult {
+export interface ProviderResult {
   startTime: number,
   endTime: number,
   PRA: number | null

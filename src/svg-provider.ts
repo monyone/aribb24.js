@@ -36,7 +36,7 @@ type Region = {
   font?: string,
 }
 
-interface ProviderOption {
+export interface ProviderOption {
   svg?: SVGElement,
   data_identifier?: number,
   data_group_id?: number,
@@ -50,7 +50,7 @@ interface ProviderOption {
   usePUA?: boolean,
 }
 
-interface ProviderResult {
+export interface ProviderResult {
   startTime: number,
   endTime: number,
   PRA: number | null

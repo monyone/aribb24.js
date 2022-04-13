@@ -20,7 +20,7 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
 
 ## Options
 
-* data_identifer: Specify number 0x80 (caption) or 0x81 (superimpose). default: 0x80 (caption)
+* data_identifier: Specify number 0x80 (caption) or 0x81 (superimpose). default: 0x80 (caption)
 * data_group_id: Specify number 0x01 (1st language) or 0x02 (2nd language). default: 0x01 (1st language)
 * forceStrokeColor: Specify a color for always drawing character's stroke.
 * forceBackgroundColor: Specify a color for always drawing character's background
