@@ -1197,7 +1197,7 @@ export default class CanvasProvider {
         canvas.height = height + outlineHeight * 2 / this.text_size_y
         canvas.style.width =  `${this.ssm_x + outlineWidth * 2 / this.text_size_x * SIZE_MAGNIFICATION}px`
         canvas.style.height = `${this.ssm_y + outlineHeight * 2 / this.text_size_y * SIZE_MAGNIFICATION}px`
-        canvas.style.verticalAlign = `top`
+        canvas.style.verticalAlign = `text-bottom`
         canvas.style.marginLeft = `${Math.floor(this.shs / 2 - outlineWidth / this.text_size_x * SIZE_MAGNIFICATION)}px`
         canvas.style.marginTop = `${Math.floor(this.svs / 2 - outlineHeight / this.text_size_y * SIZE_MAGNIFICATION)}px`
 
