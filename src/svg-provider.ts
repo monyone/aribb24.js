@@ -615,6 +615,8 @@ export default class CanvasProvider {
             this.G_BACK[0] = G_SET_BY_F.get(this.pes[begin + 2])
             begin += 3
           }
+        } else {
+          return
         }
       } else if (this.pes[begin] === JIS8.APS) {
         const P1 = this.pes[begin + 1] & 0x3F
@@ -936,6 +938,8 @@ export default class CanvasProvider {
         }else{
           return
         }
+      } else {
+        return
       }
     }
   }
