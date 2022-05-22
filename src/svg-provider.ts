@@ -29,6 +29,7 @@ type Region = {
   oy: number,
   ex: number,
   ey: number,
+  fg_color: string,
   bg_color: string,
   content: HTMLSpanElement,
   length: number
@@ -325,6 +326,7 @@ export default class CanvasProvider {
               oy: upper.oy,
               ex: lower.ex,
               ey: lower.ey,
+              fg_color: upper.fg_color,
               bg_color: upper.bg_color,
               content: combineElement,
               length: 1,
@@ -337,7 +339,10 @@ export default class CanvasProvider {
         if (!left.used) { continue; }
         for (const right of small) {
           if (!right.used) { continue; }
+          if (left.fg_color !== right.fg_color) { continue; }
+
           if (left.oy == right.oy && left.ex === right.ox) {
+            left.ex = right.ex
             right.used = false
 
             while(right.content.firstChild) {
@@ -350,7 +355,6 @@ export default class CanvasProvider {
         }
       }
 
-      this.regions = this.regions.filter((region) => { return region.used }).concat(small)
       this.regions.sort((r1, r2) => {
         if (r1.oy !== r2.oy) { return r1.oy - r2.oy }
         if (r1.ox !== r2.ox) { return r1.ox - r2.ox }
@@ -1235,6 +1239,7 @@ export default class CanvasProvider {
             oy: this.position_y - this.height(),
             ex: this.position_x,
             ey: this.position_y,
+            fg_color: this.fg_color,
             bg_color: this.force_bg_color ?? this.bg_color,
             content: content,
             length: 0,
@@ -1358,6 +1363,7 @@ export default class CanvasProvider {
         ex: this.position_x,
         ey: this.position_y,
         font: font,
+        fg_color: this.fg_color,
         bg_color: this.force_bg_color ?? this.bg_color,
         content: content,
         length: 0,
