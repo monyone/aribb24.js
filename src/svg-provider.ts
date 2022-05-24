@@ -355,6 +355,8 @@ export default class CanvasProvider {
         }
       }
 
+      this.regions = this.regions.filter((region) => { return region.used }).concat(combine)
+
       this.regions.sort((r1, r2) => {
         if (r1.oy !== r2.oy) { return r1.oy - r2.oy }
         if (r1.ox !== r2.ox) { return r1.ox - r2.ox }
