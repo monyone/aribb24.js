@@ -143,6 +143,10 @@ export default class CanvasID3Renderer {
     }
   }
 
+  public isPresent() {
+    return this.onB24CueChangeDrawed
+  }
+
   public pushRawData(pts: number, data: Uint8Array): boolean {
     const provider: CanvasProvider = new CanvasProvider(data, pts);
     const estimate = provider.render({

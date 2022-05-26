@@ -115,6 +115,10 @@ export default class SVGRenderer {
     this.svg.style.visibility = 'hidden';
   }
 
+  public isPresent() {
+    return this.onB24CueChangeDrawed
+  }
+
   public pushRawData(pts: number, data: Uint8Array): boolean {
     const provider: SVGProvider = new SVGProvider(data, pts);
     const estimate = provider.render({
