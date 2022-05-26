@@ -43,6 +43,7 @@ export interface ProviderOption {
 export interface ProviderResult {
   startTime: number,
   endTime: number,
+  rendered: boolean,
   PRA: number | null
 }
 
@@ -111,6 +112,7 @@ export default class CanvasProvider {
   private startTime: number
   private timeElapsed: number = 0
   private endTime: number | null = null
+  private rendered: boolean = false
   private PRA: number | null = null
 
   private normalFont: string = 'sans-serif'
@@ -193,6 +195,7 @@ export default class CanvasProvider {
 
     this.timeElapsed = 0
     this.endTime = null
+    this.rendered = false
     this.PRA = null
 
     this.normalFont = 'sans-serif'
@@ -394,6 +397,7 @@ export default class CanvasProvider {
     return ({
       startTime: this.startTime,
       endTime: this.endTime ?? Number.POSITIVE_INFINITY,
+      rendered: this.rendered,
       PRA: this.PRA
     })
   }
@@ -854,6 +858,8 @@ export default class CanvasProvider {
     if (!ctx) { return }
 
     if(entry.alphabet !== ALPHABETS.MACRO) {
+      this.rendered = true
+
       // background
       ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(this.force_bg_color ?? this.bg_color)
       ctx.fillRect(

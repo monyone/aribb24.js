@@ -343,6 +343,7 @@ export default class SVGRenderer {
         // なんか Win Firefox で Cue が endTime 過ぎても activeCues から消えない場合があった、バグ?
 
         const provider: SVGProvider = new SVGProvider(lastCue.data, lastCue.startTime);
+        let rendered = false
 
         if (this.isShowing) {
           const result = provider.render({
@@ -353,6 +354,8 @@ export default class SVGRenderer {
           if (result?.PRA != null) {
              this.rendererOption?.PRACallback?.(result.PRA);
           }
+          
+          rendered = result?.rendered ?? false
         }
 
         this.onB24CueChangeDrawed = true

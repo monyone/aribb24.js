@@ -54,6 +54,7 @@ export interface ProviderOption {
 export interface ProviderResult {
   startTime: number,
   endTime: number,
+  rendered: boolean,
   PRA: number | null
 }
 
@@ -123,6 +124,7 @@ export default class CanvasProvider {
   private startTime: number
   private timeElapsed: number = 0
   private endTime: number | null = null
+  private rendered: boolean = false
   private PRA: number | null = null
 
   private normalFont: string = 'monospace'
@@ -501,6 +503,7 @@ export default class CanvasProvider {
     return ({
       startTime: this.startTime,
       endTime: this.endTime ?? Number.POSITIVE_INFINITY,
+      rendered: this.rendered,
       PRA: this.PRA
     })
   }
@@ -990,6 +993,10 @@ export default class CanvasProvider {
   private renderCharacter(key: number, entry: ALPHABET_ENTRY) {
     if (this.position_x < 0 || this.position_y < 0){
       this.move_absolute_pos(0, 0)
+    }
+
+    if (entry.alphabet !== ALPHABETS.MACRO) {
+      this.rendered = true
     }
 
     if (entry.alphabet === ALPHABETS.KANJI) {

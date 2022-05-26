@@ -383,6 +383,7 @@ export default class CanvasID3Renderer {
         // なんか Win Firefox で Cue が endTime 過ぎても activeCues から消えない場合があった、バグ?
 
         const provider: CanvasProvider = new CanvasProvider(lastCue.data, lastCue.startTime);
+        let rendered = false
 
         if (this.isShowing && this.viewCanvas) {
           const result = provider.render({
@@ -395,6 +396,8 @@ export default class CanvasID3Renderer {
           if (result?.PRA != null) {
              this.rendererOption?.PRACallback?.(result.PRA);
           }
+
+          rendered = result?.rendered ?? false;
         }
 
         if (this.isShowing && this.rawCanvas) {
@@ -407,7 +410,7 @@ export default class CanvasID3Renderer {
           })
         }
 
-        this.onB24CueChangeDrawed = true
+        this.onB24CueChangeDrawed = rendered
       } else {
         this.onB24CueChangeDrawed = false
       }
