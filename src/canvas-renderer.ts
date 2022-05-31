@@ -10,7 +10,7 @@ export interface RendererOption {
   height?: number,
   data_identifier?: number,
   data_group_id?: number,
-  forceStrokeColor?: string,
+  forceStrokeColor?: boolean | string,
   forceBackgroundColor?: string,
   normalFont?: string,
   gaijiFont?: string,

@@ -29,7 +29,7 @@ export interface ProviderOption {
   height?: number,
   data_identifier?: number,
   data_group_id?: number,
-  forceStrokeColor?: string,
+  forceStrokeColor?: boolean | string,
   forceBackgroundColor?: string,
   normalFont?: string,
   gaijiFont?: string,
@@ -107,7 +107,7 @@ export default class CanvasProvider {
   private hlc: number = 0
   private stl: boolean = false
   private orn: string | null = null
-  private force_orn: string | null = null
+  private force_orn: boolean | string | null = null
 
   private startTime: number
   private timeElapsed: number = 0
@@ -307,7 +307,7 @@ export default class CanvasProvider {
     this.option_canvas = option?.canvas ?? null
 
     // その他オプション類
-    this.force_orn = CanvasProvider.getRGBAColorCode(option?.forceStrokeColor) ?? null
+    this.force_orn = ((typeof option?.forceStrokeColor === 'boolean') ? option?.forceStrokeColor : CanvasProvider.getRGBAColorCode(option?.forceStrokeColor)) ?? null
     this.force_bg_color = CanvasProvider.getRGBAColorCode(option?.forceBackgroundColor) ?? null
     this.purpose_width = option?.width ?? option?.canvas?.width ?? this.purpose_width
     this.purpose_height = option?.height ?? option?.canvas?.height ?? this.purpose_height
@@ -1123,8 +1123,8 @@ export default class CanvasProvider {
         const width = Math.floor(this.ssm_x * this.text_size_x / SIZE_MAGNIFICATION)
         const height = Math.floor(this.ssm_y * this.text_size_y / SIZE_MAGNIFICATION)
         const depth = Math.floor((drcs.length * 8) / (width * height))
-        const orn = this.force_orn ?? this.orn
-        if (orn && (!this.force_orn || this.force_orn !== this.fg_color)) {
+        const orn = this.getOrnColorCode()
+        if (orn && (!this.force_orn || this.force_orn === true || this.force_orn !== this.fg_color)) {
           ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(orn)
           for(let dy = -2 * this.height_magnification(); dy <= 2 * this.height_magnification(); dy++){
             for(let dx = -2 * this.width_magnification(); dx <= 2 * this.width_magnification(); dx++){
@@ -1201,8 +1201,8 @@ export default class CanvasProvider {
     ctx.scale(this.text_size_x * this.width_magnification(), this.text_size_y * this.height_magnification());
 
     {
-      const orn = this.force_orn ?? this.orn
-      if (orn && (!this.force_orn || this.force_orn !== this.fg_color)) {
+      const orn = this.getOrnColorCode()
+      if (orn && (!this.force_orn || this.force_orn === true || this.force_orn !== this.fg_color)) {
         if (this.useStroke) {
           ctx.font = `${this.ssm_x}px ${useGaijiFont ? this.gaijiFont : this.normalFont}`
           ctx.strokeStyle = CanvasProvider.getRGBAfromColorCode(orn)
@@ -1260,8 +1260,8 @@ export default class CanvasProvider {
     ctx.translate(sx, sy);
 
     {
-      const orn = this.force_orn ?? this.orn
-      if (orn && (!this.force_orn || this.force_orn !== this.fg_color)) {
+      const orn = this.getOrnColorCode()
+      if (orn && (!this.force_orn || this.force_orn === true || this.force_orn !== this.fg_color)) {
         if (this.useStroke) {
           ctx.strokeStyle = CanvasProvider.getRGBAfromColorCode(orn)
           ctx.lineJoin = 'round'
@@ -1286,6 +1286,16 @@ export default class CanvasProvider {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
+  private getOrnColorCode(): string | null {
+    if (this.force_orn === true) {
+      return CanvasProvider.fillAlphaColorCode(this.bg_color);
+    } else if (this.force_orn === false) {
+      return null
+    } else {
+      return this.force_orn ?? this.orn
+    }
+  }
+
   private static getRGBAColorCode(color: string | undefined): string | null {
     if (color == null) { return null; }
 
@@ -1303,6 +1313,16 @@ export default class CanvasProvider {
 
     canvas.width = canvas.height = 0;
     return code;
+  }
+
+  private static fillAlphaColorCode(color: string | undefined): string {
+    if (color == null) { return ''; }
+
+    const R = Number.parseInt(color.substring(1, 3), 16);
+    const G = Number.parseInt(color.substring(3, 5), 16);
+    const B = Number.parseInt(color.substring(5, 7), 16);
+
+    return `#${R.toString(16).toUpperCase().padStart(2, '0')}${G.toString(16).toUpperCase().padStart(2, '0')}${B.toString(16).toUpperCase().padStart(2, '0')}FF`
   }
 
   private static getRGBAfromColorCode(color: string | undefined): string {

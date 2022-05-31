@@ -41,7 +41,7 @@ export interface ProviderOption {
   svg?: SVGElement,
   data_identifier?: number,
   data_group_id?: number,
-  forceStrokeColor?: string,
+  forceStrokeColor?: boolean | string,
   forceBackgroundColor?: string,
   normalFont?: string,
   gaijiFont?: string,
@@ -115,7 +115,7 @@ export default class CanvasProvider {
   private prev_hlc: number = 0
   private stl: boolean = false
   private orn: string | null = null
-  private force_orn: string | null = null
+  private force_orn: boolean | string | null = null
   private flc: number = 15
 
   private regions: Region[] = []
@@ -230,7 +230,7 @@ export default class CanvasProvider {
   public render(option?: ProviderOption): ProviderResult | null {
     this.svg = option?.svg ?? null
     // その他オプション類
-    this.force_orn = CanvasProvider.getRGBAColorCode(option?.forceStrokeColor) ?? null
+    this.force_orn = ((typeof option?.forceStrokeColor === 'boolean') ? option?.forceStrokeColor : CanvasProvider.getRGBAColorCode(option?.forceStrokeColor)) ?? null
     this.force_bg_color = CanvasProvider.getRGBAColorCode(option?.forceBackgroundColor) ?? null
     this.normalFont = option?.normalFont ?? this.normalFont
     this.gaijiFont = option?.gaijiFont ?? this.normalFont
@@ -1259,8 +1259,8 @@ export default class CanvasProvider {
 
         const region = this.regions[this.regions.length - 1]
          
-        const orn = this.force_orn ?? this.orn
-        if (orn && (!this.force_orn || this.force_orn !== this.fg_color)) {
+        const orn = this.getOrnColorCode()
+        if (orn && (!this.force_orn || this.force_orn === true || this.force_orn !== this.fg_color)) {
           ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(orn)
           for(let dy = -outlineHeight / this.text_size_y; dy <= outlineHeight / this.text_size_y; dy++){
             for(let dx = -outlineWidth/ this.text_size_x; dx <= outlineWidth / this.text_size_x; dx++){
@@ -1339,8 +1339,8 @@ export default class CanvasProvider {
       content.style.lineHeight = `inherit`
       content.style.fontFamily = `${font}`
 
-      const orn = this.force_orn ?? this.orn
-      if (orn && (!this.force_orn || this.force_orn !== this.fg_color)) {
+      const orn = this.getOrnColorCode()
+      if (orn && (!this.force_orn || this.force_orn === true || this.force_orn !== this.fg_color)) {
         let shadow = '', first = true
         for (let dy = -4; dy <= 4; dy++) {
           for (let dx = -4; dx <= 4; dx++) {
@@ -1416,8 +1416,8 @@ export default class CanvasProvider {
     elem.setAttribute('d', path);
     elem.setAttribute('fill', `${CanvasProvider.getRGBAfromColorCode(this.fg_color)}`)
 
-    const orn = this.force_orn ?? this.orn
-    if (orn && (!this.force_orn || this.force_orn !== this.fg_color)) {
+    const orn = this.getOrnColorCode()
+    if (orn && (!this.force_orn || this.force_orn === true || this.force_orn !== this.fg_color)) {
       const width = Math.max((viewBox[2] - viewBox[0]) / this.ssm_x, (viewBox[3] - viewBox[1]) / this.ssm_y) * 4
       elem.setAttribute('stroke', `${CanvasProvider.getRGBAfromColorCode(orn)}`)
       elem.setAttribute('stroke-width', `${width}`)
@@ -1429,6 +1429,16 @@ export default class CanvasProvider {
     region.content.appendChild(svg);
     region.ex += this.width()
     region.length += 1    
+  }
+
+  private getOrnColorCode(): string | null {
+    if (this.force_orn === true) {
+      return CanvasProvider.fillAlphaColorCode(this.bg_color);
+    } else if (this.force_orn === false) {
+      return null;
+    } else {
+      return this.force_orn ?? this.orn
+    }
   }
 
   private static getRGBAColorCode(color: string | undefined): string | null {
@@ -1448,6 +1458,16 @@ export default class CanvasProvider {
 
     canvas.width = canvas.height = 0;
     return code;
+  }
+
+  private static fillAlphaColorCode(color: string | undefined): string {
+    if (color == null) { return ''; }
+
+    const R = Number.parseInt(color.substring(1, 3), 16);
+    const G = Number.parseInt(color.substring(3, 5), 16);
+    const B = Number.parseInt(color.substring(5, 7), 16);
+
+    return `#${R.toString(16).toUpperCase().padStart(2, '0')}${G.toString(16).toUpperCase().padStart(2, '0')}${B.toString(16).toUpperCase().padStart(2, '0')}FF`
   }
 
   private static getRGBAfromColorCode(color: string | undefined): string {

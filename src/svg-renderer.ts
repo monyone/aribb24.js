@@ -8,7 +8,7 @@ const DETECT_TIMEUPDATE_SEEKING_RANGE = 1;
 export interface RendererOption {
   data_identifier?: number,
   data_group_id?: number,
-  forceStrokeColor?: string,
+  forceStrokeColor?: boolean | string,
   forceBackgroundColor?: string,
   normalFont?: string,
   gaijiFont?: string,
