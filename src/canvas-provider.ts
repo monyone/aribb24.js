@@ -1290,7 +1290,7 @@ export default class CanvasProvider {
     if (this.force_orn === true) {
       return CanvasProvider.fillAlphaColorCode(this.bg_color);
     } else if (this.force_orn === false) {
-      return null
+      return this.orn
     } else {
       return this.force_orn ?? this.orn
     }
