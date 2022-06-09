@@ -23,20 +23,6 @@ import MD5 from './utils/md5'
 const SIZE_MAGNIFICATION = 2; // 奇数の height 時に SSZ で改行を行う場合があるため、全体をN倍して半分サイズに備える
 let EMBEDDED_GLYPH: Map<string, PathElement> | null = null;
 
-type Region = {
-  text_type: 'NSZ' | 'MSZ' | 'SSZ',
-  ox: number,
-  oy: number,
-  ex: number,
-  ey: number,
-  fg_color: string,
-  bg_color: string,
-  content: HTMLSpanElement,
-  length: number
-  used: boolean
-  font?: string,
-}
-
 export interface ProviderOption {
   svg?: SVGElement,
   data_identifier?: number,
@@ -58,10 +44,10 @@ export interface ProviderResult {
   PRA: number | null
 }
 
-
-export default class CanvasProvider {
+export default class SVGProvider {
   private pes: Uint8Array
   private svg: SVGElement | null = null
+  private cells: HTMLTableDataCellElement[][] | null = null;
 
   private GL: number = 0
   private GR: number = 2
@@ -117,9 +103,6 @@ export default class CanvasProvider {
   private orn: string | null = null
   private force_orn: boolean | string | null = null
   private flc: number = 15
-
-  private regions: Region[] = []
-  private style_changed = true
 
   private startTime: number
   private timeElapsed: number = 0
@@ -182,12 +165,10 @@ export default class CanvasProvider {
     }
     while (y < 0){
       this.position_y -= this.height()
-      this.style_changed = true
       y++
     }
     while (y > 0){
       this.position_y += this.height()
-      this.style_changed = true
       y--
     }
   }
@@ -230,8 +211,8 @@ export default class CanvasProvider {
   public render(option?: ProviderOption): ProviderResult | null {
     this.svg = option?.svg ?? null
     // その他オプション類
-    this.force_orn = ((typeof option?.forceStrokeColor === 'boolean') ? option?.forceStrokeColor : CanvasProvider.getRGBAColorCode(option?.forceStrokeColor)) ?? null
-    this.force_bg_color = CanvasProvider.getRGBAColorCode(option?.forceBackgroundColor) ?? null
+    this.force_orn = ((typeof option?.forceStrokeColor === 'boolean') ? option?.forceStrokeColor : SVGProvider.getRGBAColorCode(option?.forceStrokeColor)) ?? null
+    this.force_bg_color = SVGProvider.getRGBAColorCode(option?.forceBackgroundColor) ?? null
     this.normalFont = option?.normalFont ?? this.normalFont
     this.gaijiFont = option?.gaijiFont ?? this.normalFont
     this.drcsReplacement = option?.drcsReplacement ?? false
@@ -250,8 +231,14 @@ export default class CanvasProvider {
     this.usePUA = option?.usePUA ?? false
     // その他オプション類終わり
 
-    if (!CanvasProvider.detect(this.pes, option)) {
+    if (!SVGProvider.detect(this.pes, option)) {
       return null;
+    }
+
+    if (this.svg) {
+      while (this.svg.firstChild) {
+        this.svg.removeChild(this.svg.firstChild);
+      }
     }
 
     const PES_data_packet_header_length = this.pes[2] & 0x0F
@@ -274,230 +261,6 @@ export default class CanvasProvider {
       }
 
       data_unit += 5 + data_unit_size
-    }
-
-    if (this.svg) {
-      while (this.svg.firstChild) {
-        this.svg.removeChild(this.svg.firstChild);
-      }
-
-      this.svg.setAttribute('viewBox', `0 0 ${this.swf_x} ${this.swf_y}`)
-
-      {
-        const foreign = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-        const style = document.createElement('style')
-
-        style.textContent  = ''
-        style.textContent += `@keyframes flc-0 { from { opacity: 0; } to { opacity: 1; } }`
-        style.textContent += `@keyframes flc-7 { from { opacity: 1; } to { opacity: 0; } }`
-
-        foreign.appendChild(style)
-        this.svg.appendChild(foreign)
-      }
-
-      const small = this.regions.filter((region) => region.text_type === 'SSZ');
-      small.sort((r1, r2) => {
-        if (r1.oy !== r2.oy) { return r1.oy - r2.oy }
-        if (r1.ox !== r2.ox) { return r1.ox - r2.ox }
-        return 0
-      })
-      const combine: Region[] = []
-      for (const upper of small) {
-        if (!upper.used) { continue; }
-        for (const lower of small) {
-          if (!lower.used) { continue; }
-          if (upper.ey === lower.oy && upper.ox === lower.ox && upper.ex === lower.ex) {
-            upper.used = false
-            lower.used = false
-
-            upper.content.style.transform = `scale(0.5)`
-            lower.content.style.marginRight = `-${(upper.ex - upper.ox)}px`
-            upper.content.style.marginBottom = `-${(upper.ey - upper.oy)}px`
-            lower.content.style.transform = `scale(0.5)`
-            lower.content.style.marginRight = `-${(lower.ex - lower.ox)}px`
-            lower.content.style.marginBottom = `-${(lower.ey - lower.oy)}px`
-
-            const combineElement = document.createElement('div')
-            combineElement.style.display = 'inline-flex'
-            combineElement.style.flexDirection = 'column'
-            combineElement.appendChild(upper.content)
-            combineElement.appendChild(lower.content)
-            combine.push({
-              text_type: 'NSZ',
-              ox: upper.ox,
-              oy: upper.oy,
-              ex: lower.ex,
-              ey: lower.ey,
-              fg_color: upper.fg_color,
-              bg_color: upper.bg_color,
-              content: combineElement,
-              length: 1,
-              used: true
-            })
-          }
-        }
-      }
-      for (const left of small) {
-        if (!left.used) { continue; }
-        for (const right of small) {
-          if (!right.used) { continue; }
-          if (left.fg_color !== right.fg_color) { continue; }
-
-          if (left.oy == right.oy && left.ex === right.ox) {
-            left.ex = right.ex
-            right.used = false
-
-            while(right.content.firstChild) {
-              const moveElement = right.content.firstChild
-              right.content.removeChild(moveElement)
-              left.content.appendChild(moveElement)
-              left.length += 1
-            }
-          }
-        }
-      }
-
-      this.regions = this.regions.filter((region) => { return region.used }).concat(combine)
-
-      this.regions.sort((r1, r2) => {
-        if (r1.oy !== r2.oy) { return r1.oy - r2.oy }
-        if (r1.ox !== r2.ox) { return r1.ox - r2.ox }
-        return 0
-      })
-
-      this.regions.forEach((region) => {
-        if (region.text_type === 'MSZ') {
-          region.content.style.transform = `scaleX(0.5)`
-          region.content.style.transformOrigin = `0 0`
-          region.content.style.marginRight= `-${(region.ex - region.ox)}px`
-        } else if(region.text_type === 'SSZ') {
-          region.content.style.transform = `scale(0.5)`
-          region.content.style.transformOrigin = `0 0`
-          region.content.style.marginRight= `-${(region.ex - region.ox)}px`
-          region.content.style.marginBottom= `-${(region.ey - region.oy)}px`
-        }
-      })
-
-      let previous: Region | null = null
-      let root: HTMLDivElement | null = null
-      let line: HTMLDivElement | null = null
-      let bg: HTMLSpanElement | null = null
-      let foreign: SVGForeignObjectElement | null = null;
-      let height: number = 0;
-
-      for (const region of this.regions) {
-        if (!previous || (previous.oy !== region.oy && previous.ey !== region.oy)) {
-          if (foreign) {
-            foreign.setAttribute('height', `${height}`)
-          }
-
-          foreign = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-          foreign.setAttribute('x', `${0}`)
-          foreign.setAttribute('y', `${region.oy}`)
-          foreign.setAttribute('width', `${this.swf_x}`)
-          foreign.setAttribute('font-size', `${this.ssm_x}`)
-          foreign.setAttribute('letter-spacing', `${this.shs}`)
-          foreign.style.lineHeight = `${this.height()}px`
-
-          root = document.createElement('div')
-          root.style.display = 'flex'
-          root.style.flexWrap = 'nowrap'
-          root.style.flexDirection = 'column'
-          root.style.willChange = 'transform'
-
-          line = document.createElement('div')
-          line.style.display = 'flex'
-          line.style.flex = 'none'
-          line.style.flexWrap = 'nowrap'
-          line.style.flexDirection = 'row'
-          line.style.height = `${region.ey - region.oy}px`
-
-          const span = document.createElement('span')
-          span.style.width = `${region.ox}px`
-          span.style.height = `${region.ex - region.oy}px`
-          span.style.flex = 'none'
-
-          bg = document.createElement('span')
-          bg.style.backgroundColor = `${region.bg_color}`
-          bg.style.display = 'inline-flex'
-          bg.style.flex = 'none'
-          bg.style.flexWrap = 'nowrap'
-          bg.style.flexDirection = 'row'
-          bg.style.height = `${region.ey - region.oy}px`
-
-          line.appendChild(span)
-          line.appendChild(bg)
-          root.appendChild(line)
-          foreign.appendChild(root)
-          this.svg.appendChild(foreign)
-
-          height = region.ey - region.oy
-        } else if (previous.ey === region.oy) {
-          line = document.createElement('div')
-          line.style.display = 'flex'
-          line.style.flex = 'none'
-          line.style.flexWrap = 'nowrap'
-          line.style.flexDirection = 'row'
-          line.style.height = `${region.ey - region.oy}px`
-
-          bg = document.createElement('span')
-          bg.style.backgroundColor = `${region.bg_color}`
-          bg.style.whiteSpace = `pre-line`
-          bg.style.display = 'inline-flex'
-          bg.style.flex = 'none'
-          bg.style.flexWrap = 'nowrap'
-          bg.style.flexDirection = 'row'
-          bg.style.height = `${region.ey - region.oy}px`
-
-          const span = document.createElement('span')
-          span.style.width = `${region.ox}px`
-          span.style.height = `${region.ex - region.oy}px`
-          span.style.flex = 'none'
-
-          line.appendChild(span)
-          line.appendChild(bg)
-          root!.appendChild(line)
-
-          height += region.ey - region.oy
-        } else if(previous.ex !== region.ox) {
-          bg = document.createElement('span')
-          bg.style.backgroundColor = `${region.bg_color}`
-          bg.style.whiteSpace = `pre-line`
-          bg.style.display = 'inline-flex'
-          bg.style.flex = 'none'
-          bg.style.flexWrap = 'nowrap'
-          bg.style.flexDirection = 'row'
-          bg.style.height = `${region.ey - region.oy}px`
-
-          const span = document.createElement('span')
-          span.style.width = `${region.ox - previous.ex}px`
-          span.style.height = `${region.ex - region.oy}px`
-          span.style.flex = 'none'
-
-          line!.appendChild(span)
-          line!.appendChild(bg)
-          root!.appendChild(line!)
-        } else if (previous.bg_color !== region.bg_color) {
-          bg = document.createElement('span')
-          bg.style.backgroundColor = `${region.bg_color}`
-          bg.style.whiteSpace = `pre-line`
-          bg.style.display = 'inline-flex'
-          bg.style.flex = 'none'
-          bg.style.flexWrap = 'nowrap'
-          bg.style.flexDirection = 'row'
-          bg.style.whiteSpace = `pre-line`
-          bg.style.height = `${region.ey - region.oy}px`
-
-          line!.appendChild(bg)
-        }
-
-        bg!.appendChild(region.content);
-        previous = region
-      }
-
-      if (foreign) {
-        foreign.setAttribute('height', `${height}`)
-      }
     }
 
     return ({
@@ -538,19 +301,15 @@ export default class CanvasProvider {
         begin += 1
       } else if (this.pes[begin] === JIS8.APB) {
         this.move_relative_pos(-1, 0)
-        this.style_changed = true
         begin += 1
       } else if (this.pes[begin] === JIS8.APF) {
         this.move_relative_pos(1, 0)
-        this.style_changed = true
         begin += 1
       } else if (this.pes[begin] === JIS8.APD) {
         this.move_relative_pos(0, 1)
-        this.style_changed = true
         begin += 1
       } else if (this.pes[begin] === JIS8.APU) {
         this.move_relative_pos(0, -1)
-        this.style_changed = true
         begin += 1
       } else if (this.pes[begin] === JIS8.CS) {
         if(this.startTime != null && this.timeElapsed > 0){
@@ -559,7 +318,6 @@ export default class CanvasProvider {
         begin += 1
       } else if (this.pes[begin] === JIS8.APR) {
         this.move_newline()
-        this.style_changed = true
         begin += 1
       } else if (this.pes[begin] === JIS8.LS1) {
         this.GL = 1
@@ -570,7 +328,6 @@ export default class CanvasProvider {
       } else if (this.pes[begin] === JIS8.PAPF) {
         const P1 = this.pes[begin + 1] & 0x3F
         this.move_relative_pos(P1, 0)
-        this.style_changed = true
         begin += 2
       } else if (this.pes[begin] === JIS8.CAN) {
         begin += 1
@@ -631,7 +388,6 @@ export default class CanvasProvider {
         const P1 = this.pes[begin + 1] & 0x3F
         const P2 = this.pes[begin + 2] & 0x3F
         this.move_absolute_pos(P2, P1)
-        this.style_changed = true
         begin += 3
       } else if (this.pes[begin] === JIS8.SS3) {
         let key = 0
@@ -658,53 +414,42 @@ export default class CanvasProvider {
         begin += 1
       } else if (this.pes[begin] === JIS8.BKF) {
         this.fg_color = pallets[this.pallet][0]
-        this.style_changed = true
         begin += 1
       } else if (this.pes[begin] === JIS8.RDF) {
         this.fg_color = pallets[this.pallet][1]
-        this.style_changed = true
         begin += 1
       } else if (this.pes[begin] === JIS8.GRF) {
         this.fg_color = pallets[this.pallet][2]
-        this.style_changed = true
         begin += 1
       } else if (this.pes[begin] === JIS8.YLF) {
         this.fg_color = pallets[this.pallet][3]
-        this.style_changed = true
         begin += 1
       } else if (this.pes[begin] === JIS8.BLF) {
         this.fg_color = pallets[this.pallet][4]
-        this.style_changed = true
         begin += 1
       } else if (this.pes[begin] === JIS8.MGF) {
         this.fg_color = pallets[this.pallet][5]
-        this.style_changed = true
         begin += 1
       } else if (this.pes[begin] === JIS8.CNF) {
         this.fg_color = pallets[this.pallet][6]
-        this.style_changed = true
         begin += 1
       } else if (this.pes[begin] === JIS8.WHF) {
         this.fg_color = pallets[this.pallet][7]
-        this.style_changed = true
         begin += 1
       } else if (this.pes[begin] === JIS8.SSZ) {
         this.text_size_x = 0.5
         this.text_size_y = 0.5
         this.text_type = 'SSZ'
-        this.style_changed = true
         begin += 1
       } else if (this.pes[begin] === JIS8.MSZ) {
         this.text_size_x = 0.5
         this.text_size_y = 1
         this.text_type = 'MSZ'
-        this.style_changed = true
         begin += 1
       } else if (this.pes[begin] === JIS8.NSZ) {
         this.text_size_x = 1
         this.text_size_y = 1
         this.text_type = 'NSZ'
-        this.style_changed = true
         begin += 1
       } else if (this.pes[begin] === JIS8.SZX) {
         return
@@ -718,10 +463,8 @@ export default class CanvasProvider {
           const color = P1 & 0x0F
           if((P1 & 0x70) == 0x40){
             this.fg_color = pallets[this.pallet][color]
-            this.style_changed = true
           }else if((P1 & 0x70) == 0x50){
             this.bg_color = pallets[this.pallet][color]
-            this.style_changed = true
           }else{
             // other
           }
@@ -730,7 +473,6 @@ export default class CanvasProvider {
       } else if (this.pes[begin] === JIS8.FLC) {
         const index = this.pes[begin] & 0x0F;
         this.flc = index
-        this.style_changed = true
         begin += 2
       } else if (this.pes[begin] === JIS8.CDC) {
         return
@@ -743,19 +485,14 @@ export default class CanvasProvider {
       } else if (this.pes[begin] === JIS8.HLC) {
         this.prev_hlc = this.hlc
         this.hlc = this.pes[begin + 1] & 0x0F
-        if (this.prev_hlc === 0 && this.hlc !== 0 || this.prev_hlc !== 0 && this.hlc === 0) {
-          this.style_changed = true
-        }
         begin += 2
       } else if (this.pes[begin] === JIS8.RPC) {
         return
       } else if (this.pes[begin] === JIS8.SPL) {
         this.stl = false
-        this.style_changed = true
         begin += 1
       } else if (this.pes[begin] === JIS8.STL) {
         this.stl = true
-        this.style_changed = true
         begin += 1
       } else if (this.pes[begin] === JIS8.CSI) {
         let last = begin + 1
@@ -776,15 +513,12 @@ export default class CanvasProvider {
             if(P1 === 5){
               this.swf_x = 1920 * SIZE_MAGNIFICATION
               this.swf_y = 1080 * SIZE_MAGNIFICATION
-              this.style_changed = true
             }else if(P1 === 7){
               this.swf_x = 960 * SIZE_MAGNIFICATION
               this.swf_y = 540 * SIZE_MAGNIFICATION
-              this.style_changed = true
             }else if(P1 == 9){
               this.swf_x = 720 * SIZE_MAGNIFICATION
               this.swf_y = 480 * SIZE_MAGNIFICATION
-              this.style_changed = true
             }else{
               return
             }
@@ -807,7 +541,6 @@ export default class CanvasProvider {
             }
             this.sdf_x = P1 * SIZE_MAGNIFICATION
             this.sdf_y = P2 * SIZE_MAGNIFICATION
-            this.style_changed = true
             break
           }else if(this.pes[last] === CSI.SSM){
             let index = begin + 1
@@ -825,7 +558,6 @@ export default class CanvasProvider {
             }
             this.ssm_x = P1 * SIZE_MAGNIFICATION
             this.ssm_y = P2 * SIZE_MAGNIFICATION
-            this.style_changed = true
             break
           }else if(this.pes[last] === CSI.SHS){
             let index = begin + 1
@@ -836,7 +568,6 @@ export default class CanvasProvider {
               index++
             }
             this.shs = P1 * SIZE_MAGNIFICATION
-            this.style_changed = true
             break
           }else if(this.pes[last] === CSI.SVS){
             let index = begin + 1
@@ -847,7 +578,6 @@ export default class CanvasProvider {
               index++
             }
             this.svs = P1 * SIZE_MAGNIFICATION
-            this.style_changed = true
             break
           }else if(this.pes[last] === CSI.PLD){
             break
@@ -873,7 +603,6 @@ export default class CanvasProvider {
             }
             this.sdp_x = P1 * SIZE_MAGNIFICATION
             this.sdp_y = P2 * SIZE_MAGNIFICATION
-            this.style_changed = true
             break
           }else if(this.pes[last] === CSI.ACPS){
             let index = begin + 1
@@ -890,7 +619,6 @@ export default class CanvasProvider {
               index++
             }
             this.move_absolute_dot(P1 * SIZE_MAGNIFICATION, P2 * SIZE_MAGNIFICATION)
-            this.style_changed = true
             break
           }else if(this.pes[last] === CSI.TCC){
             break
@@ -898,12 +626,10 @@ export default class CanvasProvider {
             const P1 = this.pes[begin + 1]
             if (P1 == 0x30) {
               this.orn = null
-              this.style_changed = true
             }else if(P1 == 0x31){
               const P2 = (this.pes[begin + 3] & 0x0F) * 10 + (this.pes[begin + 4] & 0x0F)
               const P3 = (this.pes[begin + 5] & 0x0F) * 10 + (this.pes[begin + 6] & 0x0F)
               this.orn = pallets[P2][P3]
-              this.style_changed = true
             }
             break
           }else if(this.pes[last] === CSI.MDF){
@@ -993,6 +719,66 @@ export default class CanvasProvider {
   private renderCharacter(key: number, entry: ALPHABET_ENTRY) {
     if (this.position_x < 0 || this.position_y < 0){
       this.move_absolute_pos(0, 0)
+    }
+
+    if (this.svg === null) { return; }
+    if (this.cells === null) {
+      this.svg.setAttribute('viewBox', `0 0 ${this.swf_x} ${this.swf_y}`)
+      {
+        const foreign = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+        foreign.setAttribute('x', `${this.sdp_x}`)
+        foreign.setAttribute('y', `${this.sdp_y}`)
+        foreign.setAttribute('width', `${this.sdf_x}`)
+        foreign.setAttribute('height', `${this.sdf_y}`)
+
+        const style = document.createElement('style')
+        style.textContent  = ''
+        style.textContent += `@keyframes flc-0 { from { opacity: 0; } to { opacity: 1; } }`
+        style.textContent += `@keyframes flc-7 { from { opacity: 1; } to { opacity: 0; } }`
+
+        const table = document.createElement('table');
+        table.style.willChange = 'transform';
+        table.style.position = 'absolute';
+        table.style.top = '0px';
+        table.style.left = '0px';
+        table.style.width = '100%';
+        table.style.height = '100%';
+        table.style.boxSizing = 'border-box';
+        table.style.border = 'none';
+        table.style.borderCollapse = 'collapse';
+
+        const cells: HTMLTableDataCellElement[][] = [];
+        for (let y = 0, y_idx = 0; y < this.sdf_y; y += Math.floor((this.ssm_y + this.svs) / 2), y_idx += 1) {
+          const tr = document.createElement('tr');
+          cells.push([]);
+          tr.style.position = 'relative';
+          tr.style.height = `${Math.floor((this.ssm_y + this.svs) / 2)}`;
+          tr.style.width = '100%';
+          tr.style.boxSizing = 'border-box';
+          tr.style.border = 'none';
+
+          for (let x = 0; x < this.sdf_x; x += Math.floor((this.ssm_x + this.shs) / 2)) {
+            const td = document.createElement('td');
+
+            td.style.height = `${Math.floor((this.ssm_y + this.svs) / 2)}`;
+            td.style.width = `${Math.floor((this.ssm_x + this.shs) / 2)}`;
+            td.style.padding = '0px';
+            td.style.boxSizing = 'border-box';
+            td.style.border = 'none';
+
+            tr.appendChild(td);
+            cells[y_idx].push(td);
+          }
+
+          table.appendChild(tr);
+        }
+
+        foreign.appendChild(style)
+        foreign.appendChild(table);
+        this.svg.appendChild(foreign)
+
+        this.cells = cells;
+      }
     }
 
     if (entry.alphabet !== ALPHABETS.MACRO) {
@@ -1200,10 +986,6 @@ export default class CanvasProvider {
       } else  if (this.drcsReplacement && this.drcsReplaceMapping.has(drcs_hash.toUpperCase())) {
         this.renderFont(this.drcsReplaceMapping.get(drcs_hash.toUpperCase())!)
       } else {
-        const span = document.createElement('span');
-        span.style.display = `inline-block`
-        span.style.width = `${this.ssm_x + this.shs}px`
-        span.style.verticalAlign = `top`
         const canvas = document.createElement('canvas');
         const width = Math.floor(this.ssm_x / SIZE_MAGNIFICATION)
         const height = Math.floor(this.ssm_y / SIZE_MAGNIFICATION)
@@ -1215,53 +997,13 @@ export default class CanvasProvider {
         canvas.height = height + outlineHeight * 2 / this.text_size_y
         canvas.style.width =  `${this.ssm_x + outlineWidth * 2 / this.text_size_x * SIZE_MAGNIFICATION}px`
         canvas.style.height = `${this.ssm_y + outlineHeight * 2 / this.text_size_y * SIZE_MAGNIFICATION}px`
-        canvas.style.verticalAlign = `top`
-        canvas.style.marginLeft = `${Math.floor(this.shs / 2 - outlineWidth / this.text_size_x * SIZE_MAGNIFICATION)}px`
-        canvas.style.marginTop = `${Math.floor(this.svs / 2 - outlineHeight / this.text_size_y * SIZE_MAGNIFICATION)}px`
 
         const ctx = canvas.getContext('2d')
         if (!ctx) { return; }
 
-        if (this.style_changed || this.text_type === 'SSZ') {
-          const content = document.createElement('span');
-          content.style.color = CanvasProvider.getRGBAfromColorCode(this.fg_color)
-          content.style.fontSize = `inherit`
-          content.style.letterSpacing = `inherit`
-          content.style.lineHeight = `inherit`
-
-          // FIXME: it too wrong
-          if (this.hlc !== 0) {
-            content.style.border = `1px solid ${CanvasProvider.getRGBAfromColorCode(this.fg_color)}`
-          }
-          // FIXME: it too wrong
-          if (this.stl) {
-            content.style.textDecoration = `underline ${CanvasProvider.getRGBAfromColorCode(this.fg_color)}`
-          }
-
-          if (this.flc !== 0x0F) {
-            content.style.animation = `flc-${this.flc} 1s infinite`
-          }
-
-          this.regions.push({
-            text_type: this.text_type,
-            ox: this.position_x,
-            oy: this.position_y - this.height(),
-            ex: this.position_x,
-            ey: this.position_y,
-            fg_color: this.fg_color,
-            bg_color: this.force_bg_color ?? this.bg_color,
-            content: content,
-            length: 0,
-            used: true
-          });
-          this.style_changed = false
-        }
-
-        const region = this.regions[this.regions.length - 1]
-         
         const orn = this.getOrnColorCode()
         if (orn && (!this.force_orn || this.force_orn === true || this.force_orn !== this.fg_color)) {
-          ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(orn)
+          ctx.fillStyle = SVGProvider.getRGBAfromColorCode(orn)
           for(let dy = -outlineHeight / this.text_size_y; dy <= outlineHeight / this.text_size_y; dy++){
             for(let dx = -outlineWidth/ this.text_size_x; dx <= outlineWidth / this.text_size_x; dx++){
               for(let y = 0; y < height; y++){
@@ -1288,7 +1030,7 @@ export default class CanvasProvider {
           }
         }
 
-        ctx.fillStyle = CanvasProvider.getRGBAfromColorCode(this.fg_color)
+        ctx.fillStyle = SVGProvider.getRGBAfromColorCode(this.fg_color)
         for(let y = 0; y < height; y++){
           for(let x = 0; x < width; x++){
             let value = 0
@@ -1310,10 +1052,44 @@ export default class CanvasProvider {
           }
         }
 
-        span.appendChild(canvas)
-        region.content.appendChild(span)
-        region.ex += this.width()
-        region.length += 1
+        const x_space = Math.floor(this.text_size_x * 2);
+        const y_space = Math.floor(this.text_size_y * 2);
+        const lx = Math.round((this.position_x - this.sdp_x) / (this.ssm_x + this.shs) * 2);
+        const uy = Math.round((this.position_y - this.height() - this.sdp_y) / (this.ssm_y + this.svs) * 2);
+
+        for (let y = 0; y < y_space; y++) {
+          for (let x = 0; x < x_space; x++) {
+            const cell = this.cells[uy + y][lx + x];
+            if (y === 0 && x === 0) {
+              cell.setAttribute('rowspan', `${y_space}`);
+              cell.setAttribute('colspan', `${x_space}`);
+              cell.style.textAlign = `center`;
+              cell.style.verticalAlign = `top`;
+
+              const elem = document.createElement('div');
+
+              elem.appendChild(canvas);
+              elem.style.display = 'flex';
+              elem.style.alignItems = 'center';
+              elem.style.justifyContent = 'middle';
+              elem.style.width = `${this.ssm_x + this.shs}px`
+              elem.style.height = `${this.ssm_y + this.svs}px`
+              elem.style.lineHeight = `${this.height()}px`
+              elem.style.fontSize = `${this.ssm_x}px`;
+              elem.style.transform = `scale(${this.text_size_x}, ${this.text_size_y})`
+              elem.style.transformOrigin = `0 0`
+              elem.style.marginRight = `-${(this.ssm_x + this.shs) - this.width()}px`
+              elem.style.marginBottom = `-${(this.ssm_y + this.svs) - this.height()}px`
+              elem.style.color = SVGProvider.getRGBAfromColorCode(this.fg_color);
+
+
+              cell.style.backgroundColor = SVGProvider.getRGBAfromColorCode(this.force_bg_color ?? this.bg_color);
+              cell.appendChild(elem);
+            } else if (cell.parentNode != null){
+              cell.parentNode.removeChild(cell);
+            }
+          }
+        }
       }
 
       this.move_relative_pos(1, 0)
@@ -1321,67 +1097,10 @@ export default class CanvasProvider {
   }
 
   private renderFont(character: string): void {
+    if (this.cells === null) { return; }
+
     const useGaijiFont = ADDITIONAL_SYMBOLS_SET.has(character)
     const font = useGaijiFont ? this.gaijiFont : this.normalFont;
-
-    if (this.regions[this.regions.length - 1] != null) {
-      const region = this.regions[this.regions.length - 1]
-      if (region.font !== font) {
-        this.style_changed = true
-      }
-    }
-
-    if (this.style_changed || this.text_type === 'SSZ') {
-      const content = document.createElement('span');
-      content.style.color = CanvasProvider.getRGBAfromColorCode(this.fg_color)
-      content.style.fontSize = `inherit`
-      content.style.letterSpacing = `inherit`
-      content.style.lineHeight = `inherit`
-      content.style.fontFamily = `${font}`
-
-      const orn = this.getOrnColorCode()
-      if (orn && (!this.force_orn || this.force_orn === true || this.force_orn !== this.fg_color)) {
-        let shadow = '', first = true
-        for (let dy = -4; dy <= 4; dy++) {
-          for (let dx = -4; dx <= 4; dx++) {
-            if (dy === 0 && dx === 0) { continue; }
-            shadow += `${!first ? ',' : ''}${dx}px ${dy}px 0 ${CanvasProvider.getRGBAfromColorCode(orn)}`
-            first = false
-          }
-        }
-        content.style.textShadow = shadow
-      }
-      
-      // FIXME: it too wrong
-      if (this.hlc !== 0) {
-        content.style.border = `1px solid ${CanvasProvider.getRGBAfromColorCode(this.fg_color)}`
-      }
-      // FIXME: it too wrong
-      if (this.stl) {
-        content.style.textDecoration = `underline ${CanvasProvider.getRGBAfromColorCode(this.fg_color)}`
-      }
-
-      if (this.flc !== 0x0F) {
-        content.style.animation = `flc-${this.flc} 1s infinite`
-      }
-
-      this.regions.push({
-        text_type: this.text_type,
-        ox: this.position_x,
-        oy: this.position_y - this.height(),
-        ex: this.position_x,
-        ey: this.position_y,
-        font: font,
-        fg_color: this.fg_color,
-        bg_color: this.force_bg_color ?? this.bg_color,
-        content: content,
-        length: 0,
-        used: true
-      });
-      this.style_changed = false
-    }
-
-    const region = this.regions[this.regions.length - 1]
 
     if (EMBEDDED_GLYPH != null && EMBEDDED_GLYPH?.has(character)) {
       const {viewBox, path} = EMBEDDED_GLYPH.get(character)!;
@@ -1391,49 +1110,125 @@ export default class CanvasProvider {
 
     if (useGaijiFont) { character += '\u{fe0e}' }
 
-    const span = document.createElement('span');
-    span.style.display = `inline-block`
-    span.style.width = `${this.ssm_x + this.shs}px`
-    span.style.textAlign = `center`
-    span.style.whiteSpace = `pre-line`
-    span.textContent = character
-    region.content.appendChild(span)
+    const x_space = Math.floor(this.text_size_x * 2);
+    const y_space = Math.floor(this.text_size_y * 2);
+    const lx = Math.round((this.position_x - this.sdp_x) / (this.ssm_x + this.shs) * 2);
+    const uy = Math.round((this.position_y - this.height() - this.sdp_y) / (this.ssm_y + this.svs) * 2);
 
-    region.ex += this.width()
-    region.length += 1
+    for (let y = 0; y < y_space; y++) {
+      for (let x = 0; x < x_space; x++) {
+        const cell = this.cells[uy + y][lx + x];
+        if (y === 0 && x === 0) {
+          cell.setAttribute('rowspan', `${y_space}`);
+          cell.setAttribute('colspan', `${x_space}`);
+          cell.style.textAlign = `center`;
+          cell.style.verticalAlign = `top`;
+
+          const elem = document.createElement('div');
+
+          elem.textContent = character;
+          elem.style.display = 'flex';
+          elem.style.alignItems = 'center';
+          elem.style.justifyContent = 'middle';
+          elem.style.width = `${this.ssm_x + this.shs}px`
+          elem.style.height = `${this.ssm_y + this.svs}px`
+          elem.style.fontFamily = `${font}`
+          elem.style.lineHeight = `${this.height()}px`
+          elem.style.fontSize = `${this.ssm_x}px`;
+          elem.style.transform = `scale(${this.text_size_x}, ${this.text_size_y})`
+          elem.style.transformOrigin = `0 0`
+          elem.style.marginRight = `-${(this.ssm_x + this.shs) - this.width()}px`
+          elem.style.marginBottom = `-${(this.ssm_y + this.svs) - this.height()}px`
+          elem.style.color = SVGProvider.getRGBAfromColorCode(this.fg_color);
+
+          const orn = this.getOrnColorCode()
+          if (orn && (!this.force_orn || this.force_orn === true || this.force_orn !== this.fg_color)) {
+            let shadow = '', first = true
+            for (let dy = -2 * SIZE_MAGNIFICATION; dy <= 2 * SIZE_MAGNIFICATION; dy++) {
+              for (let dx = -2 * SIZE_MAGNIFICATION; dx <= 2 * SIZE_MAGNIFICATION; dx++) {
+                if (dy === 0 && dx === 0) { continue; }
+                shadow += `${!first ? ',' : ''}${dx}px ${dy}px 0 ${SVGProvider.getRGBAfromColorCode(orn)}`
+                first = false
+              }
+            }
+         
+            elem.style.textShadow = shadow
+          }
+
+          cell.style.backgroundColor = SVGProvider.getRGBAfromColorCode(this.force_bg_color ?? this.bg_color);
+          cell.appendChild(elem);
+        } else if (cell.parentNode != null){
+          cell.parentNode.removeChild(cell);
+        }
+      }
+    }
   }
 
   private renderPath(viewBox: [number, number, number, number], path: string): void {
-    const region = this.regions[this.regions.length - 1]
+    if (this.cells === null) { return; }
 
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
     svg.setAttribute('viewBox', `${viewBox[0]} ${viewBox[1]} ${viewBox[2]} ${viewBox[3]}`)
-    svg.style.verticalAlign = `text-bottom`
     svg.style.width = `${this.ssm_x + this.shs}px`
     svg.style.height = `${this.ssm_y}px`
 
     const elem = document.createElementNS('http://www.w3.org/2000/svg', 'path')
     elem.setAttribute('d', path);
-    elem.setAttribute('fill', `${CanvasProvider.getRGBAfromColorCode(this.fg_color)}`)
+    elem.setAttribute('fill', `${SVGProvider.getRGBAfromColorCode(this.fg_color)}`)
 
     const orn = this.getOrnColorCode()
     if (orn && (!this.force_orn || this.force_orn === true || this.force_orn !== this.fg_color)) {
       const width = Math.max((viewBox[2] - viewBox[0]) / this.ssm_x, (viewBox[3] - viewBox[1]) / this.ssm_y) * 4
-      elem.setAttribute('stroke', `${CanvasProvider.getRGBAfromColorCode(orn)}`)
+      elem.setAttribute('stroke', `${SVGProvider.getRGBAfromColorCode(orn)}`)
       elem.setAttribute('stroke-width', `${width}`)
     } else {
       elem.setAttribute('stroke', `transparent`)
     }
 
     svg.appendChild(elem)
-    region.content.appendChild(svg);
-    region.ex += this.width()
-    region.length += 1    
+
+    const x_space = Math.floor(this.text_size_x * 2);
+    const y_space = Math.floor(this.text_size_y * 2);
+    const lx = Math.round((this.position_x - this.sdp_x) / (this.ssm_x + this.shs) * 2);
+    const uy = Math.round((this.position_y - this.height() - this.sdp_y) / (this.ssm_y + this.svs) * 2);
+
+    for (let y = 0; y < y_space; y++) {
+      for (let x = 0; x < x_space; x++) {
+        const cell = this.cells[uy + y][lx + x];
+        if (y === 0 && x === 0) {
+          cell.setAttribute('rowspan', `${y_space}`);
+          cell.setAttribute('colspan', `${x_space}`);
+          cell.style.textAlign = `center`;
+          cell.style.verticalAlign = `top`;
+
+          const elem = document.createElement('div');
+
+          elem.appendChild(svg);
+          elem.style.display = 'flex';
+          elem.style.alignItems = 'center';
+          elem.style.justifyContent = 'middle';
+          elem.style.width = `${this.ssm_x + this.shs}px`
+          elem.style.height = `${this.ssm_y + this.svs}px`
+          elem.style.lineHeight = `${this.height()}px`
+          elem.style.fontSize = `${this.ssm_x}px`;
+          elem.style.transform = `scale(${this.text_size_x}, ${this.text_size_y})`
+          elem.style.transformOrigin = `0 0`
+          elem.style.marginRight = `-${(this.ssm_x + this.shs) - this.width()}px`
+          elem.style.marginBottom = `-${(this.ssm_y + this.svs) - this.height()}px`
+          elem.style.color = SVGProvider.getRGBAfromColorCode(this.fg_color);
+
+          cell.style.backgroundColor = SVGProvider.getRGBAfromColorCode(this.force_bg_color ?? this.bg_color);
+          cell.appendChild(elem);
+        } else if (cell.parentNode != null){
+          cell.parentNode.removeChild(cell);
+        }
+      }
+    }
   }
 
   private getOrnColorCode(): string | null {
     if (this.force_orn === true) {
-      return CanvasProvider.fillAlphaColorCode(this.bg_color);
+      return SVGProvider.fillAlphaColorCode(this.bg_color);
     } else if (this.force_orn === false) {
       return this.orn;
     } else {
