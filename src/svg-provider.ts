@@ -752,7 +752,7 @@ export default class SVGProvider {
           const tr = document.createElement('tr');
           cells.push([]);
           tr.style.position = 'relative';
-          tr.style.height = `${Math.floor((this.ssm_y + this.svs) / 2)}`;
+          tr.style.height = `${Math.floor((this.ssm_y + this.svs) / 2)}px`;
           tr.style.width = '100%';
           tr.style.boxSizing = 'border-box';
           tr.style.border = 'none';
@@ -760,8 +760,8 @@ export default class SVGProvider {
           for (let x = 0; x < this.sdf_x; x += Math.floor((this.ssm_x + this.shs) / 2)) {
             const td = document.createElement('td');
 
-            td.style.height = `${Math.floor((this.ssm_y + this.svs) / 2)}`;
-            td.style.width = `${Math.floor((this.ssm_x + this.shs) / 2)}`;
+            td.style.height = `${Math.floor((this.ssm_y + this.svs) / 2)}px`;
+            td.style.width = `${Math.floor((this.ssm_x + this.shs) / 2)}px`;
             td.style.padding = '0px';
             td.style.boxSizing = 'border-box';
             td.style.border = 'none';
