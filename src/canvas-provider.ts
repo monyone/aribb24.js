@@ -620,20 +620,33 @@ export default class CanvasProvider {
         this.stl = true
         begin += 1
       } else if (this.pes[begin] === JIS8.CSI) {
-        let last = begin + 1
-        while(true){
-          if (this.pes[last] === CSI.GSM){
+        let last = begin
+        let middleIndex = -1
+        let separatorIndex = -1
+        while (last + 1 < end) {
+          last += 1
+          if(this.pes[last] === 0x20){
+            // 中間文字
+            if (middleIndex < 0) {
+              middleIndex = last
+            }
+          }else if(this.pes[last] === 0x3B){
+            // 区切り文字
+            if (middleIndex < 0 && separatorIndex < 0) {
+              separatorIndex = last
+            }
+          }else if(this.pes[last] === CSI.GSM){
             break
           }else if(this.pes[last] === CSI.SWF){
             let index = begin + 1
             let P1 = 0
-            while (this.pes[index] != 0x3B && this.pes[index] != 0x20){
+            if (separatorIndex >= 0 || middleIndex < 0) {
+              return
+            }
+            while (index < middleIndex) {
               P1 *= 10
               P1 += this.pes[index] & 0x0F
               index++
-            }
-            if (this.pes[index] !== 0x20) {
-              return
             }
             if(P1 === 5){
               this.swf_x = 1920 * SIZE_MAGNIFICATION
@@ -653,13 +666,13 @@ export default class CanvasProvider {
           }else if(this.pes[last] === CSI.SDF){
             let index = begin + 1
             let P1 = 0, P2 = 0
-            while (this.pes[index] != 0x3B){
+            while (index < separatorIndex) {
               P1 *= 10
               P1 += this.pes[index] & 0x0F
               index++
             }
             index++
-            while(this.pes[index] != 0x20){
+            while (index < middleIndex) {
               P2 *= 10
               P2 += this.pes[index] & 0x0F
               index++
@@ -670,13 +683,13 @@ export default class CanvasProvider {
           }else if(this.pes[last] === CSI.SSM){
             let index = begin + 1
             let P1 = 0, P2 = 0
-            while (this.pes[index] != 0x3B){
+            while (index < separatorIndex) {
               P1 *= 10
               P1 += this.pes[index] & 0x0F
               index++
             }
             index++
-            while(this.pes[index] != 0x20){
+            while (index < middleIndex) {
               P2 *= 10
               P2 += this.pes[index] & 0x0F
               index++
@@ -687,7 +700,7 @@ export default class CanvasProvider {
           }else if(this.pes[last] === CSI.SHS){
             let index = begin + 1
             let P1 = 0
-            while (this.pes[index] != 0x20){
+            while (index < middleIndex) {
               P1 *= 10
               P1 += this.pes[index] & 0x0F
               index++
@@ -697,7 +710,7 @@ export default class CanvasProvider {
           }else if(this.pes[last] === CSI.SVS){
             let index = begin + 1
             let P1 = 0
-            while (this.pes[index] != 0x20){
+            while (index < middleIndex) {
               P1 *= 10
               P1 += this.pes[index] & 0x0F
               index++
@@ -715,13 +728,13 @@ export default class CanvasProvider {
           }else if(this.pes[last] === CSI.SDP){
             let index = begin + 1
             let P1 = 0, P2 = 0
-            while (this.pes[index] != 0x3B){
+            while (index < separatorIndex) {
               P1 *= 10
               P1 += this.pes[index] & 0x0F
               index++
             }
             index++
-            while(this.pes[index] != 0x20){
+            while (index < middleIndex) {
               P2 *= 10
               P2 += this.pes[index] & 0x0F
               index++
@@ -732,13 +745,13 @@ export default class CanvasProvider {
           }else if(this.pes[last] === CSI.ACPS){
             let index = begin + 1
             let P1 = 0, P2 = 0
-            while (this.pes[index] != 0x3B){
+            while (index < separatorIndex) {
               P1 *= 10
               P1 += this.pes[index] & 0x0F
               index++
             }
             index++
-            while(this.pes[index] != 0x20){
+            while (index < middleIndex) {
               P2 *= 10
               P2 += this.pes[index] & 0x0F
               index++
@@ -768,7 +781,7 @@ export default class CanvasProvider {
           }else if(this.pes[last] === CSI.PRA){
             let index = begin + 1
             let P1 = 0
-            while (this.pes[index] != 0x20){
+            while (index < middleIndex) {
               P1 *= 10
               P1 += this.pes[index] & 0x0F
               index++
@@ -784,8 +797,6 @@ export default class CanvasProvider {
           }else if(this.pes[last] === CSI.SCS){
             break
           }
-
-          last += 1
         }
         begin = last + 1
       } else if (this.pes[begin] === JIS8.TIME) {
