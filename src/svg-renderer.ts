@@ -106,7 +106,7 @@ export default class SVGRenderer {
   public show(): void {
     this.isShowing = true
 
-    this.svg.style.visibility = 'showing';
+    this.svg.style.visibility = 'visible';
   }
 
   public hide(): void {
