@@ -24,7 +24,7 @@ const SIZE_MAGNIFICATION = 2; // 奇数の height 時に SSZ で改行を行う�
 let EMBEDDED_GLYPH: Map<string, PathElement> | null = null;
 
 export interface ProviderOption {
-  svg?: SVGElement,
+  table?: HTMLTableElement,
   data_identifier?: number,
   data_group_id?: number,
   forceStrokeColor?: boolean | string,
@@ -44,9 +44,9 @@ export interface ProviderResult {
   PRA: number | null
 }
 
-export default class SVGProvider {
+export default class HTMLProvider {
   private pes: Uint8Array
-  private svg: SVGElement | null = null
+  private table: HTMLTableElement | null = null
   private cells: HTMLTableDataCellElement[][] | null = null;
 
   private GL: number = 0
@@ -209,10 +209,10 @@ export default class SVGProvider {
   }
 
   public render(option?: ProviderOption): ProviderResult | null {
-    this.svg = option?.svg ?? null
+    this.table = option?.table ?? null
     // その他オプション類
-    this.force_orn = ((typeof option?.forceStrokeColor === 'boolean') ? option?.forceStrokeColor : SVGProvider.getRGBAColorCode(option?.forceStrokeColor)) ?? null
-    this.force_bg_color = SVGProvider.getRGBAColorCode(option?.forceBackgroundColor) ?? null
+    this.force_orn = ((typeof option?.forceStrokeColor === 'boolean') ? option?.forceStrokeColor : HTMLProvider.getRGBAColorCode(option?.forceStrokeColor)) ?? null
+    this.force_bg_color = HTMLProvider.getRGBAColorCode(option?.forceBackgroundColor) ?? null
     this.normalFont = option?.normalFont ?? this.normalFont
     this.gaijiFont = option?.gaijiFont ?? this.normalFont
     this.drcsReplacement = option?.drcsReplacement ?? false
@@ -231,13 +231,13 @@ export default class SVGProvider {
     this.usePUA = option?.usePUA ?? false
     // その他オプション類終わり
 
-    if (!SVGProvider.detect(this.pes, option)) {
+    if (!HTMLProvider.detect(this.pes, option)) {
       return null;
     }
 
-    if (this.svg) {
-      while (this.svg.firstChild) {
-        this.svg.removeChild(this.svg.firstChild);
+    if (this.table) {
+      while (this.table.firstChild) {
+        this.table.removeChild(this.table.firstChild);
       }
     }
 
@@ -721,64 +721,50 @@ export default class SVGProvider {
       this.move_absolute_pos(0, 0)
     }
 
-    if (this.svg === null) { return; }
+    if (this.table === null) { return; }
     if (this.cells === null) {
-      this.svg.setAttribute('viewBox', `0 0 ${this.swf_x} ${this.swf_y}`)
-      {
-        const foreign = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-        foreign.setAttribute('x', `${this.sdp_x}`)
-        foreign.setAttribute('y', `${this.sdp_y}`)
-        foreign.setAttribute('width', `${this.sdf_x}`)
-        foreign.setAttribute('height', `${this.sdf_y}`)
+      if (this.table.parentElement) {
+        this.table.parentElement.style.position = 'absolute';
+        this.table.parentElement.style.width = `${this.swf_x}px`;
+        this.table.parentElement.style.height = `${this.swf_y}px`;
+      }
 
-        const style = document.createElement('style')
-        style.textContent  = ''
-        style.textContent += `@keyframes flc-0 { from { opacity: 0; } to { opacity: 1; } }`
-        style.textContent += `@keyframes flc-7 { from { opacity: 1; } to { opacity: 0; } }`
+      this.table.style.willChange = 'transform';
+      this.table.style.position = 'absolute';
+      this.table.style.left = `${this.sdp_x}px`;
+      this.table.style.top = `${this.sdp_y}px`;
+      this.table.style.width = `${this.sdf_x}px`;
+      this.table.style.height = `${this.sdf_y}px`;
+      this.table.style.boxSizing = 'border-box';
+      this.table.style.border = 'none';
+      this.table.style.borderCollapse = 'collapse';
 
-        const table = document.createElement('table');
-        table.style.willChange = 'transform';
-        table.style.position = 'absolute';
-        table.style.top = '0px';
-        table.style.left = '0px';
-        table.style.width = '100%';
-        table.style.height = '100%';
-        table.style.boxSizing = 'border-box';
-        table.style.border = 'none';
-        table.style.borderCollapse = 'collapse';
+      const cells: HTMLTableDataCellElement[][] = [];
+      for (let y = 0, y_idx = 0; y < this.sdf_y; y += Math.floor((this.ssm_y + this.svs) / 2), y_idx += 1) {
+        const tr = document.createElement('tr');
+        cells.push([]);
+        tr.style.position = 'relative';
+        tr.style.height = `${Math.floor((this.ssm_y + this.svs) / 2)}px`;
+        tr.style.width = '100%';
+        tr.style.boxSizing = 'border-box';
+        tr.style.border = 'none';
 
-        const cells: HTMLTableDataCellElement[][] = [];
-        for (let y = 0, y_idx = 0; y < this.sdf_y; y += Math.floor((this.ssm_y + this.svs) / 2), y_idx += 1) {
-          const tr = document.createElement('tr');
-          cells.push([]);
-          tr.style.position = 'relative';
-          tr.style.height = `${Math.floor((this.ssm_y + this.svs) / 2)}px`;
-          tr.style.width = '100%';
-          tr.style.boxSizing = 'border-box';
-          tr.style.border = 'none';
+        for (let x = 0; x < this.sdf_x; x += Math.floor((this.ssm_x + this.shs) / 2)) {
+          const td = document.createElement('td');
 
-          for (let x = 0; x < this.sdf_x; x += Math.floor((this.ssm_x + this.shs) / 2)) {
-            const td = document.createElement('td');
+          td.style.height = `${Math.floor((this.ssm_y + this.svs) / 2)}px`;
+          td.style.width = `${Math.floor((this.ssm_x + this.shs) / 2)}px`;
+          td.style.padding = '0px';
+          td.style.boxSizing = 'border-box';
+          td.style.border = 'none';
 
-            td.style.height = `${Math.floor((this.ssm_y + this.svs) / 2)}px`;
-            td.style.width = `${Math.floor((this.ssm_x + this.shs) / 2)}px`;
-            td.style.padding = '0px';
-            td.style.boxSizing = 'border-box';
-            td.style.border = 'none';
-
-            tr.appendChild(td);
-            cells[y_idx].push(td);
-          }
-
-          table.appendChild(tr);
+          tr.appendChild(td);
+          cells[y_idx].push(td);
         }
 
-        foreign.appendChild(style)
-        foreign.appendChild(table);
-        this.svg.appendChild(foreign)
-
-        this.cells = cells;
+        this.table.appendChild(tr);
       }
+      this.cells = cells;
     }
 
     if (entry.alphabet !== ALPHABETS.MACRO) {
@@ -1003,7 +989,7 @@ export default class SVGProvider {
 
         const orn = this.getOrnColorCode()
         if (orn && (!this.force_orn || this.force_orn === true || this.force_orn !== this.fg_color)) {
-          ctx.fillStyle = SVGProvider.getRGBAfromColorCode(orn)
+          ctx.fillStyle = HTMLProvider.getRGBAfromColorCode(orn)
           for(let dy = -outlineHeight / this.text_size_y; dy <= outlineHeight / this.text_size_y; dy++){
             for(let dx = -outlineWidth/ this.text_size_x; dx <= outlineWidth / this.text_size_x; dx++){
               for(let y = 0; y < height; y++){
@@ -1030,7 +1016,7 @@ export default class SVGProvider {
           }
         }
 
-        ctx.fillStyle = SVGProvider.getRGBAfromColorCode(this.fg_color)
+        ctx.fillStyle = HTMLProvider.getRGBAfromColorCode(this.fg_color)
         for(let y = 0; y < height; y++){
           for(let x = 0; x < width; x++){
             let value = 0
@@ -1080,10 +1066,10 @@ export default class SVGProvider {
               elem.style.transformOrigin = `0 0`
               elem.style.marginRight = `-${(this.ssm_x + this.shs) - this.width()}px`
               elem.style.marginBottom = `-${(this.ssm_y + this.svs) - this.height()}px`
-              elem.style.color = SVGProvider.getRGBAfromColorCode(this.fg_color);
+              elem.style.color = HTMLProvider.getRGBAfromColorCode(this.fg_color);
 
 
-              cell.style.backgroundColor = SVGProvider.getRGBAfromColorCode(this.force_bg_color ?? this.bg_color);
+              cell.style.backgroundColor = HTMLProvider.getRGBAfromColorCode(this.force_bg_color ?? this.bg_color);
               cell.appendChild(elem);
             } else if (cell.parentNode != null){
               cell.parentNode.removeChild(cell);
@@ -1139,7 +1125,7 @@ export default class SVGProvider {
           elem.style.transformOrigin = `0 0`
           elem.style.marginRight = `-${(this.ssm_x + this.shs) - this.width()}px`
           elem.style.marginBottom = `-${(this.ssm_y + this.svs) - this.height()}px`
-          elem.style.color = SVGProvider.getRGBAfromColorCode(this.fg_color);
+          elem.style.color = HTMLProvider.getRGBAfromColorCode(this.fg_color);
 
           const orn = this.getOrnColorCode()
           if (orn && (!this.force_orn || this.force_orn === true || this.force_orn !== this.fg_color)) {
@@ -1147,7 +1133,7 @@ export default class SVGProvider {
             for (let dy = -2 * SIZE_MAGNIFICATION; dy <= 2 * SIZE_MAGNIFICATION; dy++) {
               for (let dx = -2 * SIZE_MAGNIFICATION; dx <= 2 * SIZE_MAGNIFICATION; dx++) {
                 if (dy === 0 && dx === 0) { continue; }
-                shadow += `${!first ? ',' : ''}${dx}px ${dy}px 0 ${SVGProvider.getRGBAfromColorCode(orn)}`
+                shadow += `${!first ? ',' : ''}${dx}px ${dy}px 0 ${HTMLProvider.getRGBAfromColorCode(orn)}`
                 first = false
               }
             }
@@ -1155,7 +1141,7 @@ export default class SVGProvider {
             elem.style.textShadow = shadow
           }
 
-          cell.style.backgroundColor = SVGProvider.getRGBAfromColorCode(this.force_bg_color ?? this.bg_color);
+          cell.style.backgroundColor = HTMLProvider.getRGBAfromColorCode(this.force_bg_color ?? this.bg_color);
           cell.appendChild(elem);
         } else if (cell.parentNode != null){
           cell.parentNode.removeChild(cell);
@@ -1174,12 +1160,12 @@ export default class SVGProvider {
 
     const elem = document.createElementNS('http://www.w3.org/2000/svg', 'path')
     elem.setAttribute('d', path);
-    elem.setAttribute('fill', `${SVGProvider.getRGBAfromColorCode(this.fg_color)}`)
+    elem.setAttribute('fill', `${HTMLProvider.getRGBAfromColorCode(this.fg_color)}`)
 
     const orn = this.getOrnColorCode()
     if (orn && (!this.force_orn || this.force_orn === true || this.force_orn !== this.fg_color)) {
       const width = Math.max((viewBox[2] - viewBox[0]) / this.ssm_x, (viewBox[3] - viewBox[1]) / this.ssm_y) * 4
-      elem.setAttribute('stroke', `${SVGProvider.getRGBAfromColorCode(orn)}`)
+      elem.setAttribute('stroke', `${HTMLProvider.getRGBAfromColorCode(orn)}`)
       elem.setAttribute('stroke-width', `${width}`)
     } else {
       elem.setAttribute('stroke', `transparent`)
@@ -1215,9 +1201,9 @@ export default class SVGProvider {
           elem.style.transformOrigin = `0 0`
           elem.style.marginRight = `-${(this.ssm_x + this.shs) - this.width()}px`
           elem.style.marginBottom = `-${(this.ssm_y + this.svs) - this.height()}px`
-          elem.style.color = SVGProvider.getRGBAfromColorCode(this.fg_color);
+          elem.style.color = HTMLProvider.getRGBAfromColorCode(this.fg_color);
 
-          cell.style.backgroundColor = SVGProvider.getRGBAfromColorCode(this.force_bg_color ?? this.bg_color);
+          cell.style.backgroundColor = HTMLProvider.getRGBAfromColorCode(this.force_bg_color ?? this.bg_color);
           cell.appendChild(elem);
         } else if (cell.parentNode != null){
           cell.parentNode.removeChild(cell);
@@ -1228,7 +1214,7 @@ export default class SVGProvider {
 
   private getOrnColorCode(): string | null {
     if (this.force_orn === true) {
-      return SVGProvider.fillAlphaColorCode(this.bg_color);
+      return HTMLProvider.fillAlphaColorCode(this.bg_color);
     } else if (this.force_orn === false) {
       return this.orn;
     } else {

@@ -240,7 +240,10 @@ export default class SVGProvider {
       while (this.svg.firstChild) {
         this.svg.removeChild(this.svg.firstChild);
       }
-      if (image) { this.svg.appendChild(image); }
+      if (image) {
+        image.style.imageRendering = 'pixelated';
+        this.svg.appendChild(image);
+      }
     }
 
     const PES_data_packet_header_length = this.pes[2] & 0x0F
