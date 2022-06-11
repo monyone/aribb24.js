@@ -1068,6 +1068,21 @@ export default class HTMLProvider {
               elem.style.marginBottom = `-${(this.ssm_y + this.svs) - this.height()}px`
               elem.style.color = HTMLProvider.getRGBAfromColorCode(this.fg_color);
 
+              if(this.hlc & 0b0001){
+                cell.style.borderBottom = `1px solid ${HTMLProvider.getRGBAColorCode(this.fg_color)}`
+              }
+              if(this.hlc & 0b0010){
+                cell.style.borderRight = `1px solid ${HTMLProvider.getRGBAColorCode(this.fg_color)}`
+              }
+              if(this.hlc & 0b0100){
+                cell.style.borderTop = `1px solid ${HTMLProvider.getRGBAColorCode(this.fg_color)}`
+              }
+              if(this.hlc & 0b1000){
+                cell.style.borderLeft = `1px solid ${HTMLProvider.getRGBAColorCode(this.fg_color)}`
+              }
+              if(this.stl){
+                cell.style.borderBottom = `1px solid ${HTMLProvider.getRGBAColorCode(this.fg_color)}`
+              }
 
               cell.style.backgroundColor = HTMLProvider.getRGBAfromColorCode(this.force_bg_color ?? this.bg_color);
               cell.appendChild(elem);
@@ -1141,6 +1156,22 @@ export default class HTMLProvider {
             elem.style.textShadow = shadow
           }
 
+          if(this.hlc & 0b0001){
+            cell.style.borderBottom = `1px solid ${HTMLProvider.getRGBAColorCode(this.fg_color)}`
+          }
+          if(this.hlc & 0b0010){
+            cell.style.borderRight = `1px solid ${HTMLProvider.getRGBAColorCode(this.fg_color)}`
+          }
+          if(this.hlc & 0b0100){
+            cell.style.borderTop = `1px solid ${HTMLProvider.getRGBAColorCode(this.fg_color)}`
+          }
+          if(this.hlc & 0b1000){
+            cell.style.borderLeft = `1px solid ${HTMLProvider.getRGBAColorCode(this.fg_color)}`
+          }
+          if(this.stl){
+            cell.style.borderBottom = `1px solid ${HTMLProvider.getRGBAColorCode(this.fg_color)}`
+          }
+
           cell.style.backgroundColor = HTMLProvider.getRGBAfromColorCode(this.force_bg_color ?? this.bg_color);
           cell.appendChild(elem);
         } else if (cell.parentNode != null){
@@ -1202,6 +1233,22 @@ export default class HTMLProvider {
           elem.style.marginRight = `-${(this.ssm_x + this.shs) - this.width()}px`
           elem.style.marginBottom = `-${(this.ssm_y + this.svs) - this.height()}px`
           elem.style.color = HTMLProvider.getRGBAfromColorCode(this.fg_color);
+
+          if(this.hlc & 0b0001){
+            cell.style.borderBottom = `1px solid ${HTMLProvider.getRGBAColorCode(this.fg_color)}`
+          }
+          if(this.hlc & 0b0010){
+            cell.style.borderRight = `1px solid ${HTMLProvider.getRGBAColorCode(this.fg_color)}`
+          }
+          if(this.hlc & 0b0100){
+            cell.style.borderTop = `1px solid ${HTMLProvider.getRGBAColorCode(this.fg_color)}`
+          }
+          if(this.hlc & 0b1000){
+            cell.style.borderLeft = `1px solid ${HTMLProvider.getRGBAColorCode(this.fg_color)}`
+          }
+          if(this.stl){
+            cell.style.borderBottom = `1px solid ${HTMLProvider.getRGBAColorCode(this.fg_color)}`
+          }
 
           cell.style.backgroundColor = HTMLProvider.getRGBAfromColorCode(this.force_bg_color ?? this.bg_color);
           cell.appendChild(elem);
