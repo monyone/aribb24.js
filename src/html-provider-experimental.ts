@@ -47,7 +47,7 @@ export interface ProviderResult {
 export default class SVGProvider {
   private pes: Uint8Array
   private svg: SVGElement | null = null
-  private canvas: HTMLCanvasElement | null = null
+  private cells: HTMLTableDataCellElement[][] | null = null;
 
   private GL: number = 0
   private GR: number = 2
@@ -210,7 +210,6 @@ export default class SVGProvider {
 
   public render(option?: ProviderOption): ProviderResult | null {
     this.svg = option?.svg ?? null
-    const image = this.svg ? document.createElementNS('http://www.w3.org/2000/svg', 'image') : null;
     // その他オプション類
     this.force_orn = ((typeof option?.forceStrokeColor === 'boolean') ? option?.forceStrokeColor : SVGProvider.getRGBAColorCode(option?.forceStrokeColor)) ?? null
     this.force_bg_color = SVGProvider.getRGBAColorCode(option?.forceBackgroundColor) ?? null
@@ -240,7 +239,6 @@ export default class SVGProvider {
       while (this.svg.firstChild) {
         this.svg.removeChild(this.svg.firstChild);
       }
-      if (image) { this.svg.appendChild(image); }
     }
 
     const PES_data_packet_header_length = this.pes[2] & 0x0F
@@ -263,18 +261,6 @@ export default class SVGProvider {
       }
 
       data_unit += 5 + data_unit_size
-    }
-
-    if (image && this.canvas) {
-      image.setAttribute('href', this.canvas.toDataURL());
-      image.setAttribute('x', '0');
-      image.setAttribute('y', '0');
-      image.setAttribute('width', `${this.swf_x}`);
-      image.setAttribute('height', `${this.swf_y}`);
-    }
-    if (this.canvas) {
-      this.canvas.width = this.canvas.height = 0;
-      this.canvas = null;
     }
 
     return ({
@@ -736,78 +722,67 @@ export default class SVGProvider {
     }
 
     if (this.svg === null) { return; }
+    if (this.cells === null) {
+      this.svg.setAttribute('viewBox', `0 0 ${this.swf_x} ${this.swf_y}`)
+      {
+        const foreign = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+        foreign.setAttribute('x', `${this.sdp_x}`)
+        foreign.setAttribute('y', `${this.sdp_y}`)
+        foreign.setAttribute('width', `${this.sdf_x}`)
+        foreign.setAttribute('height', `${this.sdf_y}`)
+
+        const style = document.createElement('style')
+        style.textContent  = ''
+        style.textContent += `@keyframes flc-0 { from { opacity: 0; } to { opacity: 1; } }`
+        style.textContent += `@keyframes flc-7 { from { opacity: 1; } to { opacity: 0; } }`
+
+        const table = document.createElement('table');
+        table.style.willChange = 'transform';
+        table.style.position = 'absolute';
+        table.style.top = '0px';
+        table.style.left = '0px';
+        table.style.width = '100%';
+        table.style.height = '100%';
+        table.style.boxSizing = 'border-box';
+        table.style.border = 'none';
+        table.style.borderCollapse = 'collapse';
+
+        const cells: HTMLTableDataCellElement[][] = [];
+        for (let y = 0, y_idx = 0; y < this.sdf_y; y += Math.floor((this.ssm_y + this.svs) / 2), y_idx += 1) {
+          const tr = document.createElement('tr');
+          cells.push([]);
+          tr.style.position = 'relative';
+          tr.style.height = `${Math.floor((this.ssm_y + this.svs) / 2)}px`;
+          tr.style.width = '100%';
+          tr.style.boxSizing = 'border-box';
+          tr.style.border = 'none';
+
+          for (let x = 0; x < this.sdf_x; x += Math.floor((this.ssm_x + this.shs) / 2)) {
+            const td = document.createElement('td');
+
+            td.style.height = `${Math.floor((this.ssm_y + this.svs) / 2)}px`;
+            td.style.width = `${Math.floor((this.ssm_x + this.shs) / 2)}px`;
+            td.style.padding = '0px';
+            td.style.boxSizing = 'border-box';
+            td.style.border = 'none';
+
+            tr.appendChild(td);
+            cells[y_idx].push(td);
+          }
+
+          table.appendChild(tr);
+        }
+
+        foreign.appendChild(style)
+        foreign.appendChild(table);
+        this.svg.appendChild(foreign)
+
+        this.cells = cells;
+      }
+    }
 
     if (entry.alphabet !== ALPHABETS.MACRO) {
-      if (!this.rendered) {
-         this.svg.setAttribute('viewBox', `0 0 ${this.swf_x} ${this.swf_y}`)
-      }
       this.rendered = true
-
-      if (this.canvas == null) {
-        this.canvas = document.createElement('canvas');
-        this.canvas.width = this.swf_x;
-        this.canvas.height = this.swf_y;
-      }
-
-      const ctx = this.canvas.getContext('2d')
-      if (ctx) {
-        ctx.fillStyle = SVGProvider.getRGBAfromColorCode(this.force_bg_color ?? this.bg_color)
-        ctx.fillRect(
-          this.position_x,
-          (this.position_y - this.height()),
-          this.width(),
-          this.height()
-        )
-
-        //HLC
-        if(this.hlc & 0b0001){
-          ctx.fillStyle = SVGProvider.getRGBAfromColorCode(this.fg_color)
-          ctx.fillRect(
-            this.position_x,
-            (this.position_y - 1),
-            this.width(),
-           1
-          ) 
-        }
-        if(this.hlc & 0b0010){
-          ctx.fillStyle = SVGProvider.getRGBAfromColorCode(this.fg_color)
-          ctx.fillRect(
-            (this.position_x + this.width() - 1),
-            (this.position_y - this.height()),
-            1,
-            this.height()
-          )
-        }
-        if(this.hlc & 0b0100){
-          ctx.fillStyle = SVGProvider.getRGBAfromColorCode(this.fg_color)
-          ctx.fillRect(
-            this.position_x,
-            (this.position_y - this.height()),
-            this.width(),
-            1
-          )
-        }
-        if(this.hlc & 0b1000){
-          ctx.fillStyle = SVGProvider.getRGBAfromColorCode(this.fg_color)
-          ctx.fillRect(
-            this.position_x,
-            (this.position_y - this.height()),
-            1,
-            this.height()
-          )
-        }
-
-        // STL
-        if(this.stl){
-          ctx.fillStyle = SVGProvider.getRGBAfromColorCode(this.fg_color)
-          ctx.fillRect(
-            this.position_x,
-            (this.position_y - 1),
-            this.width(),
-            1
-          )
-        }
-      }
     }
 
     if (entry.alphabet === ALPHABETS.KANJI) {
@@ -999,7 +974,7 @@ export default class SVGProvider {
       }
 
       return
-    } else { // DRCS
+    }else { // DRCS
       const drcs = this.DRCS_mapping.get(entry.alphabet)?.get(key & 0x7F7F)
       if(!drcs){
         return
@@ -1077,13 +1052,44 @@ export default class SVGProvider {
           }
         }
 
-        const image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-        image.setAttribute('href', canvas.toDataURL());
-        image.setAttribute('x', `${this.position_x}`);
-        image.setAttribute('y', `${this.position_y - this.height()}`);
-        image.setAttribute('width', `${this.width()}`);
-        image.setAttribute('height', `${this.height()}`);
-        this.svg.appendChild(image);
+        const x_space = Math.floor(this.text_size_x * 2);
+        const y_space = Math.floor(this.text_size_y * 2);
+        const lx = Math.round((this.position_x - this.sdp_x) / (this.ssm_x + this.shs) * 2);
+        const uy = Math.round((this.position_y - this.height() - this.sdp_y) / (this.ssm_y + this.svs) * 2);
+
+        for (let y = 0; y < y_space; y++) {
+          for (let x = 0; x < x_space; x++) {
+            const cell = this.cells[uy + y][lx + x];
+            if (y === 0 && x === 0) {
+              cell.setAttribute('rowspan', `${y_space}`);
+              cell.setAttribute('colspan', `${x_space}`);
+              cell.style.textAlign = `center`;
+              cell.style.verticalAlign = `top`;
+
+              const elem = document.createElement('div');
+
+              elem.appendChild(canvas);
+              elem.style.display = 'flex';
+              elem.style.alignItems = 'center';
+              elem.style.justifyContent = 'middle';
+              elem.style.width = `${this.ssm_x + this.shs}px`
+              elem.style.height = `${this.ssm_y + this.svs}px`
+              elem.style.lineHeight = `${this.height()}px`
+              elem.style.fontSize = `${this.ssm_x}px`;
+              elem.style.transform = `scale(${this.text_size_x}, ${this.text_size_y})`
+              elem.style.transformOrigin = `0 0`
+              elem.style.marginRight = `-${(this.ssm_x + this.shs) - this.width()}px`
+              elem.style.marginBottom = `-${(this.ssm_y + this.svs) - this.height()}px`
+              elem.style.color = SVGProvider.getRGBAfromColorCode(this.fg_color);
+
+
+              cell.style.backgroundColor = SVGProvider.getRGBAfromColorCode(this.force_bg_color ?? this.bg_color);
+              cell.appendChild(elem);
+            } else if (cell.parentNode != null){
+              cell.parentNode.removeChild(cell);
+            }
+          }
+        }
       }
 
       this.move_relative_pos(1, 0)
@@ -1091,6 +1097,8 @@ export default class SVGProvider {
   }
 
   private renderFont(character: string): void {
+    if (this.cells === null) { return; }
+
     const useGaijiFont = ADDITIONAL_SYMBOLS_SET.has(character)
     const font = useGaijiFont ? this.gaijiFont : this.normalFont;
 
@@ -1102,52 +1110,120 @@ export default class SVGProvider {
 
     if (useGaijiFont) { character += '\u{fe0e}' }
 
-    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    // text.setAttribute('x', `${this.position_x} + this.width() / 2`); // without Safari 
-    // text.setAttribute('y', `${this.position_y - this.height() / 2}`); // without Safari
-    text.setAttribute('x', '0');
-    text.setAttribute('y', '0');
-    text.setAttribute('transform', `scale(${this.text_size_x} ${this.text_size_y}) translate(${(this.position_x + this.width() / 2) / this.text_size_x} ${(this.position_y - this.height() / 2) / this.text_size_y})`);
-    text.setAttribute('transform-origin', `0 0`);
-    text.setAttribute('font-size', `${this.ssm_x}`);
-    text.setAttribute('font-family', font);
-    text.setAttribute('dominant-baseline', 'central');
-    text.setAttribute('text-anchor', 'middle');
-    text.setAttribute('fill', SVGProvider.getRGBAfromColorCode(this.fg_color));
-    text.setAttribute('paint-order', 'stroke');
-    text.setAttribute('stroke-linejoin', 'round');
-    text.setAttribute('stroke-width', this.getOrnColorCode() ? `${2 * SIZE_MAGNIFICATION * 2}` : '0');
-    text.setAttribute('stroke', this.getOrnColorCode() ? SVGProvider.getRGBAfromColorCode(this.getOrnColorCode()!) : 'transparent');
-    text.appendChild(document.createTextNode(character));
+    const x_space = Math.floor(this.text_size_x * 2);
+    const y_space = Math.floor(this.text_size_y * 2);
+    const lx = Math.round((this.position_x - this.sdp_x) / (this.ssm_x + this.shs) * 2);
+    const uy = Math.round((this.position_y - this.height() - this.sdp_y) / (this.ssm_y + this.svs) * 2);
 
-    this.svg?.appendChild(text);
+    for (let y = 0; y < y_space; y++) {
+      for (let x = 0; x < x_space; x++) {
+        const cell = this.cells[uy + y][lx + x];
+        if (y === 0 && x === 0) {
+          cell.setAttribute('rowspan', `${y_space}`);
+          cell.setAttribute('colspan', `${x_space}`);
+          cell.style.textAlign = `center`;
+          cell.style.verticalAlign = `top`;
+
+          const elem = document.createElement('div');
+
+          elem.textContent = character;
+          elem.style.display = 'flex';
+          elem.style.alignItems = 'center';
+          elem.style.justifyContent = 'middle';
+          elem.style.width = `${this.ssm_x + this.shs}px`
+          elem.style.height = `${this.ssm_y + this.svs}px`
+          elem.style.fontFamily = `${font}`
+          elem.style.lineHeight = `${this.height()}px`
+          elem.style.fontSize = `${this.ssm_x}px`;
+          elem.style.transform = `scale(${this.text_size_x}, ${this.text_size_y})`
+          elem.style.transformOrigin = `0 0`
+          elem.style.marginRight = `-${(this.ssm_x + this.shs) - this.width()}px`
+          elem.style.marginBottom = `-${(this.ssm_y + this.svs) - this.height()}px`
+          elem.style.color = SVGProvider.getRGBAfromColorCode(this.fg_color);
+
+          const orn = this.getOrnColorCode()
+          if (orn && (!this.force_orn || this.force_orn === true || this.force_orn !== this.fg_color)) {
+            let shadow = '', first = true
+            for (let dy = -2 * SIZE_MAGNIFICATION; dy <= 2 * SIZE_MAGNIFICATION; dy++) {
+              for (let dx = -2 * SIZE_MAGNIFICATION; dx <= 2 * SIZE_MAGNIFICATION; dx++) {
+                if (dy === 0 && dx === 0) { continue; }
+                shadow += `${!first ? ',' : ''}${dx}px ${dy}px 0 ${SVGProvider.getRGBAfromColorCode(orn)}`
+                first = false
+              }
+            }
+         
+            elem.style.textShadow = shadow
+          }
+
+          cell.style.backgroundColor = SVGProvider.getRGBAfromColorCode(this.force_bg_color ?? this.bg_color);
+          cell.appendChild(elem);
+        } else if (cell.parentNode != null){
+          cell.parentNode.removeChild(cell);
+        }
+      }
+    }
   }
 
   private renderPath(viewBox: [number, number, number, number], path: string): void {
+    if (this.cells === null) { return; }
+
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
     svg.setAttribute('viewBox', `${viewBox[0]} ${viewBox[1]} ${viewBox[2]} ${viewBox[3]}`)
-    const scale_x = this.ssm_x * this.text_size_x / (viewBox[2] - viewBox[0])
-    const scale_y = this.ssm_y * this.text_size_y / (viewBox[3] - viewBox[1])
-    const padding_x = this.shs * this.text_size_x / 2;
-    const padding_y = this.svs * this.text_size_y / 2;
+    svg.style.width = `${this.ssm_x + this.shs}px`
+    svg.style.height = `${this.ssm_y}px`
 
     const elem = document.createElementNS('http://www.w3.org/2000/svg', 'path')
     elem.setAttribute('d', path);
+    elem.setAttribute('fill', `${SVGProvider.getRGBAfromColorCode(this.fg_color)}`)
 
-    // elem.setAttribute('x', `${this.position_x`); // without Safari 
-    // elem.setAttribute('y', `${this.position_y - this.height()}`); // without Safari issue
-    elem.setAttribute('x', '0');
-    elem.setAttribute('y', '0');
-    elem.setAttribute('transform', `scale(${scale_x} ${scale_y}) translate(${(this.position_x + padding_x) / scale_x} ${(this.position_y + padding_y - this.height()) / scale_y})`);
-    elem.setAttribute('transform-origin', `0 0`);
-    elem.setAttribute('fill', SVGProvider.getRGBAfromColorCode(this.fg_color));
-    elem.setAttribute('paint-order', 'stroke');
-    elem.setAttribute('stroke-linejoin', 'round');
-    // elem.setAttribute('stroke-width', this.getOrnColorCode() ? `${2 * SIZE_MAGNIFICATION * 2/ Math.min(scale_x, scale_y)}` : '0');
-    elem.setAttribute('stroke-width', this.getOrnColorCode() ? `${2 * SIZE_MAGNIFICATION / Math.min(scale_x, scale_y)}` : '0');
-    elem.setAttribute('stroke', this.getOrnColorCode() ? SVGProvider.getRGBAfromColorCode(this.getOrnColorCode()!) : 'transparent');
+    const orn = this.getOrnColorCode()
+    if (orn && (!this.force_orn || this.force_orn === true || this.force_orn !== this.fg_color)) {
+      const width = Math.max((viewBox[2] - viewBox[0]) / this.ssm_x, (viewBox[3] - viewBox[1]) / this.ssm_y) * 4
+      elem.setAttribute('stroke', `${SVGProvider.getRGBAfromColorCode(orn)}`)
+      elem.setAttribute('stroke-width', `${width}`)
+    } else {
+      elem.setAttribute('stroke', `transparent`)
+    }
 
-    this.svg?.appendChild(elem);
+    svg.appendChild(elem)
+
+    const x_space = Math.floor(this.text_size_x * 2);
+    const y_space = Math.floor(this.text_size_y * 2);
+    const lx = Math.round((this.position_x - this.sdp_x) / (this.ssm_x + this.shs) * 2);
+    const uy = Math.round((this.position_y - this.height() - this.sdp_y) / (this.ssm_y + this.svs) * 2);
+
+    for (let y = 0; y < y_space; y++) {
+      for (let x = 0; x < x_space; x++) {
+        const cell = this.cells[uy + y][lx + x];
+        if (y === 0 && x === 0) {
+          cell.setAttribute('rowspan', `${y_space}`);
+          cell.setAttribute('colspan', `${x_space}`);
+          cell.style.textAlign = `center`;
+          cell.style.verticalAlign = `top`;
+
+          const elem = document.createElement('div');
+
+          elem.appendChild(svg);
+          elem.style.display = 'flex';
+          elem.style.alignItems = 'center';
+          elem.style.justifyContent = 'middle';
+          elem.style.width = `${this.ssm_x + this.shs}px`
+          elem.style.height = `${this.ssm_y + this.svs}px`
+          elem.style.lineHeight = `${this.height()}px`
+          elem.style.fontSize = `${this.ssm_x}px`;
+          elem.style.transform = `scale(${this.text_size_x}, ${this.text_size_y})`
+          elem.style.transformOrigin = `0 0`
+          elem.style.marginRight = `-${(this.ssm_x + this.shs) - this.width()}px`
+          elem.style.marginBottom = `-${(this.ssm_y + this.svs) - this.height()}px`
+          elem.style.color = SVGProvider.getRGBAfromColorCode(this.fg_color);
+
+          cell.style.backgroundColor = SVGProvider.getRGBAfromColorCode(this.force_bg_color ?? this.bg_color);
+          cell.appendChild(elem);
+        } else if (cell.parentNode != null){
+          cell.parentNode.removeChild(cell);
+        }
+      }
+    }
   }
 
   private getOrnColorCode(): string | null {
