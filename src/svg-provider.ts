@@ -47,7 +47,7 @@ export interface ProviderResult {
 export default class SVGProvider {
   private pes: Uint8Array
   private svg: SVGElement | null = null
-  private canvas: HTMLCanvasElement | null = null
+  private groups: Map<number, SVGElement> = new Map();
 
   private GL: number = 0
   private GR: number = 2
@@ -210,7 +210,6 @@ export default class SVGProvider {
 
   public render(option?: ProviderOption): ProviderResult | null {
     this.svg = option?.svg ?? null
-    const image = this.svg ? document.createElementNS('http://www.w3.org/2000/svg', 'image') : null;
     // その他オプション類
     this.force_orn = ((typeof option?.forceStrokeColor === 'boolean') ? option?.forceStrokeColor : SVGProvider.getRGBAColorCode(option?.forceStrokeColor)) ?? null
     this.force_bg_color = SVGProvider.getRGBAColorCode(option?.forceBackgroundColor) ?? null
@@ -240,10 +239,6 @@ export default class SVGProvider {
       while (this.svg.firstChild) {
         this.svg.removeChild(this.svg.firstChild);
       }
-      if (image) {
-        image.style.imageRendering = 'pixelated';
-        this.svg.appendChild(image);
-      }
     }
 
     const PES_data_packet_header_length = this.pes[2] & 0x0F
@@ -266,18 +261,6 @@ export default class SVGProvider {
       }
 
       data_unit += 5 + data_unit_size
-    }
-
-    if (image && this.canvas) {
-      image.setAttribute('href', this.canvas.toDataURL());
-      image.setAttribute('x', '0');
-      image.setAttribute('y', '0');
-      image.setAttribute('width', `${this.swf_x}`);
-      image.setAttribute('height', `${this.swf_y}`);
-    }
-    if (this.canvas) {
-      this.canvas.width = this.canvas.height = 0;
-      this.canvas = null;
     }
 
     return ({
@@ -757,70 +740,82 @@ export default class SVGProvider {
       }
       this.rendered = true
 
-      if (this.canvas == null) {
-        this.canvas = document.createElement('canvas');
-        this.canvas.width = this.swf_x;
-        this.canvas.height = this.swf_y;
+      const bg = this.force_bg_color || this.bg_color
+      const alpha = SVGProvider.getAlphaFromColorCode(bg)
+      if (!this.groups.has(alpha)) {
+        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+        group.setAttribute('opacity', `${alpha / 255}`)
+        this.groups.set(alpha, group);
+        this.svg.appendChild(group);
+      }
+      const group = this.groups.get(alpha)!
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+      rect.setAttribute('shape-rendering', 'crispEdges')
+      rect.setAttribute('x', `${this.position_x}`)
+      rect.setAttribute('y', `${this.position_y - this.height()}`)
+      rect.setAttribute('width', `${this.width()}`)
+      rect.setAttribute('height', `${this.height()}`)
+      rect.setAttribute('fill', `${SVGProvider.getRGBfromColorCode(bg)}`)
+      group.appendChild(rect);
+
+      if(this.hlc & 0b0001){
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+        line.setAttribute('shape-rendering', 'crispEdges')
+        line.setAttribute('x1', `${this.position_x}`)
+        line.setAttribute('y1', `${this.position_y - this.height()}`)
+        line.setAttribute('x1', `${this.position_x + this.width() - 1}`)
+        line.setAttribute('y1', `${this.position_y - this.height()}`)
+        line.setAttribute('stroke', `${SVGProvider.getRGBAfromColorCode(this.fg_color)}`)
+        line.setAttribute('stroke-width', `${SIZE_MAGNIFICATION}`)
+        this.svg.appendChild(line);
       }
 
-      const ctx = this.canvas.getContext('2d')
-      if (ctx) {
-        ctx.fillStyle = SVGProvider.getRGBAfromColorCode(this.force_bg_color ?? this.bg_color)
-        ctx.fillRect(
-          this.position_x,
-          (this.position_y - this.height()),
-          this.width(),
-          this.height()
-        )
+      if(this.hlc & 0b0010){
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+        line.setAttribute('shape-rendering', 'crispEdges')
+        line.setAttribute('x1', `${this.position_x + this.width() - 1}`)
+        line.setAttribute('y1', `${this.position_y - this.height()}`)
+        line.setAttribute('x2', `${this.position_x + this.width() - 1}`)
+        line.setAttribute('y2', `${this.position_y}`) // 重なるように
+        line.setAttribute('stroke', `${SVGProvider.getRGBAfromColorCode(this.fg_color)}`)
+        line.setAttribute('stroke-width', `${SIZE_MAGNIFICATION}`)
+        this.svg.appendChild(line);
+      }
 
-        //HLC
-        if(this.hlc & 0b0001){
-          ctx.fillStyle = SVGProvider.getRGBAfromColorCode(this.fg_color)
-          ctx.fillRect(
-            this.position_x,
-            (this.position_y - 1),
-            this.width(),
-           1
-          ) 
-        }
-        if(this.hlc & 0b0010){
-          ctx.fillStyle = SVGProvider.getRGBAfromColorCode(this.fg_color)
-          ctx.fillRect(
-            (this.position_x + this.width() - 1),
-            (this.position_y - this.height()),
-            1,
-            this.height()
-          )
-        }
-        if(this.hlc & 0b0100){
-          ctx.fillStyle = SVGProvider.getRGBAfromColorCode(this.fg_color)
-          ctx.fillRect(
-            this.position_x,
-            (this.position_y - this.height()),
-            this.width(),
-            1
-          )
-        }
-        if(this.hlc & 0b1000){
-          ctx.fillStyle = SVGProvider.getRGBAfromColorCode(this.fg_color)
-          ctx.fillRect(
-            this.position_x,
-            (this.position_y - this.height()),
-            1,
-            this.height()
-          )
-        }
+      if(this.hlc & 0b0100){
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+        line.setAttribute('shape-rendering', 'crispEdges')
+        line.setAttribute('x1', `${this.position_x}`)
+        line.setAttribute('y1', `${this.position_y - 1}`)
+        line.setAttribute('x2', `${this.position_x + this.width()}`)
+        line.setAttribute('y2', `${this.position_y - 1}`) // 重なるように
+        line.setAttribute('stroke', `${SVGProvider.getRGBAfromColorCode(this.fg_color)}`)
+        line.setAttribute('stroke-width', `${SIZE_MAGNIFICATION}`)
+        this.svg.appendChild(line);
+      }
 
-        // STL
-        if(this.stl){
-          ctx.fillStyle = SVGProvider.getRGBAfromColorCode(this.fg_color)
-          ctx.fillRect(
-            this.position_x,
-            (this.position_y - 1),
-            this.width(),
-            1
-          )
-        }
+      if(this.hlc & 0b0010){
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+        line.setAttribute('shape-rendering', 'crispEdges')
+        line.setAttribute('x1', `${this.position_x}`)
+        line.setAttribute('y1', `${this.position_y - this.height()}`)
+        line.setAttribute('x2', `${this.position_x}`)
+        line.setAttribute('y2', `${this.position_y}`) // 重なるように
+        line.setAttribute('stroke', `${SVGProvider.getRGBAfromColorCode(this.fg_color)}`)
+        line.setAttribute('stroke-width', `${SIZE_MAGNIFICATION}`)
+        this.svg.appendChild(line);
+      }
+
+      if(this.stl){
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+        line.setAttribute('shape-rendering', 'crispEdges')
+        line.setAttribute('x1', `${this.position_x}`)
+        line.setAttribute('y1', `${this.position_y - 1}`)
+        line.setAttribute('x2', `${this.position_x + this.width()}`) // 重なるように
+        line.setAttribute('y2', `${this.position_y - 1}`)
+        line.setAttribute('stroke', `${SVGProvider.getRGBAfromColorCode(this.fg_color)}`)
+        line.setAttribute('stroke-width', `${SIZE_MAGNIFICATION}`)
+        this.svg.appendChild(line);
       }
     }
 
@@ -1026,16 +1021,14 @@ export default class SVGProvider {
         this.renderFont(this.drcsReplaceMapping.get(drcs_hash.toUpperCase())!)
       } else {
         const canvas = document.createElement('canvas');
-        const width = Math.floor(this.ssm_x / SIZE_MAGNIFICATION)
-        const height = Math.floor(this.ssm_y / SIZE_MAGNIFICATION)
+        const width = Math.floor(this.ssm_x * this.text_size_x / SIZE_MAGNIFICATION)
+        const height = Math.floor(this.ssm_y * this.text_size_y / SIZE_MAGNIFICATION)
         const depth = Math.floor((drcs.length * 8) / (width * height))
 
         const outlineWidth = 2
         const outlineHeight = 2
-        canvas.width = width + outlineWidth * 2 / this.text_size_x
-        canvas.height = height + outlineHeight * 2 / this.text_size_y
-        canvas.style.width =  `${this.ssm_x + outlineWidth * 2 / this.text_size_x * SIZE_MAGNIFICATION}px`
-        canvas.style.height = `${this.ssm_y + outlineHeight * 2 / this.text_size_y * SIZE_MAGNIFICATION}px`
+        canvas.width = width + outlineWidth * 2
+        canvas.height = height + outlineHeight * 2
 
         const ctx = canvas.getContext('2d')
         if (!ctx) { return; }
@@ -1043,8 +1036,8 @@ export default class SVGProvider {
         const orn = this.getOrnColorCode()
         if (orn && (!this.force_orn || this.force_orn === true || this.force_orn !== this.fg_color)) {
           ctx.fillStyle = SVGProvider.getRGBAfromColorCode(orn)
-          for(let dy = -outlineHeight / this.text_size_y; dy <= outlineHeight / this.text_size_y; dy++){
-            for(let dx = -outlineWidth/ this.text_size_x; dx <= outlineWidth / this.text_size_x; dx++){
+          for(let dy = -outlineHeight; dy <= outlineHeight; dy++){
+            for(let dx = -outlineWidth; dx <= outlineWidth; dx++){
               for(let y = 0; y < height; y++){
                 for(let x = 0; x < width; x++){
                   let value = 0
@@ -1057,8 +1050,8 @@ export default class SVGProvider {
 
                   if (value > 0) {
                     ctx.fillRect(
-                      outlineWidth / this.text_size_x + x + dx,
-                      outlineHeight / this.text_size_y + y + dy,
+                      outlineWidth + x + dx,
+                      outlineHeight + y + dy,
                       1,
                       1,
                     )
@@ -1082,8 +1075,8 @@ export default class SVGProvider {
 
             if(value > 0){
               ctx.fillRect(
-                outlineWidth / this.text_size_x + x,
-                outlineHeight / this.text_size_y + y,
+                outlineWidth + x,
+                outlineHeight + y,
                 1,
                 1,
               )
@@ -1094,9 +1087,9 @@ export default class SVGProvider {
         const image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
         image.setAttribute('href', canvas.toDataURL());
         image.setAttribute('x', `${this.position_x}`);
-        image.setAttribute('y', `${this.position_y - this.height()}`);
-        image.setAttribute('width', `${this.width()}`);
-        image.setAttribute('height', `${this.height()}`);
+        image.setAttribute('y', `${this.position_y - this.height() + this.svs / 2 - outlineHeight}`);
+        image.setAttribute('width', `${image.width}`);
+        image.setAttribute('height', `${image.height}`);
         this.svg.appendChild(image);
       }
 
@@ -1213,4 +1206,23 @@ export default class SVGProvider {
 
     return `rgba(${R}, ${G}, ${B}, ${A / 255})`;
   }
+
+  private static getRGBfromColorCode(color: string | undefined): string {
+    if (color == null) { return ''; }
+
+    const R = Number.parseInt(color.substring(1, 3), 16);
+    const G = Number.parseInt(color.substring(3, 5), 16);
+    const B = Number.parseInt(color.substring(5, 7), 16);
+
+    return `rgb(${R}, ${G}, ${B})`;
+  }
+
+  private static getAlphaFromColorCode(color: string | undefined): number {
+    if (color == null) { return Number.NaN; }
+
+    const A = Number.parseInt(color.substring(7, 9), 16);
+
+    return A;
+  }
+
 }
