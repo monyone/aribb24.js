@@ -1025,10 +1025,11 @@ export default class SVGProvider {
         const height = Math.floor(this.ssm_y * this.text_size_y / SIZE_MAGNIFICATION)
         const depth = Math.floor((drcs.length * 8) / (width * height))
 
+        const drcsMagnification = 2
         const outlineWidth = 2
         const outlineHeight = 2
-        canvas.width = width + outlineWidth * 2
-        canvas.height = height + outlineHeight * 2
+        canvas.width = (width + outlineWidth * 2) * drcsMagnification
+        canvas.height = (height + outlineHeight * 2) * drcsMagnification
 
         const ctx = canvas.getContext('2d')
         if (!ctx) { return; }
@@ -1050,10 +1051,10 @@ export default class SVGProvider {
 
                   if (value > 0) {
                     ctx.fillRect(
-                      outlineWidth + x + dx,
-                      outlineHeight + y + dy,
-                      1,
-                      1,
+                      (outlineWidth + x + dx) * drcsMagnification,
+                      (outlineHeight + y + dy) * drcsMagnification,
+                      drcsMagnification,
+                      drcsMagnification,
                     )
                   }
                 }
@@ -1075,10 +1076,10 @@ export default class SVGProvider {
 
             if(value > 0){
               ctx.fillRect(
-                outlineWidth + x,
-                outlineHeight + y,
-                1,
-                1,
+                (outlineWidth + x) * drcsMagnification,
+                (outlineHeight + y) * drcsMagnification,
+                drcsMagnification,
+                drcsMagnification,
               )
             }
           }
@@ -1086,10 +1087,10 @@ export default class SVGProvider {
 
         const image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
         image.setAttribute('href', canvas.toDataURL());
-        image.setAttribute('x', `${this.position_x}`);
-        image.setAttribute('y', `${this.position_y - this.height() + this.svs / 2 - outlineHeight}`);
-        image.setAttribute('width', `${image.width}`);
-        image.setAttribute('height', `${image.height}`);
+        image.setAttribute('x', `${this.position_x + Math.floor(this.shs * this.text_size_x / 2) - outlineWidth * SIZE_MAGNIFICATION}`);
+        image.setAttribute('y', `${this.position_y + Math.floor(this.svs * this.text_size_y / 2) - this.height() - outlineHeight * SIZE_MAGNIFICATION}`);
+        image.setAttribute('width', `${canvas.width / drcsMagnification * SIZE_MAGNIFICATION}`);
+        image.setAttribute('height', `${canvas.height / drcsMagnification * SIZE_MAGNIFICATION}`);
         this.svg.appendChild(image);
       }
 
