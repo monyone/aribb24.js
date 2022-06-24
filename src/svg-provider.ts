@@ -762,9 +762,9 @@ export default class SVGProvider {
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
         line.setAttribute('shape-rendering', 'crispEdges')
         line.setAttribute('x1', `${this.position_x}`)
-        line.setAttribute('y1', `${this.position_y - this.height()}`)
-        line.setAttribute('x1', `${this.position_x + this.width() - 1}`)
-        line.setAttribute('y1', `${this.position_y - this.height()}`)
+        line.setAttribute('y1', `${this.position_y - SIZE_MAGNIFICATION / 2}`)
+        line.setAttribute('x2', `${this.position_x + this.width()}`)
+        line.setAttribute('y2', `${this.position_y - SIZE_MAGNIFICATION / 2}`)
         line.setAttribute('stroke', `${SVGProvider.getRGBAfromColorCode(this.fg_color)}`)
         line.setAttribute('stroke-width', `${SIZE_MAGNIFICATION}`)
         this.svg.appendChild(line);
@@ -773,9 +773,9 @@ export default class SVGProvider {
       if(this.hlc & 0b0010){
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
         line.setAttribute('shape-rendering', 'crispEdges')
-        line.setAttribute('x1', `${this.position_x + this.width() - 1}`)
+        line.setAttribute('x1', `${this.position_x + this.width() - SIZE_MAGNIFICATION / 2}`)
         line.setAttribute('y1', `${this.position_y - this.height()}`)
-        line.setAttribute('x2', `${this.position_x + this.width() - 1}`)
+        line.setAttribute('x2', `${this.position_x + this.width() - SIZE_MAGNIFICATION / 2}`)
         line.setAttribute('y2', `${this.position_y}`) // 重なるように
         line.setAttribute('stroke', `${SVGProvider.getRGBAfromColorCode(this.fg_color)}`)
         line.setAttribute('stroke-width', `${SIZE_MAGNIFICATION}`)
@@ -786,20 +786,20 @@ export default class SVGProvider {
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
         line.setAttribute('shape-rendering', 'crispEdges')
         line.setAttribute('x1', `${this.position_x}`)
-        line.setAttribute('y1', `${this.position_y - 1}`)
+        line.setAttribute('y1', `${this.position_y - this.height() + SIZE_MAGNIFICATION / 2}`)
         line.setAttribute('x2', `${this.position_x + this.width()}`)
-        line.setAttribute('y2', `${this.position_y - 1}`) // 重なるように
+        line.setAttribute('y2', `${this.position_y - this.height() + SIZE_MAGNIFICATION / 2}`) // 重なるように
         line.setAttribute('stroke', `${SVGProvider.getRGBAfromColorCode(this.fg_color)}`)
         line.setAttribute('stroke-width', `${SIZE_MAGNIFICATION}`)
         this.svg.appendChild(line);
       }
 
-      if(this.hlc & 0b0010){
+      if(this.hlc & 0b1000){
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
         line.setAttribute('shape-rendering', 'crispEdges')
-        line.setAttribute('x1', `${this.position_x}`)
+        line.setAttribute('x1', `${this.position_x + SIZE_MAGNIFICATION / 2}`)
         line.setAttribute('y1', `${this.position_y - this.height()}`)
-        line.setAttribute('x2', `${this.position_x}`)
+        line.setAttribute('x2', `${this.position_x + SIZE_MAGNIFICATION / 2}`)
         line.setAttribute('y2', `${this.position_y}`) // 重なるように
         line.setAttribute('stroke', `${SVGProvider.getRGBAfromColorCode(this.fg_color)}`)
         line.setAttribute('stroke-width', `${SIZE_MAGNIFICATION}`)
@@ -810,9 +810,9 @@ export default class SVGProvider {
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
         line.setAttribute('shape-rendering', 'crispEdges')
         line.setAttribute('x1', `${this.position_x}`)
-        line.setAttribute('y1', `${this.position_y - 1}`)
+        line.setAttribute('y1', `${this.position_y - SIZE_MAGNIFICATION / 2}`)
         line.setAttribute('x2', `${this.position_x + this.width()}`) // 重なるように
-        line.setAttribute('y2', `${this.position_y - 1}`)
+        line.setAttribute('y2', `${this.position_y - SIZE_MAGNIFICATION / 2}`)
         line.setAttribute('stroke', `${SVGProvider.getRGBAfromColorCode(this.fg_color)}`)
         line.setAttribute('stroke-width', `${SIZE_MAGNIFICATION}`)
         this.svg.appendChild(line);
@@ -1025,10 +1025,11 @@ export default class SVGProvider {
         const height = Math.floor(this.ssm_y * this.text_size_y / SIZE_MAGNIFICATION)
         const depth = Math.floor((drcs.length * 8) / (width * height))
 
+        const drcsMagnification = 2
         const outlineWidth = 2
         const outlineHeight = 2
-        canvas.width = width + outlineWidth * 2
-        canvas.height = height + outlineHeight * 2
+        canvas.width = (width + outlineWidth * 2) * drcsMagnification
+        canvas.height = (height + outlineHeight * 2) * drcsMagnification
 
         const ctx = canvas.getContext('2d')
         if (!ctx) { return; }
@@ -1050,10 +1051,10 @@ export default class SVGProvider {
 
                   if (value > 0) {
                     ctx.fillRect(
-                      outlineWidth + x + dx,
-                      outlineHeight + y + dy,
-                      1,
-                      1,
+                      (outlineWidth + x + dx) * drcsMagnification,
+                      (outlineHeight + y + dy) * drcsMagnification,
+                      drcsMagnification,
+                      drcsMagnification,
                     )
                   }
                 }
@@ -1075,10 +1076,10 @@ export default class SVGProvider {
 
             if(value > 0){
               ctx.fillRect(
-                outlineWidth + x,
-                outlineHeight + y,
-                1,
-                1,
+                (outlineWidth + x) * drcsMagnification,
+                (outlineHeight + y) * drcsMagnification,
+                drcsMagnification,
+                drcsMagnification,
               )
             }
           }
@@ -1086,10 +1087,10 @@ export default class SVGProvider {
 
         const image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
         image.setAttribute('href', canvas.toDataURL());
-        image.setAttribute('x', `${this.position_x}`);
-        image.setAttribute('y', `${this.position_y - this.height() + this.svs / 2 - outlineHeight}`);
-        image.setAttribute('width', `${image.width}`);
-        image.setAttribute('height', `${image.height}`);
+        image.setAttribute('x', `${this.position_x + Math.floor(this.shs * this.text_size_x / 2) - outlineWidth * SIZE_MAGNIFICATION}`);
+        image.setAttribute('y', `${this.position_y + Math.floor(this.svs * this.text_size_y / 2) - this.height() - outlineHeight * SIZE_MAGNIFICATION}`);
+        image.setAttribute('width', `${canvas.width / drcsMagnification * SIZE_MAGNIFICATION}`);
+        image.setAttribute('height', `${canvas.height / drcsMagnification * SIZE_MAGNIFICATION}`);
         this.svg.appendChild(image);
       }
 
