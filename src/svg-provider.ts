@@ -762,9 +762,9 @@ export default class SVGProvider {
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
         line.setAttribute('shape-rendering', 'crispEdges')
         line.setAttribute('x1', `${this.position_x}`)
-        line.setAttribute('y1', `${this.position_y - this.height()}`)
-        line.setAttribute('x1', `${this.position_x + this.width() - 1}`)
-        line.setAttribute('y1', `${this.position_y - this.height()}`)
+        line.setAttribute('y1', `${this.position_y - SIZE_MAGNIFICATION / 2}`)
+        line.setAttribute('x2', `${this.position_x + this.width()}`)
+        line.setAttribute('y2', `${this.position_y - SIZE_MAGNIFICATION / 2}`)
         line.setAttribute('stroke', `${SVGProvider.getRGBAfromColorCode(this.fg_color)}`)
         line.setAttribute('stroke-width', `${SIZE_MAGNIFICATION}`)
         this.svg.appendChild(line);
@@ -773,9 +773,9 @@ export default class SVGProvider {
       if(this.hlc & 0b0010){
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
         line.setAttribute('shape-rendering', 'crispEdges')
-        line.setAttribute('x1', `${this.position_x + this.width() - 1}`)
+        line.setAttribute('x1', `${this.position_x + this.width() - SIZE_MAGNIFICATION / 2}`)
         line.setAttribute('y1', `${this.position_y - this.height()}`)
-        line.setAttribute('x2', `${this.position_x + this.width() - 1}`)
+        line.setAttribute('x2', `${this.position_x + this.width() - SIZE_MAGNIFICATION / 2}`)
         line.setAttribute('y2', `${this.position_y}`) // 重なるように
         line.setAttribute('stroke', `${SVGProvider.getRGBAfromColorCode(this.fg_color)}`)
         line.setAttribute('stroke-width', `${SIZE_MAGNIFICATION}`)
@@ -786,20 +786,20 @@ export default class SVGProvider {
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
         line.setAttribute('shape-rendering', 'crispEdges')
         line.setAttribute('x1', `${this.position_x}`)
-        line.setAttribute('y1', `${this.position_y - 1}`)
+        line.setAttribute('y1', `${this.position_y - this.height() + SIZE_MAGNIFICATION / 2}`)
         line.setAttribute('x2', `${this.position_x + this.width()}`)
-        line.setAttribute('y2', `${this.position_y - 1}`) // 重なるように
+        line.setAttribute('y2', `${this.position_y - this.height() + SIZE_MAGNIFICATION / 2}`) // 重なるように
         line.setAttribute('stroke', `${SVGProvider.getRGBAfromColorCode(this.fg_color)}`)
         line.setAttribute('stroke-width', `${SIZE_MAGNIFICATION}`)
         this.svg.appendChild(line);
       }
 
-      if(this.hlc & 0b0010){
+      if(this.hlc & 0b1000){
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
         line.setAttribute('shape-rendering', 'crispEdges')
-        line.setAttribute('x1', `${this.position_x}`)
+        line.setAttribute('x1', `${this.position_x + SIZE_MAGNIFICATION / 2}`)
         line.setAttribute('y1', `${this.position_y - this.height()}`)
-        line.setAttribute('x2', `${this.position_x}`)
+        line.setAttribute('x2', `${this.position_x + SIZE_MAGNIFICATION / 2}`)
         line.setAttribute('y2', `${this.position_y}`) // 重なるように
         line.setAttribute('stroke', `${SVGProvider.getRGBAfromColorCode(this.fg_color)}`)
         line.setAttribute('stroke-width', `${SIZE_MAGNIFICATION}`)
@@ -810,9 +810,9 @@ export default class SVGProvider {
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
         line.setAttribute('shape-rendering', 'crispEdges')
         line.setAttribute('x1', `${this.position_x}`)
-        line.setAttribute('y1', `${this.position_y - 1}`)
+        line.setAttribute('y1', `${this.position_y - SIZE_MAGNIFICATION / 2}`)
         line.setAttribute('x2', `${this.position_x + this.width()}`) // 重なるように
-        line.setAttribute('y2', `${this.position_y - 1}`)
+        line.setAttribute('y2', `${this.position_y - SIZE_MAGNIFICATION / 2}`)
         line.setAttribute('stroke', `${SVGProvider.getRGBAfromColorCode(this.fg_color)}`)
         line.setAttribute('stroke-width', `${SIZE_MAGNIFICATION}`)
         this.svg.appendChild(line);
