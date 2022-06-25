@@ -144,7 +144,7 @@ export default class SVGProvider {
   }
   private move_relative_pos(x: number, y: number){
     if (this.position_x < 0 || this.position_y < 0){
-      this.move_absolute_pos(0, 0)
+      this.move_absolute_dot(this.sdp_x, this.sdp_y + (this.ssm_y + this.svs));
     }
 
     while (x < 0){
@@ -174,7 +174,7 @@ export default class SVGProvider {
   }
   private move_newline(){
     if (this.position_x < 0 || this.position_y < 0){
-      this.move_absolute_pos(0, 0)
+      this.move_absolute_dot(this.sdp_x, this.sdp_y + (this.ssm_y + this.svs));
     }
     this.position_x = this.sdp_x
     this.position_y = this.position_y + this.height()
@@ -729,7 +729,7 @@ export default class SVGProvider {
 
   private renderCharacter(key: number, entry: ALPHABET_ENTRY) {
     if (this.position_x < 0 || this.position_y < 0){
-      this.move_absolute_pos(0, 0)
+      this.move_absolute_dot(this.sdp_x, this.sdp_y + (this.ssm_y + this.svs));
     }
 
     if (this.svg === null) { return; }
