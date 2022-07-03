@@ -1,6 +1,6 @@
 {
   "name": "aribb24.js",
-  "version": "1.10.3",
+  "version": "1.10.4",
   "main": "dist/aribb24.js",
   "types": "d.ts/index.d.ts",
   "files": [
