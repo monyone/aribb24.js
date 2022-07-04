@@ -44,6 +44,8 @@ export default class SVGRenderer {
   private readonly onCanplayHandler: (() => void) = this.onCanplay.bind(this);
   private readonly onPlayHandler: (() => void) = this.onPlay.bind(this);
   private readonly onPauseHandler: (() => void) = this.onPause.bind(this);
+  private readonly onPauseAnimationHandler: (() => void) = this.onPauseAnimation.bind(this);
+  private readonly onResumeAnimationHandler: (() => void) = this.onResumeAnimation.bind(this);
   private readonly onSeekingHandler: (() => void) = this.onSeeking.bind(this);
   private readonly onSeekedHandler: (() => void) = this.onSeeked.bind(this);
 
@@ -69,6 +71,9 @@ export default class SVGRenderer {
     this.subtitleElement = subtitleElement ?? media.parentElement
 
     this.media.addEventListener('canplay', this.onCanplayHandler)
+    this.media.addEventListener('play', this.onResumeAnimationHandler)
+    this.media.addEventListener('pause', this.onPauseAnimationHandler)
+
     if (this.rendererOption?.useHighResTimeupdate) {
       this.media.addEventListener('play', this.onPlayHandler)
       this.media.addEventListener('pause', this.onPauseHandler)
@@ -88,6 +93,8 @@ export default class SVGRenderer {
     this.media?.removeEventListener('canplay', this.onCanplayHandler)
     this.media?.removeEventListener('play', this.onPlayHandler)
     this.media?.removeEventListener('pause', this.onPauseHandler)
+    this.media?.removeEventListener('play', this.onResumeAnimationHandler)
+    this.media?.removeEventListener('pause', this.onPauseAnimationHandler)
     this.onPause();
     this.media?.removeEventListener('timeupdate', this.onTimeupdateHandler)
     this.prevCurrentTime = null;
@@ -489,6 +496,14 @@ export default class SVGRenderer {
       window.cancelAnimationFrame(this.highResTimeupdatePollingId);
       this.highResTimeupdatePollingId = null;
     }
+  }
+
+  private onPauseAnimation() {
+    (this.svg as unknown as SVGSVGElement).pauseAnimations();
+  }
+
+  private onResumeAnimation() {
+    (this.svg as unknown as SVGSVGElement).unpauseAnimations();
   }
 
   private onSeeking() {

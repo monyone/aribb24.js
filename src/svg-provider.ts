@@ -1091,6 +1091,23 @@ export default class SVGProvider {
         image.setAttribute('y', `${this.position_y + Math.floor(this.svs * this.text_size_y / 2) - this.height() - outlineHeight * SIZE_MAGNIFICATION}`);
         image.setAttribute('width', `${canvas.width / drcsMagnification * SIZE_MAGNIFICATION}`);
         image.setAttribute('height', `${canvas.height / drcsMagnification * SIZE_MAGNIFICATION}`);
+
+        if (this.flc === 0) {
+          const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+          animate.setAttribute('attributeName', 'opacity');
+          animate.setAttribute('values', '0;1;0');
+          animate.setAttribute('dur', '1s');
+          animate.setAttribute('repeatCount', 'indefinite');
+          image.appendChild(animate);
+        } else if(this.flc === 7) {
+          const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+          animate.setAttribute('attributeName', 'opacity');
+          animate.setAttribute('values', '1;0;1');
+          animate.setAttribute('dur', '1s');
+          animate.setAttribute('repeatCount', 'indefinite');
+          image.appendChild(animate);
+        }
+
         this.svg.appendChild(image);
       }
 
@@ -1128,6 +1145,22 @@ export default class SVGProvider {
     text.setAttribute('stroke', this.getOrnColorCode() ? SVGProvider.getRGBAfromColorCode(this.getOrnColorCode()!) : 'transparent');
     text.appendChild(document.createTextNode(character));
 
+    if (this.flc === 0) {
+      const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+      animate.setAttribute('attributeName', 'opacity');
+      animate.setAttribute('values', '0;1;0');
+      animate.setAttribute('dur', '1s');
+      animate.setAttribute('repeatCount', 'indefinite');
+      text.appendChild(animate);
+    } else if(this.flc === 7) {
+      const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+      animate.setAttribute('attributeName', 'opacity');
+      animate.setAttribute('values', '1;0;1');
+      animate.setAttribute('dur', '1s');
+      animate.setAttribute('repeatCount', 'indefinite');
+      text.appendChild(animate);
+    }
+
     this.svg?.appendChild(text);
   }
 
@@ -1154,6 +1187,22 @@ export default class SVGProvider {
     // elem.setAttribute('stroke-width', this.getOrnColorCode() ? `${2 * SIZE_MAGNIFICATION * 2/ Math.min(scale_x, scale_y)}` : '0');
     elem.setAttribute('stroke-width', this.getOrnColorCode() ? `${2 * SIZE_MAGNIFICATION / Math.min(scale_x, scale_y)}` : '0');
     elem.setAttribute('stroke', this.getOrnColorCode() ? SVGProvider.getRGBAfromColorCode(this.getOrnColorCode()!) : 'transparent');
+
+    if (this.flc === 0) {
+      const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+      animate.setAttribute('attributeName', 'opacity');
+      animate.setAttribute('values', '0;1;0');
+      animate.setAttribute('dur', '1s');
+      animate.setAttribute('repeatCount', 'indefinite');
+      elem.appendChild(animate);
+    } else if(this.flc === 7) {
+      const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+      animate.setAttribute('attributeName', 'opacity');
+      animate.setAttribute('values', '1;0;1');
+      animate.setAttribute('dur', '1s');
+      animate.setAttribute('repeatCount', 'indefinite');
+      elem.appendChild(animate);
+    }
 
     this.svg?.appendChild(elem);
   }
