@@ -753,8 +753,8 @@ export default class SVGProvider {
       rect.setAttribute('shape-rendering', 'crispEdges')
       rect.setAttribute('x', `${this.position_x}`)
       rect.setAttribute('y', `${this.position_y - this.height()}`)
-      rect.setAttribute('width', `${this.width()}`)
-      rect.setAttribute('height', `${this.height()}`)
+      rect.setAttribute('width', `${this.width() + 1}`) // for Firefox (+1)
+      rect.setAttribute('height', `${this.height() + 1}`) // for Firefox (+1)
       rect.setAttribute('fill', `${SVGProvider.getRGBfromColorCode(bg)}`)
       group.appendChild(rect);
 
@@ -1095,15 +1095,17 @@ export default class SVGProvider {
         if (this.flc === 0) {
           const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
           animate.setAttribute('attributeName', 'opacity');
-          animate.setAttribute('values', '0;1;0');
+          animate.setAttribute('values', '1;0');
           animate.setAttribute('dur', '1s');
+          animate.setAttribute('calcMode', 'discrete');
           animate.setAttribute('repeatCount', 'indefinite');
           image.appendChild(animate);
         } else if(this.flc === 7) {
           const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
           animate.setAttribute('attributeName', 'opacity');
-          animate.setAttribute('values', '1;0;1');
+          animate.setAttribute('values', '0;1');
           animate.setAttribute('dur', '1s');
+          animate.setAttribute('calcMode', 'discrete');
           animate.setAttribute('repeatCount', 'indefinite');
           image.appendChild(animate);
         }
@@ -1148,15 +1150,17 @@ export default class SVGProvider {
     if (this.flc === 0) {
       const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
       animate.setAttribute('attributeName', 'opacity');
-      animate.setAttribute('values', '0;1;0');
+      animate.setAttribute('values', '1;0');
       animate.setAttribute('dur', '1s');
+      animate.setAttribute('calcMode', 'discrete');
       animate.setAttribute('repeatCount', 'indefinite');
       text.appendChild(animate);
     } else if(this.flc === 7) {
       const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
       animate.setAttribute('attributeName', 'opacity');
-      animate.setAttribute('values', '1;0;1');
+      animate.setAttribute('values', '0;1');
       animate.setAttribute('dur', '1s');
+      animate.setAttribute('calcMode', 'discrete');
       animate.setAttribute('repeatCount', 'indefinite');
       text.appendChild(animate);
     }
@@ -1191,15 +1195,17 @@ export default class SVGProvider {
     if (this.flc === 0) {
       const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
       animate.setAttribute('attributeName', 'opacity');
-      animate.setAttribute('values', '0;1;0');
+      animate.setAttribute('values', '1;0');
       animate.setAttribute('dur', '1s');
+      animate.setAttribute('calcMode', 'discrete');
       animate.setAttribute('repeatCount', 'indefinite');
       elem.appendChild(animate);
     } else if(this.flc === 7) {
       const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
       animate.setAttribute('attributeName', 'opacity');
-      animate.setAttribute('values', '1;0;1');
+      animate.setAttribute('values', '0;1');
       animate.setAttribute('dur', '1s');
+      animate.setAttribute('calcMode', 'discrete');
       animate.setAttribute('repeatCount', 'indefinite');
       elem.appendChild(animate);
     }
