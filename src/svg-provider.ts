@@ -471,7 +471,7 @@ export default class SVGProvider {
           begin += 2
         }
       } else if (this.pes[begin] === JIS8.FLC) {
-        const index = this.pes[begin] & 0x0F;
+        const index = this.pes[begin + 1] & 0x0F;
         this.flc = index
         begin += 2
       } else if (this.pes[begin] === JIS8.CDC) {
