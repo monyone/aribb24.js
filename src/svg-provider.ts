@@ -19,6 +19,7 @@ import { PathElement } from './constants/mapping/additional-symbols-glyph'
 
 import CRC16 from './utils/crc16-ccitt'
 import MD5 from './utils/md5'
+import CRC32 from './utils/crc32'
 
 const SIZE_MAGNIFICATION = 2; // 奇数の height 時に SSZ で改行を行う場合があるため、全体をN倍して半分サイズに備える
 let EMBEDDED_GLYPH: Map<string, PathElement> | null = null;
@@ -258,6 +259,8 @@ export default class SVGProvider {
         this.parseDRCS(1, data_unit + 5, data_unit + 5 + data_unit_size)
       }else if (data_unit_parameter == 0x31) {
         this.parseDRCS(2, data_unit + 5, data_unit + 5 + data_unit_size)
+      }else if (data_unit_parameter == 0x35) {
+        this.parseBitmap(data_unit + 5, data_unit + 5 + data_unit_size)
       }
 
       data_unit += 5 + data_unit_size
@@ -1211,6 +1214,119 @@ export default class SVGProvider {
     }
 
     this.svg?.appendChild(elem);
+  }
+
+  private parseBitmap(begin: number, end: number): void {
+    if (this.svg === null) {
+      return;
+    }
+    if (!this.rendered) {
+       this.svg.setAttribute('viewBox', `0 0 ${this.swf_x} ${this.swf_y}`);
+    }
+    this.rendered = true;
+    const x_position = (this.pes[begin] << 8) | this.pes[begin + 1];
+    begin += 2;
+    const y_position = (this.pes[begin] << 8) | this.pes[begin + 1];
+    begin += 2;
+    const number_of_flc_colors = this.pes[begin];
+    begin += 1;
+    const flcColors = new Set(this.pes.subarray(begin, begin + number_of_flc_colors));
+    begin += number_of_flc_colors;
+    const pngHeaderSize = 8 /* PNG signature */ + 4 /* size */ + 4 /* 'IHDR' */ + 13 /* IHDR */ + 4 /* CRC32 */;
+    if (begin + pngHeaderSize > end) {
+      return;
+    }
+    const ihdr = this.pes.subarray(begin, begin + pngHeaderSize);
+    const idat = this.pes.subarray(begin + pngHeaderSize, end);
+    const plteDataSize = 128 * 3;
+    const trnsDataSize = 128;
+    const plteSize = plteDataSize + 12 /* 'PLTE' + size + CRC32 */;
+    const trnsSize = trnsDataSize + 12 /* 'tRNS' + size + CRC32 */;
+    const plteOffset = pngHeaderSize;
+    const trnsOffset = pngHeaderSize + plteSize;
+    const pngData = new Uint8Array(ihdr.byteLength + idat.byteLength + plteSize + trnsSize);
+    const pngDataView = new DataView(pngData.buffer);
+    pngData.set(ihdr, 0);
+    pngData.set(idat, pngHeaderSize + plteSize + trnsSize);
+    for (let i = 0; i < 128 / 16; i++) {
+      for (let j = 0; j < 16; j++) {
+        if (flcColors.has(i * 16 + j)) {
+          continue;
+        }
+        const color = pallets[i][j];
+        const R = Number.parseInt(color.substring(1, 3), 16);
+        const G = Number.parseInt(color.substring(3, 5), 16);
+        const B = Number.parseInt(color.substring(5, 7), 16);
+        const A = Number.parseInt(color.substring(7, 9), 16);
+        pngData[plteOffset + 8 + (i * 16 + j) * 3] = R;
+        pngData[plteOffset + 8 + (i * 16 + j) * 3 + 1] = G;
+        pngData[plteOffset + 8 + (i * 16 + j) * 3 + 2] = B;
+        pngData[trnsOffset + 8 + (i * 16 + j)] = A;
+      }
+    }
+    pngDataView.setInt32(plteOffset, plteDataSize, false);
+    pngData[plteOffset + 4] = 'P'.charCodeAt(0);
+    pngData[plteOffset + 5] = 'L'.charCodeAt(0);
+    pngData[plteOffset + 6] = 'T'.charCodeAt(0);
+    pngData[plteOffset + 7] = 'E'.charCodeAt(0);
+    pngDataView.setInt32(trnsOffset, trnsDataSize, false);
+    pngData[trnsOffset + 4] = 't'.charCodeAt(0);
+    pngData[trnsOffset + 5] = 'R'.charCodeAt(0);
+    pngData[trnsOffset + 6] = 'N'.charCodeAt(0);
+    pngData[trnsOffset + 7] = 'S'.charCodeAt(0);
+    pngDataView.setInt32(plteOffset + plteSize - 4, CRC32(pngData, plteOffset + 4, plteOffset + 8 + plteDataSize), false);
+    pngDataView.setInt32(trnsOffset + trnsSize - 4, CRC32(pngData, trnsOffset + 4, trnsOffset + 8 + trnsDataSize), false);
+    const width = pngDataView.getInt32(16 /* PNG signature + 'IHDR' + size */, false);
+    const height = pngDataView.getInt32(20 /* PNG signature + 'IHDR' + size + width */, false);
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('x', `${this.sdp_x}`);
+    svg.setAttribute('y', `${this.sdp_y}`);
+    svg.setAttribute('width', `${this.sdf_x}`);
+    svg.setAttribute('height', `${this.sdf_y}`);
+    svg.setAttribute('viewBox', `0 0 ${this.sdf_x} ${this.sdf_y}`);
+    const image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+    image.setAttribute('href', 'data:image/png;base64,' + window.btoa(String.fromCharCode(...pngData)));
+    image.setAttribute('x', `${x_position * SIZE_MAGNIFICATION}`);
+    image.setAttribute('y', `${y_position * SIZE_MAGNIFICATION}`);
+    image.setAttribute('width', `${width * SIZE_MAGNIFICATION}`);
+    image.setAttribute('height', `${height * SIZE_MAGNIFICATION}`);
+    svg.appendChild(image);
+    if (flcColors.size > 0) {
+      for (let i = 0; i < 128 / 16; i++) {
+        for (let j = 0; j < 16; j++) {
+          if (!flcColors.has(i * 16 + j)) {
+            pngData[trnsOffset + 8 + (i * 16 + j)] = 0;
+          } else {
+            const color = pallets[i][j];
+            const R = Number.parseInt(color.substring(1, 3), 16);
+            const G = Number.parseInt(color.substring(3, 5), 16);
+            const B = Number.parseInt(color.substring(5, 7), 16);
+            const A = Number.parseInt(color.substring(7, 9), 16);
+            pngData[plteOffset + 8 + (i * 16 + j) * 3] = R;
+            pngData[plteOffset + 8 + (i * 16 + j) * 3 + 1] = G;
+            pngData[plteOffset + 8 + (i * 16 + j) * 3 + 2] = B;
+            pngData[trnsOffset + 8 + (i * 16 + j)] = A;
+          }
+        }
+      }
+      pngDataView.setInt32(plteOffset + plteSize - 4, CRC32(pngData, plteOffset + 4, plteOffset + 8 + plteDataSize), false);
+      pngDataView.setInt32(trnsOffset + trnsSize - 4, CRC32(pngData, trnsOffset + 4, trnsOffset + 8 + trnsDataSize), false);
+      const flcImage = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+      flcImage.setAttribute('href', 'data:image/png;base64,' + window.btoa(String.fromCharCode(...pngData)));
+      flcImage.setAttribute('x', `${x_position * SIZE_MAGNIFICATION}`);
+      flcImage.setAttribute('y', `${y_position * SIZE_MAGNIFICATION}`);
+      flcImage.setAttribute('width', `${width * SIZE_MAGNIFICATION}`);
+      flcImage.setAttribute('height', `${height * SIZE_MAGNIFICATION}`);
+      const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+      animate.setAttribute('attributeName', 'opacity');
+      animate.setAttribute('values', '1;0');
+      animate.setAttribute('dur', '1s');
+      animate.setAttribute('calcMode', 'discrete');
+      animate.setAttribute('repeatCount', 'indefinite');
+      flcImage.appendChild(animate);
+      svg.appendChild(flcImage);
+    }
+    this.svg.appendChild(svg);
   }
 
   private getOrnColorCode(): string | null {
