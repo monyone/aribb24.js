@@ -41,11 +41,13 @@ export interface ProviderResult {
   startTime: number,
   endTime: number,
   rendered: boolean,
+  textContent: string | null,
   PRA: number | null
 }
 
 export default class HTMLProvider {
   private pes: Uint8Array
+  private text: string = '';
   private table: HTMLTableElement | null = null
   private cells: HTMLTableDataCellElement[][] | null = null;
 
@@ -267,6 +269,7 @@ export default class HTMLProvider {
       startTime: this.startTime,
       endTime: this.endTime ?? Number.POSITIVE_INFINITY,
       rendered: this.rendered,
+      textContent: this.rendered ? this.text : null,
       PRA: this.PRA
     })
   }
@@ -1098,6 +1101,10 @@ export default class HTMLProvider {
   }
 
   private renderFont(character: string): void {
+    if (!(this.text_size_x === 0.5 && this.text_size_y === 0.5 && (HIRAGANA_MAPPING.includes(character) || KATAKANA_MAPPING.includes(character)))) {
+      this.text += character
+    }
+    
     if (this.cells === null) { return; }
 
     const useGaijiFont = ADDITIONAL_SYMBOLS_SET.has(character)

@@ -34,6 +34,7 @@ export default class CanvasID3Renderer {
   private subtitleElement: HTMLElement | null = null
   private viewCanvas: HTMLCanvasElement | null = null
   private rawCanvas: HTMLCanvasElement | null = null
+  private textContent: string | null = null;
   private resizeObserver: ResizeObserver | null = null
   private mutationObserver: MutationObserver | null = null
   private prevCurrentTime: number | null = null
@@ -114,6 +115,10 @@ export default class CanvasID3Renderer {
 
   public getRawCanvas(): HTMLCanvasElement | null {
     return this.rawCanvas
+  }
+
+  public getTextContent(): string | null {
+    return this.textContent;
   }
 
   public refresh(): void {
@@ -398,6 +403,7 @@ export default class CanvasID3Renderer {
           }
 
           rendered = result?.rendered ?? false;
+          this.textContent = result?.textContent ?? null;
         }
 
         if (this.isShowing && this.rawCanvas) {
@@ -413,6 +419,7 @@ export default class CanvasID3Renderer {
         this.onB24CueChangeDrawed = rendered
       } else {
         this.onB24CueChangeDrawed = false
+        this.textContent = null;
       }
 
       for (let i = this.b24Track.activeCues.length - 2; i >= 0; i--) {
@@ -424,6 +431,7 @@ export default class CanvasID3Renderer {
       }
     } else{
       this.onB24CueChangeDrawed = false
+      this.textContent = null;
     }
   }
 

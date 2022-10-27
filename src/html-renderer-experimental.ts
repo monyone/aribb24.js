@@ -30,6 +30,7 @@ export default class HTMLID3Renderer {
   private b24Track: TextTrack | null = null
   private subtitleElement: HTMLElement | null = null
   private table: HTMLTableElement | null = null;
+  private textContent: string | null = null;
   private wrapper: HTMLDivElement | null = null;
   private resizeObserver: ResizeObserver | null = null
   private mutationObserver: MutationObserver | null = null
@@ -103,6 +104,10 @@ export default class HTMLID3Renderer {
 
   public dispose(): void {
     this.detachMedia()
+  }
+
+  public getTextContent(): string | null {
+    return this.textContent;
   }
 
   public refresh(): void {
@@ -366,8 +371,10 @@ export default class HTMLID3Renderer {
 
         if (result?.rendered) { this.onResize(); }
         this.onB24CueChangeDrawed = result?.rendered ?? false;
+        this.textContent = result?.textContent ?? null;
       } else {
         this.onB24CueChangeDrawed = false
+        this.textContent = null;
       }
 
       for (let i = this.b24Track.activeCues.length - 2; i >= 0; i--) {
@@ -379,6 +386,7 @@ export default class HTMLID3Renderer {
       }
     } else{
       this.onB24CueChangeDrawed = false
+      this.textContent = null;
     }
   }
 

@@ -44,6 +44,7 @@ export interface ProviderResult {
   startTime: number,
   endTime: number,
   rendered: boolean,
+  textContent: string | null,
   PRA: number | null
 }
 
@@ -53,6 +54,7 @@ export default class CanvasProvider {
 
   private option_canvas: HTMLCanvasElement | null = null
   private render_canvas: HTMLCanvasElement | null = null
+  private render_text: string = '';
 
   private GL: number = 0
   private GR: number = 2
@@ -137,6 +139,7 @@ export default class CanvasProvider {
     // デフォルト値の対応を上記ととること
     this.render_canvas = null
     this.option_canvas = null
+    this.render_text = ''
 
     this.GL = 0
     this.GR = 2
@@ -398,6 +401,7 @@ export default class CanvasProvider {
       startTime: this.startTime,
       endTime: this.endTime ?? Number.POSITIVE_INFINITY,
       rendered: this.rendered,
+      textContent: this.rendered ? this.render_text : null,
       PRA: this.PRA
     })
   }
@@ -1191,6 +1195,10 @@ export default class CanvasProvider {
   }
 
   private renderFont(character: string): void {
+    if (!(this.text_size_x === 0.5 && this.text_size_y === 0.5 && (HIRAGANA_MAPPING.includes(character) || KATAKANA_MAPPING.includes(character)))) {
+      this.render_text += character
+    }
+
     if (!this.render_canvas) { return; }
 
     if (EMBEDDED_GLYPH != null && EMBEDDED_GLYPH.has(character)) {

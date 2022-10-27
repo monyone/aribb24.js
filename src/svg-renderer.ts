@@ -29,6 +29,7 @@ export default class SVGRenderer {
   private b24Track: TextTrack | null = null
   private subtitleElement: HTMLElement | null = null
   private svg: SVGElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  private textContent: string | null = null;
   private prevCurrentTime: number | null = null
   private highResTimeupdatePollingId: number | null = null
   private isShowing: boolean = true
@@ -108,6 +109,10 @@ export default class SVGRenderer {
 
   public getSVG(): SVGElement {
     return this.svg
+  }
+
+  public getTextContent(): string | null {
+    return this.textContent;
   }
 
   public show(): void {
@@ -363,11 +368,13 @@ export default class SVGRenderer {
           }
           
           rendered = result?.rendered ?? false
+          this.textContent = result?.textContent ?? null;
         }
 
         this.onB24CueChangeDrawed = true
       } else {
         this.onB24CueChangeDrawed = false
+        this.textContent = null;
       }
 
       for (let i = this.b24Track.activeCues.length - 2; i >= 0; i--) {
@@ -379,6 +386,7 @@ export default class SVGRenderer {
       }
     } else{
       this.onB24CueChangeDrawed = false
+      this.textContent = null;
     }
   }
 

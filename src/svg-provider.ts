@@ -42,11 +42,13 @@ export interface ProviderResult {
   startTime: number,
   endTime: number,
   rendered: boolean,
+  textContent: string | null,
   PRA: number | null
 }
 
 export default class SVGProvider {
   private pes: Uint8Array
+  private text: string = '';
   private svg: SVGElement | null = null
   private groups: Map<number, SVGElement> = new Map();
 
@@ -270,6 +272,7 @@ export default class SVGProvider {
       startTime: this.startTime,
       endTime: this.endTime ?? Number.POSITIVE_INFINITY,
       rendered: this.rendered,
+      textContent: this.rendered ? this.text : null,
       PRA: this.PRA
     })
   }
@@ -1121,6 +1124,10 @@ export default class SVGProvider {
   }
 
   private renderFont(character: string): void {
+    if (!(this.text_size_x === 0.5 && this.text_size_y === 0.5 && (HIRAGANA_MAPPING.includes(character) || KATAKANA_MAPPING.includes(character)))) {
+      this.text += character
+    }
+
     const useGaijiFont = ADDITIONAL_SYMBOLS_SET.has(character)
     const font = useGaijiFont ? this.gaijiFont : this.normalFont;
 
