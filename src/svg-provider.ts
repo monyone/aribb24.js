@@ -42,7 +42,8 @@ export interface ProviderResult {
   startTime: number,
   endTime: number,
   rendered: boolean,
-  PRA: number | null
+  renderedText: string | null,
+  PRA: number | null,
 }
 
 export default class SVGProvider {
@@ -109,6 +110,7 @@ export default class SVGProvider {
   private timeElapsed: number = 0
   private endTime: number | null = null
   private rendered: boolean = false
+  private renderedText: string = ''
   private PRA: number | null = null
 
   private normalFont: string = 'monospace'
@@ -185,7 +187,7 @@ export default class SVGProvider {
     const purpose_data_identifier = option?.data_identifier ?? 0x80; // default: caption
     const purpose_data_group_id = option?.data_group_id ?? 0x01; // default: 1st language
 
-    if (pes.length <= 0) { return false; }  
+    if (pes.length <= 0) { return false; }
     const data_identifier = pes[0];
     if(data_identifier !== purpose_data_identifier){
       return false;
@@ -270,7 +272,8 @@ export default class SVGProvider {
       startTime: this.startTime,
       endTime: this.endTime ?? Number.POSITIVE_INFINITY,
       rendered: this.rendered,
-      PRA: this.PRA
+      renderedText: this.renderedText !== '' ? this.renderedText : null,
+      PRA: this.PRA,
     })
   }
 
@@ -1121,6 +1124,12 @@ export default class SVGProvider {
   }
 
   private renderFont(character: string): void {
+
+    // append to rendered text (ignoring ruby character)
+    if (!(this.text_type === 'SSZ' && (HIRAGANA_MAPPING.includes(character) || KATAKANA_MAPPING.includes(character)))) {
+      this.renderedText += character;
+    }
+
     const useGaijiFont = ADDITIONAL_SYMBOLS_SET.has(character)
     const font = useGaijiFont ? this.gaijiFont : this.normalFont;
 
@@ -1133,7 +1142,7 @@ export default class SVGProvider {
     if (useGaijiFont) { character += '\u{fe0e}' }
 
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    // text.setAttribute('x', `${this.position_x} + this.width() / 2`); // without Safari 
+    // text.setAttribute('x', `${this.position_x} + this.width() / 2`); // without Safari
     // text.setAttribute('y', `${this.position_y - this.height() / 2}`); // without Safari
     text.setAttribute('x', '0');
     text.setAttribute('y', '0');
@@ -1182,7 +1191,7 @@ export default class SVGProvider {
     const elem = document.createElementNS('http://www.w3.org/2000/svg', 'path')
     elem.setAttribute('d', path);
 
-    // elem.setAttribute('x', `${this.position_x`); // without Safari 
+    // elem.setAttribute('x', `${this.position_x`); // without Safari
     // elem.setAttribute('y', `${this.position_y - this.height()}`); // without Safari issue
     elem.setAttribute('x', '0');
     elem.setAttribute('y', '0');

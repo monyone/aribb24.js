@@ -29,6 +29,8 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
 * drcsReplacement: Replace DRCS to text if possible
 * drcsReplaceMapping: add more DRCS Mapping by Object (ex. { md5: character })
     * currently, replace to full-width character only supported.
+* renderedTextCallback: specify rendered text callback
+    * Type Definition is renderedText (renderedText: string) => unknown
 * PRACallback: specify PRA callback for SuperImpose
     * Type Definition is PRA (index: number) => unknown
 * keepAspectRatio: keep caption's aspect ratio in any container. (default: true)

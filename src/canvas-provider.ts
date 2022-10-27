@@ -44,7 +44,8 @@ export interface ProviderResult {
   startTime: number,
   endTime: number,
   rendered: boolean,
-  PRA: number | null
+  renderedText: string | null,
+  PRA: number | null,
 }
 
 
@@ -96,6 +97,7 @@ export default class CanvasProvider {
   private svs: number = 24 * SIZE_MAGNIFICATION
   private text_size_x: number = 1
   private text_size_y: number = 1
+  private text_type: 'NSZ' | 'MSZ' | 'SSZ' = 'NSZ'
   private position_x: number = -1
   private position_y: number = -1
 
@@ -113,6 +115,7 @@ export default class CanvasProvider {
   private timeElapsed: number = 0
   private endTime: number | null = null
   private rendered: boolean = false
+  private renderedText: string = ''
   private PRA: number | null = null
 
   private normalFont: string = 'sans-serif'
@@ -277,7 +280,7 @@ export default class CanvasProvider {
     const purpose_data_identifier = option?.data_identifier ?? 0x80; // default: caption
     const purpose_data_group_id = option?.data_group_id ?? 0x01; // default: 1st language
 
-    if (pes.length <= 0) { return false; }  
+    if (pes.length <= 0) { return false; }
     const data_identifier = pes[0];
     if(data_identifier !== purpose_data_identifier){
       return false;
@@ -398,7 +401,8 @@ export default class CanvasProvider {
       startTime: this.startTime,
       endTime: this.endTime ?? Number.POSITIVE_INFINITY,
       rendered: this.rendered,
-      PRA: this.PRA
+      renderedText: this.renderedText !== '' ? this.renderedText : null,
+      PRA: this.PRA,
     })
   }
 
@@ -570,14 +574,17 @@ export default class CanvasProvider {
       } else if (this.pes[begin] === JIS8.SSZ) {
         this.text_size_x = 0.5
         this.text_size_y = 0.5
+        this.text_type = 'SSZ'
         begin += 1
       } else if (this.pes[begin] === JIS8.MSZ) {
         this.text_size_x = 0.5
         this.text_size_y = 1
+        this.text_type = 'MSZ'
         begin += 1
       } else if (this.pes[begin] === JIS8.NSZ) {
         this.text_size_x = 1
         this.text_size_y = 1
+        this.text_type = 'NSZ'
         begin += 1
       } else if (this.pes[begin] === JIS8.SZX) {
         return
@@ -904,7 +911,7 @@ export default class CanvasProvider {
         ctx.fillRect(
           this.position_x * this.width_magnification(),
           (this.position_y - this.height()) * this.height_magnification(),
-          this.width() * this.width_magnification(), 
+          this.width() * this.width_magnification(),
           1 * this.height_magnification()
         )
       }
@@ -1192,6 +1199,11 @@ export default class CanvasProvider {
 
   private renderFont(character: string): void {
     if (!this.render_canvas) { return; }
+
+    // append to rendered text (ignoring ruby character)
+    if (!(this.text_type === 'SSZ' && (HIRAGANA_MAPPING.includes(character) || KATAKANA_MAPPING.includes(character)))) {
+      this.renderedText += character;
+    }
 
     if (EMBEDDED_GLYPH != null && EMBEDDED_GLYPH.has(character)) {
       const {viewBox, path} = EMBEDDED_GLYPH.get(character)!;

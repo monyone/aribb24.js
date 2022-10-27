@@ -14,6 +14,7 @@ export interface RendererOption {
   gaijiFont?: string,
   drcsReplacement?: boolean,
   drcsReplaceMapping?: Record<string, string>,
+  renderedTextCallback?: (renderedText: string) => unknown,
   PRACallback?: (index: number) => unknown,
   keepAspectRatio?: boolean,
   enableAutoInBandMetadataTextTrackDetection?: boolean,
@@ -160,7 +161,7 @@ export default class HTMLID3Renderer {
 
   public pushID3v2Data(pts: number, data: Uint8Array): boolean {
     let result = false;
-    
+
     for (let begin = 0; begin < data.length;) {
       const id3_start = begin;
 
@@ -360,6 +361,10 @@ export default class HTMLID3Renderer {
           table: this.table ?? undefined,
         })
 
+        if (result?.renderedText != null) {
+          this.rendererOption?.renderedTextCallback?.(result?.renderedText);
+        }
+
         if (result?.PRA != null) {
            this.rendererOption?.PRACallback?.(result.PRA);
         }
@@ -373,7 +378,7 @@ export default class HTMLID3Renderer {
       for (let i = this.b24Track.activeCues.length - 2; i >= 0; i--) {
         const cue = this.b24Track.activeCues[i]
         cue.endTime = Math.min(cue.endTime, lastCue.startTime)
-        if (cue.startTime === cue.endTime) { // .. if duplicate subtitle appeared 
+        if (cue.startTime === cue.endTime) { // .. if duplicate subtitle appeared
           this.b24Track.removeCue(cue);
         }
       }
@@ -388,13 +393,13 @@ export default class HTMLID3Renderer {
   }
 
   private onTimeupdate() {
-    if (!this.media) { return; } 
+    if (!this.media) { return; }
     if (this.prevCurrentTime == null) {
       this.prevCurrentTime = this.media.currentTime;
       return;
     }
-    
-    if (!this.id3Track || !this.id3Track.cues || this.id3Track.cues.length === 0) { 
+
+    if (!this.id3Track || !this.id3Track.cues || this.id3Track.cues.length === 0) {
       this.prevCurrentTime = this.media.currentTime;
       return;
     }
@@ -423,7 +428,7 @@ export default class HTMLID3Renderer {
         const currentTime = this.prevCurrentTime;
         const middle = Math.floor((begin + end) / 2);
         const startTime = cues[middle].startTime;
-  
+
         if (currentTime < startTime) {
           end = middle;
         } else {
@@ -438,7 +443,7 @@ export default class HTMLID3Renderer {
         const currentTime = this.media.currentTime;
         const middle = Math.floor((begin + end) / 2);
         const startTime = cues[middle].startTime;
-  
+
         if (currentTime < startTime) {
           end = middle;
         } else {

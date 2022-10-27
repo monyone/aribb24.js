@@ -41,7 +41,8 @@ export interface ProviderResult {
   startTime: number,
   endTime: number,
   rendered: boolean,
-  PRA: number | null
+  renderedText: string | null,
+  PRA: number | null,
 }
 
 export default class HTMLProvider {
@@ -108,6 +109,7 @@ export default class HTMLProvider {
   private timeElapsed: number = 0
   private endTime: number | null = null
   private rendered: boolean = false
+  private renderedText: string = ''
   private PRA: number | null = null
 
   private normalFont: string = 'monospace'
@@ -184,7 +186,7 @@ export default class HTMLProvider {
     const purpose_data_identifier = option?.data_identifier ?? 0x80; // default: caption
     const purpose_data_group_id = option?.data_group_id ?? 0x01; // default: 1st language
 
-    if (pes.length <= 0) { return false; }  
+    if (pes.length <= 0) { return false; }
     const data_identifier = pes[0];
     if(data_identifier !== purpose_data_identifier){
       return false;
@@ -267,7 +269,8 @@ export default class HTMLProvider {
       startTime: this.startTime,
       endTime: this.endTime ?? Number.POSITIVE_INFINITY,
       rendered: this.rendered,
-      PRA: this.PRA
+      renderedText: this.renderedText !== '' ? this.renderedText : null,
+      PRA: this.PRA,
     })
   }
 
@@ -1100,6 +1103,11 @@ export default class HTMLProvider {
   private renderFont(character: string): void {
     if (this.cells === null) { return; }
 
+    // append to rendered text (ignoring ruby character)
+    if (!(this.text_type === 'SSZ' && (HIRAGANA_MAPPING.includes(character) || KATAKANA_MAPPING.includes(character)))) {
+      this.renderedText += character;
+    }
+
     const useGaijiFont = ADDITIONAL_SYMBOLS_SET.has(character)
     const font = useGaijiFont ? this.gaijiFont : this.normalFont;
 
@@ -1152,7 +1160,7 @@ export default class HTMLProvider {
                 first = false
               }
             }
-         
+
             elem.style.textShadow = shadow
           }
 
