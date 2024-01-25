@@ -192,7 +192,14 @@ export default class CanvasID3Renderer {
       const id3_start = begin;
 
       if (begin + 3 > data.length) { break; }
-      if (!(data[begin + 0] === 0x49 && data[begin + 1] === 0x44 && data[begin + 2] === 0x33)) { break; }
+      if (!(data[begin + 0] === 0x49 && data[begin + 1] === 0x44 && data[begin + 2] === 0x33)) {
+        if (begin === 0) {
+          begin += 5; // ffmpeg 6.1 未満には ID3 を 5 bytes 消すので、それの対策を入れると、修正済みだと 5 bytes パディングされうる
+          continue;
+        } else {
+          break;
+        }
+      }
       begin += 3 + 2 /* version */ + 1 /* flag */;
 
       if (begin + 4 > data.length) { break; }
