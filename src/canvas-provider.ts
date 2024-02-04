@@ -280,7 +280,7 @@ export default class CanvasProvider {
     const purpose_data_identifier = option?.data_identifier ?? 0x80; // default: caption
     const purpose_data_group_id = option?.data_group_id ?? 0x01; // default: 1st language
 
-    if (pes.length <= 0) { return false; }  
+    if (pes.length <= 0) { return false; }
     const data_identifier = pes[0];
     if(data_identifier !== purpose_data_identifier){
       return false;
@@ -908,7 +908,7 @@ export default class CanvasProvider {
         ctx.fillRect(
           this.position_x * this.width_magnification(),
           (this.position_y - this.height()) * this.height_magnification(),
-          this.width() * this.width_magnification(), 
+          this.width() * this.width_magnification(),
           1 * this.height_magnification()
         )
       }

@@ -164,7 +164,7 @@ export default class SVGRenderer {
 
   public pushID3v2Data(pts: number, data: Uint8Array): boolean {
     let result = false;
-    
+
     for (let begin = 0; begin < data.length;) {
       const id3_start = begin;
 
@@ -373,7 +373,7 @@ export default class SVGRenderer {
           if (result?.PRA != null) {
              this.rendererOption?.PRACallback?.(result.PRA);
           }
-          
+
           rendered = result?.rendered ?? false
           this.textContent = result?.textContent ?? null;
         }
@@ -387,7 +387,7 @@ export default class SVGRenderer {
       for (let i = this.b24Track.activeCues.length - 2; i >= 0; i--) {
         const cue = this.b24Track.activeCues[i]
         cue.endTime = Math.min(cue.endTime, lastCue.startTime)
-        if (cue.startTime === cue.endTime) { // .. if duplicate subtitle appeared 
+        if (cue.startTime === cue.endTime) { // .. if duplicate subtitle appeared
           this.b24Track.removeCue(cue);
         }
       }
@@ -403,13 +403,13 @@ export default class SVGRenderer {
   }
 
   private onTimeupdate() {
-    if (!this.media) { return; } 
+    if (!this.media) { return; }
     if (this.prevCurrentTime == null) {
       this.prevCurrentTime = this.media.currentTime;
       return;
     }
-    
-    if (!this.id3Track || !this.id3Track.cues || this.id3Track.cues.length === 0) { 
+
+    if (!this.id3Track || !this.id3Track.cues || this.id3Track.cues.length === 0) {
       this.prevCurrentTime = this.media.currentTime;
       return;
     }
@@ -438,7 +438,7 @@ export default class SVGRenderer {
         const currentTime = this.prevCurrentTime;
         const middle = Math.floor((begin + end) / 2);
         const startTime = cues[middle].startTime;
-  
+
         if (currentTime < startTime) {
           end = middle;
         } else {
@@ -453,7 +453,7 @@ export default class SVGRenderer {
         const currentTime = this.media.currentTime;
         const middle = Math.floor((begin + end) / 2);
         const startTime = cues[middle].startTime;
-  
+
         if (currentTime < startTime) {
           end = middle;
         } else {

@@ -186,7 +186,7 @@ export default class HTMLProvider {
     const purpose_data_identifier = option?.data_identifier ?? 0x80; // default: caption
     const purpose_data_group_id = option?.data_group_id ?? 0x01; // default: 1st language
 
-    if (pes.length <= 0) { return false; }  
+    if (pes.length <= 0) { return false; }
     const data_identifier = pes[0];
     if(data_identifier !== purpose_data_identifier){
       return false;
@@ -1104,7 +1104,7 @@ export default class HTMLProvider {
     if (!(this.text_size_x === 0.5 && this.text_size_y === 0.5 && (HIRAGANA_MAPPING.includes(character) || KATAKANA_MAPPING.includes(character)))) {
       this.text += character
     }
-    
+
     if (this.cells === null) { return; }
 
     const useGaijiFont = ADDITIONAL_SYMBOLS_SET.has(character)
@@ -1159,7 +1159,7 @@ export default class HTMLProvider {
                 first = false
               }
             }
-         
+
             elem.style.textShadow = shadow
           }
 

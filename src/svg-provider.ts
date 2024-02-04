@@ -187,7 +187,7 @@ export default class SVGProvider {
     const purpose_data_identifier = option?.data_identifier ?? 0x80; // default: caption
     const purpose_data_group_id = option?.data_group_id ?? 0x01; // default: 1st language
 
-    if (pes.length <= 0) { return false; }  
+    if (pes.length <= 0) { return false; }
     const data_identifier = pes[0];
     if(data_identifier !== purpose_data_identifier){
       return false;
@@ -1140,7 +1140,7 @@ export default class SVGProvider {
     if (useGaijiFont) { character += '\u{fe0e}' }
 
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    // text.setAttribute('x', `${this.position_x} + this.width() / 2`); // without Safari 
+    // text.setAttribute('x', `${this.position_x} + this.width() / 2`); // without Safari
     // text.setAttribute('y', `${this.position_y - this.height() / 2}`); // without Safari
     text.setAttribute('x', '0');
     text.setAttribute('y', '0');
@@ -1189,7 +1189,7 @@ export default class SVGProvider {
     const elem = document.createElementNS('http://www.w3.org/2000/svg', 'path')
     elem.setAttribute('d', path);
 
-    // elem.setAttribute('x', `${this.position_x`); // without Safari 
+    // elem.setAttribute('x', `${this.position_x`); // without Safari
     // elem.setAttribute('y', `${this.position_y - this.height()}`); // without Safari issue
     elem.setAttribute('x', '0');
     elem.setAttribute('y', '0');

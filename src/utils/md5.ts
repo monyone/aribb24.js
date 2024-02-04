@@ -138,6 +138,6 @@ export default (buffer: ArrayBuffer): string => {
   result += byteToHex((d & 0x0000FF00) >>>  8);
   result += byteToHex((d & 0x00FF0000) >>> 16);
   result += byteToHex((d & 0xFF000000) >>> 24);
-  
+
   return result;
 }
