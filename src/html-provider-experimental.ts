@@ -106,6 +106,8 @@ export default class HTMLProvider {
   private force_orn: boolean | string | null = null
   private flc: number = 15
 
+  private non_spacing: string = '';
+
   private startTime: number
   private timeElapsed: number = 0
   private endTime: number | null = null
@@ -724,6 +726,19 @@ export default class HTMLProvider {
       this.move_absolute_dot(this.sdp_x, this.sdp_y + (this.ssm_y + this.svs));
     }
 
+    if (entry.alphabet === ALPHABETS.KANJI) {
+      const ch1 = ((key & 0xFF00) >> 8) - 0x21
+      const ch2 = ((key & 0x00FF) >> 0) - 0x21
+
+      if (ch1 === 0 && 12 <= ch2 && ch2 <= 17) {
+        this.non_spacing = ['\u0301', '\u3000', '\u0308', '\u0302', '\u0305', '\u0332'][ch2 - 12];
+        return;
+      } else if (ch1 === 1 && ch2 === 93) {
+        this.non_spacing += '\u20DD';
+        return;
+      }
+    }
+
     if (this.table === null) { return; }
     if (this.cells === null) {
       if (this.table.parentElement) {
@@ -1101,6 +1116,9 @@ export default class HTMLProvider {
   }
 
   private renderFont(character: string): void {
+    character += this.non_spacing;
+    this.non_spacing = '';
+
     if (!(this.text_size_x === 0.5 && this.text_size_y === 0.5 && (HIRAGANA_MAPPING.includes(character) || KATAKANA_MAPPING.includes(character)))) {
       this.text += character
     }
