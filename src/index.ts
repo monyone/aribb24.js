@@ -6,3 +6,7 @@ export { default as SVGProvider, ProviderOption as SVGProviderOption, ProviderRe
 
 export { default as HTMLRenderer, RendererOption as HTMLRendererOption } from './v1/html-renderer-experimental'
 export { default as HTMLProvider, ProviderOption as HTMLProviderOption, ProviderResult as HTMLProviderResult } from './v1/html-provider-experimental'
+
+import JPNJIS8Tokenizer from './v2/tokenizer/jis8/locale/japan'
+
+console.log(new JPNJIS8Tokenizer());

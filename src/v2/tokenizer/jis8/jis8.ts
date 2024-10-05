@@ -77,7 +77,7 @@ export default abstract class JIS8Tokenizer {
     this.GR = GR;
     this.GB = GB;
     this.character_dicts = character_dicts;
-    this.drcs_dicts = drcs_dicts;
+    this.drcs_dicts = Object.assign({}, ... Object.entries(drcs_dicts).map(([key, value]) => [key, { ... value, dict: new Map<number, Uint8Array>() }]))
   }
 
   public tokenize(datagroup: ArrayBuffer) {
@@ -321,7 +321,7 @@ export default abstract class JIS8Tokenizer {
             break;
           }
           case CONTROL_CODES.MACRO: {
-            // TODO:
+            // TODO: いつかやる
             throw new Error('Not Implemeted!');
           }
           case CONTROL_CODES.HLC: {
