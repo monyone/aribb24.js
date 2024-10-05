@@ -1,11 +1,11 @@
-import CanvasRenderer from './canvas-renderer'
-import CanvasProvider from './canvas-provider'
-import SVGRenderer from './svg-renderer'
-import SVGProvider from './svg-provider'
-import HTMLRenderer from './html-renderer-experimental'
-import HTMLProvider from './html-provider-experimental'
+import CanvasRenderer from './v1/canvas-renderer'
+import CanvasProvider from './v1/canvas-provider'
+import SVGRenderer from './v1/svg-renderer'
+import SVGProvider from './v1/svg-provider'
+import HTMLRenderer from './v1/html-renderer-experimental'
+import HTMLProvider from './v1/html-provider-experimental'
 
-import EmbeddedGlyph from './constants/mapping/additional-symbols-glyph'
+import EmbeddedGlyph from './v1/constants/mapping/additional-symbols-glyph'
 CanvasProvider.setEmbeddedGlyph(EmbeddedGlyph);
 SVGProvider.setEmbeddedGlyph(EmbeddedGlyph);
 HTMLProvider.setEmbeddedGlyph(EmbeddedGlyph);
