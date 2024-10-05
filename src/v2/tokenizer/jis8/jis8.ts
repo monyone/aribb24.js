@@ -1,7 +1,7 @@
 import { ByteStream } from "../../util/bytestream";
 
 import type { AribToken } from '../token';
-import { ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, CharacterSizeControl, ClearScreen, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, Delete, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WritingModeModification, YellowForeground } from "../token";
+import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, Delete, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WritingModeModification, YellowForeground } from "../token";
 
 export const CONTROL_CODES = {
   NUL: 0x00,
@@ -58,6 +58,33 @@ export const ESC_CODES = {
   LS3R: 0x7c,
 } as const;
 
+export const CSI_CODE = {
+  GSM: 0x42,
+  SWF: 0x53,
+  CCC: 0x54,
+  SDF: 0x56,
+  SSM: 0x57,
+  SHS: 0x58,
+  SVS: 0x59,
+  PLD: 0x5b,
+  PLU: 0x5c,
+  GAA: 0x5d,
+  SRC: 0x5e,
+  SDP: 0x5f,
+  ACPS: 0x61,
+  TCC: 0x62,
+  ORN: 0x63,
+  MDF: 0x64,
+  CFS: 0x65,
+  XCS: 0x66,
+  SCR: 0x67,
+  PRA: 0x68,
+  ACS: 0x69,
+  UED: 0x6a,
+  RCS: 0x6e,
+  SCS: 0x6f,
+};
+
 export type CharacterDict = {
   type: 'Character',
   code: number;
@@ -92,346 +119,433 @@ export default abstract class JIS8Tokenizer {
     const stream = new ByteStream(datagroup);
     const result: AribToken[] = [];
 
-    try {
-      while (!stream.isEmpty()) {
-        if (0x20 < stream.peekU8() && stream.peekU8() < 0x7F) {
-          // GL
-          continue;
-        } else if (0xA0 < stream.peekU8() && stream.peekU8() < 0xFF) {
-          // GR
-          continue;
-        }
+    while (!stream.isEmpty()) {
+      if (0x20 < stream.peekU8() && stream.peekU8() < 0x7F) {
+        // GL
+        continue;
+      } else if (0xA0 < stream.peekU8() && stream.peekU8() < 0xFF) {
+        // GR
+        continue;
+      }
 
-        const control = stream.readU8() as (typeof CONTROL_CODES)[keyof typeof CONTROL_CODES];
-        switch (control) {
-          case CONTROL_CODES.NUL: {
-            result.push(Null.from());
-            break;
-          }
-          case CONTROL_CODES.BEL: {
-            result.push(Bell.from());
-            break;
-          }
-          case CONTROL_CODES.APB: {
-            result.push(ActivePositionBackward.from());
-            break;
-          }
-          case CONTROL_CODES.APF: {
-            result.push(ActivePositionForward.from());
-            break;
-          }
-          case CONTROL_CODES.APD: {
-            result.push(ActivePositionDown.from());
-            break;
-          }
-          case CONTROL_CODES.APU: {
-            result.push(ActivePositionUp.from());
-            break;
-          }
-          case CONTROL_CODES.CS: {
-            result.push(ClearScreen.from());
-            break;
-          }
-          case CONTROL_CODES.APR: {
-            result.push(ActivePositionReturn.from());
-            break;
-          }
-          case CONTROL_CODES.LS1: {
-            this.GL = 0
-            break;
-          }
-          case CONTROL_CODES.LS0: {
-            this.GL = 0;
-            break;
-          }
-          case CONTROL_CODES.PAPF: {
-            const x = stream.readU8() & 0x3F;
-            result.push(ParameterizedActivePositionForward.from(x));
-            break;
-          }
-          case CONTROL_CODES.CAN: {
-            result.push(Cancel.from());
-            break;
-          }
-          case CONTROL_CODES.SS2: {
-            // TODO:
-            break;
-          }
-          case CONTROL_CODES.ESC: {
-            const P1 = stream.readU8();
-            switch (P1) {
-              case ESC_CODES.LS2:
-                this.GL = 2;
-                break;
-              case ESC_CODES.LS3:
-                this.GL = 3;
-                break;
-              case ESC_CODES.LS1R:
-                this.GR = 1;
-                break;
-              case ESC_CODES.LS2R:
-                this.GR = 2;
-                break;
-              case ESC_CODES.LS3R:
-                this.GR = 3;
-                break;
-              case 0x24: {
-                const P2 = stream.readU8();
-                if (0x28 <= P2 && P2 <= 0x2B) {
-                  const P3 = stream.readU8();
-                  if (P3 === 0x20) {
-                    const P4 = stream.readU8();
-                    this.GB[P2 - 0x28] = Object.values(this.drcs_dicts).find(({ code }) => code === P4)!;
-                  } else {
-                    this.GB[P2 - 0x28] = Object.values(this.character_dicts).find(({ code }) => code === P3)!;
-                  }
+      const control = stream.readU8() as (typeof CONTROL_CODES)[keyof typeof CONTROL_CODES];
+      switch (control) {
+        case CONTROL_CODES.NUL: {
+          result.push(Null.from());
+          break;
+        }
+        case CONTROL_CODES.BEL: {
+          result.push(Bell.from());
+          break;
+        }
+        case CONTROL_CODES.APB: {
+          result.push(ActivePositionBackward.from());
+          break;
+        }
+        case CONTROL_CODES.APF: {
+          result.push(ActivePositionForward.from());
+          break;
+        }
+        case CONTROL_CODES.APD: {
+          result.push(ActivePositionDown.from());
+          break;
+        }
+        case CONTROL_CODES.APU: {
+          result.push(ActivePositionUp.from());
+          break;
+        }
+        case CONTROL_CODES.CS: {
+          result.push(ClearScreen.from());
+          break;
+        }
+        case CONTROL_CODES.APR: {
+          result.push(ActivePositionReturn.from());
+          break;
+        }
+        case CONTROL_CODES.LS1: {
+          this.GL = 0
+          break;
+        }
+        case CONTROL_CODES.LS0: {
+          this.GL = 0;
+          break;
+        }
+        case CONTROL_CODES.PAPF: {
+          const x = stream.readU8() & 0x3F;
+          result.push(ParameterizedActivePositionForward.from(x));
+          break;
+        }
+        case CONTROL_CODES.CAN: {
+          result.push(Cancel.from());
+          break;
+        }
+        case CONTROL_CODES.SS2: {
+          // TODO:
+          break;
+        }
+        case CONTROL_CODES.ESC: {
+          const P1 = stream.readU8();
+          switch (P1) {
+            case ESC_CODES.LS2:
+              this.GL = 2;
+              break;
+            case ESC_CODES.LS3:
+              this.GL = 3;
+              break;
+            case ESC_CODES.LS1R:
+              this.GR = 1;
+              break;
+            case ESC_CODES.LS2R:
+              this.GR = 2;
+              break;
+            case ESC_CODES.LS3R:
+              this.GR = 3;
+              break;
+            case 0x24: {
+              const P2 = stream.readU8();
+              if (0x28 <= P2 && P2 <= 0x2B) {
+                const P3 = stream.readU8();
+                if (P3 === 0x20) {
+                  const P4 = stream.readU8();
+                  this.GB[P2 - 0x28] = Object.values(this.drcs_dicts).find(({ code }) => code === P4)!;
                 } else {
-                  this.GB[0] = Object.values(this.character_dicts).find(({ code }) => code === P2)!;
+                  this.GB[P2 - 0x28] = Object.values(this.character_dicts).find(({ code }) => code === P3)!;
                 }
-              }
-              default: {
-                if (0x28 <= P1 && P1 <= 0x2B) {
-                  const P2 = stream.readU8();
-                  if (P2 === 0x20) {
-                    const P3 = stream.readU8();
-                    this.GB[P1 - 0x28] = Object.values(this.drcs_dicts).find(({ code }) => code === P3)!;
-                  } else {
-                    this.GB[P1 - 0x28] = Object.values(this.character_dicts).find(({ code }) => code === P2)!;
-                  }
-                }
+              } else {
+                this.GB[0] = Object.values(this.character_dicts).find(({ code }) => code === P2)!;
               }
             }
-            break;
-          }
-          case CONTROL_CODES.APS: {
-            const y = stream.readU8() & 0x3F;
-            const x = stream.readU8() & 0x3F;
-            result.push(ActivePositionSet.from(x, y));
-          }
-          case CONTROL_CODES.SS3: {
-            // TODO:
-            break;
-          }
-          case CONTROL_CODES.RS: {
-            result.push(RecordSeparator.from());
-            break;
-          }
-          case CONTROL_CODES.US: {
-            result.push(UnitSeparator.from());
-            break;
-          }
-          case CONTROL_CODES.SP: {
-            result.push(Space.from());
-            break;
-          }
-          case CONTROL_CODES.DEL: {
-            result.push(Delete.from());
-            break;
-          }
-          case CONTROL_CODES.BKF: {
-            result.push(BlackForeground.from());
-            break;
-          }
-          case CONTROL_CODES.RDF: {
-            result.push(RedForeground.from());
-            break;
-          }
-          case CONTROL_CODES.GRF: {
-            result.push(GreenForeground.from());
-            break;
-          }
-          case CONTROL_CODES.YLF: {
-            result.push(YellowForeground.from());
-            break;
-          }
-          case CONTROL_CODES.BLF: {
-            result.push(BlueForeground.from());
-            break;
-          }
-          case CONTROL_CODES.MGF: {
-            result.push(MagentaForeground.from());
-            break;
-          }
-          case CONTROL_CODES.CNF: {
-            result.push(CyanForeground.from());
-            break;
-          }
-          case CONTROL_CODES.WHF: {
-            result.push(MagentaForeground.from());
-            break;
-          }
-          case CONTROL_CODES.SSZ: {
-            result.push(SmallSize.from());
-            break;
-          }
-          case CONTROL_CODES.MSZ: {
-            result.push(MiddleSize.from());
-            break;
-          }
-          case CONTROL_CODES.NSZ: {
-            result.push(NormalSize.from());
-            break;
-          }
-          case CONTROL_CODES.SZX: {
-            const P1 = stream.readU8();
-            switch (P1) {
-              case 0x60: // Tiny
-              case 0x41: // Double Height
-              case 0x44: // Double Width
-              case 0x45: // Double Height And Width
-              case 0x6B: // Special 1
-              case 0x64: // Special 2
-                result.push(CharacterSizeControl.from(P1));
-                break;
+            default: {
+              if (0x28 <= P1 && P1 <= 0x2B) {
+                const P2 = stream.readU8();
+                if (P2 === 0x20) {
+                  const P3 = stream.readU8();
+                  this.GB[P1 - 0x28] = Object.values(this.drcs_dicts).find(({ code }) => code === P3)!;
+                } else {
+                  this.GB[P1 - 0x28] = Object.values(this.character_dicts).find(({ code }) => code === P2)!;
+                }
+              } else {
+                throw new Error(`Undefined ESC Code in STD-B24 ARIB Caption (0x${P1.toString(16)})`);
+              }
             }
-            break;
           }
-          case CONTROL_CODES.COL: {
-            const P1 = stream.readU8();
-            const color = P1 & 0x0F
-            switch (P1 & 0x70) {
-              case 0x20:
-                result.push(PalletControl.from(color));
-                break;
-              case 0x40:
-                result.push(ColorControlForeground.from(color));
-                break;
-              case 0x50:
-                result.push(ColorControlHalfBackground.from(color));
-                break;
-              case 0x60:
-                result.push(ColorControlHalfForeground.from(color));
-                break;
-              case 0x70:
-                result.push(ColorControlHalfBackground.from(color));
-                break;
+          break;
+        }
+        case CONTROL_CODES.APS: {
+          const y = stream.readU8() & 0x3F;
+          const x = stream.readU8() & 0x3F;
+          result.push(ActivePositionSet.from(x, y));
+        }
+        case CONTROL_CODES.SS3: {
+          // TODO:
+          break;
+        }
+        case CONTROL_CODES.RS: {
+          result.push(RecordSeparator.from());
+          break;
+        }
+        case CONTROL_CODES.US: {
+          result.push(UnitSeparator.from());
+          break;
+        }
+        case CONTROL_CODES.SP: {
+          result.push(Space.from());
+          break;
+        }
+        case CONTROL_CODES.DEL: {
+          result.push(Delete.from());
+          break;
+        }
+        case CONTROL_CODES.BKF: {
+          result.push(BlackForeground.from());
+          break;
+        }
+        case CONTROL_CODES.RDF: {
+          result.push(RedForeground.from());
+          break;
+        }
+        case CONTROL_CODES.GRF: {
+          result.push(GreenForeground.from());
+          break;
+        }
+        case CONTROL_CODES.YLF: {
+          result.push(YellowForeground.from());
+          break;
+        }
+        case CONTROL_CODES.BLF: {
+          result.push(BlueForeground.from());
+          break;
+        }
+        case CONTROL_CODES.MGF: {
+          result.push(MagentaForeground.from());
+          break;
+        }
+        case CONTROL_CODES.CNF: {
+          result.push(CyanForeground.from());
+          break;
+        }
+        case CONTROL_CODES.WHF: {
+          result.push(MagentaForeground.from());
+          break;
+        }
+        case CONTROL_CODES.SSZ: {
+          result.push(SmallSize.from());
+          break;
+        }
+        case CONTROL_CODES.MSZ: {
+          result.push(MiddleSize.from());
+          break;
+        }
+        case CONTROL_CODES.NSZ: {
+          result.push(NormalSize.from());
+          break;
+        }
+        case CONTROL_CODES.SZX: {
+          const P1 = stream.readU8();
+          switch (P1) {
+            case 0x60: // Tiny
+            case 0x41: // Double Height
+            case 0x44: // Double Width
+            case 0x45: // Double Height And Width
+            case 0x6B: // Special 1
+            case 0x64: // Special 2
+              result.push(CharacterSizeControl.from(P1));
+              break;
+          }
+          break;
+        }
+        case CONTROL_CODES.COL: {
+          const P1 = stream.readU8();
+          const color = P1 & 0x0F
+          switch (P1 & 0x70) {
+            case 0x20:
+              result.push(PalletControl.from(color));
+              break;
+            case 0x40:
+              result.push(ColorControlForeground.from(color));
+              break;
+            case 0x50:
+              result.push(ColorControlHalfBackground.from(color));
+              break;
+            case 0x60:
+              result.push(ColorControlHalfForeground.from(color));
+              break;
+            case 0x70:
+              result.push(ColorControlHalfBackground.from(color));
+              break;
+          }
+          break;
+        }
+        case CONTROL_CODES.FLC: {
+          const P1 = stream.readU8();
+          switch (P1) {
+            case 0x40: // NORMAL
+            case 0x47: // INVERTED
+            case 0x4F: // STOP
+              result.push(FlashingControl.from(P1));
+              break;
+          }
+          break;
+        }
+        case CONTROL_CODES.CDC: {
+          const P1 = stream.readU8();
+          if (P1 === 0x20) {
+            const P2 = stream.readU8();
+            switch (P2) {
+              case 0x40: // Simple
+              case 0x41: // 1st
+              case 0x42: // 2nd
+              case 0x43: // 3rd
+              case 0x44: // 4th
+              case 0x45: // 5th
+              case 0x46: // 6th
+              case 0x47: // 7th
+              case 0x48: // 8th
+              case 0x49: // 9th
+              case 0x4a: // 10th
+              case 0x4f: // Stop
+                result.push(ReplacingConcealmentMode.from(P2));
+                break
             }
-            break;
+          } else if (P1 === 0x40 || P1 === 0x4F) {
+            result.push(SingleConcealmentMode.from(P1));
           }
-          case CONTROL_CODES.FLC: {
-            const P1 = stream.readU8();
-            switch (P1) {
-              case 0x40: // NORMAL
-              case 0x47: // INVERTED
-              case 0x4F: // STOP
-                result.push(FlashingControl.from(P1));
-                break;
+          break;
+        }
+        case CONTROL_CODES.POL: {
+          const P1 = stream.readU8();
+          switch (P1) {
+            case 0x40:
+              result.push(PatternPolarityControl.from(P1));
+              break;
+            case 0x41:
+              result.push(PatternPolarityControl.from(P1));
+              break;
+            case 0x42:
+              result.push(PatternPolarityControl.from(P1));
+              break;
+          }
+          break;
+        }
+        case CONTROL_CODES.WMM: {
+          const P1 = stream.readU8();
+          switch (P1) {
+            case 0x40: // both
+            case 0x44: // foreground
+            case 0x45: // background
+              result.push(WritingModeModification.from(P1));
+              break;
+          }
+          break;
+        }
+        case CONTROL_CODES.MACRO: {
+          // TODO:
+          throw new Error('Not Implemeted!');
+        }
+        case CONTROL_CODES.HLC: {
+          const P1 = stream.readU8() & 0x0F;
+          result.push(HilightingCharacterBlock.from(P1));
+          break;
+        }
+        case CONTROL_CODES.RPC: {
+          const P1 = stream.readU8() & 0x3F;
+          result.push(RepeatCharacter.from(P1));
+          break;
+        }
+        case CONTROL_CODES.SPL: {
+          result.push(StopLining.from());
+          break;
+        }
+        case CONTROL_CODES.STL: {
+          result.push(StartLining.from());
+          break;
+        }
+        case CONTROL_CODES.CSI: {
+          const values: number[] = [0];
+          let F = 0;
+          while (!stream.isEmpty()) {
+            const x = stream.readU8();
+            if (x === 0x20 || x == 0x3b) {
+              values.push(0);
+            } else if ((x & 0x40) !== 0) {
+              F = x;
+              break;
             }
-            break;
+
+            values[values.length - 1] *= 10;
+            values[values.length - 1] += (stream.readU8() & 0x0F);
           }
-          case CONTROL_CODES.CDC: {
-            const P1 = stream.readU8();
-            if (P1 === 0x20) {
+
+          switch (F) {
+            case CSI_CODE.GSM:
+              // TODO:
+              break;
+            case CSI_CODE.SWF:
+              result.push(SetWritingFormat.from(values[0]));
+              break;
+            case CSI_CODE.CCC:
+              // TODO:
+              break;
+            case CSI_CODE.SDF:
+              result.push(SetDisplayFormat.from(values[0], values[1]));
+              break;
+            case CSI_CODE.SSM:
+              result.push(CharacterCompositionDotDesignation.from(values[0], values[1]));
+              break;
+            case CSI_CODE.SHS:
+              result.push(SetHorizontalSpacing.from(values[0]));
+              break;
+            case CSI_CODE.SVS:
+              result.push(SetVerticalSpacing.from(values[0]));
+              break;
+            case CSI_CODE.PLD:
+              // TODO:
+              break;
+            case CSI_CODE.PLU:
+              // TODO:
+              break;
+            case CSI_CODE.GAA:
+              // TODO:
+              break;
+            case CSI_CODE.SRC:
+              // TODO:
+              break;
+            case CSI_CODE.SDP:
+              result.push(SetDisplayPosition.from(values[0], values[1]));
+              break;
+            case CSI_CODE.ACPS:
+              result.push(ActiveCoordinatePositionSet.from(values[0], values[1]));
+              break;
+            case CSI_CODE.TCC:
+              // TODO:
+              break;
+            case CSI_CODE.ORN:
+              // TODO:
+              break;
+            case CSI_CODE.MDF:
+              // TODO:
+              break;
+            case CSI_CODE.CFS:
+              // TODO:
+              break;
+            case CSI_CODE.XCS:
+              // TODO:
+              break;
+            case CSI_CODE.SCR:
+              // TODO:
+              break;
+            case CSI_CODE.PRA:
+              // TODO:
+              break;
+            case CSI_CODE.ACS:
+              // TODO:
+              break;
+            case CSI_CODE.UED:
+              // TODO:
+              break;
+            case CSI_CODE.RCS:
+              // TODO:
+              break;
+            case CSI_CODE.SCS:
+              // TODO:
+              break;
+            default:
+              throw new Error(`Undefined CSI Code in STD-B24 ARIB Caption (0x${F.toString(16)})`);
+          }
+          break;
+        }
+        case CONTROL_CODES.TIME: {
+          const P1 = stream.readU8();
+          switch (P1) {
+            case 0x20: {
+              const time = (stream.readU8() & 0x3F) / 10
+              result.push(TimeControlWait.from(time));
+              break;
+            }
+            case 0x28: {
               const P2 = stream.readU8();
               switch (P2) {
-                case 0x40: // Simple
-                case 0x41: // 1st
-                case 0x42: // 2nd
-                case 0x43: // 3rd
-                case 0x44: // 4th
-                case 0x45: // 5th
-                case 0x46: // 6th
-                case 0x47: // 7th
-                case 0x48: // 8th
-                case 0x49: // 9th
-                case 0x4a: // 10th
-                case 0x4f: // Stop
-                  result.push(ReplacingConcealmentMode.from(P2));
-                  break
+                case 0x40: // FREE
+                case 0x41: // REAL
+                case 0x42: // OFFSET
+                case 0x43: // UNIQUE
+                  result.push(TimeControlMode.from(P2));
+                  break;
               }
-            } else if (P1 === 0x40 || P1 === 0x4F) {
-              result.push(SingleConcealmentMode.from(P1));
+              break;
             }
-            break;
-          }
-          case CONTROL_CODES.POL: {
-            const P1 = stream.readU8();
-            switch (P1) {
-              case 0x40:
-                result.push(PatternPolarityControl.from(P1));
-                break;
-              case 0x41:
-                result.push(PatternPolarityControl.from(P1));
-                break;
-              case 0x42:
-                result.push(PatternPolarityControl.from(P1));
-                break;
+            case 0x29: {
+              // FIXME: I can't understand this operation....
+              throw new Error('Not Implemeted!');
             }
-            break;
           }
-          case CONTROL_CODES.WMM: {
-            const P1 = stream.readU8();
-            switch (P1) {
-              case 0x40: // both
-              case 0x44: // foreground
-              case 0x45: // background
-                result.push(WritingModeModification.from(P1));
-                break;
-            }
-            break;
-          }
-          case CONTROL_CODES.MACRO: {
-            // TODO: いつかやる
-            throw new Error('Not Implemeted!');
-          }
-          case CONTROL_CODES.HLC: {
-            const P1 = stream.readU8() & 0x0F;
-            result.push(HilightingCharacterBlock.from(P1));
-            break;
-          }
-          case CONTROL_CODES.RPC: {
-            const P1 = stream.readU8() & 0x3F;
-            result.push(RepeatCharacter.from(P1));
-            break;
-          }
-          case CONTROL_CODES.SPL: {
-            result.push(StopLining.from());
-            break;
-          }
-          case CONTROL_CODES.STL: {
-            result.push(StartLining.from());
-            break;
-          }
-          case CONTROL_CODES.CSI: {
-            // TODO:
-            break;
-          }
-          case CONTROL_CODES.TIME: {
-            const P1 = stream.readU8();
-            switch (P1) {
-              case 0x20: {
-                const time = (stream.readU8() & 0x3F) / 10
-                result.push(TimeControlWait.from(time));
-                break;
-              }
-              case 0x28: {
-                const P2 = stream.readU8();
-                switch (P2) {
-                  case 0x40: // FREE
-                  case 0x41: // REAL
-                  case 0x42: // OFFSET
-                  case 0x43: // UNIQUE
-                    result.push(TimeControlMode.from(P2));
-                    break;
-                }
-                break;
-              }
-              case 0x29: {
-                // TODO: 意味わからんわ
-                throw new Error('Not Implemeted!');
-              }
-            }
-            break;
-          }
-          default: {
-            const exhaustive: never = control;
-            throw new Error(`Undefined Conrtol Code in STD-B24 ARIB Caption (0x${(exhaustive as number).toString(16)})`);
-          }
+          break;
+        }
+        default: {
+          const exhaustive: never = control;
+          throw new Error(`Undefined Conrtol Code in STD-B24 ARIB Caption (0x${(exhaustive as number).toString(16)})`);
         }
       }
-    } catch (e) {
-      console.error(e);
-      return [];
     }
 
     return result;

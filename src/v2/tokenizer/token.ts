@@ -482,9 +482,80 @@ export const TimeControlMode = {
   }
 }
 
-// TODO: OTHER TIME
 
-// TODO: CSI
+export type SetWritingFormat = {
+  tag: 'SetWritingFormat';
+  format: number;
+};
+export const SetWritingFormat = {
+  from(format: number): SetWritingFormat {
+    return ({ tag: 'SetWritingFormat', format })
+  }
+};
+
+export type SetDisplayFormat = {
+  tag: 'SetDisplayFormat';
+  horizontal: number;
+  vertical: number;
+};
+export const SetDisplayFormat = {
+  from(horizontal: number, vertical: number): SetDisplayFormat {
+    return ({ tag: 'SetDisplayFormat', horizontal, vertical })
+  }
+};
+
+export type SetDisplayPosition = {
+  tag: 'SetDisplayPosition';
+  horizontal: number;
+  vertical: number;
+};
+export const SetDisplayPosition = {
+  from(horizontal: number, vertical: number): SetDisplayPosition {
+    return ({ tag: 'SetDisplayPosition', horizontal, vertical })
+  }
+};
+
+export type CharacterCompositionDotDesignation = {
+  tag: 'CharacterCompositionDotDesignation';
+  horizontal: number;
+  vertical: number;
+};
+export const CharacterCompositionDotDesignation = {
+  from(horizontal: number, vertical: number): CharacterCompositionDotDesignation {
+    return ({ tag: 'CharacterCompositionDotDesignation', horizontal, vertical })
+  }
+};
+
+export type SetHorizontalSpacing = {
+  tag: 'SetHorizontalSpacing';
+  spacing: number;
+};
+export const SetHorizontalSpacing = {
+  from(spacing: number): SetHorizontalSpacing {
+    return ({ tag: 'SetHorizontalSpacing', spacing })
+  }
+};
+
+export type SetVerticalSpacing = {
+  tag: 'SetVerticalSpacing';
+  spacing: number;
+};
+export const SetVerticalSpacing = {
+  from(spacing: number): SetVerticalSpacing {
+    return ({ tag: 'SetVerticalSpacing', spacing })
+  }
+};
+
+export type ActiveCoordinatePositionSet = {
+  tag: 'ActiveCoordinatePositionSet';
+  x: number;
+  y: number;
+};
+export const ActiveCoordinatePositionSet = {
+  from(x: number, y: number): ActiveCoordinatePositionSet {
+    return ({ tag: 'ActiveCoordinatePositionSet', x, y })
+  }
+};
 
 export type AribToken =
   // 文字
@@ -535,4 +606,13 @@ export type AribToken =
   StartLining |
   StopLining |
   TimeControlWait |
-  TimeControlMode;
+  TimeControlMode |
+  // 制御符号 (CSI)
+  SetWritingFormat |
+  SetDisplayFormat |
+  SetDisplayPosition |
+  CharacterCompositionDotDesignation |
+  SetHorizontalSpacing |
+  SetVerticalSpacing |
+  ActiveCoordinatePositionSet;
+
