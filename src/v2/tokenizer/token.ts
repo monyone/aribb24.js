@@ -130,6 +130,24 @@ export const ActivePositionSet = {
   }
 }
 
+export type RecordSeparator = {
+  tag: 'RecordSeparator';
+};
+export const RecordSeparator = {
+  from(): RecordSeparator {
+    return ({ tag: 'RecordSeparator' });
+  }
+}
+
+export type UnitSeparator = {
+  tag: 'UnitSeparator';
+};
+export const UnitSeparator = {
+  from(): UnitSeparator {
+    return ({ tag: 'UnitSeparator' });
+  }
+}
+
 export type Space = { // SP
   tag: 'Space';
 }
@@ -220,6 +238,51 @@ export const WhiteForeground = {
   }
 }
 
+export type SmallSize = { // SSZ
+  tag: 'SmallSize';
+};
+export const SmallSize = {
+  from(): SmallSize {
+    return ({ tag: 'SmallSize' });
+  }
+}
+
+export type MiddleSize = { // MSZ
+  tag: 'MiddleSize';
+};
+export const MiddleSize = {
+  from(): MiddleSize {
+    return ({ tag: 'MiddleSize' });
+  }
+}
+
+export type NormalSize = { // NSZ
+  tag: 'NormalSize';
+};
+export const NormalSize = {
+  from(): NormalSize {
+    return ({ tag: 'NormalSize' });
+  }
+}
+
+export const CharacterSizeControlType = {
+  TINY: 0x60,
+  DOUBLE_HEIGHT: 0x41,
+  DOUBLE_WIDTH: 0x44,
+  DOUBLE_HEIGHT_AND_WIDTH: 0x45,
+  SPECIAL_1: 0x6b,
+  SPECIAL_2: 0x64,
+} as const;
+export type CharacterSizeControl = {
+  tag: 'CharacterSizeControl';
+  type: (typeof CharacterSizeControlType)[keyof typeof CharacterSizeControlType];
+};
+export const CharacterSizeControl = {
+  from(type: (typeof CharacterSizeControlType)[keyof typeof CharacterSizeControlType]): CharacterSizeControl {
+    return ({ tag: 'CharacterSizeControl', type });
+  }
+};
+
 export type ColorControlForeground = {
   tag: 'ColorControlForeground';
   color: number; // 8 ~ 15
@@ -266,144 +329,162 @@ export type PalletControl = {
 };
 export const PalletControl = {
   from(pallet: number): PalletControl {
-    return ({ tag: 'PalletControl' , pallet });
+    return ({ tag: 'PalletControl', pallet });
   }
 }
 
-export type PatternPolarityControlNormal = {
-  tag: 'PatternPolarityControlNormal';
+export const FlashingControlType = {
+  NORMAL: 0x40,
+  INVERTED: 0x47,
+  STOP: 0x4F,
+} as const;
+export type FlashingControl = {
+  tag: 'FlashingControl';
+  type: (typeof FlashingControlType)[keyof typeof FlashingControlType];
+}
+export const FlashingControl = {
+  from(type: (typeof FlashingControlType)[keyof typeof FlashingControlType]): FlashingControl {
+    return ({ tag: 'FlashingControl', type });
+  }
+}
+
+export const SingleConcealmentModeType = {
+  START: 0x40,
+  STOP: 0x4F,
+} as const;
+export type SingleConcealmentMode = {
+  tag: 'SingleConcealmentMode';
+  type: (typeof SingleConcealmentModeType)[keyof typeof SingleConcealmentModeType];
 };
-export const PatternPolarityControlNormal = {
-  from(): PatternPolarityControlNormal {
-    return ({ tag: 'PatternPolarityControlNormal' });
+export const SingleConcealmentMode = {
+  from(type: (typeof SingleConcealmentModeType)[keyof typeof SingleConcealmentModeType]): SingleConcealmentMode {
+    return ({ tag: 'SingleConcealmentMode', type });
   }
-}
-
-export type PatternPolarityControlInverted1 = {
-  tag: 'PatternPolarityControlInverted1';
 };
-export const PatternPolarityControlInverted1 = {
-  from(): PatternPolarityControlInverted1 {
-    return ({ tag: 'PatternPolarityControlInverted1' });
-  }
-}
 
-export type PatternPolarityControlInverted2 = {
-  tag: 'PatternPolarityControlInverted2';
+export const ReplacingConcealmentModeType = {
+  START: 0x40,
+  FIRST: 0x41,
+  SECOND: 0x42,
+  THIRD: 0x43,
+  FOURTH: 0x44,
+  FIFTH: 0x45,
+  SIXTH: 0x46,
+  SEVENTH: 0x47,
+  EIGHTH: 0x48,
+  NINTH: 0x49,
+  TENTH: 0x4a,
+  STOP: 0x4F,
+} as const;
+export type ReplacingConcealmentMode = {
+  tag: 'ReplacingConcealmentMode';
+  type: (typeof ReplacingConcealmentModeType)[keyof typeof ReplacingConcealmentModeType];
 };
-export const PatternPolarityControlInverted2 = {
-  from(): PatternPolarityControlInverted2 {
-    return ({ tag: 'PatternPolarityControlInverted2' });
+export const ReplacingConcealmentMode = {
+  from(type: (typeof ReplacingConcealmentModeType)[keyof typeof ReplacingConcealmentModeType]): ReplacingConcealmentMode {
+    return ({ tag: 'ReplacingConcealmentMode', type });
   }
-}
-
-export type SmallSize = { // SSZ
-  tag: 'SmallSize';
 };
-export const SmallSize = {
-  from(): SmallSize {
-    return ({ tag: 'SmallSize' });
-  }
-}
 
-export type MiddleSize = { // MSZ
-  tag: 'MiddleSize';
+export const PatternPolarityControlType = {
+  NORMAL: 0x40,
+  INVERTED_1: 0x41,
+  INVERTED_2: 0x42,
+} as const;
+export type PatternPolarityControl = {
+  tag: 'PatternPolarityControl';
+  type: (typeof PatternPolarityControlType)[keyof typeof PatternPolarityControlType]
 };
-export const MiddleSize = {
-  from(): MiddleSize {
-    return ({ tag: 'MiddleSize' });
+export const PatternPolarityControl = {
+  from(type: (typeof PatternPolarityControlType)[keyof typeof PatternPolarityControlType]): PatternPolarityControl {
+    return ({ tag: 'PatternPolarityControl', type});
   }
-}
-
-export type NormalSize = { // NSZ
-  tag: 'NormalSize';
 };
-export const NormalSize = {
-  from(): NormalSize {
-    return ({ tag: 'NormalSize' });
-  }
-}
 
-export type TinySize = { // SZX
-  tag: 'TinySize';
+export const WritingModeModificationType = {
+  BOTH: 0x40,
+  FOREGROUND: 0x44,
+  BACKGROUND: 0x45
+} as const;
+export type WritingModeModification = {
+  tag: 'WritingModeModification';
+  type: (typeof WritingModeModificationType)[keyof typeof WritingModeModificationType];
 };
-export const TinySize = {
-  from(): TinySize {
-    return ({ tag: 'TinySize' });
+export const WritingModeModification = {
+  from(type: (typeof WritingModeModificationType)[keyof typeof WritingModeModificationType]): WritingModeModification {
+    return ({ tag: 'WritingModeModification', type });
   }
-}
-
-export type DoubleHeightSize = { // SZX
-  tag: 'DoubleHeightSize';
 };
-export const DoubleHeightSize = {
-  from(): DoubleHeightSize {
-    return ({ tag: 'DoubleHeightSize' });
-  }
-}
 
-export type DoubleWidthSize = { // SZX
-  tag: 'DoubleWidthSize';
+// TODO: MACRO
+
+export type HilightingCharacterBlock = {
+  tag: 'HilightingCharacterBlock';
+  enclosure: number;
 };
-export const DoubleWidthSize = {
-  from(): DoubleWidthSize {
-    return ({ tag: 'DoubleWidthSize' });
+export const HilightingCharacterBlock = {
+  from(enclosure: number): HilightingCharacterBlock {
+    return ({ tag: 'HilightingCharacterBlock', enclosure });
   }
 }
 
-export type DoubleHeightAndWidthSize = { // SZX
-  tag: 'DoubleHeightAndWidthSize';
+export type RepeatCharacter = {
+  tag: 'RepeatCharacter';
+  repeat: number;
 };
-export const DoubleHeightAndWidthSize = {
-  from(): DoubleHeightAndWidthSize {
-    return ({ tag: 'DoubleHeightAndWidthSize' });
+export const RepeatCharacter = {
+  from(repeat: number): RepeatCharacter {
+    return ({ tag: 'RepeatCharacter', repeat });
   }
 }
 
-export type Special1Size = { // SZX
-  tag: 'Special1Size';
+export type StartLining = {
+  tag: 'StartLining';
+}
+export const StartLining = {
+  from(): StartLining {
+    return ({ tag: 'StartLining' });
+  }
+}
+
+export type StopLining = {
+  tag: 'StopLining';
+}
+export const StopLining = {
+  from(): StopLining {
+    return ({ tag: 'StopLining' });
+  }
+}
+
+export type TimeControlWait = {
+  tag: 'TimeControlWait';
+  seconds: number;
 };
-export const Special1Size = {
-  from(): Special1Size {
-    return ({ tag: 'Special1Size' });
+export const TimeControlWait = {
+  from(seconds: number): TimeControlWait {
+    return ({ tag: 'TimeControlWait', seconds });
   }
 }
 
-export type Special2Size = { // SZX
-  tag: 'Special2Size';
-};
-export const Special2Size = {
-  from(): Special2Size {
-    return ({ tag: 'Special2Size' });
+export const TimeControlModeType = {
+  FREE: 0x40,
+  REAL: 0x41,
+  OFFSET: 0x42,
+  UNIQUE: 0x43,
+} as const;
+export type TimeControlMode = {
+  tag: 'TimeControlMode';
+  type: (typeof TimeControlModeType)[keyof typeof TimeControlModeType];
+}
+export const TimeControlMode = {
+  from(type: (typeof TimeControlModeType)[keyof typeof TimeControlModeType]): TimeControlMode {
+    return ({ tag: 'TimeControlMode', type })
   }
 }
 
-export type FlashingControlNormal = { // FLC
-  tag: 'FlashingControlNormal';
-}
-export const FlashingControlNormal = {
-  from(): FlashingControlNormal {
-    return ({ tag: 'FlashingControlNormal' });
-  }
-}
+// TODO: OTHER TIME
 
-export type FlashingControlInverted = { // FLC
-  tag: 'FlashingControlInverted';
-}
-export const FlashingControlInverted = {
-  from(): FlashingControlInverted {
-    return ({ tag: 'FlashingControlInverted' });
-  }
-}
-
-export type FlashingControlStop = { // FLC
-  tag: 'FlashingControlStop';
-}
-export const FlashingControlStop = {
-  from(): FlashingControlStop {
-    return ({ tag: 'FlashingControlStop' });
-  }
-}
+// TODO: CSI
 
 export type AribToken =
   // 文字
@@ -422,6 +503,8 @@ export type AribToken =
   ParameterizedActivePositionForward |
   Cancel |
   ActivePositionSet |
+  RecordSeparator |
+  UnitSeparator |
   Space |
   // 制御符号 (C1)
   Delete |
@@ -433,23 +516,23 @@ export type AribToken =
   MagentaForeground |
   CyanForeground |
   WhiteForeground |
+  SmallSize |
+  MiddleSize |
+  NormalSize |
+  CharacterSizeControl |
   ColorControlForeground |
   ColorControlBackground |
   ColorControlHalfForeground |
   ColorControlHalfBackground |
   PalletControl |
-  PatternPolarityControlNormal |
-  PatternPolarityControlInverted1 |
-  PatternPolarityControlInverted2 |
-  SmallSize |
-  MiddleSize |
-  NormalSize |
-  TinySize |
-  DoubleHeightSize |
-  DoubleWidthSize |
-  DoubleHeightAndWidthSize |
-  Special1Size |
-  Special2Size |
-  FlashingControlNormal |
-  FlashingControlInverted |
-  FlashingControlStop;
+  FlashingControl |
+  SingleConcealmentMode |
+  ReplacingConcealmentMode |
+  PatternPolarityControl |
+  WritingModeModification |
+  HilightingCharacterBlock |
+  RepeatCharacter |
+  StartLining |
+  StopLining |
+  TimeControlWait |
+  TimeControlMode;
