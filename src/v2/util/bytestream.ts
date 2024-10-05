@@ -1,5 +1,3 @@
-import concat from "./concat";
-
 export class ByteStream {
   private view: DataView;
   private offset: number;
