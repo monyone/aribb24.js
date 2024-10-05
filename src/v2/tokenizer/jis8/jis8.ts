@@ -50,6 +50,14 @@ export const CONTROL_CODES = {
   TIME: 0x9d,
 } as const;
 
+export const ESC_CODES = {
+  LS2: 0x6e,
+  LS3: 0x6f,
+  LS1R: 0x7e,
+  LS2R: 0x7d,
+  LS3R: 0x7c,
+} as const;
+
 export type CharacterDict = {
   type: 'Character',
   code: number;
@@ -150,7 +158,49 @@ export default abstract class JIS8Tokenizer {
             break;
           }
           case CONTROL_CODES.ESC: {
-            // TODO:
+            const P1 = stream.readU8();
+            switch (P1) {
+              case ESC_CODES.LS2:
+                this.GL = 2;
+                break;
+              case ESC_CODES.LS3:
+                this.GL = 3;
+                break;
+              case ESC_CODES.LS1R:
+                this.GR = 1;
+                break;
+              case ESC_CODES.LS2R:
+                this.GR = 2;
+                break;
+              case ESC_CODES.LS3R:
+                this.GR = 3;
+                break;
+              case 0x24: {
+                const P2 = stream.readU8();
+                if (0x28 <= P2 && P2 <= 0x2B) {
+                  const P3 = stream.readU8();
+                  if (P3 === 0x20) {
+                    const P4 = stream.readU8();
+                    this.GB[P2 - 0x28] = Object.values(this.drcs_dicts).find(({ code }) => code === P4)!;
+                  } else {
+                    this.GB[P2 - 0x28] = Object.values(this.character_dicts).find(({ code }) => code === P3)!;
+                  }
+                } else {
+                  this.GB[0] = Object.values(this.character_dicts).find(({ code }) => code === P2)!;
+                }
+              }
+              default: {
+                if (0x28 <= P1 && P1 <= 0x2B) {
+                  const P2 = stream.readU8();
+                  if (P2 === 0x20) {
+                    const P3 = stream.readU8();
+                    this.GB[P1 - 0x28] = Object.values(this.drcs_dicts).find(({ code }) => code === P3)!;
+                  } else {
+                    this.GB[P1 - 0x28] = Object.values(this.character_dicts).find(({ code }) => code === P2)!;
+                  }
+                }
+              }
+            }
             break;
           }
           case CONTROL_CODES.APS: {
