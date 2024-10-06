@@ -1,3 +1,4 @@
+import { ARIBB24Parser } from "../../parser/index";
 import { ARIBB24Token } from "../../tokenizer/token";
 
 import ARIBB24Renderer from "./renderer";
@@ -17,6 +18,9 @@ export default abstract class ARIBB24CanvasRenderer implements ARIBB24Renderer {
     this.canvas.style.width = '100%';
     this.canvas.style.height = '100%';
     this.canvas.style.objectFit = 'contain';
+
+    this.canvas.width = 1920;
+    this.canvas.height = 1080;
   }
 
   public resize(width: number, height: number): void {
@@ -49,5 +53,4 @@ export default abstract class ARIBB24CanvasRenderer implements ARIBB24Renderer {
   public onseeking(): void {
     this.clear();
   }
-
 }

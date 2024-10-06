@@ -124,7 +124,7 @@ export default abstract class JIS8Tokenizer {
     this.GR = GR;
     this.GB = GB;
     this.character_dicts = character_dicts;
-    this.drcs_dicts = Object.assign({}, ... Object.entries(drcs_dicts).map(([key, value]) => [key, { ... value, dict: new Map<number, DRCS | ArrayBuffer>(value.dict.entries()) }]))
+    this.drcs_dicts = structuredClone(drcs_dicts);
   }
 
   public tokenize(units: DataUnit[]): ARIBB24Token[] {
@@ -339,6 +339,7 @@ export default abstract class JIS8Tokenizer {
           const y = stream.readU8() & 0x3F;
           const x = stream.readU8() & 0x3F;
           result.push(ActivePositionSet.from(x, y));
+          break;
         }
         case CONTROL_CODES.SS3: {
           let code = 0;
@@ -702,7 +703,6 @@ export default abstract class JIS8Tokenizer {
           const bits = (depth * 0b00011101) >> 5; // De Brujin Sequence in 8 bit
           const length = Math.floor(width * height * bits / 8);
           const binary = uint8.slice(begin + 4, begin + 4 + length).buffer;
-          console.log(bits);
 
           if (bytes === 1) {
             const index = (CharacterCode & 0xFF00) >> 8;
