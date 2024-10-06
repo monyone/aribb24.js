@@ -9,3 +9,4 @@ export { default as HTMLProvider, ProviderOption as HTMLProviderOption, Provider
 
 export { default as ARIBB24Controller } from './v2/runtime/controller/controller';
 export { default as ARIBB24MPEGTSFeeder } from './v2/runtime/feeder/mpegts-feeder';
+export { default as ARIBB24CanvasMainThreadRenderer } from './v2/runtime/renderer/canvas-renderer-main';

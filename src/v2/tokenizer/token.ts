@@ -560,7 +560,7 @@ export const ActiveCoordinatePositionSet = {
   }
 };
 
-export type AribToken =
+export type ARIBB24Token =
   // 文字
   Character |
   Mosaic |

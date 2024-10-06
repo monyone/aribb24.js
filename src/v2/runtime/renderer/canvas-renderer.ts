@@ -1,4 +1,4 @@
-import { ARIBB24FeederTokenizedData } from "../feeder/feeder";
+import { ARIBB24Token } from "../../tokenizer/token";
 
 import ARIBB24Renderer from "./renderer";
 import { ARIBB24RenderOption } from "./renderer-option";
@@ -26,7 +26,11 @@ export default abstract class ARIBB24CanvasRenderer implements ARIBB24Renderer {
     this.canvas.height = height;
   }
 
-  public abstract render(render: ARIBB24FeederTokenizedData): void;
+  public destroy(): void {
+    this.resize(0, 0);
+  }
+
+  public abstract render(tokens: ARIBB24Token[]): void;
   public abstract clear(): void;
 
   public onattach(element: HTMLElement): void {
@@ -37,11 +41,13 @@ export default abstract class ARIBB24CanvasRenderer implements ARIBB24Renderer {
     element.removeChild(this.canvas);
   }
 
+  public onresize(tokens: ARIBB24Token[]): void {
+    this.clear();
+    this.render(tokens);
+  }
+
   public onseeking(): void {
     this.clear();
   }
 
-  public destroy(): void {
-    this.resize(0, 0);
-  }
 }

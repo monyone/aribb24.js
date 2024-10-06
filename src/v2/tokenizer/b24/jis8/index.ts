@@ -1,7 +1,7 @@
 import { ByteStream } from "../../../util/bytestream";
 import { DataUnit } from "../datagroup";
 
-import type { AribToken } from '../../token';
+import type { ARIBB24Token } from '../../token';
 import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, Delete, DRCS, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, YellowForeground } from "../../token";
 
 export const CONTROL_CODES = {
@@ -127,8 +127,8 @@ export default abstract class JIS8Tokenizer {
     this.drcs_dicts = Object.assign({}, ... Object.entries(drcs_dicts).map(([key, value]) => [key, { ... value, dict: new Map<number, DRCS | ArrayBuffer>(value.dict.entries()) }]))
   }
 
-  public tokenize(units: DataUnit[]): AribToken[] {
-    const result: AribToken[] = [];
+  public tokenize(units: DataUnit[]): ARIBB24Token[] {
+    const result: ARIBB24Token[] = [];
     for (const unit of units) {
       switch (unit.tag) {
         case 'Statement':
@@ -143,9 +143,9 @@ export default abstract class JIS8Tokenizer {
     return result;
   }
 
-  protected tokenizeStatement(arraybuffer: ArrayBuffer): AribToken[] {
+  protected tokenizeStatement(arraybuffer: ArrayBuffer): ARIBB24Token[] {
     const stream = new ByteStream(arraybuffer);
-    const result: AribToken[] = [];
+    const result: ARIBB24Token[] = [];
 
     while (!stream.isEmpty()) {
       if (0x20 < stream.peekU8() && stream.peekU8() < 0x7F) {

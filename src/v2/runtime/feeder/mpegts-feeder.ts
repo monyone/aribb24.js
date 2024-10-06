@@ -1,7 +1,7 @@
 import AVLTree from '../../util/avl';
 
 import ARIBB24Feeder, { ARIBB24FeederOption, ARIBB24FeederRawData, ARIBB24FeederTokenizedData } from './feeder';
-import extractPES from '../../tokenizer/mpegts/extract';
+import extractPES from '../../tokenizer/b24/mpegts/extract';
 import extractDatagroup from '../../tokenizer/b24/datagroup'
 import JPNJIS8Tokenizer from '../../tokenizer/b24/jis8/japan/index';
 
