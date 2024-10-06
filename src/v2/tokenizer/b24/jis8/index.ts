@@ -2,7 +2,7 @@ import { ByteStream } from "../../../util/bytestream";
 import { DataUnit } from "../datagroup";
 
 import type { AribToken } from '../../token';
-import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, Delete, DRCS, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WritingModeModification, YellowForeground } from "../../token";
+import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, Delete, DRCS, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, YellowForeground } from "../../token";
 
 export const CONTROL_CODES = {
   NUL: 0x00,
@@ -135,7 +135,7 @@ export default abstract class JIS8Tokenizer {
           result.push(... this.tokenizeStatement(unit.data));
           break;
         case 'DRCS':
-          this.tokenizeDRCS(unit.data);
+          this.tokenizeDRCS(unit.bytes, unit.data);
           break;
       }
     }
@@ -414,7 +414,7 @@ export default abstract class JIS8Tokenizer {
           break;
         }
         case CONTROL_CODES.WHF: {
-          result.push(MagentaForeground.from());
+          result.push(WhiteForeground.from());
           break;
         }
         case CONTROL_CODES.SSZ: {
@@ -681,7 +681,50 @@ export default abstract class JIS8Tokenizer {
     return result;
   }
 
-  protected tokenizeDRCS(arraybuffer: ArrayBuffer): void {
+  protected tokenizeDRCS(bytes: 1 | 2, arraybuffer: ArrayBuffer): void {
+    const uint8 = new Uint8Array(arraybuffer);
+    let begin = 0, end = uint8.byteLength;
+    const NumberOfCode = uint8[begin + 0];
+    begin += 1
+    while (begin < end){
+      const CharacterCode = (uint8[begin + 0] << 8) | uint8[begin + 1];
+      const NumberOfFont = uint8[begin + 2];
+      begin += 3
 
+      for (let font = 0; font < NumberOfFont; font++) {
+        const fontId = (uint8[begin + 0] & 0xF0) >> 4
+        const mode = (uint8[begin + 0] & 0x0F)
+
+        if (mode === 0 || mode === 1) { // FIXME: Other Mode Not Supported
+          const depth = uint8[begin + 1] + 2;
+          const width = uint8[begin + 2];
+          const height = uint8[begin + 3];
+          const bits = (depth * 0b00011101) >> 5; // De Brujin Sequence in 8 bit
+          const length = Math.floor(width * height * bits / 8);
+          const binary = uint8.slice(begin + 4, begin + 4 + length).buffer;
+          console.log(bits);
+
+          if (bytes === 1) {
+            const index = (CharacterCode & 0xFF00) >> 8;
+            const ch = (CharacterCode & 0x00FF) & 0x7F;
+
+            const entry = Object.values(this.drcs_dicts).find((value) => value.code === index);
+            if (entry == null || entry.type !== 'DRCS') { continue };
+
+            entry.dict.set(ch, DRCS.from(width, height, bits, binary));
+          }else{
+            const index = 0x40;
+            const ch = CharacterCode & 0x7F7F;
+
+            const entry = Object.values(this.drcs_dicts).find((value) => value.code === index);
+            if (entry == null || entry.type !== 'DRCS') { continue };
+
+            entry.dict.set(ch, DRCS.from(width, height, bits, binary));
+          }
+
+          begin += 4 + length
+        }
+      }
+    }
   }
 }
