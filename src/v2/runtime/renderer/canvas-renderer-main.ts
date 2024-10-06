@@ -32,7 +32,6 @@ export default class ARIBB24CanvasMainThreadRenderer extends ARIBB24CanvasRender
 
             // background
             context.fillStyle = colortable[state.background];
-            console.log(colortable[state.background])
             context.fillRect(
               state.margin[0] + state.position[0],
               state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.height(state),
@@ -45,6 +44,18 @@ export default class ARIBB24CanvasMainThreadRenderer extends ARIBB24CanvasRender
             context.translate(center_x, center_y);
             context.scale(ARIBB24Parser.width_maginification(state), ARIBB24Parser.height_maginification(state));
 
+            // orn
+            if (state.ornament) {
+              context.font = `${state.fontsize[0]}px sans-serif`;
+              context.strokeStyle = colortable[state.ornament];
+              context.lineJoin = 'round';
+              context.textBaseline = 'middle';
+              context.textAlign = 'center';
+              context.lineWidth = 4;
+              context.strokeText(character, 0, 0);
+            }
+
+            // text
             context.font = `${state.fontsize[0]}px sans-serif`;
             context.fillStyle = colortable[state.foreground];
             context.textBaseline = 'middle';
