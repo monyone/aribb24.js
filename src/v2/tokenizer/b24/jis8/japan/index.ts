@@ -1,5 +1,6 @@
+import { DRCS } from "../../../token";
 import ascii from "../ascii";
-import JIS8Tokenizer from "../jis8";
+import JIS8Tokenizer from "../index";
 import hiragana from "./hiragana";
 import katakana from "./katakana";
 import symbol_pua from "./symbol-pua";
@@ -45,22 +46,22 @@ const JPN_NORMAL_DICTS = {
 
 // DRCS
 const JPN_DRCS_DICTS = {
-  DRCS_0: { type: 'DRCS', code: 0x40, bytes: 2, dict: new Map<number, ArrayBuffer>() },
-  DRCS_1: { type: 'DRCS', code: 0x41, bytes: 1, dict: new Map<number, ArrayBuffer>() },
-  DRCS_2: { type: 'DRCS', code: 0x42, bytes: 1, dict: new Map<number, ArrayBuffer>() },
-  DRCS_3: { type: 'DRCS', code: 0x43, bytes: 1, dict: new Map<number, ArrayBuffer>() },
-  DRCS_4: { type: 'DRCS', code: 0x44, bytes: 1, dict: new Map<number, ArrayBuffer>() },
-  DRCS_5: { type: 'DRCS', code: 0x45, bytes: 1, dict: new Map<number, ArrayBuffer>() },
-  DRCS_6: { type: 'DRCS', code: 0x46, bytes: 1, dict: new Map<number, ArrayBuffer>() },
-  DRCS_7: { type: 'DRCS', code: 0x47, bytes: 1, dict: new Map<number, ArrayBuffer>() },
-  DRCS_8: { type: 'DRCS', code: 0x48, bytes: 1, dict: new Map<number, ArrayBuffer>() },
-  DRCS_9: { type: 'DRCS', code: 0x49, bytes: 1, dict: new Map<number, ArrayBuffer>() },
-  DRCS_10: { type: 'DRCS', code: 0x4a, bytes: 1, dict: new Map<number, ArrayBuffer>() },
-  DRCS_11: { type: 'DRCS', code: 0x4b, bytes: 1, dict: new Map<number, ArrayBuffer>() },
-  DRCS_12: { type: 'DRCS', code: 0x4c, bytes: 1, dict: new Map<number, ArrayBuffer>() },
-  DRCS_13: { type: 'DRCS', code: 0x4d, bytes: 1, dict: new Map<number, ArrayBuffer>() },
-  DRCS_14: { type: 'DRCS', code: 0x4e, bytes: 1, dict: new Map<number, ArrayBuffer>() },
-  DRCS_15: { type: 'DRCS', code: 0x4f, bytes: 1, dict: new Map<number, ArrayBuffer>() },
+  DRCS_0: { type: 'DRCS', code: 0x40, bytes: 2, dict: new Map<number, DRCS>() },
+  DRCS_1: { type: 'DRCS', code: 0x41, bytes: 1, dict: new Map<number, DRCS>() },
+  DRCS_2: { type: 'DRCS', code: 0x42, bytes: 1, dict: new Map<number, DRCS>() },
+  DRCS_3: { type: 'DRCS', code: 0x43, bytes: 1, dict: new Map<number, DRCS>() },
+  DRCS_4: { type: 'DRCS', code: 0x44, bytes: 1, dict: new Map<number, DRCS>() },
+  DRCS_5: { type: 'DRCS', code: 0x45, bytes: 1, dict: new Map<number, DRCS>() },
+  DRCS_6: { type: 'DRCS', code: 0x46, bytes: 1, dict: new Map<number, DRCS>() },
+  DRCS_7: { type: 'DRCS', code: 0x47, bytes: 1, dict: new Map<number, DRCS>() },
+  DRCS_8: { type: 'DRCS', code: 0x48, bytes: 1, dict: new Map<number, DRCS>() },
+  DRCS_9: { type: 'DRCS', code: 0x49, bytes: 1, dict: new Map<number, DRCS>() },
+  DRCS_10: { type: 'DRCS', code: 0x4a, bytes: 1, dict: new Map<number, DRCS>() },
+  DRCS_11: { type: 'DRCS', code: 0x4b, bytes: 1, dict: new Map<number, DRCS>() },
+  DRCS_12: { type: 'DRCS', code: 0x4c, bytes: 1, dict: new Map<number, DRCS>() },
+  DRCS_13: { type: 'DRCS', code: 0x4d, bytes: 1, dict: new Map<number, DRCS>() },
+  DRCS_14: { type: 'DRCS', code: 0x4e, bytes: 1, dict: new Map<number, DRCS>() },
+  DRCS_15: { type: 'DRCS', code: 0x4f, bytes: 1, dict: new Map<number, DRCS>() },
   MACRO: { type: 'MACRO', code: 0x70, bytes: 1, dict: MACRO },
 } as const;
 

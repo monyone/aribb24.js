@@ -1,8 +1,9 @@
 import AVLTree from '../../util/avl';
 
 import ARIBB24Feeder, { ARIBB24FeederOption, ARIBB24FeederRawData, ARIBB24FeederTokenizedData } from './feeder';
-import parsePES from '../../tokenizer/pes/index';
-import JPNJIS8Tokenizer from '../../tokenizer/b24/jis8/locale/japan';
+import extractPES from '../../tokenizer/mpegts/extract';
+import extractDatagroup from '../../tokenizer/b24/datagroup'
+import JPNJIS8Tokenizer from '../../tokenizer/b24/jis8/japan/index';
 
 
 const compare = (a: number, b: number) => {
@@ -65,37 +66,24 @@ export default class ARIBB24MPEGTSFeeder implements ARIBB24Feeder {
     while (!this.isDestroyed) {
       for await (const { pts, data } of this.generator(this.abortController.signal)) {
         // TODO: FIXME: NEED* 個々のロジックは外部に出す
-        const parsed = parsePES(data);
-        if (!parsed) { continue; }
+        const datagroup = extractPES(data);
+        if (datagroup == null) { continue; }
+        if (datagroup.tag === 'Superimpose') { continue; } // TODO!
 
-        if (parsed.tag === 'Superimpose') { continue; } // TODO!
-
-        const caption = parsed.content;
+        const caption = extractDatagroup(datagroup.data);
+        if (caption == null) { continue; }
         if (caption.tag === 'CaptionManagement') { // TODO!
           continue;
         }
-        for (const unit of caption.units) {
-          switch (unit.tag) {
-            case 'Statement': {
-              const tokenizer = new JPNJIS8Tokenizer();
-              break;
-            }
-            case 'DRCS':
-              break;
-            default: {
-              const _: never = unit;
-              throw new Error(`Undefined DataUnit in STD-B24)`);
-            }
-          }
-        }
 
-        //this.present.insert(pts, { pts: });
+        const tokenizer = new JPNJIS8Tokenizer();
+        this.present.insert(pts, { pts, data: tokenizer.tokenize(caption.units) });
       }
     }
   }
 
   public feed(data: ArrayBuffer, pts: number, dts: number, timescale: number) {
-    this.decode.insert(pts / timescale, { pts, data });
+    this.decode.insert(pts / timescale, { pts: pts / timescale , data });
   }
 
   public content(time: number): ARIBB24FeederTokenizedData | null {

@@ -1,4 +1,4 @@
-import { AribToken } from "../../tokenizer/b24/token";
+import { AribToken } from "../../tokenizer/token";
 
 export type ARIBB24FeederOption = {
   timeshift: number

@@ -4,7 +4,7 @@ export type Character = {
 };
 export const Character = {
   from(character: string): Character {
-    return ({ tag: 'Character', character });
+    return { tag: 'Character', character };
   }
 }
 
@@ -14,17 +14,20 @@ export type Mosaic = {
 };
 export const Mosaic = {
   from(): Mosaic {
-    return ({ tag: 'Mosaic' });
+    return { tag: 'Mosaic' };
   }
 }
 
 export type DRCS = {
   tag: 'DRCS';
-  drcs: ArrayBuffer;
+  width: number;
+  height: number;
+  depth: number;
+  binary: ArrayBuffer;
 };
 export const DRCS = {
-  from(drcs: ArrayBuffer): DRCS {
-    return ({ tag: 'DRCS', drcs });
+  from(width: number, height: number, depth: number, binary: ArrayBuffer): DRCS {
+    return { tag: 'DRCS', width, height, depth, binary };
   }
 }
 
@@ -33,7 +36,7 @@ export type Null = { // NUL
 };
 export const Null = {
   from(): Null {
-    return ({ tag: 'Null' });
+    return { tag: 'Null' };
   }
 }
 
@@ -42,7 +45,7 @@ export type Bell = { // BEL
 };
 export const Bell = {
   from(): Bell {
-    return ({ tag: 'Bell' });
+    return { tag: 'Bell' };
   }
 }
 
@@ -51,7 +54,7 @@ export type ActivePositionBackward = { // APB
 };
 export const ActivePositionBackward = {
   from(): ActivePositionBackward {
-    return ({ tag: 'ActivePositionBackward' });
+    return { tag: 'ActivePositionBackward' };
   }
 }
 
@@ -60,7 +63,7 @@ export type ActivePositionForward = { // APF
 };
 export const ActivePositionForward = {
   from(): ActivePositionForward {
-    return ({ tag: 'ActivePositionForward' });
+    return { tag: 'ActivePositionForward' };
   }
 }
 
@@ -69,7 +72,7 @@ export type ActivePositionDown = { // APD
 };
 export const ActivePositionDown = {
   from(): ActivePositionDown {
-    return ({ tag: 'ActivePositionDown' });
+    return { tag: 'ActivePositionDown' };
   }
 }
 
@@ -78,7 +81,7 @@ export type ActivePositionUp = { // APU
 };
 export const ActivePositionUp = {
   from(): ActivePositionUp {
-    return ({ tag: 'ActivePositionUp' });
+    return { tag: 'ActivePositionUp' };
   }
 }
 
@@ -87,7 +90,7 @@ export type ClearScreen = { // CS
 };
 export const ClearScreen = {
   from(): ClearScreen {
-    return ({ tag: 'ClearScreen' });
+    return { tag: 'ClearScreen' };
   }
 }
 
@@ -96,7 +99,7 @@ export type ActivePositionReturn = { // APR
 };
 export const ActivePositionReturn = {
   from(): ActivePositionReturn {
-    return ({ tag: 'ActivePositionReturn' });
+    return { tag: 'ActivePositionReturn' };
   }
 }
 
@@ -106,7 +109,7 @@ export type ParameterizedActivePositionForward = { // PAPF
 }
 export const ParameterizedActivePositionForward = {
   from(x: number): ParameterizedActivePositionForward {
-    return ({ tag: 'ParameterizedActivePositionForward', x });
+    return { tag: 'ParameterizedActivePositionForward', x };
   }
 }
 
@@ -115,7 +118,7 @@ export type Cancel = { // CAN
 };
 export const Cancel = {
   from(): Cancel {
-    return ({ tag: 'Cancel' });
+    return { tag: 'Cancel' };
   }
 }
 
@@ -126,7 +129,7 @@ export type ActivePositionSet = { // APS
 }
 export const ActivePositionSet = {
   from(x: number, y: number): ActivePositionSet {
-    return ({ tag: 'ActivePositionSet', x, y });
+    return { tag: 'ActivePositionSet', x, y };
   }
 }
 
@@ -135,7 +138,7 @@ export type RecordSeparator = {
 };
 export const RecordSeparator = {
   from(): RecordSeparator {
-    return ({ tag: 'RecordSeparator' });
+    return { tag: 'RecordSeparator' };
   }
 }
 
@@ -144,7 +147,7 @@ export type UnitSeparator = {
 };
 export const UnitSeparator = {
   from(): UnitSeparator {
-    return ({ tag: 'UnitSeparator' });
+    return { tag: 'UnitSeparator' };
   }
 }
 
@@ -153,7 +156,7 @@ export type Space = { // SP
 }
 export const Space = {
   from(): Space {
-    return ({ tag: 'Space' });
+    return { tag: 'Space' };
   }
 }
 
@@ -162,7 +165,7 @@ export type Delete = { // DEL
 };
 export const Delete = {
   from(): Delete {
-    return ({ tag: 'Delete' });
+    return { tag: 'Delete' };
   }
 }
 
@@ -171,7 +174,7 @@ export type BlackForeground = { // BKF
 };
 export const BlackForeground = {
   from(): BlackForeground {
-    return ({ tag: 'BlackForeground' });
+    return { tag: 'BlackForeground' };
   }
 }
 
@@ -180,7 +183,7 @@ export type RedForeground = { // RDF
 };
 export const RedForeground = {
   from(): RedForeground {
-    return ({ tag: 'RedForeground' });
+    return { tag: 'RedForeground' };
   }
 }
 
@@ -189,7 +192,7 @@ export type GreenForeground = { // GRF
 };
 export const GreenForeground = {
   from(): GreenForeground {
-    return ({ tag: 'GreenForeground' });
+    return { tag: 'GreenForeground' };
   }
 }
 
@@ -198,7 +201,7 @@ export type YellowForeground = { // YLF
 };
 export const YellowForeground = {
   from(): YellowForeground {
-    return ({ tag: 'YellowForeground' });
+    return { tag: 'YellowForeground' };
   }
 }
 
@@ -207,7 +210,7 @@ export type BlueForeground = { // BLF
 };
 export const BlueForeground = {
   from(): BlueForeground {
-    return ({ tag: 'BlueForeground' });
+    return { tag: 'BlueForeground' };
   }
 }
 
@@ -216,7 +219,7 @@ export type MagentaForeground = { // MGF
 };
 export const MagentaForeground = {
   from(): MagentaForeground {
-    return ({ tag: 'MagentaForeground' });
+    return { tag: 'MagentaForeground' };
   }
 }
 
@@ -225,7 +228,7 @@ export type CyanForeground = { // CNF
 };
 export const CyanForeground = {
   from(): CyanForeground {
-    return ({ tag: 'CyanForeground' });
+    return { tag: 'CyanForeground' };
   }
 }
 
@@ -234,7 +237,7 @@ export type WhiteForeground = { // WHF
 };
 export const WhiteForeground = {
   from(): WhiteForeground {
-    return ({ tag: 'WhiteForeground' });
+    return { tag: 'WhiteForeground' };
   }
 }
 
@@ -243,7 +246,7 @@ export type SmallSize = { // SSZ
 };
 export const SmallSize = {
   from(): SmallSize {
-    return ({ tag: 'SmallSize' });
+    return { tag: 'SmallSize' };
   }
 }
 
@@ -252,7 +255,7 @@ export type MiddleSize = { // MSZ
 };
 export const MiddleSize = {
   from(): MiddleSize {
-    return ({ tag: 'MiddleSize' });
+    return { tag: 'MiddleSize' };
   }
 }
 
@@ -261,7 +264,7 @@ export type NormalSize = { // NSZ
 };
 export const NormalSize = {
   from(): NormalSize {
-    return ({ tag: 'NormalSize' });
+    return { tag: 'NormalSize' };
   }
 }
 
@@ -279,7 +282,7 @@ export type CharacterSizeControl = {
 };
 export const CharacterSizeControl = {
   from(type: (typeof CharacterSizeControlType)[keyof typeof CharacterSizeControlType]): CharacterSizeControl {
-    return ({ tag: 'CharacterSizeControl', type });
+    return { tag: 'CharacterSizeControl', type };
   }
 };
 
@@ -289,7 +292,7 @@ export type ColorControlForeground = {
 };
 export const ColorControlForeground = {
   from(color: number): ColorControlForeground {
-    return ({ tag: 'ColorControlForeground', color });
+    return { tag: 'ColorControlForeground', color };
   }
 }
 
@@ -299,7 +302,7 @@ export type ColorControlBackground = {
 };
 export const ColorControlBackground = {
   from(color: number): ColorControlBackground {
-    return ({ tag: 'ColorControlBackground', color });
+    return { tag: 'ColorControlBackground', color };
   }
 }
 
@@ -309,7 +312,7 @@ export type ColorControlHalfForeground = {
 };
 export const ColorControlHalfForeground = {
   from(color: number): ColorControlHalfForeground {
-    return ({ tag: 'ColorControlHalfForeground', color });
+    return { tag: 'ColorControlHalfForeground', color };
   }
 }
 
@@ -319,7 +322,7 @@ export type ColorControlHalfBackground = {
 };
 export const ColorControlHalfBackground = {
   from(color: number): ColorControlHalfBackground {
-    return ({ tag: 'ColorControlHalfBackground', color });
+    return { tag: 'ColorControlHalfBackground', color };
   }
 }
 
@@ -329,7 +332,7 @@ export type PalletControl = {
 };
 export const PalletControl = {
   from(pallet: number): PalletControl {
-    return ({ tag: 'PalletControl', pallet });
+    return { tag: 'PalletControl', pallet };
   }
 }
 
@@ -344,7 +347,7 @@ export type FlashingControl = {
 }
 export const FlashingControl = {
   from(type: (typeof FlashingControlType)[keyof typeof FlashingControlType]): FlashingControl {
-    return ({ tag: 'FlashingControl', type });
+    return { tag: 'FlashingControl', type };
   }
 }
 
@@ -358,7 +361,7 @@ export type SingleConcealmentMode = {
 };
 export const SingleConcealmentMode = {
   from(type: (typeof SingleConcealmentModeType)[keyof typeof SingleConcealmentModeType]): SingleConcealmentMode {
-    return ({ tag: 'SingleConcealmentMode', type });
+    return { tag: 'SingleConcealmentMode', type };
   }
 };
 
@@ -382,7 +385,7 @@ export type ReplacingConcealmentMode = {
 };
 export const ReplacingConcealmentMode = {
   from(type: (typeof ReplacingConcealmentModeType)[keyof typeof ReplacingConcealmentModeType]): ReplacingConcealmentMode {
-    return ({ tag: 'ReplacingConcealmentMode', type });
+    return { tag: 'ReplacingConcealmentMode', type };
   }
 };
 
@@ -397,7 +400,7 @@ export type PatternPolarityControl = {
 };
 export const PatternPolarityControl = {
   from(type: (typeof PatternPolarityControlType)[keyof typeof PatternPolarityControlType]): PatternPolarityControl {
-    return ({ tag: 'PatternPolarityControl', type});
+    return { tag: 'PatternPolarityControl', type};
   }
 };
 
@@ -412,7 +415,7 @@ export type WritingModeModification = {
 };
 export const WritingModeModification = {
   from(type: (typeof WritingModeModificationType)[keyof typeof WritingModeModificationType]): WritingModeModification {
-    return ({ tag: 'WritingModeModification', type });
+    return { tag: 'WritingModeModification', type };
   }
 };
 
@@ -424,7 +427,7 @@ export type HilightingCharacterBlock = {
 };
 export const HilightingCharacterBlock = {
   from(enclosure: number): HilightingCharacterBlock {
-    return ({ tag: 'HilightingCharacterBlock', enclosure });
+    return { tag: 'HilightingCharacterBlock', enclosure };
   }
 }
 
@@ -434,7 +437,7 @@ export type RepeatCharacter = {
 };
 export const RepeatCharacter = {
   from(repeat: number): RepeatCharacter {
-    return ({ tag: 'RepeatCharacter', repeat });
+    return { tag: 'RepeatCharacter', repeat };
   }
 }
 
@@ -443,7 +446,7 @@ export type StartLining = {
 }
 export const StartLining = {
   from(): StartLining {
-    return ({ tag: 'StartLining' });
+    return { tag: 'StartLining' };
   }
 }
 
@@ -452,7 +455,7 @@ export type StopLining = {
 }
 export const StopLining = {
   from(): StopLining {
-    return ({ tag: 'StopLining' });
+    return { tag: 'StopLining' };
   }
 }
 
@@ -462,7 +465,7 @@ export type TimeControlWait = {
 };
 export const TimeControlWait = {
   from(seconds: number): TimeControlWait {
-    return ({ tag: 'TimeControlWait', seconds });
+    return { tag: 'TimeControlWait', seconds };
   }
 }
 
@@ -478,7 +481,7 @@ export type TimeControlMode = {
 }
 export const TimeControlMode = {
   from(type: (typeof TimeControlModeType)[keyof typeof TimeControlModeType]): TimeControlMode {
-    return ({ tag: 'TimeControlMode', type })
+    return { tag: 'TimeControlMode', type }
   }
 }
 
@@ -489,7 +492,7 @@ export type SetWritingFormat = {
 };
 export const SetWritingFormat = {
   from(format: number): SetWritingFormat {
-    return ({ tag: 'SetWritingFormat', format })
+    return { tag: 'SetWritingFormat', format }
   }
 };
 
@@ -500,7 +503,7 @@ export type SetDisplayFormat = {
 };
 export const SetDisplayFormat = {
   from(horizontal: number, vertical: number): SetDisplayFormat {
-    return ({ tag: 'SetDisplayFormat', horizontal, vertical })
+    return { tag: 'SetDisplayFormat', horizontal, vertical }
   }
 };
 
@@ -511,7 +514,7 @@ export type SetDisplayPosition = {
 };
 export const SetDisplayPosition = {
   from(horizontal: number, vertical: number): SetDisplayPosition {
-    return ({ tag: 'SetDisplayPosition', horizontal, vertical })
+    return { tag: 'SetDisplayPosition', horizontal, vertical }
   }
 };
 
@@ -522,7 +525,7 @@ export type CharacterCompositionDotDesignation = {
 };
 export const CharacterCompositionDotDesignation = {
   from(horizontal: number, vertical: number): CharacterCompositionDotDesignation {
-    return ({ tag: 'CharacterCompositionDotDesignation', horizontal, vertical })
+    return { tag: 'CharacterCompositionDotDesignation', horizontal, vertical }
   }
 };
 
@@ -532,7 +535,7 @@ export type SetHorizontalSpacing = {
 };
 export const SetHorizontalSpacing = {
   from(spacing: number): SetHorizontalSpacing {
-    return ({ tag: 'SetHorizontalSpacing', spacing })
+    return { tag: 'SetHorizontalSpacing', spacing }
   }
 };
 
@@ -542,7 +545,7 @@ export type SetVerticalSpacing = {
 };
 export const SetVerticalSpacing = {
   from(spacing: number): SetVerticalSpacing {
-    return ({ tag: 'SetVerticalSpacing', spacing })
+    return { tag: 'SetVerticalSpacing', spacing }
   }
 };
 
@@ -553,7 +556,7 @@ export type ActiveCoordinatePositionSet = {
 };
 export const ActiveCoordinatePositionSet = {
   from(x: number, y: number): ActiveCoordinatePositionSet {
-    return ({ tag: 'ActiveCoordinatePositionSet', x, y })
+    return { tag: 'ActiveCoordinatePositionSet', x, y }
   }
 };
 

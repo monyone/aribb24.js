@@ -115,12 +115,6 @@ class AVLTreeNode<K, V> implements AVLTreeNodeInterface<K, V> {
     return (this.left?.depth ?? 0) - (this.right?.depth ?? 0);
   }
 
-  public toString(): string {
-    if (this.left) { console.log(this.left.parent === this ? 'OK': `NG`); }
-    if (this.right) { console.log(this.right.parent === this ? 'OK': 'NG'); }
-    return `[${JSON.stringify(this.key)}:${JSON.stringify(this.value)}, [${this.left}, ${this.right}]]`;
-  }
-
   public leftmost(): AVLTreeNode<K, V> {
     if (this.left == null) { return this; }
     return this.left.leftmost();

@@ -1,7 +1,8 @@
 import { ByteStream } from "../../../util/bytestream";
+import { DataUnit } from "../datagroup";
 
-import type { AribToken } from '../token';
-import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, Delete, DRCS, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WritingModeModification, YellowForeground } from "../token";
+import type { AribToken } from '../../token';
+import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, Delete, DRCS, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WritingModeModification, YellowForeground } from "../../token";
 
 export const CONTROL_CODES = {
   NUL: 0x00,
@@ -85,44 +86,65 @@ export const CSI_CODE = {
   SCS: 0x6f,
 };
 
-export type CharacterDict = {
-  type: 'Character',
+export const DictEntryType = {
+  Character: 'Character',
+  DRCS: 'DRCS',
+  MACRO: 'MACRO',
+} as const;
+export type CharacterDictEntry = {
+  type: (typeof DictEntryType.Character),
   code: number;
   bytes: number;
   dict: Map<number, string>
 };
-export type DRCSDict = {
-  type: 'DRCS',
+export type DRCSDictEntry = {
+  type: (typeof DictEntryType.DRCS),
   code: number;
   bytes: number;
-  dict: Map<number, ArrayBuffer>
+  dict: Map<number, DRCS>
 };
-export type MacroDict = {
-  type: 'MACRO',
+export type MacroDictEntry = {
+  type: (typeof DictEntryType.MACRO),
   code: number;
   bytes: number;
   dict: Map<number, ArrayBuffer>
 };
 
-export type Dict = CharacterDict | DRCSDict | MacroDict;
+export type DictEntry = CharacterDictEntry | DRCSDictEntry | MacroDictEntry;
 
 export default abstract class JIS8Tokenizer {
   private GL: 0 | 1 | 2 | 3;
   private GR: 0 | 1 | 2 | 3;
-  private GB: [Dict, Dict, Dict, Dict];
-  private character_dicts: Record<string, CharacterDict>;
-  private drcs_dicts: Record<string, DRCSDict>;
+  private GB: [DictEntry, DictEntry, DictEntry, DictEntry];
+  private character_dicts: Record<string, CharacterDictEntry>;
+  private drcs_dicts: Record<string, DRCSDictEntry | MacroDictEntry>;
 
-  public constructor(GL: 0 | 1 | 2 | 3, GR: 0 | 1 | 2 | 3, GB: [Dict, Dict, Dict, Dict], character_dicts: Record<string, CharacterDict>, drcs_dicts: Record<string, DRCSDict | MacroDict>) {
+  public constructor(GL: 0 | 1 | 2 | 3, GR: 0 | 1 | 2 | 3, GB: [DictEntry, DictEntry, DictEntry, DictEntry], character_dicts: Record<string, CharacterDictEntry>, drcs_dicts: Record<string, DRCSDictEntry | MacroDictEntry>) {
     this.GL = GL;
     this.GR = GR;
     this.GB = GB;
     this.character_dicts = character_dicts;
-    this.drcs_dicts = Object.assign({}, ... Object.entries(drcs_dicts).map(([key, value]) => [key, { ... value, dict: new Map<number, ArrayBuffer>(Array.from(value.dict.entries())) }]))
+    this.drcs_dicts = Object.assign({}, ... Object.entries(drcs_dicts).map(([key, value]) => [key, { ... value, dict: new Map<number, DRCS | ArrayBuffer>(value.dict.entries()) }]))
   }
 
-  public tokenize(datagroup: ArrayBuffer) {
-    const stream = new ByteStream(datagroup);
+  public tokenize(units: DataUnit[]): AribToken[] {
+    const result: AribToken[] = [];
+    for (const unit of units) {
+      switch (unit.tag) {
+        case 'Statement':
+          result.push(... this.tokenizeStatement(unit.data));
+          break;
+        case 'DRCS':
+          this.tokenizeDRCS(unit.data);
+          break;
+      }
+    }
+
+    return result;
+  }
+
+  protected tokenizeStatement(arraybuffer: ArrayBuffer): AribToken[] {
+    const stream = new ByteStream(arraybuffer);
     const result: AribToken[] = [];
 
     while (!stream.isEmpty()) {
@@ -140,10 +162,13 @@ export default abstract class JIS8Tokenizer {
             if (dict.has(code)) { result.push(Character.from(dict.get(code)!)); }
             break;
           case 'DRCS':
-            if (dict.has(code)) { result.push(DRCS.from(dict.get(code)!)); }
+            if (dict.has(code)) {
+              const { width, height, depth, binary } = dict.get(code)!;
+              result.push(DRCS.from(width, height, depth, binary));
+            }
             break;
           case 'MACRO':
-            if (dict.has(code)) { this.tokenize(dict.get(code)!); }
+            if (dict.has(code)) { result.push(... this.tokenizeStatement(dict.get(code)!)); }
             break;
           default:
             const exhaustive: never = type;
@@ -164,10 +189,13 @@ export default abstract class JIS8Tokenizer {
             if (dict.has(code)) { result.push(Character.from(dict.get(code)!)); }
             break;
           case 'DRCS':
-            if (dict.has(code)) { result.push(DRCS.from(dict.get(code)!)); }
+            if (dict.has(code)) {
+              const { width, height, depth, binary } = dict.get(code)!;
+              result.push(DRCS.from(width, height, depth, binary));
+            }
             break;
           case 'MACRO':
-            if (dict.has(code)) { this.tokenize(dict.get(code)!); }
+            if (dict.has(code)) { result.push(... this.tokenizeStatement(dict.get(code)!)); }
             break;
           default:
             const exhaustive: never = type;
@@ -242,10 +270,13 @@ export default abstract class JIS8Tokenizer {
               if (dict.has(code)) { result.push(Character.from(dict.get(code)!)); }
               break;
             case 'DRCS':
-              if (dict.has(code)) { result.push(DRCS.from(dict.get(code)!)); }
+              if (dict.has(code)) {
+                const { width, height, depth, binary } = dict.get(code)!;
+                result.push(DRCS.from(width, height, depth, binary));
+              }
               break;
             case 'MACRO':
-              if (dict.has(code)) { this.tokenize(dict.get(code)!); }
+              if (dict.has(code)) { result.push(... this.tokenizeStatement(dict.get(code)!)); }
               break;
             default:
               const exhaustive: never = type;
@@ -323,10 +354,13 @@ export default abstract class JIS8Tokenizer {
               if (dict.has(code)) { result.push(Character.from(dict.get(code)!)); }
               break;
             case 'DRCS':
-              if (dict.has(code)) { result.push(DRCS.from(dict.get(code)!)); }
+              if (dict.has(code)) {
+                const { width, height, depth, binary } = dict.get(code)!;
+                result.push(DRCS.from(width, height, depth, binary));
+              }
               break;
             case 'MACRO':
-              if (dict.has(code)) { this.tokenize(dict.get(code)!); }
+              if (dict.has(code)) { result.push(... this.tokenizeStatement(dict.get(code)!)); }
               break;
             default:
               const exhaustive: never = type;
@@ -645,5 +679,9 @@ export default abstract class JIS8Tokenizer {
     }
 
     return result;
+  }
+
+  protected tokenizeDRCS(arraybuffer: ArrayBuffer): void {
+
   }
 }
