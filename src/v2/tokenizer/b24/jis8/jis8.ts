@@ -1,7 +1,7 @@
-import { ByteStream } from "../../util/bytestream";
+import { ByteStream } from "../../../util/bytestream";
 
 import type { AribToken } from '../token';
-import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, Delete, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WritingModeModification, YellowForeground } from "../token";
+import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, Delete, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WritingModeModification, YellowForeground } from "../token";
 
 export const CONTROL_CODES = {
   NUL: 0x00,
@@ -122,9 +122,11 @@ export default abstract class JIS8Tokenizer {
     while (!stream.isEmpty()) {
       if (0x20 < stream.peekU8() && stream.peekU8() < 0x7F) {
         // GL
+        stream.readU8();
         continue;
       } else if (0xA0 < stream.peekU8() && stream.peekU8() < 0xFF) {
         // GR
+        stream.readU8();
         continue;
       }
 
@@ -319,13 +321,13 @@ export default abstract class JIS8Tokenizer {
           const color = P1 & 0x0F
           switch (P1 & 0x70) {
             case 0x20:
-              result.push(PalletControl.from(color));
+              result.push(PalletControl.from(stream.readU8() & 0x0F));
               break;
             case 0x40:
               result.push(ColorControlForeground.from(color));
               break;
             case 0x50:
-              result.push(ColorControlHalfBackground.from(color));
+              result.push(ColorControlBackground.from(color));
               break;
             case 0x60:
               result.push(ColorControlHalfForeground.from(color));
@@ -427,13 +429,15 @@ export default abstract class JIS8Tokenizer {
             const x = stream.readU8();
             if (x === 0x20 || x == 0x3b) {
               values.push(0);
+              continue;
             } else if ((x & 0x40) !== 0) {
               F = x;
               break;
             }
 
             values[values.length - 1] *= 10;
-            values[values.length - 1] += (stream.readU8() & 0x0F);
+            values[values.length - 1] += (x & 0x0F);
+            console.log(values);
           }
 
           switch (F) {

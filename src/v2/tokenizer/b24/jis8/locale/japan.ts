@@ -1,4 +1,4 @@
-import kanji from "../../../../v1/constants/mapping/kanji";
+import kanji from "../../../../../v1/constants/mapping/kanji";
 import ascii from "../ascii";
 import JIS8Tokenizer from "../jis8";
 import hiragana from "./hiragana";
