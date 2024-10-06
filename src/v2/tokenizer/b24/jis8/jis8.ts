@@ -1,7 +1,7 @@
 import { ByteStream } from "../../../util/bytestream";
 
 import type { AribToken } from '../token';
-import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, Delete, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WritingModeModification, YellowForeground } from "../token";
+import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, Delete, DRCS, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WritingModeModification, YellowForeground } from "../token";
 
 export const CONTROL_CODES = {
   NUL: 0x00,
@@ -95,10 +95,16 @@ export type DRCSDict = {
   type: 'DRCS',
   code: number;
   bytes: number;
-  dict: Map<number, Uint8Array>
+  dict: Map<number, ArrayBuffer>
+};
+export type MacroDict = {
+  type: 'MACRO',
+  code: number;
+  bytes: number;
+  dict: Map<number, ArrayBuffer>
 };
 
-export type Dict = CharacterDict | DRCSDict;
+export type Dict = CharacterDict | DRCSDict | MacroDict;
 
 export default abstract class JIS8Tokenizer {
   private GL: 0 | 1 | 2 | 3;
@@ -107,12 +113,12 @@ export default abstract class JIS8Tokenizer {
   private character_dicts: Record<string, CharacterDict>;
   private drcs_dicts: Record<string, DRCSDict>;
 
-  public constructor(GL: 0 | 1 | 2 | 3, GR: 0 | 1 | 2 | 3, GB: [Dict, Dict, Dict, Dict], character_dicts: Record<string, CharacterDict>, drcs_dicts: Record<string, DRCSDict>) {
+  public constructor(GL: 0 | 1 | 2 | 3, GR: 0 | 1 | 2 | 3, GB: [Dict, Dict, Dict, Dict], character_dicts: Record<string, CharacterDict>, drcs_dicts: Record<string, DRCSDict | MacroDict>) {
     this.GL = GL;
     this.GR = GR;
     this.GB = GB;
     this.character_dicts = character_dicts;
-    this.drcs_dicts = Object.assign({}, ... Object.entries(drcs_dicts).map(([key, value]) => [key, { ... value, dict: new Map<number, Uint8Array>() }]))
+    this.drcs_dicts = Object.assign({}, ... Object.entries(drcs_dicts).map(([key, value]) => [key, { ... value, dict: new Map<number, ArrayBuffer>(Array.from(value.dict.entries())) }]))
   }
 
   public tokenize(datagroup: ArrayBuffer) {
@@ -121,12 +127,53 @@ export default abstract class JIS8Tokenizer {
 
     while (!stream.isEmpty()) {
       if (0x20 < stream.peekU8() && stream.peekU8() < 0x7F) {
-        // GL
-        stream.readU8();
+        let code = 0;
+        for (let i = 0; i < this.GB[this.GL].bytes; i++) {
+          code <<= 8;
+          code |= (stream.readU8() & 0x7F);
+        }
+
+        const { type, dict } = this.GB[this.GL];
+
+        switch (type) {
+          case 'Character':
+            if (dict.has(code)) { result.push(Character.from(dict.get(code)!)); }
+            break;
+          case 'DRCS':
+            if (dict.has(code)) { result.push(DRCS.from(dict.get(code)!)); }
+            break;
+          case 'MACRO':
+            if (dict.has(code)) { this.tokenize(dict.get(code)!); }
+            break;
+          default:
+            const exhaustive: never = type;
+            throw new Error(`Undefined Dict Type in STD-B24 ARIB Caption (${exhaustive})`);
+        }
+
         continue;
       } else if (0xA0 < stream.peekU8() && stream.peekU8() < 0xFF) {
-        // GR
-        stream.readU8();
+        let code = 0;
+        for (let i = 0; i < this.GB[this.GR].bytes; i++) {
+          code <<= 8;
+          code |= (stream.readU8() & 0x7F);
+        }
+
+        const { type, dict } = this.GB[this.GR];
+        switch (type) {
+          case 'Character':
+            if (dict.has(code)) { result.push(Character.from(dict.get(code)!)); }
+            break;
+          case 'DRCS':
+            if (dict.has(code)) { result.push(DRCS.from(dict.get(code)!)); }
+            break;
+          case 'MACRO':
+            if (dict.has(code)) { this.tokenize(dict.get(code)!); }
+            break;
+          default:
+            const exhaustive: never = type;
+            throw new Error(`Undefined Dict Type in STD-B24 ARIB Caption (${exhaustive})`);
+        }
+
         continue;
       }
 
@@ -165,7 +212,7 @@ export default abstract class JIS8Tokenizer {
           break;
         }
         case CONTROL_CODES.LS1: {
-          this.GL = 0
+          this.GL = 1;
           break;
         }
         case CONTROL_CODES.LS0: {
@@ -182,7 +229,29 @@ export default abstract class JIS8Tokenizer {
           break;
         }
         case CONTROL_CODES.SS2: {
-          // TODO:
+          let code = 0;
+          for (let i = 0; i < this.GB[2].bytes; i++) {
+            code <<= 8;
+            code |= (stream.readU8() & 0x7F);
+          }
+
+          const { type, dict } = this.GB[2];
+
+          switch (type) {
+            case 'Character':
+              if (dict.has(code)) { result.push(Character.from(dict.get(code)!)); }
+              break;
+            case 'DRCS':
+              if (dict.has(code)) { result.push(DRCS.from(dict.get(code)!)); }
+              break;
+            case 'MACRO':
+              if (dict.has(code)) { this.tokenize(dict.get(code)!); }
+              break;
+            default:
+              const exhaustive: never = type;
+              throw new Error(`Undefined Dict Type in STD-B24 ARIB Caption (${exhaustive})`);
+          }
+
           break;
         }
         case CONTROL_CODES.ESC: {
@@ -216,6 +285,7 @@ export default abstract class JIS8Tokenizer {
               } else {
                 this.GB[0] = Object.values(this.character_dicts).find(({ code }) => code === P2)!;
               }
+              break;
             }
             default: {
               if (0x28 <= P1 && P1 <= 0x2B) {
@@ -229,6 +299,7 @@ export default abstract class JIS8Tokenizer {
               } else {
                 throw new Error(`Undefined ESC Code in STD-B24 ARIB Caption (0x${P1.toString(16)})`);
               }
+              break;
             }
           }
           break;
@@ -239,7 +310,29 @@ export default abstract class JIS8Tokenizer {
           result.push(ActivePositionSet.from(x, y));
         }
         case CONTROL_CODES.SS3: {
-          // TODO:
+          let code = 0;
+          for (let i = 0; i < this.GB[3].bytes; i++) {
+            code <<= 8;
+            code |= (stream.readU8() & 0x7F);
+          }
+
+          const { type, dict } = this.GB[3];
+
+          switch (type) {
+            case 'Character':
+              if (dict.has(code)) { result.push(Character.from(dict.get(code)!)); }
+              break;
+            case 'DRCS':
+              if (dict.has(code)) { result.push(DRCS.from(dict.get(code)!)); }
+              break;
+            case 'MACRO':
+              if (dict.has(code)) { this.tokenize(dict.get(code)!); }
+              break;
+            default:
+              const exhaustive: never = type;
+              throw new Error(`Undefined Dict Type in STD-B24 ARIB Caption (${exhaustive})`);
+          }
+
           break;
         }
         case CONTROL_CODES.RS: {
@@ -437,7 +530,6 @@ export default abstract class JIS8Tokenizer {
 
             values[values.length - 1] *= 10;
             values[values.length - 1] += (x & 0x0F);
-            console.log(values);
           }
 
           switch (F) {

@@ -18,13 +18,13 @@ export const Mosaic = {
   }
 }
 
-export type Drcs = {
-  tag: 'Drcs';
-  drcs: Uint8Array;
+export type DRCS = {
+  tag: 'DRCS';
+  drcs: ArrayBuffer;
 };
-export const Drcs = {
-  from(drcs: Uint8Array): Drcs {
-    return ({ tag: 'Drcs', drcs });
+export const DRCS = {
+  from(drcs: ArrayBuffer): DRCS {
+    return ({ tag: 'DRCS', drcs });
   }
 }
 
@@ -561,7 +561,7 @@ export type AribToken =
   // 文字
   Character |
   Mosaic |
-  Drcs |
+  DRCS |
   // 制御符号 (C0)
   Null |
   Bell |
