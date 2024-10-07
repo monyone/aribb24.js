@@ -135,11 +135,8 @@ export class ARIBB24Parser {
   public static height(state: ARIBB24ParserState): number {
     return (state.fontsize[1] + state.vspace) * CHARACTER_SIZE_MAP.get(state.size)![1];
   }
-  public static width_maginification(state: ARIBB24ParserState): number {
-    return CHARACTER_SIZE_MAP.get(state.size)![0];
-  }
-  public static height_maginification(state: ARIBB24ParserState): number {
-    return CHARACTER_SIZE_MAP.get(state.size)![1];
+  public static scale(state: ARIBB24ParserState): [number, number] {
+    return CHARACTER_SIZE_MAP.get(state.size)!;
   }
 
   private move_absolute_dot(x: number, y: number) {

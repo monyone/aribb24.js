@@ -29,9 +29,10 @@ export default class ARIBB24CanvasMainThreadRenderer extends ARIBB24CanvasRender
         switch (token.tag) {
           case 'Character': {
             const { state, option, character: { character } } = token;
+            const font = this.option.font.normal;
 
             // background
-            context.fillStyle = colortable[state.background];
+            context.fillStyle = this.option.color.background ?? colortable[state.background];
             context.fillRect(
               state.margin[0] + state.position[0],
               state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.height(state),
@@ -40,14 +41,14 @@ export default class ARIBB24CanvasMainThreadRenderer extends ARIBB24CanvasRender
             );
 
             const center_x = (state.margin[0] + state.position[0] + ARIBB24Parser.width(state) / 2);
-            const center_y = (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.height(state) / 2);
+            const center_y = (state.margin[1] + (state.position[1] + 1));
             context.translate(center_x, center_y);
-            context.scale(ARIBB24Parser.width_maginification(state), ARIBB24Parser.height_maginification(state));
+            context.scale(ARIBB24Parser.scale(state)[0], ARIBB24Parser.scale(state)[1]);
 
             // orn
-            if (state.ornament != null) {
-              context.font = `${state.fontsize[0]}px sans-serif`;
-              context.strokeStyle = colortable[state.ornament];
+            if (this.option.color.stroke != null || state.ornament != null) {
+              context.font = `${state.fontsize[0]}px ${font}`;
+              context.strokeStyle = this.option.color.stroke ?? colortable[state.ornament!];
               context.lineJoin = 'round';
               context.textBaseline = 'middle';
               context.textAlign = 'center';
@@ -56,8 +57,8 @@ export default class ARIBB24CanvasMainThreadRenderer extends ARIBB24CanvasRender
             }
 
             // text
-            context.font = `${state.fontsize[0]}px sans-serif`;
-            context.fillStyle = colortable[state.foreground];
+            context.font = `${state.fontsize[0]}px ${font}`;
+            context.fillStyle = this.option.color.foreground ?? colortable[state.foreground];
             context.textBaseline = 'middle';
             context.textAlign = 'center';
             context.fillText(character, 0, 0);
