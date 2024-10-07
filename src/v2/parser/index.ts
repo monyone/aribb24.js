@@ -89,25 +89,26 @@ export const initialState: ARIBB24ParserState = {
   end_time: null,
 };
 
-export type ARIBB24ClearScreenParsedToken = {
+export type ARIBB24CommonParsedToken = {
+  state: ARIBB24ParserState;
+  option: ARIBB24ParserOption;
+}
+
+export type ARIBB24ClearScreenParsedToken = ARIBB24CommonParsedToken & {
   tag: 'ClearScreen';
   time: number;
-  state: ARIBB24ParserState;
 };
-export type ARIBB24CharacterParsedToken = {
+export type ARIBB24CharacterParsedToken = ARIBB24CommonParsedToken & {
   tag: 'Character';
   character: Character;
-  state: ARIBB24ParserState;
 };
-export type ARIBB24DRCSPrasedToken = {
+export type ARIBB24DRCSPrasedToken = ARIBB24CommonParsedToken & {
   tag: 'DRCS';
   drcs: DRCS;
-  state: ARIBB24ParserState;
 };
-export type ARIBB24PRAParsedToken = {
+export type ARIBB24PRAParsedToken = ARIBB24CommonParsedToken & {
   tag: 'PRA';
-  pra: number;
-  state: ARIBB24ParserState;
+  sound: number;
 };
 export type ARIBB24ParsedToken = ARIBB24ClearScreenParsedToken | ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken | ARIBB24PRAParsedToken;
 
@@ -194,6 +195,7 @@ export class ARIBB24Parser {
             tag: 'Character',
             character: token,
             state: structuredClone(this.state),
+            option: structuredClone(this.option),
           });
           this.move_relative_pos(1, 0);
           break;
@@ -202,6 +204,7 @@ export class ARIBB24Parser {
             tag: 'DRCS',
             drcs: token,
             state: structuredClone(this.state),
+            option: structuredClone(this.option),
           });
           this.move_relative_pos(1, 0);
           break;
@@ -351,6 +354,7 @@ export class ARIBB24Parser {
             tag: 'ClearScreen',
             time: this.state.elapsed_time,
             state: structuredClone(this.state),
+            option: structuredClone(this.option),
           });
           break;
         case 'TimeControlWait':

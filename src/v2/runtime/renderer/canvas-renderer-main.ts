@@ -28,7 +28,7 @@ export default class ARIBB24CanvasMainThreadRenderer extends ARIBB24CanvasRender
 
         switch (token.tag) {
           case 'Character': {
-            const { state, character: { character } } = token;
+            const { state, option, character: { character } } = token;
 
             // background
             context.fillStyle = colortable[state.background];
@@ -51,7 +51,7 @@ export default class ARIBB24CanvasMainThreadRenderer extends ARIBB24CanvasRender
               context.lineJoin = 'round';
               context.textBaseline = 'middle';
               context.textAlign = 'center';
-              context.lineWidth = 4;
+              context.lineWidth = 4 * option.magnification;
               context.strokeText(character, 0, 0);
             }
 
