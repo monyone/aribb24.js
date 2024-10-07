@@ -45,7 +45,7 @@ export default class ARIBB24CanvasMainThreadRenderer extends ARIBB24CanvasRender
             context.scale(ARIBB24Parser.width_maginification(state), ARIBB24Parser.height_maginification(state));
 
             // orn
-            if (state.ornament) {
+            if (state.ornament != null) {
               context.font = `${state.fontsize[0]}px sans-serif`;
               context.strokeStyle = colortable[state.ornament];
               context.lineJoin = 'round';

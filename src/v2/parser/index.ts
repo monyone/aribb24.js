@@ -342,6 +342,7 @@ export class ARIBB24Parser {
               const lower = Math.floor(token.ornament / 100);
               const upper = token.ornament % 100;
               this.state.ornament = (upper << 4) | lower;
+              break;
             }
           }
         // time

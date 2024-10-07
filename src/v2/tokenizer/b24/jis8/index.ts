@@ -84,7 +84,7 @@ export const CSI_CODE = {
   UED: 0x6a,
   RCS: 0x6e,
   SCS: 0x6f,
-};
+} as const;
 
 export const DictEntryType = {
   Character: 'Character',
@@ -617,6 +617,7 @@ export default abstract class JIS8Tokenizer {
                 case 0x02:
                 case 0x03:
                   result.push(OrnamentControl.from(values[0], values[1]));
+                  break;
               }
               break;
             case CSI_CODE.MDF:
