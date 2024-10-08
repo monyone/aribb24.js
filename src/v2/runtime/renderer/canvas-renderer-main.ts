@@ -41,7 +41,7 @@ export default class ARIBB24CanvasMainThreadRenderer extends ARIBB24CanvasRender
             );
 
             const center_x = (state.margin[0] + state.position[0] + ARIBB24Parser.width(state) / 2);
-            const center_y = (state.margin[1] + (state.position[1] + 1));
+            const center_y = (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.height(state) / 2);
             context.translate(center_x, center_y);
             context.scale(ARIBB24Parser.scale(state)[0], ARIBB24Parser.scale(state)[1]);
 
@@ -71,9 +71,8 @@ export default class ARIBB24CanvasMainThreadRenderer extends ARIBB24CanvasRender
           }
           case 'ClearScreen':
             if (token.time === 0) {
-              this.initialize();
-            } else {
-              // TODO: SET END TIME
+              // erase internal buffer
+              context.clearRect(0, 0, this.buffer.width, this.buffer.height);
             }
             break;
           case 'PRA':
@@ -88,25 +87,14 @@ export default class ARIBB24CanvasMainThreadRenderer extends ARIBB24CanvasRender
       const context = this.canvas.getContext('2d');
       if (context == null) { return; }
 
+      context.clearRect(0, 0, this.canvas.width, this.canvas.height);
       context.drawImage(this.buffer, 0, 0, this.canvas.width, this.canvas.height);
     }
   }
-
-  private initialize() {
-    {
-      const context = this.buffer.getContext('2d');
-      if (context == null) { return; }
-      context.clearRect(0, 0, this.buffer.width, this.buffer.height);
-    }
-    this.clear();
-  }
-
   public clear() {
-    {
-      const context = this.canvas.getContext('2d');
-      if (context == null) { return; }
+    const context = this.canvas.getContext('2d');
+    if (context == null) { return; }
 
-      context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    }
+    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 }

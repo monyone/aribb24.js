@@ -10,6 +10,7 @@ export type ARIBB24FeederRawData = {
 };
 export type ARIBB24FeederTokenizedData = {
   pts: number;
+  duration: number;
   data: ARIBB24Token[];
 };
 

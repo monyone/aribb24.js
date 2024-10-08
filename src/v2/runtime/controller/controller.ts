@@ -137,22 +137,28 @@ export default class PGSController {
     if (!this.media) { return; }
 
     const currentTime = this.media.currentTime;
-    const content = this.feeder?.content(currentTime) ?? null;
-    // If no content this time
-    if (content == null) { return; }
-
-    // repaint
+    const current = this.feeder?.content(currentTime) ?? null;
     if (repaint) {
-      this.renderers.forEach((renderer) => renderer.render(content.data));
+      // paint
+      if (current == null || currentTime >= current.pts + current.duration) {
+        this.renderers.forEach((renderer) => renderer.clear());
+      } else {
+        this.renderers.forEach((renderer) => renderer.render(current.data));
+      }
+
       return;
     }
 
-    // If already rendered, ignore it
-    if (this.priviousPts === content.pts) { return; }
-    this.renderers.forEach((renderer) => renderer.render(content.data));
-
+    // current pts is same as before, ignore it
+    if (current?.pts === this.priviousPts) { return; }
+    // paint
+    if (current == null || currentTime >= current.pts + current.duration) {
+      this.renderers.forEach((renderer) => renderer.clear());
+    } else {
+      this.renderers.forEach((renderer) => renderer.render(current.data));
+    }
     // Update privious information
-    this.priviousPts = content.pts;
+    this.priviousPts = current?.pts ?? null;
   }
 
   private clear() {

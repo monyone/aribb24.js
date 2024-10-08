@@ -4,6 +4,7 @@ import ARIBB24Feeder, { ARIBB24FeederOption, ARIBB24FeederRawData, ARIBB24Feeder
 import extractPES from '../../tokenizer/b24/mpegts/extract';
 import extractDatagroup from '../../tokenizer/b24/datagroup'
 import JPNJIS8Tokenizer from '../../tokenizer/b24/jis8/japan/index';
+import { ARIBB24Parser } from '../../parser/index';
 
 
 const compare = (a: number, b: number) => {
@@ -77,7 +78,20 @@ export default class ARIBB24MPEGTSFeeder implements ARIBB24Feeder {
         }
 
         const tokenizer = new JPNJIS8Tokenizer();
-        this.present.insert(pts, { pts, data: tokenizer.tokenize(caption.units) });
+        const tokenized = tokenizer.tokenize(caption.units);
+
+        let duration = Number.POSITIVE_INFINITY;
+        let elapse = 0;
+        for (const token of tokenized) {
+          if (token.tag === 'ClearScreen') {
+            if (elapse === 0) { continue; }
+            duration = elapse;
+          } else if (token.tag === 'TimeControlWait') {
+            elapse += token.seconds;
+          }
+        }
+
+        this.present.insert(pts, { pts, duration, data: tokenized });
       }
     }
   }
