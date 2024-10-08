@@ -31,12 +31,12 @@ export default class PGSController {
   public attachMedia(media: HTMLVideoElement, container?: HTMLElement): void {
     this.media = media;
     this.container = container ?? media.parentElement!;
-    this.renderer?.onattach(this.container);
+    this.renderer?.onAttach(this.container);
     this.setupHandlers();
   }
 
   public detachMedia(): void {
-    if (this.container) { this.renderer?.ondetach(this.container); }
+    if (this.container) { this.renderer?.onDetach(this.container); }
     this.cleanupHandlers()
     this.media = this.container = null
   }
@@ -62,27 +62,27 @@ export default class PGSController {
 
   public attachFeeder(feeder: ARIBB24Feeder) {
     this.feeder = feeder;
-    this.feeder.onattach();
+    this.feeder.onAttach();
   }
 
   public detachFeeder() {
-    this.feeder?.ondetach();
+    this.feeder?.onDetach();
     this.feeder = null;
   }
 
   public attachRenderer(renderer: ARIBB24Renderer) {
     this.renderer = renderer;
-    if (this.container) { this.renderer?.onattach(this.container); }
+    if (this.container) { this.renderer?.onAttach(this.container); }
   }
 
   public detachRenderer() {
-    if (this.container) { this.renderer?.ondetach(this.container); }
+    if (this.container) { this.renderer?.onDetach(this.container); }
     this.renderer = null;
   }
 
   private onSeeking() {
-    this.feeder?.onseeking();
-    this.renderer?.onseeking();
+    this.feeder?.onSeeking();
+    this.renderer?.onSeeking();
     this.clear();
   }
 

@@ -15,7 +15,7 @@ export type ARIBB24FeederTokenizedData = {
 
 export default interface ARIBB24Feeder {
   content(time: number): ARIBB24FeederTokenizedData | null;
-  onattach(): void;
-  ondetach(): void;
-  onseeking(): void;
+  onAttach(): void;
+  onDetach(): void;
+  onSeeking(): void;
 }

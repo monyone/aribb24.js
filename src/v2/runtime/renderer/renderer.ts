@@ -5,8 +5,8 @@ export default interface ARIBB24Renderer {
   clear(): void;
   destroy(): void;
 
-  onattach(element: HTMLElement): void;
-  ondetach(element: HTMLElement): void;
-  onresize(tokens: ARIBB24Token[]): void;
-  onseeking(): void;
+  onAttach(element: HTMLElement): void;
+  onDetach(element: HTMLElement): void;
+  onResize(tokens: ARIBB24Token[]): void;
+  onSeeking(): void;
 }

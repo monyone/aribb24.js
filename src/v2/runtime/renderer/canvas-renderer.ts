@@ -37,20 +37,20 @@ export default abstract class ARIBB24CanvasRenderer implements ARIBB24Renderer {
   public abstract render(tokens: ARIBB24Token[]): void;
   public abstract clear(): void;
 
-  public onattach(element: HTMLElement): void {
+  public onAttach(element: HTMLElement): void {
     element.appendChild(this.canvas);
   }
 
-  public ondetach(element: HTMLElement): void {
+  public onDetach(element: HTMLElement): void {
     element.removeChild(this.canvas);
   }
 
-  public onresize(tokens: ARIBB24Token[]): void {
+  public onResize(tokens: ARIBB24Token[]): void {
     this.clear();
     this.render(tokens);
   }
 
-  public onseeking(): void {
+  public onSeeking(): void {
     this.clear();
   }
 }

@@ -104,15 +104,15 @@ export default class ARIBB24MPEGTSFeeder implements ARIBB24Feeder {
     this.notify(null);
   }
 
-  public onattach(): void {
+  public onAttach(): void {
     this.clear();
   }
 
-  public ondetach(): void {
+  public onDetach(): void {
     this.clear();
   }
 
-  public onseeking(): void {
+  public onSeeking(): void {
     this.clear();
   }
 
