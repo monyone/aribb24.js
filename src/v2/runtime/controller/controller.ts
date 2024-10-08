@@ -15,7 +15,7 @@ export default class PGSController {
   private readonly onSeekingHandler = this.onSeeking.bind(this);
   private readonly onSeekedHandler = this.onSeeked.bind(this);
   // Renderer
-  private renderer: ARIBB24Renderer | null = null;
+  private renderers: ARIBB24Renderer[] = [];
   private priviousPts: number | null = null;
   // Feeder
   private feeder: ARIBB24Feeder | null = null;
@@ -29,14 +29,21 @@ export default class PGSController {
   }
 
   public attachMedia(media: HTMLVideoElement, container?: HTMLElement): void {
+    if (this.container) {
+      this.renderers.forEach((renderer) => renderer.onDetach(this.container!));
+    }
     this.media = media;
     this.container = container ?? media.parentElement!;
-    this.renderer?.onAttach(this.container);
+    if (this.container) {
+      this.renderers.forEach((renderer) => renderer.onAttach(this.container!));
+    }
     this.setupHandlers();
   }
 
   public detachMedia(): void {
-    if (this.container) { this.renderer?.onDetach(this.container); }
+    if (this.container) {
+      this.renderers.forEach((renderer) => renderer.onDetach(this.container!));
+    }
     this.cleanupHandlers()
     this.media = this.container = null
   }
@@ -61,6 +68,7 @@ export default class PGSController {
   }
 
   public attachFeeder(feeder: ARIBB24Feeder) {
+    this.detachFeeder();
     this.feeder = feeder;
     this.feeder.onAttach();
   }
@@ -71,18 +79,22 @@ export default class PGSController {
   }
 
   public attachRenderer(renderer: ARIBB24Renderer) {
-    this.renderer = renderer;
-    if (this.container) { this.renderer?.onAttach(this.container); }
+    this.renderers.push(renderer);
+    if (this.container) {
+      renderer.onAttach(this.container);
+    }
   }
 
-  public detachRenderer() {
-    if (this.container) { this.renderer?.onDetach(this.container); }
-    this.renderer = null;
+  public detachRenderer(renderer: ARIBB24Renderer) {
+    if (this.container) {
+      renderer.onDetach(this.container);
+    }
+    this.renderers = this.renderers.filter((elem) => elem !== renderer);
   }
 
   private onSeeking() {
     this.feeder?.onSeeking();
-    this.renderer?.onSeeking();
+    this.renderers.forEach((renderer) => renderer.onSeeking());
     this.clear();
   }
 
@@ -90,21 +102,54 @@ export default class PGSController {
     this.clear();
   }
 
+  private onContainerResize() {
+    if (!this.media || !this.container) { return; }
+
+    if (this.feeder == null) {
+      this.renderers.forEach((renderer) => renderer.onContainerResize(this.container!));
+      return;
+    }
+
+    this.paint(true);
+  }
+
+  private onVideoResize() {
+    if (!this.media || !this.container) { return; }
+
+    if (this.feeder == null ) {
+      this.renderers.forEach((renderer) => renderer.onVideoResize(this.media!));
+      return;
+    }
+
+    this.paint(true);
+  }
+
   private onTimeupdate() {
     // not showing, do not show
     if (!this.isShowing) { return; }
     this.timer = requestAnimationFrame(this.onTimeupdateHandler);
 
+    this.paint(false);
+  }
+
+  private paint(repaint: boolean) {
     // precondition
-    if (this.media == null || this.feeder == null) { return; }
+    if (!this.media) { return; }
 
     const currentTime = this.media.currentTime;
-    const content = this.feeder.content(currentTime) ?? null;
+    const content = this.feeder?.content(currentTime) ?? null;
+    // If no content this time
     if (content == null) { return; }
+
+    // repaint
+    if (repaint) {
+      this.renderers.forEach((renderer) => renderer.render(content.data));
+      return;
+    }
 
     // If already rendered, ignore it
     if (this.priviousPts === content.pts) { return; }
-    this.renderer?.render(content.data);
+    this.renderers.forEach((renderer) => renderer.render(content.data));
 
     // Update privious information
     this.priviousPts = content.pts;
@@ -112,7 +157,7 @@ export default class PGSController {
 
   private clear() {
     // clearRect for viewer
-    this.renderer?.clear();
+    this.renderers.forEach((renderer) => renderer.clear());
     // clear privious information
     this.priviousPts = null;
   }
