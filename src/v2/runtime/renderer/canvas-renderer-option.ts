@@ -1,6 +1,6 @@
-import { ARIBB24RenderOption } from "./renderer-option";
+import { ARIBB24RendererOption } from "./renderer-option";
 
-export type ARIBB24CanvasRenderOption = ARIBB24RenderOption & {
+export type ARIBB24CanvasRendererOption = ARIBB24RendererOption & {
   font: {
     normal: string;
     arib: string;
@@ -12,8 +12,8 @@ export type ARIBB24CanvasRenderOption = ARIBB24RenderOption & {
   }
 };
 
-export const ARIBB24CanvasRenderOption = {
-  from (option?: Partial<ARIBB24CanvasRenderOption>): ARIBB24CanvasRenderOption {
+export const ARIBB24CanvasRendererOption = {
+  from (option?: Partial<ARIBB24CanvasRendererOption>): ARIBB24CanvasRendererOption {
     return {
       font: {
         normal: 'sans-serif',
