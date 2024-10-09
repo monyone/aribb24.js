@@ -39,8 +39,8 @@ export default abstract class ARIBB24CanvasRenderer implements ARIBB24Renderer {
     element.appendChild(this.canvas);
   }
 
-  public onDetach(element: HTMLElement): void {
-    element.removeChild(this.canvas);
+  public onDetach(): void {
+    this.canvas.remove();
   }
 
   public onContainerResize(element: HTMLElement): void {

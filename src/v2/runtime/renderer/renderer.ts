@@ -6,7 +6,7 @@ export default interface ARIBB24Renderer {
   destroy(): void;
 
   onAttach(element: HTMLElement): void;
-  onDetach(element: HTMLElement): void;
+  onDetach(): void;
   onContainerResize(element: HTMLElement): void;
   onVideoResize(video: HTMLVideoElement): void;
   onSeeking(): void;

@@ -30,7 +30,7 @@ export default class PGSController {
 
   public attachMedia(media: HTMLVideoElement, container?: HTMLElement): void {
     if (this.container) {
-      this.renderers.forEach((renderer) => renderer.onDetach(this.container!));
+      this.renderers.forEach((renderer) => renderer.onDetach());
     }
     this.media = media;
     this.container = container ?? media.parentElement!;
@@ -42,7 +42,7 @@ export default class PGSController {
 
   public detachMedia(): void {
     if (this.container) {
-      this.renderers.forEach((renderer) => renderer.onDetach(this.container!));
+      this.renderers.forEach((renderer) => renderer.onDetach());
     }
     this.cleanupHandlers()
     this.media = this.container = null
@@ -79,6 +79,7 @@ export default class PGSController {
   }
 
   public attachRenderer(renderer: ARIBB24Renderer) {
+    renderer.onDetach();
     this.renderers.push(renderer);
     if (this.container) {
       renderer.onAttach(this.container);
@@ -86,9 +87,7 @@ export default class PGSController {
   }
 
   public detachRenderer(renderer: ARIBB24Renderer) {
-    if (this.container) {
-      renderer.onDetach(this.container);
-    }
+    renderer.onDetach();
     this.renderers = this.renderers.filter((elem) => elem !== renderer);
   }
 
