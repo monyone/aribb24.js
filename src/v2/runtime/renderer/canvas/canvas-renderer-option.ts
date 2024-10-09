@@ -1,4 +1,4 @@
-import { ARIBB24RendererOption } from "./renderer-option";
+import { ARIBB24RendererOption } from "../renderer-option";
 
 export type ARIBB24CanvasRendererOption = ARIBB24RendererOption & {
   font: {

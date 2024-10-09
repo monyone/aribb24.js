@@ -1,8 +1,7 @@
-import { ARIBB24Parser } from "../../parser/index";
-import { ARIBB24Token } from "../../tokenizer/token";
+import { ARIBB24Token } from "../../../tokenizer/token";
 import ARIBB24CanvasRenderer from "./canvas-renderer";
-import colortable from "./colortable";
-import { ARIBB24RendererOption } from "./renderer-option";
+import { ARIBB24RendererOption } from "../renderer-option";
+import ARIBB24RendererRenderingFunc from "./canvas-renderer-strategy"
 
 export default class ARIBB24CanvasMainThreadRenderer extends ARIBB24CanvasRenderer {
   private buffer: HTMLCanvasElement;
@@ -17,7 +16,7 @@ export default class ARIBB24CanvasMainThreadRenderer extends ARIBB24CanvasRender
       const context = this.buffer.getContext('2d');
       if (context == null) { return; }
 
-      ARIBB24CanvasRenderer.renderTokens(this.buffer, context, tokens, this.option);
+      ARIBB24RendererRenderingFunc(this.buffer, context, tokens, this.option);
     }
     {
       const context = this.canvas.getContext('2d');
