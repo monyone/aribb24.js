@@ -26,10 +26,4 @@ export default class ARIBB24CanvasMainThreadRenderer extends ARIBB24CanvasRender
       context.drawImage(this.buffer, 0, 0, this.canvas.width, this.canvas.height);
     }
   }
-  public clear() {
-    const context = this.canvas.getContext('2d');
-    if (context == null) { return; }
-
-    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-  }
 }

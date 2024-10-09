@@ -34,8 +34,14 @@ export default abstract class ARIBB24CanvasRenderer implements ARIBB24Renderer {
     this.resize(0, 0);
   }
 
+  public clear(): void {
+    const context = this.canvas.getContext('2d');
+    if (context == null) { return; }
+
+    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
   public abstract render(tokens: ARIBB24Token[]): void;
-  public abstract clear(): void;
 
   public onAttach(element: HTMLElement): void {
     element.appendChild(this.canvas);
