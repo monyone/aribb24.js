@@ -8,6 +8,11 @@ export default class PGSController {
   // Video
   private media: HTMLVideoElement | null = null;
   private container: HTMLElement | null = null;
+  // Container Resize Handler
+  private readonly onContainerResizeHandler = this.onContainerResize.bind(this);
+  private resize_observer: ResizeObserver | null = null;
+  // Video Resize Handler
+  private readonly onVideoResizeHandler = this.onVideoResize.bind(this);
   // Timeupdate Handler
   private readonly onTimeupdateHandler = this.onTimeupdate.bind(this);
   private timer: number | null = null;
@@ -16,7 +21,7 @@ export default class PGSController {
   private readonly onSeekedHandler = this.onSeeked.bind(this);
   // Renderer
   private renderers: ARIBB24Renderer[] = [];
-  private priviousPts: number | null = null;
+  private privious_pts: number | null = null;
   // Feeder
   private feeder: ARIBB24Feeder | null = null;
   // Control
@@ -38,6 +43,9 @@ export default class PGSController {
       this.renderers.forEach((renderer) => renderer.onAttach(this.container!));
     }
     this.setupHandlers();
+
+    // prepare Event Loop
+    this.onTimeupdate();
   }
 
   public detachMedia(): void {
@@ -54,9 +62,11 @@ export default class PGSController {
     // setup media handler
     this.media.addEventListener('seeking', this.onSeekingHandler);
     this.media.addEventListener('seeked', this.onSeekedHandler);
+    this.media.addEventListener('resize', this.onVideoResizeHandler);
 
-    // prepare Event Loop
-    this.onTimeupdate();
+    // setup container Resize Handler
+    this.resize_observer = new ResizeObserver(this.onContainerResizeHandler);
+    this.resize_observer.observe(this.container);
   }
 
   private cleanupHandlers() {
@@ -64,7 +74,15 @@ export default class PGSController {
     if (this.media) {
       this.media.removeEventListener('seeking', this.onSeekingHandler);
       this.media.removeEventListener('seeked', this.onSeekedHandler);
+      this.media.removeEventListener('resize', this.onVideoResizeHandler);
     }
+
+    // setup container Resize Handler
+    if (this.container) {
+      this.resize_observer?.unobserve(this.container);
+    }
+    this.resize_observer?.disconnect();
+    this.resize_observer = null;
   }
 
   public attachFeeder(feeder: ARIBB24Feeder) {
@@ -101,26 +119,28 @@ export default class PGSController {
     this.clear();
   }
 
-  private onContainerResize() {
+  private onContainerResize(entries: ResizeObserverEntry[]) {
     if (!this.media || !this.container) { return; }
 
-    if (this.feeder == null) {
-      this.renderers.forEach((renderer) => renderer.onContainerResize(this.container!));
-      return;
-    }
+    const target = entries.find((entry) => entry.target === this.container);
+    if (!target) { return; }
 
-    this.paint(true);
+    const width = target.devicePixelContentBoxSize[0].inlineSize;
+    const height = target.devicePixelContentBoxSize[0].blockSize;
+
+    this.renderers.forEach((renderer) => {
+      if (!renderer.onContainerResize(width, height)) { return; }
+      this.paint(true);
+    });
   }
 
   private onVideoResize() {
     if (!this.media || !this.container) { return; }
 
-    if (this.feeder == null ) {
-      this.renderers.forEach((renderer) => renderer.onVideoResize(this.media!));
-      return;
-    }
-
-    this.paint(true);
+    this.renderers.forEach((renderer) => {
+      if (!renderer.onVideoResize(this.media!.videoWidth, this.media!.videoHeight)) { return; }
+      this.paint(true);
+    });
   }
 
   private onTimeupdate() {
@@ -149,7 +169,7 @@ export default class PGSController {
     }
 
     // current pts is same as before, ignore it
-    if (current?.pts === this.priviousPts) { return; }
+    if (current?.pts === this.privious_pts) { return; }
     // paint
     if (current == null || currentTime >= current.pts + current.duration) {
       this.renderers.forEach((renderer) => renderer.clear());
@@ -157,14 +177,14 @@ export default class PGSController {
       this.renderers.forEach((renderer) => renderer.render(current.data));
     }
     // Update privious information
-    this.priviousPts = current?.pts ?? null;
+    this.privious_pts = current?.pts ?? null;
   }
 
   private clear() {
     // clearRect for viewer
     this.renderers.forEach((renderer) => renderer.clear());
     // clear privious information
-    this.priviousPts = null;
+    this.privious_pts = null;
   }
 
   public show(): void {

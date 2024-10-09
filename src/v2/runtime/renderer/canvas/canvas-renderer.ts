@@ -1,8 +1,6 @@
-import { ARIBB24Token, Character } from "../../../tokenizer/token";
+import { ARIBB24Token } from "../../../tokenizer/token";
 import ARIBB24Renderer from "../renderer";
 import { ARIBB24CanvasRendererOption } from "./canvas-renderer-option";
-import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser } from "../../../parser/index";
-import colortable from "../colortable";
 
 export default abstract class ARIBB24CanvasRenderer implements ARIBB24Renderer {
   protected option: ARIBB24CanvasRendererOption;
@@ -25,7 +23,6 @@ export default abstract class ARIBB24CanvasRenderer implements ARIBB24Renderer {
 
   public resize(width: number, height: number): void {
     if (this.canvas == null) { return; }
-
     this.canvas.width = width;
     this.canvas.height = height;
   }
@@ -51,12 +48,14 @@ export default abstract class ARIBB24CanvasRenderer implements ARIBB24Renderer {
     this.canvas.remove();
   }
 
-  public onContainerResize(element: HTMLElement): void {
+  public onContainerResize(width: number, height: number): boolean {
     this.clear();
+    this.resize(width, height);
+    return true;
   }
 
-  public onVideoResize(video: HTMLVideoElement): void {
-    // noop
+  public onVideoResize(width: number, height: number): boolean {
+    return false;
   }
 
   public onSeeking(): void {
