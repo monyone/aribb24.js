@@ -1,8 +1,7 @@
 import { ARIBB24Token } from "../../../tokenizer/token";
 import ARIBB24CanvasRenderer from "./canvas-renderer";
 import { ARIBB24RendererOption } from "../renderer-option";
-import ARIBB24RendererRenderingBufferFunc from "./canvas-renderer-strategy"
-import ARIBB24RendererRenderingForegroundFunc from "./canvas-renderer-double-buffer"
+import ARIBB24RendererRenderingFunc from "./canvas-renderer-strategy"
 
 
 export default class ARIBB24CanvasMainThreadRenderer extends ARIBB24CanvasRenderer {
@@ -14,7 +13,6 @@ export default class ARIBB24CanvasMainThreadRenderer extends ARIBB24CanvasRender
   }
 
   public render(tokens: ARIBB24Token[]): void {
-    if (!ARIBB24RendererRenderingBufferFunc(this.buffer, tokens, this.option)) { return; }
-    if (!ARIBB24RendererRenderingForegroundFunc(this.canvas, this.buffer, this.option)) { return; }
+    ARIBB24RendererRenderingFunc(this.canvas, this.buffer, tokens, this.option);
   }
 }
