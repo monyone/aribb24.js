@@ -9,6 +9,9 @@ export type ARIBB24CanvasRendererOption = ARIBB24RendererOption & {
     stroke: string | null,
     foreground: string | null,
     background: string | null,
+  },
+  resize: {
+    target: 'video' | 'container'
   }
 };
 
@@ -26,6 +29,10 @@ export const ARIBB24CanvasRendererOption = {
         background: null,
         ... option?.color,
       },
+      resize: {
+        target: 'container',
+        ... option?.resize,
+      }
     };
   }
 };

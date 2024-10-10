@@ -16,9 +16,6 @@ export default abstract class ARIBB24CanvasRenderer implements ARIBB24Renderer {
     this.canvas.style.width = '100%';
     this.canvas.style.height = '100%';
     this.canvas.style.objectFit = 'contain';
-
-    this.canvas.width = 1920;
-    this.canvas.height = 1080;
   }
 
   public resize(width: number, height: number): void {
@@ -49,13 +46,19 @@ export default abstract class ARIBB24CanvasRenderer implements ARIBB24Renderer {
   }
 
   public onContainerResize(width: number, height: number): boolean {
+    if (this.option.resize.target !== 'container') { return false; }
+
     this.clear();
     this.resize(width, height);
     return true;
   }
 
   public onVideoResize(width: number, height: number): boolean {
-    return false;
+    if (this.option.resize.target !== 'video') { return false; }
+
+    this.clear();
+    this.resize(width, height);
+    return true;
   }
 
   public onSeeking(): void {
