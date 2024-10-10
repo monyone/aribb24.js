@@ -12,6 +12,7 @@ export type ARIBB24CanvasRendererOption = ARIBB24RendererOption & {
   },
   resize: {
     target: 'video' | 'container'
+    objectFit: 'contain' | 'none'
   }
 };
 
@@ -31,6 +32,7 @@ export const ARIBB24CanvasRendererOption = {
       },
       resize: {
         target: 'container',
+        objectFit: 'contain',
         ... option?.resize,
       }
     };

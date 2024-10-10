@@ -3,7 +3,10 @@ import { ARIBB24Token } from "../../../tokenizer/token";
 import { ARIBB24CanvasRendererOption } from "./canvas-renderer-option";
 import colortable from "../colortable";
 
-export default (buffer: HTMLCanvasElement | OffscreenCanvas, context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, tokens: ARIBB24Token[], rendererOption: ARIBB24CanvasRendererOption) => {
+export default (buffer: HTMLCanvasElement | OffscreenCanvas, tokens: ARIBB24Token[], rendererOption: ARIBB24CanvasRendererOption): boolean => {
+  const context = buffer.getContext('2d');
+  if (context == null) { return false; }
+
   const parser = new ARIBB24Parser();
   for (const token of parser.parse(tokens)) {
     const plane_width = token.state.plane[0];
@@ -36,6 +39,8 @@ export default (buffer: HTMLCanvasElement | OffscreenCanvas, context: CanvasRend
         throw new Error(`Unhandled ARIB Parsed Token (${exhaustive})`);
     }
   }
+
+  return true;
 }
 
 const renderBackground = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, rendererOption: ARIBB24CanvasRendererOption) => {

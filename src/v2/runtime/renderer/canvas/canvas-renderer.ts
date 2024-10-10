@@ -15,7 +15,6 @@ export default abstract class ARIBB24CanvasRenderer implements ARIBB24Renderer {
     this.canvas.style.pointerEvents = 'none';
     this.canvas.style.width = '100%';
     this.canvas.style.height = '100%';
-    this.canvas.style.objectFit = 'contain';
   }
 
   public resize(width: number, height: number): void {
