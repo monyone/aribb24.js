@@ -129,11 +129,14 @@ export class ARIBB24Parser {
     this.state.position = [this.state.position[0] * this.option.magnification, this.state.position[1] * this.option.magnification];
   }
 
-  public static width(state: ARIBB24ParserState): number {
-    return (state.fontsize[0] + state.hspace) * CHARACTER_SIZE_MAP.get(state.size)![0];
+  public static box(state: ARIBB24ParserState): [number, number] {
+    return [
+      (state.fontsize[0] + state.hspace) * CHARACTER_SIZE_MAP.get(state.size)![0],
+      (state.fontsize[1] + state.vspace) * CHARACTER_SIZE_MAP.get(state.size)![1]
+    ];
   }
-  public static height(state: ARIBB24ParserState): number {
-    return (state.fontsize[1] + state.vspace) * CHARACTER_SIZE_MAP.get(state.size)![1];
+  public static offset(state: ARIBB24ParserState): [number, number] {
+    return [state.hspace * CHARACTER_SIZE_MAP.get(state.size)![0] / 2, state.vspace * CHARACTER_SIZE_MAP.get(state.size)![1] / 2];
   }
   public static scale(state: ARIBB24ParserState): [number, number] {
     return CHARACTER_SIZE_MAP.get(state.size)!;
@@ -145,8 +148,8 @@ export class ARIBB24Parser {
   }
 
   private move_absolute_pos(x: number, y: number) {
-    this.state.position[0] = x * ARIBB24Parser.width(this.state);
-    this.state.position[1] = (y + 1) * ARIBB24Parser.height(this.state) - 1;
+    this.state.position[0] = x * ARIBB24Parser.box(this.state)[0];
+    this.state.position[1] = (y + 1) * ARIBB24Parser.box(this.state)[1] - 1;
   }
 
   private move_newline() {
@@ -156,7 +159,7 @@ export class ARIBB24Parser {
 
   private move_relative_pos(x: number, y: number) {
     while (x < 0){
-      this.state.position[0] -= ARIBB24Parser.width(this.state);
+      this.state.position[0] -= ARIBB24Parser.box(this.state)[0];
       x++;
       while (this.state.position[0] < 0) {
         this.state.position[0] += this.state.area[0];
@@ -164,7 +167,7 @@ export class ARIBB24Parser {
       }
     }
     while (x > 0){
-      this.state.position[0] += ARIBB24Parser.width(this.state);
+      this.state.position[0] += ARIBB24Parser.box(this.state)[0];
       x--;
       while (this.state.position[0] >= this.state.area[0]) {
         this.state.position[0] -= this.state.area[0];
@@ -172,11 +175,11 @@ export class ARIBB24Parser {
       }
     }
     while (y < 0){
-      this.state.position[1] -= ARIBB24Parser.height(this.state);
+      this.state.position[1] -= ARIBB24Parser.box(this.state)[1];
       y++;
     }
     while (y > 0){
-      this.state.position[1] += ARIBB24Parser.height(this.state);
+      this.state.position[1] += ARIBB24Parser.box(this.state)[1];
       y--;
     }
   }

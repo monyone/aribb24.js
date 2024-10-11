@@ -707,7 +707,7 @@ export default abstract class JIS8Tokenizer {
           const depth = uint8[begin + 1] + 2;
           const width = uint8[begin + 2];
           const height = uint8[begin + 3];
-          const bits = (depth * 0b00011101) >> 5; // De Brujin Sequence in 8 bit
+          const bits = [0, 1, 6, 2, 7, 5, 4, 3][(depth * 0b00011101) >> 5]; // De Brujin Sequence in 8 bit
           const length = Math.floor(width * height * bits / 8);
           const binary = uint8.slice(begin + 4, begin + 4 + length).buffer;
 

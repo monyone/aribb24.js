@@ -3,12 +3,12 @@ import { ARIBB24Token } from "../../../tokenizer/token";
 import { ARIBB24CanvasRendererOption } from "./canvas-renderer-option";
 import colortable from "../colortable";
 
-export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTMLCanvasElement | OffscreenCanvas, tokens: ARIBB24Token[], rendererOption: ARIBB24CanvasRendererOption): boolean => {
+export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTMLCanvasElement | OffscreenCanvas, tokens: ARIBB24Token[], rendererOption: ARIBB24CanvasRendererOption): void => {
   // render background
   let magnification: [number, number] = [1, 1];
   {
     const context = buffer.getContext('2d');
-    if (context == null) { return false; }
+    if (context == null) { return; }
 
     const parser = new ARIBB24Parser();
     for (const token of parser.parse(tokens)) {
@@ -54,7 +54,7 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
   // render Foregroud
   if (target != null) {
     const context = target.getContext('2d');
-    if (context == null) { return false; }
+    if (context == null) { return; }
     context.clearRect(0, 0, target.width, target.height);
 
     switch (rendererOption.resize.objectFit) {
@@ -77,32 +77,30 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
       }
     }
   }
-
-  return true;
 }
 
-const renderBackground = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], rendererOption: ARIBB24CanvasRendererOption) => {
+const renderBackground = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], rendererOption: ARIBB24CanvasRendererOption): void => {
   const { state } = token;
 
   // background
   context.fillStyle = rendererOption.color.background ?? colortable[state.background];
   context.fillRect(
-    (state.margin[0] + state.position[0]) * magnification[0],
-    (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.height(state)) * magnification[1],
-    ARIBB24Parser.width(state) * magnification[0],
-    ARIBB24Parser.height(state) * magnification[1]
+    (state.margin[0] + (state.position[0] + 0)  -                          0) * magnification[0],
+    (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1]) * magnification[1],
+    ARIBB24Parser.box(state)[0] * magnification[0],
+    ARIBB24Parser.box(state)[1] * magnification[1]
   );
 }
 
-const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken, magnification: [number, number], rendererOption: ARIBB24CanvasRendererOption) => {
+const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken, magnification: [number, number], rendererOption: ARIBB24CanvasRendererOption): void => {
   const { state, option, character: { character } } = token;
   const font = rendererOption.font.normal;
 
   // background
   renderBackground(context, token, magnification, rendererOption);
 
-  const center_x = (state.margin[0] + state.position[0] + ARIBB24Parser.width(state) / 2) * magnification[0];
-  const center_y = (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.height(state) / 2) * magnification[1];
+  const center_x = (state.margin[0] + (state.position[0] + 0) + ARIBB24Parser.box(state)[0] / 2) * magnification[0];
+  const center_y = (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1] / 2) * magnification[1];
   context.translate(center_x, center_y);
   context.scale(ARIBB24Parser.scale(state)[0] * magnification[0], ARIBB24Parser.scale(state)[1] * magnification[1]);
 
@@ -127,10 +125,54 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSPrasedToken, magnification: [number, number], rendererOption: ARIBB24CanvasRendererOption) => {
+const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSPrasedToken, magnification: [number, number], delta: [number, number], color: string): void => {
   const { state, option, drcs: { width, height, depth, binary } } = token;
-  const font = rendererOption.font.normal;
+  const uint8 = new Uint8Array(binary);
 
+  context.scale(magnification[0], magnification[1]);
+  context.fillStyle = color;
+
+  for(let sy = 0; sy < height; sy++){
+    for(let sx = 0; sx < width; sx++){
+      let value = 0;
+      for(let d = 0; d < depth; d++){
+        const byte = Math.floor(((((sy * width) + sx) * depth) + d) / 8);
+        const index = 7 - (((((sy * width) + sx) * depth) + d) % 8);
+        value *= 2;
+        value += ((uint8[byte] & (1 << index)) >> index);
+      }
+
+      const x = sx + delta[0];
+      const y = sy + delta[1];
+
+      if (value === 0) { continue; }
+
+      context.fillRect(
+        (state.margin[0] + state.position[0] + (0 -                           0 + ARIBB24Parser.offset(state)[0] + x * option.magnification)),
+        (state.margin[1] + state.position[1] + (1 - ARIBB24Parser.box(state)[1] + ARIBB24Parser.offset(state)[1] + y * option.magnification)),
+        1 * option.magnification,
+        1 * option.magnification
+      );
+    }
+  }
+
+  context.setTransform(1, 0, 0, 1, 0, 0);
+}
+
+const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSPrasedToken, magnification: [number, number], rendererOption: ARIBB24CanvasRendererOption): void => {
+  const { state } = token;
   // background
   renderBackground(context, token, magnification, rendererOption);
+
+  // orn
+  if (rendererOption.color.stroke != null || state.ornament != null) {
+    for (let dy = -2; dy <= 2; dy++) {
+      for (let dx = -2; dx <= 2; dx++) {
+        renderDRCSInternal(context, token, magnification, [dx, dy], rendererOption.color.stroke ?? colortable[state.ornament!]);
+      }
+    }
+  }
+
+  // foreground
+  renderDRCSInternal(context, token, magnification, [0, 0], rendererOption.color.foreground ?? colortable[state.foreground]);
 }
