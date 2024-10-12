@@ -25,21 +25,7 @@
   "scripts": {
     "build": "webpack --mode production",
     "build:dev": "webpack --mode development",
-    "tsc": "tsc --noEmit",
-    "eslint": "eslint src/**/*.ts",
-    "prettier": "prettier --write src/**/*.ts"
-  },
-  "husky": {
-    "hook": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.ts": [
-      "tsc --noEmit",
-      "eslint --fix",
-      "prettier --write"
-    ]
+    "tsc": "tsc --noEmit"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
@@ -50,11 +36,6 @@
     "@typescript-eslint/parser": "^4.14.0",
     "babel-loader": "^8.2.2",
     "core-js": "^3.8.3",
-    "eslint": "^7.18.0",
-    "eslint-config-prettier": "^7.2.0",
-    "husky": "^4.3.8",
-    "lint-staged": "^10.5.3",
-    "prettier": "^2.2.1",
     "ts-loader": "^9.5.1",
     "typescript": "^5.6.2",
     "webpack": "^5.16.0",
