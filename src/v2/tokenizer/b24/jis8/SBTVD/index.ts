@@ -6,8 +6,8 @@ import specialCharacters from "./special-characters";
 
 const BRAZIL_NORMAL_DICTS = {
   ASCII: { type: 'Character', code: 0x4a, bytes: 1, dict: ascii },
-  LATIN_EXTENSION: { type: 'Character', code: 0x4a, bytes: 1, dict: latinExtension },
-  SPECIAL_CHARACTERS: { type: 'Character', code: 0x4a, bytes: 1, dict: specialCharacters },
+  LATIN_EXTENSION: { type: 'Character', code: 0x4b, bytes: 1, dict: latinExtension },
+  SPECIAL_CHARACTERS: { type: 'Character', code: 0x4c, bytes: 1, dict: specialCharacters },
 } as const;
 
 // DRCS
