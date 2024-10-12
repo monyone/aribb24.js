@@ -63,7 +63,7 @@ export class ByteStream {
 
   public readU24(): number {
     const result = this.peekU24();
-    this.offset += 2;
+    this.offset += 3;
     return result;
   }
 

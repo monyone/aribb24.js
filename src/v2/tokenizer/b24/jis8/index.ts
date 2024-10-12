@@ -1,5 +1,5 @@
 import { ByteStream } from "../../../util/bytestream";
-import { DataUnit } from "../datagroup";
+import { CaptionData, CaptionManagement } from "../datagroup";
 
 import type { ARIBB24Token } from '../../token';
 import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, Delete, DRCS, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControl, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, YellowForeground } from "../../token";
@@ -127,9 +127,9 @@ export default abstract class JIS8Tokenizer {
     this.drcs_dicts = structuredClone(drcs_dicts);
   }
 
-  public tokenize(units: DataUnit[]): ARIBB24Token[] {
+  public tokenize(data: CaptionData): ARIBB24Token[] {
     const result: ARIBB24Token[] = [];
-    for (const unit of units) {
+    for (const unit of data.units) {
       switch (unit.tag) {
         case 'Statement':
           result.push(... this.tokenizeStatement(unit.data));
@@ -143,7 +143,7 @@ export default abstract class JIS8Tokenizer {
     return result;
   }
 
-  protected tokenizeStatement(arraybuffer: ArrayBuffer): ARIBB24Token[] {
+  public tokenizeStatement(arraybuffer: ArrayBuffer): ARIBB24Token[] {
     const stream = new ByteStream(arraybuffer);
     const result: ARIBB24Token[] = [];
 
@@ -689,7 +689,7 @@ export default abstract class JIS8Tokenizer {
     return result;
   }
 
-  protected tokenizeDRCS(bytes: 1 | 2, arraybuffer: ArrayBuffer): void {
+  public tokenizeDRCS(bytes: 1 | 2, arraybuffer: ArrayBuffer): void {
     const uint8 = new Uint8Array(arraybuffer);
     let begin = 0, end = uint8.byteLength;
     const NumberOfCode = uint8[begin + 0];

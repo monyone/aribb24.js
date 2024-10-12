@@ -2,9 +2,9 @@ import AVLTree from '../../util/avl';
 
 import ARIBB24Feeder, { ARIBB24FeederOption, ARIBB24FeederRawData, ARIBB24FeederTokenizedData } from './feeder';
 import extractPES from '../../tokenizer/b24/mpegts/extract';
-import extractDatagroup from '../../tokenizer/b24/datagroup'
+import extractDatagroup, { CaptionManagement } from '../../tokenizer/b24/datagroup'
 import JPNJIS8Tokenizer from '../../tokenizer/b24/jis8/japan/index';
-import { ARIBB24Parser } from '../../parser/index';
+import { ClearScreen } from '../../tokenizer/token';
 
 
 const compare = (a: number, b: number) => {
@@ -14,6 +14,7 @@ const compare = (a: number, b: number) => {
 export default class ARIBB24MPEGTSFeeder implements ARIBB24Feeder {
   private option: ARIBB24FeederOption;
   private priviousTime: number | null = null;
+  private priviousManagementData: CaptionManagement | null = null;
   private decode: AVLTree<number, ARIBB24FeederRawData> = new AVLTree<number, ARIBB24FeederRawData>(compare);
   private decodeBuffer: ARIBB24FeederRawData[] = [];
   private decodingPromise: Promise<void>;
@@ -73,12 +74,21 @@ export default class ARIBB24MPEGTSFeeder implements ARIBB24Feeder {
 
         const caption = extractDatagroup(datagroup.data);
         if (caption == null) { continue; }
-        if (caption.tag === 'CaptionManagement') { // TODO!
+        if (caption.tag === 'CaptionManagement') {
+          if (this.priviousManagementData?.group === caption.group) { continue; }
+          this.priviousManagementData = caption;
+          this.present.insert(pts, { pts, duration: Number.POSITIVE_INFINITY, data: [ClearScreen.from()] });
           continue;
         }
 
+        // Caption
+        if (this.priviousManagementData == null) { continue; }
+
+        const entry = this.priviousManagementData.languages.find((entry) => entry.lang === caption.lang);
+        if (entry == null) { continue; }
+
         const tokenizer = new JPNJIS8Tokenizer();
-        const tokenized = tokenizer.tokenize(caption.units);
+        const tokenized = tokenizer.tokenize(caption);
 
         let duration = Number.POSITIVE_INFINITY;
         let elapse = 0;
