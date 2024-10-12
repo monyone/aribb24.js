@@ -66,7 +66,7 @@ export default class ARIBB24MPEGTSFeeder implements Feeder {
         // TODO: FIXME: NEED* 個々のロジックは外部に出す
         const datagroup = extractPES(data);
         if (datagroup == null) { continue; }
-        if (datagroup.tag === 'Superimpose') { continue; } // TODO!
+        if (datagroup.tag !== this.option.recieve.type) { continue; }
 
         const caption = extractDatagroup(datagroup.data);
         if (caption == null) { continue; }
@@ -82,6 +82,7 @@ export default class ARIBB24MPEGTSFeeder implements Feeder {
 
         const entry = this.priviousManagementData.languages.find((entry) => entry.lang === caption.lang);
         if (entry == null) { continue; }
+        if (this.option.recieve.language !== caption.lang && this.option.recieve.language !== entry?.iso_639_language_code) { continue; }
 
         const specification = getTokenizeInformation(entry.iso_639_language_code, this.option);
         if (specification == null) { continue; }

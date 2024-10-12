@@ -7,7 +7,11 @@ import { ARIBB24Token } from "../../tokenizer/token";
 
 export type FeederOption = {
   timeshift: number;
-  association: 'ARIB' | 'SBTVD' | null; // null is AutoDetect
+  recieve: {
+    association: 'ARIB' | 'SBTVD' | null; // null is AutoDetect
+    type: 'Caption' | 'Superimpose';
+    language: number | string;
+  },
   tokenizer: {
     pua: boolean;
   };
@@ -16,8 +20,13 @@ export const FeederOption = {
   from (option?: Partial<FeederOption>): FeederOption {
     return {
       timeshift: 0,
-      association: null,
       ... option,
+      recieve: {
+        association: null,
+        type: 'Caption',
+        language: 0,
+        ... option?.recieve,
+      },
       tokenizer: {
         pua: false,
         ... option?.tokenizer
@@ -27,7 +36,7 @@ export const FeederOption = {
 }
 
 export const getTokenizeInformation = (language: string, option: FeederOption): [ARIBB24Tokenizer, ARIBB24ParserState] | null => {
-  switch (option.association) {
+  switch (option.recieve.association) {
     case 'ARIB': return [new ARIBJapaneseJIS8Tokenizer({ usePUA: option.tokenizer.pua }), initialState];
     case 'SBTVD': return [new ARIBBrazilianJIS8Tokenizer(), latenInitialState];
   }

@@ -3,6 +3,7 @@ import { ARIBB24Token } from "../../../tokenizer/token";
 import { CanvasRendererOption } from "./canvas-renderer-option";
 import colortable from "../colortable";
 import halfwidth from "../halfwidth";
+import namedcolor from "../namedcolor";
 
 export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTMLCanvasElement | OffscreenCanvas, state: ARIBB24ParserState, tokens: ARIBB24Token[], rendererOption: CanvasRendererOption): void => {
   // render background
@@ -175,10 +176,14 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
     context.scale(magnification[0], ARIBB24Parser.scale(state)[1] * magnification[1]);
   }
 
+  const stroke = rendererOption.color.stroke != null ? (namedcolor.get(rendererOption.color.stroke) ?? rendererOption.color.stroke) : null;
+  const orn = stroke ?? (state.ornament != null ? colortable[state.ornament] : null);
+  const foreground = rendererOption.color.foreground ?? colortable[state.foreground];
+
   // orn
-  if (rendererOption.color.stroke != null || state.ornament != null) {
+  if (orn !== null && orn !== foreground) {
     context.font = `${state.fontsize[0]}px ${font}`;
-    context.strokeStyle = rendererOption.color.stroke ?? colortable[state.ornament!];
+    context.strokeStyle = orn;
     context.lineJoin = 'round';
     context.textBaseline = 'middle';
     context.textAlign = 'center';
@@ -188,7 +193,7 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
 
   // text
   context.font = `${state.fontsize[0]}px ${font}`;
-  context.fillStyle = rendererOption.color.foreground ?? colortable[state.foreground];
+  context.fillStyle = foreground;
   context.textBaseline = 'middle';
   context.textAlign = 'center';
   context.fillText(character, 0, 0, state.fontsize[0]);
@@ -239,16 +244,19 @@ const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRendering
   // Underline
   renderUnderline(context, token, magnification, rendererOption);
 
+  const stroke = rendererOption.color.stroke != null ? (namedcolor.get(rendererOption.color.stroke) ?? rendererOption.color.stroke) : null;
+  const orn = stroke ?? (state.ornament != null ? colortable[state.ornament] : null);
+  const foreground = rendererOption.color.foreground ?? colortable[state.foreground];
 
   // orn
-  if (rendererOption.color.stroke != null || state.ornament != null) {
+  if (orn !== null && orn !== foreground) {
     for (let dy = -2; dy <= 2; dy++) {
       for (let dx = -2; dx <= 2; dx++) {
-        renderDRCSInternal(context, token, magnification, [dx, dy], rendererOption.color.stroke ?? colortable[state.ornament!]);
+        renderDRCSInternal(context, token, magnification, [dx, dy], orn);
       }
     }
   }
 
   // foreground
-  renderDRCSInternal(context, token, magnification, [0, 0], rendererOption.color.foreground ?? colortable[state.foreground]);
+  renderDRCSInternal(context, token, magnification, [0, 0], foreground);
 }
