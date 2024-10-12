@@ -1,9 +1,8 @@
 import { ARIBB24Token } from "../../../tokenizer/token";
+import { ARIBB24ParserState } from "../../../parser/index";
 import CanvasRenderer from "./canvas-renderer";
 import { RendererOption } from "../renderer-option";
-import RendererRenderingFunc from "./canvas-renderer-strategy"
-import { ARIBB24ParserState } from "../../../parser/index";
-
+import render from "./canvas-renderer-strategy"
 
 export default class CanvasMainThreadRenderer extends CanvasRenderer {
   private buffer: HTMLCanvasElement;
@@ -14,6 +13,6 @@ export default class CanvasMainThreadRenderer extends CanvasRenderer {
   }
 
   public render(state: ARIBB24ParserState, tokens: ARIBB24Token[]): void {
-    RendererRenderingFunc(this.canvas, this.buffer, state, tokens, this.option);
+    render(this.canvas, this.buffer, state, tokens, this.option);
   }
 }
