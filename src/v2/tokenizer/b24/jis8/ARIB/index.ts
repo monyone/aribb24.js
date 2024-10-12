@@ -1,8 +1,8 @@
 import { DRCS } from "../../../token";
 import ascii from "../ascii";
 import ARIBB24JIS8Tokenizer from "../tokenizer";
-import hiragana from "../hiragana";
-import katakana from "../katakana";
+import hiragana from "./hiragana";
+import katakana from "./katakana";
 import symbol_pua from "./symbol-pua";
 import symbol_unicode from "./symbol-unicode";
 
@@ -25,7 +25,7 @@ const MACRO = new Map([
   [0x6f, (Uint8Array.from([0x1b, 0x28, 0x4a, 0x1b, 0x29, 0x32, 0x1b, 0x2a, 0x20, 0x41, 0x1b, 0x2b, 0x20, 0x70, 0x0f, 0x1b, 0x7d])).buffer], // 英数, モザイクA, DRCS-1
 ]);
 
-const JPN_NORMAL_DICTS = {
+const JAPAN_NORMAL_DICTS = {
   // Character
   KANJI: { type: 'Character', code: 0x42, bytes: 2, dict: new Map<number, string>() }, // Dummy
   ASCII: { type: 'Character', code: 0x4a, bytes: 1, dict: ascii },
@@ -45,7 +45,7 @@ const JPN_NORMAL_DICTS = {
 } as const;
 
 // DRCS
-const JPN_DRCS_DICTS = {
+const JAPAN_DRCS_DICTS = {
   DRCS_0: { type: 'DRCS', code: 0x40, bytes: 2, dict: new Map<number, DRCS>() },
   DRCS_1: { type: 'DRCS', code: 0x41, bytes: 1, dict: new Map<number, DRCS>() },
   DRCS_2: { type: 'DRCS', code: 0x42, bytes: 1, dict: new Map<number, DRCS>() },
@@ -70,8 +70,8 @@ export type ARIBB24JapaneseJIS8TokenizerOption = {
 };
 
 export default class ARIBJapaneseJIS8Tokenizer extends ARIBB24JIS8Tokenizer {
-  static NORMAL_DICT_USE_PUA = { ... JPN_NORMAL_DICTS };
-  static NORMAL_DICT_USE_UNICODE = { ... JPN_NORMAL_DICTS };
+  static NORMAL_DICT_USE_PUA = { ... JAPAN_NORMAL_DICTS };
+  static NORMAL_DICT_USE_UNICODE = { ... JAPAN_NORMAL_DICTS };
   static {
     const kanji_use_pua = new Map<number, string>();
     const kanji_use_unicode = new Map<number, string>();
@@ -105,33 +105,33 @@ export default class ARIBJapaneseJIS8Tokenizer extends ARIBB24JIS8Tokenizer {
     }
 
     this.NORMAL_DICT_USE_PUA = {
-      ... JPN_NORMAL_DICTS,
+      ... JAPAN_NORMAL_DICTS,
       KANJI: {
-        ... JPN_NORMAL_DICTS.KANJI, dict: kanji_use_pua
+        ... JAPAN_NORMAL_DICTS.KANJI, dict: kanji_use_pua
       },
       ADDITIONAL_SYMBOLS:{
-        ... JPN_NORMAL_DICTS.ADDITIONAL_SYMBOLS,
+        ... JAPAN_NORMAL_DICTS.ADDITIONAL_SYMBOLS,
         dict: kanji_use_pua
       }
     };
     this.NORMAL_DICT_USE_UNICODE = {
-      ... JPN_NORMAL_DICTS,
+      ... JAPAN_NORMAL_DICTS,
       KANJI: {
-        ... JPN_NORMAL_DICTS.KANJI, dict: kanji_use_unicode
+        ... JAPAN_NORMAL_DICTS.KANJI, dict: kanji_use_unicode
       },
       ADDITIONAL_SYMBOLS: {
-        ... JPN_NORMAL_DICTS.ADDITIONAL_SYMBOLS,
+        ... JAPAN_NORMAL_DICTS.ADDITIONAL_SYMBOLS,
         dict: kanji_use_unicode
       }
     };
   }
 
   public constructor(option?: ARIBB24JapaneseJIS8TokenizerOption) {
-    const USE_NORMAL_DICT = option?.usePUA ? ARIBJapaneseJIS8Tokenizer.NORMAL_DICT_USE_PUA : ARIBJapaneseJIS8Tokenizer.NORMAL_DICT_USE_UNICODE;
+    const USING_NORMAL_DICT = option?.usePUA ? ARIBJapaneseJIS8Tokenizer.NORMAL_DICT_USE_PUA : ARIBJapaneseJIS8Tokenizer.NORMAL_DICT_USE_UNICODE;
     super(0, 2,
-      [USE_NORMAL_DICT.KANJI, USE_NORMAL_DICT.ASCII, USE_NORMAL_DICT.HIRAGANA, JPN_DRCS_DICTS.MACRO],
-      USE_NORMAL_DICT,
-      JPN_DRCS_DICTS
+      [USING_NORMAL_DICT.KANJI, USING_NORMAL_DICT.ASCII, USING_NORMAL_DICT.HIRAGANA, JAPAN_DRCS_DICTS.MACRO],
+      USING_NORMAL_DICT,
+      JAPAN_DRCS_DICTS
     );
   }
 }

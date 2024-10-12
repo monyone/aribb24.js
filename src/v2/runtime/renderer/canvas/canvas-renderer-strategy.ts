@@ -80,6 +80,18 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
   }
 }
 
+const clear = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], rendererOption: CanvasRendererOption): void => {
+  const { state } = token;
+
+  // background
+  context.clearRect(
+    (state.margin[0] + (state.position[0] + 0)  -                          0) * magnification[0],
+    (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1]) * magnification[1],
+    ARIBB24Parser.box(state)[0] * magnification[0],
+    ARIBB24Parser.box(state)[1] * magnification[1]
+  );
+}
+
 const renderBackground = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], rendererOption: CanvasRendererOption): void => {
   const { state } = token;
 
@@ -136,8 +148,11 @@ const renderUnderline = (context: CanvasRenderingContext2D | OffscreenCanvasRend
 
 const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken, magnification: [number, number], rendererOption: CanvasRendererOption): void => {
   const { state, option, character: { character: key } } = token;
-  const is_middle = state.size === CHARACTER_SIZE.Middle;
-  const character = is_middle && halfwidth.has(key) ? halfwidth.get(key)! : key;
+  const is_halfwidth = state.size === CHARACTER_SIZE.Middle || state.size === CHARACTER_SIZE.Small;
+  const replace_halfwidth = (rendererOption.replace.half && state.size === CHARACTER_SIZE.Middle) || (rendererOption.replace.small && state.size === CHARACTER_SIZE.Small)
+  const character = replace_halfwidth && halfwidth.has(key) ? halfwidth.get(key)! : key;
+  // clear
+  clear(context, token, magnification, rendererOption);
   // background
   renderBackground(context, token, magnification, rendererOption);
   // Highlight
@@ -148,13 +163,14 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
   // detect
   const font = rendererOption.font.normal;
   context.font = `${state.fontsize[0]}px ${font}`;
-  const fullwidth_font = context.measureText(character).width === state.fontsize[0];
+  const { width }  = context.measureText(character);
+  const fullwidth_font = width === state.fontsize[0];
 
   const center_x = (state.margin[0] + (state.position[0] + 0) + ARIBB24Parser.box(state)[0] / 2) * magnification[0];
   const center_y = (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1] / 2) * magnification[1];
   context.translate(center_x, center_y);
-  if (is_middle && !fullwidth_font) {
-    context.scale(magnification[0], ARIBB24Parser.scale(state)[1] * magnification[1]);
+  if (fullwidth_font || !is_halfwidth) {
+    context.scale(ARIBB24Parser.scale(state)[0] * magnification[0], ARIBB24Parser.scale(state)[1] * magnification[1]);
   } else {
     context.scale(ARIBB24Parser.scale(state)[0] * magnification[0], ARIBB24Parser.scale(state)[1] * magnification[1]);
   }
@@ -214,6 +230,8 @@ const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasR
 
 const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSPrasedToken, magnification: [number, number], rendererOption: CanvasRendererOption): void => {
   const { state } = token;
+  // clear
+  clear(context, token, magnification, rendererOption);
   // background
   renderBackground(context, token, magnification, rendererOption);
   // Highlight

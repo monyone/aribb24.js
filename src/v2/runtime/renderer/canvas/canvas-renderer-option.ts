@@ -7,6 +7,7 @@ export type CanvasRendererOption = RendererOption & {
   },
   replace: {
     half: boolean,
+    small: boolean
   }
   color: {
     stroke: string | null,
@@ -29,6 +30,7 @@ export const CanvasRendererOption = {
       },
       replace: {
         half: true,
+        small: true,
         ... option?.replace,
       },
       color: {
