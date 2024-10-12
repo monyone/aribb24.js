@@ -8,6 +8,7 @@ export type CanvasRendererOption = RendererOption & {
   replace: {
     half: boolean,
     small: boolean
+    drcs: Map<string, string>,
   }
   color: {
     stroke: string | null,
@@ -31,6 +32,7 @@ export const CanvasRendererOption = {
       replace: {
         half: true,
         small: true,
+        drcs: new Map<string, string>(),
         ... option?.replace,
       },
       color: {

@@ -4,6 +4,7 @@ import { CaptionData, CaptionManagement } from "../datagroup";
 import type { ARIBB24Token } from '../../token';
 import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, Delete, DRCS, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControl, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, YellowForeground } from "../../token";
 import ARIBB24Tokenizer from "../tokenizer";
+import md5 from "../../../util/md5";
 
 export const CONTROL_CODES = {
   NUL: 0x00,
@@ -112,6 +113,19 @@ export type MacroDictEntry = {
 };
 
 export type DictEntry = CharacterDictEntry | DRCSDictEntry | MacroDictEntry;
+
+export const replaceDRCS = (tokens: ARIBB24Token[], replace: Map<string, string>): ARIBB24Token[] => {
+  return tokens.map((token) => {
+    if (token.tag !== 'DRCS') { return token; }
+    const hash = md5(token.binary);
+
+    if (replace.has(hash)) {
+      return Character.from(replace.get(hash)!);
+    } else {
+      return token;
+    }
+  });
+}
 
 export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
   private GL: 0 | 1 | 2 | 3;

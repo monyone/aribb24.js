@@ -172,7 +172,7 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
   if (fullwidth_font || !is_halfwidth) {
     context.scale(ARIBB24Parser.scale(state)[0] * magnification[0], ARIBB24Parser.scale(state)[1] * magnification[1]);
   } else {
-    context.scale(ARIBB24Parser.scale(state)[0] * magnification[0], ARIBB24Parser.scale(state)[1] * magnification[1]);
+    context.scale(magnification[0], ARIBB24Parser.scale(state)[1] * magnification[1]);
   }
 
   // orn

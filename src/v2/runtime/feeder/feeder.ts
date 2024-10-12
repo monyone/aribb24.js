@@ -9,7 +9,7 @@ export type FeederOption = {
   timeshift: number;
   association: 'ARIB' | 'SBTVD' | null; // null is AutoDetect
   tokenizer: {
-    usePUA: boolean;
+    pua: boolean;
   };
 };
 export const FeederOption = {
@@ -19,7 +19,7 @@ export const FeederOption = {
       association: null,
       ... option,
       tokenizer: {
-        usePUA: false,
+        pua: false,
         ... option?.tokenizer
       },
     };
@@ -28,14 +28,14 @@ export const FeederOption = {
 
 export const getTokenizeInformation = (language: string, option: FeederOption): [ARIBB24Tokenizer, ARIBB24ParserState] | null => {
   switch (option.association) {
-    case 'ARIB': return [new ARIBJapaneseJIS8Tokenizer({ usePUA: option.tokenizer.usePUA }), initialState];
+    case 'ARIB': return [new ARIBJapaneseJIS8Tokenizer({ usePUA: option.tokenizer.pua }), initialState];
     case 'SBTVD': return [new ARIBBrazilianJIS8Tokenizer(), latenInitialState];
   }
 
   switch (language) {
     case 'jpn':
     case 'eng':
-      return [new ARIBJapaneseJIS8Tokenizer({ usePUA: option.tokenizer.usePUA }), initialState];
+      return [new ARIBJapaneseJIS8Tokenizer({ usePUA: option.tokenizer.pua }), initialState];
     case 'spa':
     case 'por':
       return [new ARIBBrazilianJIS8Tokenizer(), latenInitialState];
