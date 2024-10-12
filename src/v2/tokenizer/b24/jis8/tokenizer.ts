@@ -3,6 +3,7 @@ import { CaptionData, CaptionManagement } from "../datagroup";
 
 import type { ARIBB24Token } from '../../token';
 import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, Delete, DRCS, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControl, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, YellowForeground } from "../../token";
+import ARIBB24Tokenizer from "../tokenizer";
 
 export const CONTROL_CODES = {
   NUL: 0x00,
@@ -112,7 +113,7 @@ export type MacroDictEntry = {
 
 export type DictEntry = CharacterDictEntry | DRCSDictEntry | MacroDictEntry;
 
-export default abstract class JIS8Tokenizer {
+export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
   private GL: 0 | 1 | 2 | 3;
   private GR: 0 | 1 | 2 | 3;
   private GB: [DictEntry, DictEntry, DictEntry, DictEntry];

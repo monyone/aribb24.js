@@ -1,8 +1,8 @@
 import { DRCS } from "../../../token";
 import ascii from "../ascii";
-import JIS8Tokenizer from "../index";
-import hiragana from "./hiragana";
-import katakana from "./katakana";
+import ARIBB24JIS8Tokenizer from "../tokenizer";
+import hiragana from "../hiragana";
+import katakana from "../katakana";
 import symbol_pua from "./symbol-pua";
 import symbol_unicode from "./symbol-unicode";
 
@@ -23,7 +23,7 @@ const MACRO = new Map([
   [0x6d, (Uint8Array.from([0x1b, 0x24, 0x42, 0x1b, 0x29, 0x20, 0x44, 0x1b, 0x2a, 0x30, 0x1b, 0x2b, 0x20, 0x70, 0x0f, 0x1b, 0x7d])).buffer], // 漢字系, DRCS-4, ひらがな
   [0x6e, (Uint8Array.from([0x1b, 0x28, 0x31, 0x1b, 0x29, 0x30, 0x1b, 0x2a, 0x4a, 0x1b, 0x2b, 0x20, 0x70, 0x0f, 0x1b, 0x7d])).buffer], // カタカナ, ひらがな, 英数,
   [0x6f, (Uint8Array.from([0x1b, 0x28, 0x4a, 0x1b, 0x29, 0x32, 0x1b, 0x2a, 0x20, 0x41, 0x1b, 0x2b, 0x20, 0x70, 0x0f, 0x1b, 0x7d])).buffer], // 英数, モザイクA, DRCS-1
-])
+]);
 
 const JPN_NORMAL_DICTS = {
   // Character
@@ -65,11 +65,11 @@ const JPN_DRCS_DICTS = {
   MACRO: { type: 'MACRO', code: 0x70, bytes: 1, dict: MACRO },
 } as const;
 
-export type JPNJIS8TokenizerOption = {
+export type ARIBB24JapaneseJIS8TokenizerOption = {
   usePUA: boolean
 };
 
-export default class JPNJIS8Tokenizer extends JIS8Tokenizer {
+export default class ARIBJapaneseJIS8Tokenizer extends ARIBB24JIS8Tokenizer {
   static NORMAL_DICT_USE_PUA = { ... JPN_NORMAL_DICTS };
   static NORMAL_DICT_USE_UNICODE = { ... JPN_NORMAL_DICTS };
   static {
@@ -126,8 +126,8 @@ export default class JPNJIS8Tokenizer extends JIS8Tokenizer {
     };
   }
 
-  public constructor(option?: JPNJIS8TokenizerOption) {
-    const USE_NORMAL_DICT = option?.usePUA ? JPNJIS8Tokenizer.NORMAL_DICT_USE_PUA : JPNJIS8Tokenizer.NORMAL_DICT_USE_UNICODE;
+  public constructor(option?: ARIBB24JapaneseJIS8TokenizerOption) {
+    const USE_NORMAL_DICT = option?.usePUA ? ARIBJapaneseJIS8Tokenizer.NORMAL_DICT_USE_PUA : ARIBJapaneseJIS8Tokenizer.NORMAL_DICT_USE_UNICODE;
     super(0, 2,
       [USE_NORMAL_DICT.KANJI, USE_NORMAL_DICT.ASCII, USE_NORMAL_DICT.HIRAGANA, JPN_DRCS_DICTS.MACRO],
       USE_NORMAL_DICT,

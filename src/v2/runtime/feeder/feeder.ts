@@ -1,4 +1,7 @@
-import { ARIBB24ParserState } from "../../parser/index";
+import { ARIBB24ParserState, initialState } from "../../parser/index";
+import { CaptionManagement } from "../../tokenizer/b24/datagroup";
+import ARIBJapaneseJIS8Tokenizer from "../../tokenizer/b24/jis8/ARIB/index";
+import ARIBB24Tokenizer from "../../tokenizer/b24/tokenizer";
 import { ARIBB24Token } from "../../tokenizer/token";
 
 export type FeederOption = {
@@ -20,6 +23,20 @@ export const FeederOption = {
       },
     };
   }
+}
+
+export const getTokenizeInformation = (language: string, option: FeederOption): [ARIBB24Tokenizer, ARIBB24ParserState] | null => {
+  switch (option.association) {
+    case 'ARIB': return [new ARIBJapaneseJIS8Tokenizer({ usePUA: option.tokenizer.usePUA }), initialState]
+  }
+
+  switch (language) {
+    case 'jpn':
+    case 'eng':
+      return [new ARIBJapaneseJIS8Tokenizer({ usePUA: option.tokenizer.usePUA }), initialState];
+  }
+
+  return null;
 }
 
 export type FeederRawData = {

@@ -1,6 +1,6 @@
 import AVLTree from '../../util/avl';
 
-import Feeder, { FeederOption, FeederRawData, FeederTokenizedData } from './feeder';
+import Feeder, { FeederOption, FeederRawData, FeederTokenizedData, getTokenizeInformation } from './feeder';
 import extractPES from '../../tokenizer/b24/mpegts/extract';
 import extractDatagroup, { CaptionManagement } from '../../tokenizer/b24/datagroup'
 import JPNJIS8Tokenizer from '../../tokenizer/b24/jis8/ARIB/index';
@@ -83,7 +83,10 @@ export default class ARIBB24MPEGTSFeeder implements Feeder {
         const entry = this.priviousManagementData.languages.find((entry) => entry.lang === caption.lang);
         if (entry == null) { continue; }
 
-        const tokenizer = new JPNJIS8Tokenizer({ usePUA: this.option.tokenizer.usePUA });
+        const specification = getTokenizeInformation(entry.iso_639_language_code, this.option);
+        if (specification == null) { continue; }
+
+        const [tokenizer, state] = specification;
         const tokenized = tokenizer.tokenize(caption);
 
         let duration = Number.POSITIVE_INFINITY;
@@ -97,7 +100,7 @@ export default class ARIBB24MPEGTSFeeder implements Feeder {
           }
         }
 
-        this.present.insert(pts, { pts, duration, state: initialState, data: tokenized });
+        this.present.insert(pts, { pts, duration, state, data: tokenized });
       }
     }
   }

@@ -1,6 +1,6 @@
 import { ARIBB24Token, Character, CharacterSizeControlType, DRCS, OrnamentControlType } from "../tokenizer/token";
 
-const CHARACTER_SIZE = {
+export const CHARACTER_SIZE = {
   Small: 'Small',
   Middle: 'Middle',
   Normal: 'Normal',
@@ -87,6 +87,11 @@ export const initialState: Readonly<ARIBB24ParserState> = {
   // time
   elapsed_time: 0,
   end_time: null,
+};
+
+export const latenInitialState: Readonly<ARIBB24ParserState> = {
+  ... initialState,
+  size: CHARACTER_SIZE.Middle,
 };
 
 export type ARIBB24CommonParsedToken = {
