@@ -129,7 +129,10 @@ const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasR
   const { state, option, drcs: { width, height, depth, binary } } = token;
   const uint8 = new Uint8Array(binary);
 
-  context.scale(magnification[0], magnification[1]);
+  const start_x = (state.margin[0] + state.position[0] + (0 -                           0 + ARIBB24Parser.offset(state)[0])) * magnification[0];
+  const start_y = (state.margin[1] + state.position[1] + (1 - ARIBB24Parser.box(state)[1] + ARIBB24Parser.offset(state)[1])) * magnification[1];
+  context.translate(start_x, start_y);
+  context.scale(option.magnification * magnification[0], option.magnification * magnification[1]);
   context.fillStyle = color;
 
   for(let sy = 0; sy < height; sy++){
@@ -147,12 +150,7 @@ const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasR
 
       if (value === 0) { continue; }
 
-      context.fillRect(
-        (state.margin[0] + state.position[0] + (0 -                           0 + ARIBB24Parser.offset(state)[0] + x * option.magnification)),
-        (state.margin[1] + state.position[1] + (1 - ARIBB24Parser.box(state)[1] + ARIBB24Parser.offset(state)[1] + y * option.magnification)),
-        1 * option.magnification,
-        1 * option.magnification
-      );
+      context.fillRect(x, y, 1, 1);
     }
   }
 
