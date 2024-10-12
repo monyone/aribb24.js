@@ -5,7 +5,6 @@ import latinExtension from "./latin-extension";
 import specialCharacters from "./special-characters";
 
 const BRAZIL_NORMAL_DICTS = {
-  // Character
   ASCII: { type: 'Character', code: 0x4a, bytes: 1, dict: ascii },
   LATIN_EXTENSION: { type: 'Character', code: 0x4a, bytes: 1, dict: latinExtension },
   SPECIAL_CHARACTERS: { type: 'Character', code: 0x4a, bytes: 1, dict: specialCharacters },

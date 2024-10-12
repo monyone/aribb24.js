@@ -26,7 +26,6 @@ const MACRO = new Map([
 ]);
 
 const JAPAN_NORMAL_DICTS = {
-  // Character
   KANJI: { type: 'Character', code: 0x42, bytes: 2, dict: new Map<number, string>() }, // Dummy
   ASCII: { type: 'Character', code: 0x4a, bytes: 1, dict: ascii },
   HIRAGANA: { type: 'Character', code: 0x30, bytes: 1, dict: hiragana },
