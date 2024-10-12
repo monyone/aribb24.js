@@ -1,9 +1,9 @@
 import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser } from "../../../parser/index";
 import { ARIBB24Token } from "../../../tokenizer/token";
-import { ARIBB24CanvasRendererOption } from "./canvas-renderer-option";
+import { CanvasRendererOption } from "./canvas-renderer-option";
 import colortable from "../colortable";
 
-export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTMLCanvasElement | OffscreenCanvas, tokens: ARIBB24Token[], rendererOption: ARIBB24CanvasRendererOption): void => {
+export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTMLCanvasElement | OffscreenCanvas, tokens: ARIBB24Token[], rendererOption: CanvasRendererOption): void => {
   // render background
   let magnification: [number, number] = [1, 1];
   {
@@ -79,7 +79,7 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
   }
 }
 
-const renderBackground = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], rendererOption: ARIBB24CanvasRendererOption): void => {
+const renderBackground = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], rendererOption: CanvasRendererOption): void => {
   const { state } = token;
 
   // background
@@ -92,7 +92,7 @@ const renderBackground = (context: CanvasRenderingContext2D | OffscreenCanvasRen
   );
 }
 
-const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken, magnification: [number, number], rendererOption: ARIBB24CanvasRendererOption): void => {
+const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken, magnification: [number, number], rendererOption: CanvasRendererOption): void => {
   const { state, option, character: { character } } = token;
   const font = rendererOption.font.normal;
 
@@ -157,7 +157,7 @@ const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasR
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSPrasedToken, magnification: [number, number], rendererOption: ARIBB24CanvasRendererOption): void => {
+const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSPrasedToken, magnification: [number, number], rendererOption: CanvasRendererOption): void => {
   const { state } = token;
   // background
   renderBackground(context, token, magnification, rendererOption);

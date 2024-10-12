@@ -1,1 +1,1 @@
-export type ARIBB24ControllerOption = {};
+export type ControllerOption = {};

@@ -7,6 +7,6 @@ export { default as SVGProvider, ProviderOption as SVGProviderOption, ProviderRe
 export { default as HTMLRenderer, RendererOption as HTMLRendererOption } from './v1/html-renderer-experimental'
 export { default as HTMLProvider, ProviderOption as HTMLProviderOption, ProviderResult as HTMLProviderResult } from './v1/html-provider-experimental'
 
-export { default as ARIBB24Controller } from './v2/runtime/controller/controller';
-export { default as ARIBB24MPEGTSFeeder } from './v2/runtime/feeder/mpegts-feeder';
-export { default as ARIBB24CanvasMainThreadRenderer } from './v2/runtime/renderer/canvas/canvas-renderer-main';
+export { default as Controller } from './v2/runtime/controller/controller';
+export { default as MPEGTSFeeder } from './v2/runtime/feeder/mpegts-feeder';
+export { default as CanvasMainThreadRenderer } from './v2/runtime/renderer/canvas/canvas-renderer-main';

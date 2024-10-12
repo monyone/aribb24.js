@@ -1,21 +1,21 @@
 import { ARIBB24Token } from "../../tokenizer/token";
 
-export type ARIBB24FeederOption = {
+export type FeederOption = {
   timeshift: number
 };
 
-export type ARIBB24FeederRawData = {
+export type FeederRawData = {
   pts: number;
   data: ArrayBuffer;
 };
-export type ARIBB24FeederTokenizedData = {
+export type FeederTokenizedData = {
   pts: number;
   duration: number;
   data: ARIBB24Token[];
 };
 
-export default interface ARIBB24Feeder {
-  content(time: number): ARIBB24FeederTokenizedData | null;
+export default interface Feeder {
+  content(time: number): FeederTokenizedData | null;
   onAttach(): void;
   onDetach(): void;
   onSeeking(): void;

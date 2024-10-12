@@ -1,7 +1,7 @@
-export type ARIBB24RendererOption = {};
+export type RendererOption = {};
 
-export const ARIBB24RendererOption = {
-  from (option?: Partial<ARIBB24RendererOption>): ARIBB24RendererOption {
+export const RendererOption = {
+  from (option?: Partial<RendererOption>): RendererOption {
     return {
       ... option,
     };

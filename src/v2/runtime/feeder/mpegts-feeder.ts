@@ -1,6 +1,6 @@
 import AVLTree from '../../util/avl';
 
-import ARIBB24Feeder, { ARIBB24FeederOption, ARIBB24FeederRawData, ARIBB24FeederTokenizedData } from './feeder';
+import Feeder, { FeederOption, FeederRawData, FeederTokenizedData } from './feeder';
 import extractPES from '../../tokenizer/b24/mpegts/extract';
 import extractDatagroup, { CaptionManagement } from '../../tokenizer/b24/datagroup'
 import JPNJIS8Tokenizer from '../../tokenizer/b24/jis8/japan/index';
@@ -11,19 +11,19 @@ const compare = (a: number, b: number) => {
   return Math.sign(a - b) as (-1 | 0 | 1);
 }
 
-export default class ARIBB24MPEGTSFeeder implements ARIBB24Feeder {
-  private option: ARIBB24FeederOption;
+export default class ARIBB24MPEGTSFeeder implements Feeder {
+  private option: FeederOption;
   private priviousTime: number | null = null;
   private priviousManagementData: CaptionManagement | null = null;
-  private decode: AVLTree<number, ARIBB24FeederRawData> = new AVLTree<number, ARIBB24FeederRawData>(compare);
-  private decodeBuffer: ARIBB24FeederRawData[] = [];
+  private decode: AVLTree<number, FeederRawData> = new AVLTree<number, FeederRawData>(compare);
+  private decodeBuffer: FeederRawData[] = [];
   private decodingPromise: Promise<void>;
   private decodingNotify: (() => void) = Promise.resolve;
   private abortController: AbortController = new AbortController();
-  private present: AVLTree<number, ARIBB24FeederTokenizedData> = new AVLTree<number, ARIBB24FeederTokenizedData>(compare);
+  private present: AVLTree<number, FeederTokenizedData> = new AVLTree<number, FeederTokenizedData>(compare);
   private isDestroyed: boolean = false;
 
-  public constructor(option?: Partial<ARIBB24FeederOption>) {
+  public constructor(option?: Partial<FeederOption>) {
     this.option = {
       timeshift: 0,
       ... option
@@ -35,7 +35,7 @@ export default class ARIBB24MPEGTSFeeder implements ARIBB24Feeder {
     this.pump();
   }
 
-  private notify(segment: ARIBB24FeederRawData | null): void {
+  private notify(segment: FeederRawData | null): void {
     if (segment != null) {
       this.decodeBuffer.push(segment);
     } else {
@@ -110,7 +110,7 @@ export default class ARIBB24MPEGTSFeeder implements ARIBB24Feeder {
     this.decode.insert(pts / timescale, { pts: pts / timescale , data });
   }
 
-  public content(time: number): ARIBB24FeederTokenizedData | null {
+  public content(time: number): FeederTokenizedData | null {
     if (this.priviousTime != null) {
       for (const segment of this.decode.range(this.priviousTime, time)) {
         this.notify(segment);

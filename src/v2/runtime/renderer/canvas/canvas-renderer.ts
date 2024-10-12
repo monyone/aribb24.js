@@ -1,13 +1,13 @@
 import { ARIBB24Token } from "../../../tokenizer/token";
-import ARIBB24Renderer from "../renderer";
-import { ARIBB24CanvasRendererOption } from "./canvas-renderer-option";
+import Renderer from "../renderer";
+import { CanvasRendererOption } from "./canvas-renderer-option";
 
-export default abstract class ARIBB24CanvasRenderer implements ARIBB24Renderer {
-  protected option: ARIBB24CanvasRendererOption;
+export default abstract class CanvasRenderer implements Renderer {
+  protected option: CanvasRendererOption;
   protected canvas: HTMLCanvasElement;
 
-  public constructor(option?: Partial<ARIBB24CanvasRendererOption>) {
-    this.option = ARIBB24CanvasRendererOption.from(option);
+  public constructor(option?: Partial<CanvasRendererOption>) {
+    this.option = CanvasRendererOption.from(option);
     // Setup Canvas
     this.canvas = document.createElement('canvas');
     this.canvas.style.position = 'absolute';

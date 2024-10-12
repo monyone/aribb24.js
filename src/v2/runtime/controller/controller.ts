@@ -1,10 +1,10 @@
 import ARIBB24Feeder from "../feeder/feeder";
 import ARIBB24Renderer from "../renderer/renderer";
-import { ARIBB24ControllerOption } from "./controller-option";
+import { ControllerOption } from "./controller-option";
 
 export default class PGSController {
   // Option
-  private option: ARIBB24ControllerOption;
+  private option: ControllerOption;
   // Video
   private media: HTMLVideoElement | null = null;
   private container: HTMLElement | null = null;
@@ -27,7 +27,7 @@ export default class PGSController {
   // Control
   private isShowing: boolean = true;
 
-  public constructor(option?: Partial<ARIBB24ControllerOption>) {
+  public constructor(option?: Partial<ControllerOption>) {
     this.option = {
       ... option,
     }

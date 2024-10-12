@@ -1,6 +1,6 @@
 import { ARIBB24Token } from "../../tokenizer/token";
 
-export default interface ARIBB24Renderer {
+export default interface Renderer {
   render(tokens: ARIBB24Token[]): void;
   clear(): void;
   destroy(): void;
