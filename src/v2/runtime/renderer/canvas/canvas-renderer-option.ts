@@ -20,8 +20,8 @@ export const CanvasRendererOption = {
   from (option?: Partial<CanvasRendererOption>): CanvasRendererOption {
     return {
       font: {
-        normal: 'sans-serif',
-        arib: 'sans-serif',
+        normal: '"Hiragino Maru Gothic Pro", "HGMaruGothicMPRO", "BIZ UDGothic", "MS Gothic", sans-serif',
+        arib: '"Hiragino Maru Gothic Pro", "HGMaruGothicMPRO", "BIZ UDGothic", "MS Gothic", sans-serif',
         ... option?.font,
       },
       color: {
