@@ -1,4 +1,4 @@
-import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARIBB24ParserState } from "../../../parser/index";
+import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARIBB24ParserState, CHARACTER_SIZE } from "../../../parser/index";
 import { ARIBB24Token } from "../../../tokenizer/token";
 import { CanvasRendererOption } from "./canvas-renderer-option";
 import colortable from "../colortable";
@@ -142,11 +142,20 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
   // Underline
   renderUnderline(context, token, magnification, rendererOption);
 
+  // detect
   const font = rendererOption.font.normal;
+  context.font = `${state.fontsize[0]}px ${font}`;
+  const fullwidth_font = context.measureText(character).width === state.fontsize[0];
+  const is_middle = state.size === CHARACTER_SIZE.Middle;
+
   const center_x = (state.margin[0] + (state.position[0] + 0) + ARIBB24Parser.box(state)[0] / 2) * magnification[0];
   const center_y = (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1] / 2) * magnification[1];
   context.translate(center_x, center_y);
-  context.scale(ARIBB24Parser.scale(state)[0] * magnification[0], ARIBB24Parser.scale(state)[1] * magnification[1]);
+  if (is_middle && !fullwidth_font) {
+    context.scale(magnification[0], ARIBB24Parser.scale(state)[1] * magnification[1]);
+  } else {
+    context.scale(ARIBB24Parser.scale(state)[0] * magnification[0], ARIBB24Parser.scale(state)[1] * magnification[1]);
+  }
 
   // orn
   if (rendererOption.color.stroke != null || state.ornament != null) {
@@ -156,7 +165,7 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
     context.textBaseline = 'middle';
     context.textAlign = 'center';
     context.lineWidth = 4 * option.magnification;
-    context.strokeText(character, 0, 0);
+    context.strokeText(character, 0, 0, state.fontsize[0]);
   }
 
   // text
@@ -164,7 +173,7 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
   context.fillStyle = rendererOption.color.foreground ?? colortable[state.foreground];
   context.textBaseline = 'middle';
   context.textAlign = 'center';
-  context.fillText(character, 0, 0);
+  context.fillText(character, 0, 0, state.fontsize[0]);
 
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
