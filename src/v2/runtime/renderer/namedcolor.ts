@@ -1,5 +1,4 @@
 export default new Map([
-  ['Keyword', 'RGB HEX VALUEFF'],
   ['black', '#000000FF'],
   ['silver', '#C0C0C0FF'],
   ['gray', '#808080FF'],
@@ -150,4 +149,5 @@ export default new Map([
   ['whitesmoke', '#F5F5F5FF'],
   ['yellowgreen', '#9ACD32FF'],
   ['rebeccapurple', '#663399FF'],
+  ['transparent', '#00000000'],
 ]);
