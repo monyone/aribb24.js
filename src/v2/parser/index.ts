@@ -213,6 +213,16 @@ export class ARIBB24Parser {
           });
           this.move_relative_pos(1, 0);
           break;
+        case 'Space': {
+          result.push({
+            tag: 'Character',
+            character: Character.from('　'),
+            state: structuredClone(this.state),
+            option: structuredClone(this.option),
+          });
+          this.move_relative_pos(1, 0);
+          break;
+        }
         // display
         case 'SetWritingFormat': // SWF
           break;
