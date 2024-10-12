@@ -92,13 +92,57 @@ const renderBackground = (context: CanvasRenderingContext2D | OffscreenCanvasRen
   );
 }
 
+const renderHighlight = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], rendererOption: CanvasRendererOption): void => {
+  const { state, option } = token;
+
+  const x = (state.margin[0] + (state.position[0] + 0) +                           0) * magnification[0];
+  const y = (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1]) * magnification[1];
+  context.translate(x, y);
+  context.scale(magnification[0], magnification[1]);
+  context.fillStyle = rendererOption.color.foreground ?? colortable[state.foreground];
+
+  if ((state.highlight & 0b0001) !== 0) { // bottom
+    context.fillRect(0, ARIBB24Parser.box(state)[1] - 1 * option.magnification, ARIBB24Parser.box(state)[0], 1 * option.magnification);
+  }
+  if ((state.highlight & 0b0010) !== 0) { // right
+    context.fillRect(ARIBB24Parser.box(state)[0] - 1 * option.magnification, 0, 1 * option.magnification, ARIBB24Parser.box(state)[1]);
+  }
+  if ((state.highlight & 0b0100) !== 0) { // top
+    context.fillRect(0, 0, ARIBB24Parser.box(state)[0], 1 * option.magnification);
+  }
+  if ((state.highlight & 0b1000) !== 0) { // left
+    context.fillRect(0, 0, 1 * option.magnification, ARIBB24Parser.box(state)[1]);
+  }
+
+  context.setTransform(1, 0, 0, 1, 0, 0);
+}
+
+const renderUnderline = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], rendererOption: CanvasRendererOption): void => {
+  const { state, option } = token;
+
+  if (!state.underline) { return; }
+
+  const x = (state.margin[0] + (state.position[0] + 0) +                           0) * magnification[0];
+  const y = (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1]) * magnification[1];
+  context.translate(x, y);
+  context.scale(magnification[0], magnification[1]);
+  context.fillStyle = rendererOption.color.foreground ?? colortable[state.foreground];
+
+  context.fillRect(0, ARIBB24Parser.box(state)[1] - 1 * option.magnification, ARIBB24Parser.box(state)[0], 1 * option.magnification);
+
+  context.setTransform(1, 0, 0, 1, 0, 0);
+}
+
 const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken, magnification: [number, number], rendererOption: CanvasRendererOption): void => {
   const { state, option, character: { character } } = token;
-  const font = rendererOption.font.normal;
-
   // background
   renderBackground(context, token, magnification, rendererOption);
+  // Highlight
+  renderHighlight(context, token, magnification, rendererOption);
+  // Underline
+  renderUnderline(context, token, magnification, rendererOption);
 
+  const font = rendererOption.font.normal;
   const center_x = (state.margin[0] + (state.position[0] + 0) + ARIBB24Parser.box(state)[0] / 2) * magnification[0];
   const center_y = (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1] / 2) * magnification[1];
   context.translate(center_x, center_y);
@@ -161,6 +205,11 @@ const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRendering
   const { state } = token;
   // background
   renderBackground(context, token, magnification, rendererOption);
+  // Highlight
+  renderHighlight(context, token, magnification, rendererOption);
+  // Underline
+  renderUnderline(context, token, magnification, rendererOption);
+
 
   // orn
   if (rendererOption.color.stroke != null || state.ornament != null) {
