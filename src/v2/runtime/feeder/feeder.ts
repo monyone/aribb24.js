@@ -3,6 +3,7 @@ import { ARIBB24Token } from "../../tokenizer/token";
 
 export type FeederOption = {
   timeshift: number;
+  association: 'ARIB' | 'SBTVD' | null; // null is AutoDetect
   tokenizer: {
     usePUA: boolean;
   };
@@ -11,6 +12,7 @@ export const FeederOption = {
   from (option?: Partial<FeederOption>): FeederOption {
     return {
       timeshift: 0,
+      association: null,
       ... option,
       tokenizer: {
         usePUA: false,
