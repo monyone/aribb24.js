@@ -164,7 +164,7 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
   const font = rendererOption.font.normal;
   context.font = `${state.fontsize[0]}px ${font}`;
   const { width }  = context.measureText(character);
-  const fullwidth_font = width === state.fontsize[0];
+  const fullwidth_font = width >= state.fontsize[0];
 
   const center_x = (state.margin[0] + (state.position[0] + 0) + ARIBB24Parser.box(state)[0] / 2) * magnification[0];
   const center_y = (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1] / 2) * magnification[1];
