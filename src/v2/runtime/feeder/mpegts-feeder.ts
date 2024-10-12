@@ -24,11 +24,7 @@ export default class ARIBB24MPEGTSFeeder implements Feeder {
   private isDestroyed: boolean = false;
 
   public constructor(option?: Partial<FeederOption>) {
-    this.option = {
-      timeshift: 0,
-      ... option
-    };
-
+    this.option = FeederOption.from(option);
     this.decodingPromise = new Promise((resolve) => {
       this.decodingNotify = resolve;
     });
@@ -87,7 +83,7 @@ export default class ARIBB24MPEGTSFeeder implements Feeder {
         const entry = this.priviousManagementData.languages.find((entry) => entry.lang === caption.lang);
         if (entry == null) { continue; }
 
-        const tokenizer = new JPNJIS8Tokenizer();
+        const tokenizer = new JPNJIS8Tokenizer({ usePUA: this.option.tokenizer.usePUA });
         const tokenized = tokenizer.tokenize(caption);
 
         let duration = Number.POSITIVE_INFINITY;

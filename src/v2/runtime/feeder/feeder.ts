@@ -1,8 +1,23 @@
 import { ARIBB24Token } from "../../tokenizer/token";
 
 export type FeederOption = {
-  timeshift: number
+  timeshift: number;
+  tokenizer: {
+    usePUA: boolean;
+  };
 };
+export const FeederOption = {
+  from (option?: Partial<FeederOption>): FeederOption {
+    return {
+      timeshift: 0,
+      ... option,
+      tokenizer: {
+        usePUA: false,
+        ... option?.tokenizer
+      },
+    };
+  }
+}
 
 export type FeederRawData = {
   pts: number;
