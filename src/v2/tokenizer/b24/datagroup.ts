@@ -1,4 +1,5 @@
 import { ByteStream } from "../../util/bytestream";
+import EOFError from "../../util/eof";
 
 export type StatementDataUnit = {
   tag: 'Statement';
@@ -145,7 +146,7 @@ export default (data: ArrayBuffer, readSTM: boolean = false): CaptionData | null
       };
     }
   } catch (e) {
-    console.error(e);
-    return null;
+    if (e instanceof EOFError) { return null; }
+    throw e;
   }
 }

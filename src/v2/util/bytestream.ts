@@ -1,3 +1,5 @@
+import EOFError from "./eof";
+
 export class ByteStream {
   private view: DataView;
   private offset: number;
@@ -17,7 +19,7 @@ export class ByteStream {
 
   public read(length: number): ArrayBuffer {
     if (!this.exists(length)) {
-      throw new Error('Detected EOF!');
+      throw new EOFError('Detected EOF!');
     }
 
     const result = this.view.buffer.slice(this.offset, this.offset + length);
@@ -27,7 +29,7 @@ export class ByteStream {
 
   public peekU8(): number {
     if (!this.exists(1)) {
-      throw new Error('Detected EOF!');
+      throw new EOFError('Detected EOF!');
     }
 
     return this.view.getUint8(this.offset);
@@ -41,7 +43,7 @@ export class ByteStream {
 
   public peekU16(): number {
     if (!this.exists(2)) {
-      throw new Error('Detected EOF!');
+      throw new EOFError('Detected EOF!');
     }
 
     return this.view.getUint16(this.offset, false);
@@ -55,7 +57,7 @@ export class ByteStream {
 
   public peekU24(): number {
     if (!this.exists(3)) {
-      throw new Error('Detected EOF!');
+      throw new EOFError('Detected EOF!');
     }
 
     return this.view.getUint16(this.offset, false) * (2 ** 8) + this.view.getUint8(this.offset + 2);
@@ -69,7 +71,7 @@ export class ByteStream {
 
   public peekU32(): number {
     if (!this.exists(4)) {
-      throw new Error('Detected EOF!');
+      throw new EOFError('Detected EOF!');
     }
 
     return this.view.getUint32(this.offset, false);
