@@ -1,3 +1,4 @@
+import { ARIBB24ParserState } from "../../parser/index";
 import { ARIBB24Token } from "../../tokenizer/token";
 
 export type FeederOption = {
@@ -26,6 +27,7 @@ export type FeederRawData = {
 export type FeederTokenizedData = {
   pts: number;
   duration: number;
+  state: ARIBB24ParserState;
   data: ARIBB24Token[];
 };
 

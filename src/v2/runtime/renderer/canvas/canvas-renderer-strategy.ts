@@ -1,16 +1,16 @@
-import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser } from "../../../parser/index";
+import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARIBB24ParserState } from "../../../parser/index";
 import { ARIBB24Token } from "../../../tokenizer/token";
 import { CanvasRendererOption } from "./canvas-renderer-option";
 import colortable from "../colortable";
 
-export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTMLCanvasElement | OffscreenCanvas, tokens: ARIBB24Token[], rendererOption: CanvasRendererOption): void => {
+export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTMLCanvasElement | OffscreenCanvas, state: ARIBB24ParserState, tokens: ARIBB24Token[], rendererOption: CanvasRendererOption): void => {
   // render background
   let magnification: [number, number] = [1, 1];
   {
     const context = buffer.getContext('2d');
     if (context == null) { return; }
 
-    const parser = new ARIBB24Parser();
+    const parser = new ARIBB24Parser(state);
     for (const token of parser.parse(tokens)) {
       const plane_width = token.state.plane[0];
       const plane_height = token.state.plane[1];

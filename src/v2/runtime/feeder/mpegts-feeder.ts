@@ -3,9 +3,9 @@ import AVLTree from '../../util/avl';
 import Feeder, { FeederOption, FeederRawData, FeederTokenizedData } from './feeder';
 import extractPES from '../../tokenizer/b24/mpegts/extract';
 import extractDatagroup, { CaptionManagement } from '../../tokenizer/b24/datagroup'
-import JPNJIS8Tokenizer from '../../tokenizer/b24/jis8/japan/index';
+import JPNJIS8Tokenizer from '../../tokenizer/b24/jis8/ARIB/index';
 import { ClearScreen } from '../../tokenizer/token';
-
+import { initialState } from '../../parser/index';
 
 const compare = (a: number, b: number) => {
   return Math.sign(a - b) as (-1 | 0 | 1);
@@ -73,7 +73,7 @@ export default class ARIBB24MPEGTSFeeder implements Feeder {
         if (caption.tag === 'CaptionManagement') {
           if (this.priviousManagementData?.group === caption.group) { continue; }
           this.priviousManagementData = caption;
-          this.present.insert(pts, { pts, duration: Number.POSITIVE_INFINITY, data: [ClearScreen.from()] });
+          this.present.insert(pts, { pts, duration: Number.POSITIVE_INFINITY, state: initialState, data: [ClearScreen.from()] });
           continue;
         }
 
@@ -97,7 +97,7 @@ export default class ARIBB24MPEGTSFeeder implements Feeder {
           }
         }
 
-        this.present.insert(pts, { pts, duration, data: tokenized });
+        this.present.insert(pts, { pts, duration, state: initialState, data: tokenized });
       }
     }
   }

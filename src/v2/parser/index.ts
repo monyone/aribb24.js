@@ -62,7 +62,7 @@ const ARIBB24ParserStateOption = {
   }
 }
 
-export const initialState: ARIBB24ParserState = {
+export const initialState: Readonly<ARIBB24ParserState> = {
   // display
   plane: [960, 540],
   area: [960, 540],
@@ -116,7 +116,7 @@ export class ARIBB24Parser {
   private state: ARIBB24ParserState;
   private option: ARIBB24ParserOption;
 
-  public constructor(state: ARIBB24ParserState = initialState, option?: ARIBB24ParserOption) {
+  public constructor(state: Readonly<ARIBB24ParserState> = initialState, option?: ARIBB24ParserOption) {
     this.state = structuredClone(state);
     this.option = ARIBB24ParserStateOption.from(option);
     // magnification

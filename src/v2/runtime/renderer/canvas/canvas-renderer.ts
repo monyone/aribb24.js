@@ -1,3 +1,4 @@
+import { ARIBB24ParserState } from "../../../parser/index";
 import { ARIBB24Token } from "../../../tokenizer/token";
 import Renderer from "../renderer";
 import { CanvasRendererOption } from "./canvas-renderer-option";
@@ -34,7 +35,7 @@ export default abstract class CanvasRenderer implements Renderer {
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
-  public abstract render(tokens: ARIBB24Token[]): void;
+  public abstract render(state: ARIBB24ParserState, tokens: ARIBB24Token[]): void;
 
   public onAttach(element: HTMLElement): void {
     element.appendChild(this.canvas);
