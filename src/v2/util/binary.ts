@@ -22,7 +22,7 @@ export function binaryUTF8ToString(binary: Uint8Array, begin: number, end: numbe
 
     return decoder.decode(array);
   } else {
-    return window.decodeURIComponent(binaryToPercentString(binary, begin, end));
+    return decodeURIComponent(binaryToPercentString(binary, begin, end));
   }
 }
 
@@ -38,7 +38,7 @@ export function binaryISO85591ToString(binary: Uint8Array, begin: number, end: n
 }
 
 export function base64ToUint8Array(base64: string): Uint8Array {
-  const binary = window.atob(base64);
+  const binary = atob(base64);
   const result = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) { result[i] = binary.charCodeAt(i); }
   return result;
