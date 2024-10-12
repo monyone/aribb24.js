@@ -5,6 +5,9 @@ export type CanvasRendererOption = RendererOption & {
     normal: string;
     arib: string;
   },
+  replace: {
+    half: boolean,
+  }
   color: {
     stroke: string | null,
     foreground: string | null,
@@ -23,6 +26,10 @@ export const CanvasRendererOption = {
         normal: '"Hiragino Maru Gothic Pro", "HGMaruGothicMPRO", "BIZ UDGothic", "MS Gothic", sans-serif',
         arib: '"Hiragino Maru Gothic Pro", "HGMaruGothicMPRO", "BIZ UDGothic", "MS Gothic", sans-serif',
         ... option?.font,
+      },
+      replace: {
+        half: true,
+        ... option?.replace,
       },
       color: {
         stroke: null,

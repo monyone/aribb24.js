@@ -2,6 +2,7 @@ import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARI
 import { ARIBB24Token } from "../../../tokenizer/token";
 import { CanvasRendererOption } from "./canvas-renderer-option";
 import colortable from "../colortable";
+import halfwidth from "../halfwidth";
 
 export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTMLCanvasElement | OffscreenCanvas, state: ARIBB24ParserState, tokens: ARIBB24Token[], rendererOption: CanvasRendererOption): void => {
   // render background
@@ -134,7 +135,9 @@ const renderUnderline = (context: CanvasRenderingContext2D | OffscreenCanvasRend
 }
 
 const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken, magnification: [number, number], rendererOption: CanvasRendererOption): void => {
-  const { state, option, character: { character } } = token;
+  const { state, option, character: { character: key } } = token;
+  const is_middle = state.size === CHARACTER_SIZE.Middle;
+  const character = is_middle && halfwidth.has(key) ? halfwidth.get(key)! : key;
   // background
   renderBackground(context, token, magnification, rendererOption);
   // Highlight
@@ -146,7 +149,6 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
   const font = rendererOption.font.normal;
   context.font = `${state.fontsize[0]}px ${font}`;
   const fullwidth_font = context.measureText(character).width === state.fontsize[0];
-  const is_middle = state.size === CHARACTER_SIZE.Middle;
 
   const center_x = (state.margin[0] + (state.position[0] + 0) + ARIBB24Parser.box(state)[0] / 2) * magnification[0];
   const center_y = (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1] / 2) * magnification[1];
