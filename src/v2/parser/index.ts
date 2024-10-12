@@ -363,6 +363,7 @@ export class ARIBB24Parser {
               break;
             }
           }
+          break;
         // time
         case 'ClearScreen':
           result.push({
