@@ -125,6 +125,7 @@ export default class ARIBB24MPEGTSFeeder implements Feeder {
   private clear(): void {
     this.present.clear();
     this.priviousTime = null;
+    this.priviousManagementData = null;
     this.notify(null);
   }
 
