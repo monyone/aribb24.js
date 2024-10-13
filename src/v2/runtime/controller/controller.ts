@@ -168,16 +168,21 @@ export default class PGSController {
       return;
     }
 
-    // current pts is same as before, ignore it
-    if (current?.pts === this.privious_pts) { return; }
-    // paint
-    if (current == null || currentTime >= current.pts + current.duration) {
+    // render
+    if (current == null) { // current is null
+      if (this.privious_pts == null) { return; }
       this.renderers.forEach((renderer) => renderer.clear());
-    } else {
+      this.privious_pts = null;
+    } else if (currentTime >= current.pts + current.duration) { // cue duration expired, clear
+      const end = current.pts + current.duration;
+      if (this.privious_pts === end) { return; }
+      this.renderers.forEach((renderer) => renderer.clear());
+      this.privious_pts = end; // end is finite
+    } else { // render
+      if (this.privious_pts === current.pts) { return; }
       this.renderers.forEach((renderer) => renderer.render(current.state, current.data));
+      this.privious_pts = current.pts
     }
-    // Update privious information
-    this.privious_pts = current?.pts ?? null;
   }
 
   private clear() {
