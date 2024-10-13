@@ -21,6 +21,7 @@ export default class HLSFeeder extends DecodingFeeder {
   }
 
   public attachMedia(media: HTMLVideoElement, container?: HTMLElement): void {
+    this.detachMedia();
     this.media = media;
 
     this.setupHandlers();
@@ -65,6 +66,10 @@ export default class HLSFeeder extends DecodingFeeder {
     this.media.textTracks.removeEventListener('removetrack', this.onRemoveTrackHandler);
     this.media.removeEventListener('play', this.onPlayHandler);
     this.media.removeEventListener('pause', this.onPauseHandler);
+  }
+
+  public destroy(): void {
+    this.detachMedia();
   }
 
   private registerID3Track(): void {
