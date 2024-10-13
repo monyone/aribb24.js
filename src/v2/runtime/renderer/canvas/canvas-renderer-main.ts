@@ -4,6 +4,7 @@ import CanvasRenderer from "./canvas-renderer";
 import { RendererOption } from "../renderer-option";
 import render from "./canvas-renderer-strategy"
 import { replaceDRCS } from "../../../tokenizer/b24/jis8/tokenizer";
+import { CaptionLanguageInformation } from "../../../tokenizer/b24/datagroup";
 
 export default class CanvasMainThreadRenderer extends CanvasRenderer {
   private buffer: HTMLCanvasElement;
@@ -38,7 +39,7 @@ export default class CanvasMainThreadRenderer extends CanvasRenderer {
     }
   }
 
-  public render(initialState: ARIBB24ParserState, tokens: ARIBB24Token[]): void {
+  public render(initialState: ARIBB24ParserState, tokens: ARIBB24Token[], info: CaptionLanguageInformation): void {
     render(this.canvas, this.buffer, initialState, replaceDRCS(tokens, this.option.replace.drcs), this.option);
   }
 

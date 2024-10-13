@@ -26,8 +26,6 @@ const CHARACTER_SIZE_MAP = new Map<(typeof CHARACTER_SIZE)[keyof typeof CHARACTE
 ]);
 
 export type ARIBB24ParserState = {
-  // association
-  association: 'ARIB' | 'SBTVD';
   // spacing
   plane: [number, number];
   area: [number, number];
@@ -66,8 +64,6 @@ const ARIBB24ParserStateOption = {
 }
 
 export const initialState: Readonly<ARIBB24ParserState> = {
-  // association
-  association: 'ARIB',
   // display
   plane: [960, 540],
   area: [960, 540],
@@ -97,7 +93,6 @@ export const initialState: Readonly<ARIBB24ParserState> = {
 export const latenInitialState: Readonly<ARIBB24ParserState> = {
   ... initialState,
   // association
-  association: 'SBTVD',
   size: CHARACTER_SIZE.Middle,
 };
 

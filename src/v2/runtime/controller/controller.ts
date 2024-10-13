@@ -187,7 +187,7 @@ export default class PGSController {
       if (current == null || currentTime >= current.pts + current.duration) {
         this.renderers.forEach((renderer) => renderer.clear());
       } else {
-        this.renderers.forEach((renderer) => renderer.render(current.state, current.data));
+        this.renderers.forEach((renderer) => renderer.render(current.state, current.data, current.info));
       }
 
       return;
@@ -205,7 +205,7 @@ export default class PGSController {
       this.privious_pts = end; // end is finite
     } else { // render
       if (this.privious_pts === current.pts) { return; }
-      this.renderers.forEach((renderer) => renderer.render(current.state, current.data));
+      this.renderers.forEach((renderer) => renderer.render(current.state, current.data, current.info));
       this.privious_pts = current.pts
 
       // Builtin Sound Callback

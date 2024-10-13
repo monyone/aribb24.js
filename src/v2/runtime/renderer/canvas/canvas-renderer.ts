@@ -1,4 +1,5 @@
 import { ARIBB24ParserState } from "../../../parser/index";
+import { CaptionLanguageInformation } from "../../../tokenizer/b24/datagroup";
 import { ARIBB24Token } from "../../../tokenizer/token";
 import Renderer from "../renderer";
 import { CanvasRendererOption } from "./canvas-renderer-option";
@@ -27,7 +28,7 @@ export default abstract class CanvasRenderer implements Renderer {
   public show(): void {
     this.canvas.style.visibility = 'visible';
   }
-  public abstract render(initialState: ARIBB24ParserState, tokens: ARIBB24Token[]): void;
+  public abstract render(initialState: ARIBB24ParserState, tokens: ARIBB24Token[], info: CaptionLanguageInformation): void;
 
   public onAttach(element: HTMLElement): void {
     element.appendChild(this.canvas);

@@ -71,7 +71,16 @@ export default abstract class DecodingFeeder implements Feeder {
         if (caption.tag === 'CaptionManagement') {
           if (this.priviousManagementData?.group === caption.group) { continue; }
           this.priviousManagementData = caption;
-          this.present.insert(pts, { pts, duration: Number.POSITIVE_INFINITY, state: initialState, data: [ClearScreen.from()] });
+          this.present.insert(pts, {
+            pts,
+            duration: Number.POSITIVE_INFINITY,
+            state: initialState,
+            info: {
+              association: 'UNKNOWN',
+              language: 'und',
+            },
+            data: [ClearScreen.from()]
+          });
           continue;
         }
 
@@ -85,7 +94,7 @@ export default abstract class DecodingFeeder implements Feeder {
         const specification = getTokenizeInformation(entry.iso_639_language_code, this.option);
         if (specification == null) { continue; }
 
-        const [tokenizer, state] = specification;
+        const [association, tokenizer, state] = specification;
         const tokenized = tokenizer.tokenize(caption);
 
         let duration = Number.POSITIVE_INFINITY;
@@ -99,7 +108,16 @@ export default abstract class DecodingFeeder implements Feeder {
           }
         }
 
-        this.present.insert(pts, { pts, duration, state, data: tokenized });
+        this.present.insert(pts, {
+          pts,
+          duration,
+          state,
+          info: {
+            association,
+            language: entry.iso_639_language_code,
+          },
+          data: tokenized
+        });
       }
     }
   }

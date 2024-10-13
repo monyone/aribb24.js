@@ -40,6 +40,11 @@ export type CaptionStatement = {
 }
 export type CaptionData = CaptionManagement | CaptionStatement;
 
+export type CaptionLanguageInformation = {
+  association: 'ARIB' | 'SBTVD' | 'UNKNOWN',
+  language: string;
+};
+
 export default (data: ArrayBuffer, readSTM: boolean = false): CaptionData | null => {
   try {
     const stream = new ByteStream(data);

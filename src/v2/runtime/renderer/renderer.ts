@@ -1,8 +1,9 @@
 import { ARIBB24ParserState } from "../../parser/index";
+import { CaptionLanguageInformation } from "../../tokenizer/b24/datagroup";
 import { ARIBB24Token } from "../../tokenizer/token";
 
 export default interface Renderer {
-  render(initialState: ARIBB24ParserState, tokens: ARIBB24Token[]): void;
+  render(initialState: ARIBB24ParserState, tokens: ARIBB24Token[], info: CaptionLanguageInformation): void;
   clear(): void;
   hide(): void;
   show(): void;
