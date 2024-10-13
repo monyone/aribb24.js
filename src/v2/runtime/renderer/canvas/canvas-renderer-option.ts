@@ -1,3 +1,4 @@
+import type { PathElement } from "../additional-symbols-glyph";
 import { RendererOption } from "../renderer-option";
 
 export type CanvasRendererOption = RendererOption & {
@@ -9,6 +10,7 @@ export type CanvasRendererOption = RendererOption & {
     half: boolean,
     small: boolean
     drcs: Map<string, string>,
+    glyph: Map<string, PathElement>,
   }
   color: {
     stroke: string | null,
@@ -33,6 +35,7 @@ export const CanvasRendererOption = {
         half: true,
         small: true,
         drcs: new Map<string, string>(),
+        glyph: new Map<string, PathElement>(),
         ... option?.replace,
       },
       color: {

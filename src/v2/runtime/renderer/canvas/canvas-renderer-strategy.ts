@@ -161,24 +161,52 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
   // Underline
   renderUnderline(context, token, magnification, rendererOption);
 
+  const stroke = rendererOption.color.stroke != null ? (namedcolor.get(rendererOption.color.stroke) ?? rendererOption.color.stroke) : null;
+  const orn = stroke ?? (state.ornament != null ? colortable[state.ornament] : null);
+  const foreground = rendererOption.color.foreground ?? colortable[state.foreground];
+
+  const center_x = Math.floor((state.margin[0] + (state.position[0] + 0) + ARIBB24Parser.box(state)[0] / 2) * magnification[0]);
+  const center_y = Math.floor((state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1] / 2) * magnification[1]);
+  context.translate(center_x, center_y);
+
+  // if embedded glyph, use
+  if (rendererOption.replace.glyph.has(character)) {
+    const { viewBox, path } = rendererOption.replace.glyph.get(character)!
+    const path2d = new Path2D(path);
+
+    const [sx, sy, dx, dy] = viewBox
+    const width = dx - sx
+    const height = dy - sy
+    context.scale(state.fontsize[0] / width, state.fontsize[1] / height);
+    context.translate(sx, sy);
+
+    // orn
+    if (orn !== null && orn !== foreground) {
+      context.strokeStyle = orn;
+      context.lineJoin = 'round';
+      context.lineWidth = 4 * option.magnification;
+      context.stroke(path2d);
+    }
+
+    // text
+    context.fillStyle = foreground;
+    context.fill(path2d);
+
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    return;
+  }
+
   // detect
   const font = rendererOption.font.normal;
   context.font = `${state.fontsize[0]}px ${font}`;
   const { width }  = context.measureText(character);
   const fullwidth_font = width >= state.fontsize[0];
 
-  const center_x = (state.margin[0] + (state.position[0] + 0) + ARIBB24Parser.box(state)[0] / 2) * magnification[0];
-  const center_y = (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1] / 2) * magnification[1];
-  context.translate(center_x, center_y);
   if (fullwidth_font || !is_halfwidth) {
     context.scale(ARIBB24Parser.scale(state)[0] * magnification[0], ARIBB24Parser.scale(state)[1] * magnification[1]);
   } else {
     context.scale(magnification[0], ARIBB24Parser.scale(state)[1] * magnification[1]);
   }
-
-  const stroke = rendererOption.color.stroke != null ? (namedcolor.get(rendererOption.color.stroke) ?? rendererOption.color.stroke) : null;
-  const orn = stroke ?? (state.ornament != null ? colortable[state.ornament] : null);
-  const foreground = rendererOption.color.foreground ?? colortable[state.foreground];
 
   // orn
   if (orn !== null && orn !== foreground) {
@@ -188,7 +216,7 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
     context.textBaseline = 'middle';
     context.textAlign = 'center';
     context.lineWidth = 4 * option.magnification;
-    context.strokeText(character, 0, 0, state.fontsize[0]);
+    context.strokeText(character, 0, 0);
   }
 
   // text
@@ -196,7 +224,7 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
   context.fillStyle = foreground;
   context.textBaseline = 'middle';
   context.textAlign = 'center';
-  context.fillText(character, 0, 0, state.fontsize[0]);
+  context.fillText(character, 0, 0);
 
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
