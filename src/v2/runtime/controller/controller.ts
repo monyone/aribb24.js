@@ -203,15 +203,15 @@ export default class PGSController {
       if (this.privious_pts === end) { return; }
       this.renderers.forEach((renderer) => renderer.clear());
       this.privious_pts = end; // end is finite
+    } else { // render
+      if (this.privious_pts === current.pts) { return; }
+      this.renderers.forEach((renderer) => renderer.render(current.state, current.data));
+      this.privious_pts = current.pts
 
       // Builtin Sound Callback
       for (const token of current.data.filter((data) => data.tag === 'BuiltinSoundReplay')) {
         this.emitter.emit(EventType.BuiltinSound, BuiltinSound.from(token.sound));
       }
-    } else { // render
-      if (this.privious_pts === current.pts) { return; }
-      this.renderers.forEach((renderer) => renderer.render(current.state, current.data));
-      this.privious_pts = current.pts
     }
   }
 

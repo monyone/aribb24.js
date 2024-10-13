@@ -5,6 +5,7 @@ import type { ARIBB24Token } from '../../token';
 import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, BuiltinSoundReplay, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, Delete, DRCS, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControl, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, YellowForeground } from "../../token";
 import ARIBB24Tokenizer from "../tokenizer";
 import md5 from "../../../util/md5";
+import { NotImplementedError, UnreachableError } from "../../../util/error";
 
 export const CONTROL_CODES = {
   NUL: 0x00,
@@ -187,7 +188,7 @@ export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
             break;
           default:
             const exhaustive: never = type;
-            throw new Error(`Undefined Dict Type in STD-B24 ARIB Caption (${exhaustive})`);
+            throw new UnreachableError(`Undefined Dict Type in STD-B24 ARIB Caption (${exhaustive})`);
         }
 
         continue;
@@ -214,7 +215,7 @@ export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
             break;
           default:
             const exhaustive: never = type;
-            throw new Error(`Undefined Dict Type in STD-B24 ARIB Caption (${exhaustive})`);
+            throw new UnreachableError(`Undefined Dict Type in STD-B24 ARIB Caption (${exhaustive})`);
         }
 
         continue;
@@ -295,7 +296,7 @@ export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
               break;
             default:
               const exhaustive: never = type;
-              throw new Error(`Undefined Dict Type in STD-B24 ARIB Caption (${exhaustive})`);
+              throw new UnreachableError(`Undefined Dict Type in STD-B24 ARIB Caption (${exhaustive})`);
           }
 
           break;
@@ -380,7 +381,7 @@ export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
               break;
             default:
               const exhaustive: never = type;
-              throw new Error(`Undefined Dict Type in STD-B24 ARIB Caption (${exhaustive})`);
+              throw new UnreachableError(`Undefined Dict Type in STD-B24 ARIB Caption (${exhaustive})`);
           }
 
           break;
@@ -544,8 +545,7 @@ export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
           break;
         }
         case CONTROL_CODES.MACRO: {
-          // TODO:
-          throw new Error('Not Implemeted!');
+          throw new NotImplementedError(`MACRO is Not Implemeted!`);
         }
         case CONTROL_CODES.HLC: {
           const P1 = stream.readU8() & 0x0F;
@@ -584,14 +584,12 @@ export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
 
           switch (F) {
             case CSI_CODE.GSM:
-              // TODO:
-              break;
+              throw new NotImplementedError(`GSM is Not Implemented!`);
             case CSI_CODE.SWF:
               result.push(SetWritingFormat.from(values[0]));
               break;
             case CSI_CODE.CCC:
-              // TODO:
-              break;
+              throw new NotImplementedError(`CCC is Not Implemented!`);
             case CSI_CODE.SDF:
               result.push(SetDisplayFormat.from(values[0], values[1]));
               break;
@@ -605,17 +603,13 @@ export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
               result.push(SetVerticalSpacing.from(values[0]));
               break;
             case CSI_CODE.PLD:
-              // TODO:
-              break;
+              throw new NotImplementedError(`PLD is Not Implemented!`);
             case CSI_CODE.PLU:
-              // TODO:
-              break;
+              throw new NotImplementedError(`PLU is Not Implemented!`);
             case CSI_CODE.GAA:
-              // TODO:
-              break;
+              throw new NotImplementedError(`GAA is Not Implemented!`);
             case CSI_CODE.SRC:
-              // TODO:
-              break;
+              throw new NotImplementedError(`SRC is Not Implemented!`);
             case CSI_CODE.SDP:
               result.push(SetDisplayPosition.from(values[0], values[1]));
               break;
@@ -623,8 +617,7 @@ export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
               result.push(ActiveCoordinatePositionSet.from(values[0], values[1]));
               break;
             case CSI_CODE.TCC:
-              // TODO:
-              break;
+              throw new NotImplementedError(`TCC is Not Implemented!`);
             case CSI_CODE.ORN:
               switch (values[0]) {
                 case 0x00:
@@ -636,34 +629,27 @@ export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
               }
               break;
             case CSI_CODE.MDF:
-              // TODO:
-              break;
+              throw new NotImplementedError(`MDF is Not Implemented!`);
             case CSI_CODE.CFS:
-              // TODO:
-              break;
+              throw new NotImplementedError(`CFS is Not Implemented!`);
             case CSI_CODE.XCS:
-              // TODO:
-              break;
+              throw new NotImplementedError(`XCS is Not Implemented!`);
             case CSI_CODE.SCR:
-              // TODO:
-              break;
+              throw new NotImplementedError(`SCR is Not Implemented!`);
             case CSI_CODE.PRA:
               result.push(BuiltinSoundReplay.from(values[0]));
               break;
             case CSI_CODE.ACS:
-              // TODO:
-              break;
+              throw new NotImplementedError(`ACS is Not Implemented!`);
             case CSI_CODE.UED:
-              // TODO:
-              break;
+              throw new NotImplementedError(`UED is Not Implemented!`);
             case CSI_CODE.RCS:
-              // TODO:
+              //throw new NotImplementedError(`RCS is Not Implemented!`);
               break;
             case CSI_CODE.SCS:
-              // TODO:
-              break;
+              throw new NotImplementedError(`SCS is Not Implemented!`);
             default:
-              throw new Error(`Undefined CSI Code in STD-B24 ARIB Caption (0x${F.toString(16)})`);
+              throw new NotImplementedError(`Unhandled CSI Code in STD-B24 ARIB Caption (0x${F.toString(16)})`);
           }
           break;
         }
@@ -671,7 +657,7 @@ export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
           const P1 = stream.readU8();
           switch (P1) {
             case 0x20: {
-              const time = (stream.readU8() & 0x3F) / 10
+              const time = (stream.readU8() & 0x3F) / 10;
               result.push(TimeControlWait.from(time));
               break;
             }
@@ -689,14 +675,14 @@ export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
             }
             case 0x29: {
               // FIXME: I can't understand this operation....
-              throw new Error('Not Implemeted!');
+              throw new NotImplementedError(`TIME 0x29 is Not Implemeted!`);
             }
           }
           break;
         }
         default: {
           const exhaustive: never = control;
-          throw new Error(`Undefined Conrtol Code in STD-B24 ARIB Caption (0x${(exhaustive as number).toString(16)})`);
+          throw new UnreachableError(`Undefined Conrtol Code in STD-B24 ARIB Caption (0x${(exhaustive as number).toString(16)})`);
         }
       }
     }

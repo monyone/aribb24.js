@@ -1,4 +1,5 @@
 import { ARIBB24Token, Character, CharacterSizeControlType, DRCS, OrnamentControlType } from "../tokenizer/token";
+import { UnreachableError } from "../util/error";
 
 export const CHARACTER_SIZE = {
   Small: 'Small',
@@ -235,16 +236,16 @@ export class ARIBB24Parser {
             case 4:
               break;
             case 5:
-              this.state.plane = [1920, 1080];
+              this.state.plane = [1920 * this.option.magnification, 1080 * this.option.magnification];
               break;
             case 7:
-              this.state.plane = [960, 540];
+              this.state.plane = [960 * this.option.magnification, 540 * this.option.magnification];
               break;
             case 9:
-              this.state.plane = [720, 480];
+              this.state.plane = [720 * this.option.magnification, 480 * this.option.magnification];
               break;
             case 11:
-              this.state.plane = [1280, 720];
+              this.state.plane = [1280 * this.option.magnification, 720 * this.option.magnification];
               break;
             // vertical
             default:
@@ -323,7 +324,7 @@ export class ARIBB24Parser {
               break;
             default:
               const exhaustive: never = token;
-              throw new Error(`Undefined Size Type in STD-B24 ARIB Caption (${exhaustive})`);
+              throw new UnreachableError(`Undefined Size Type in STD-B24 ARIB Caption (${exhaustive})`);
           }
           break;
         // pallet

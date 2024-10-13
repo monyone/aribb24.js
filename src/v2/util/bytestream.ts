@@ -1,4 +1,4 @@
-import EOFError from "./eof";
+import { EOFError } from "./error";
 
 export class ByteStream {
   private view: DataView;

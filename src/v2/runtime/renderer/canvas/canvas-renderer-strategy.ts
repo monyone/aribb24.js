@@ -4,6 +4,7 @@ import { CanvasRendererOption } from "./canvas-renderer-option";
 import colortable from "../colortable";
 import halfwidth from "../halfwidth";
 import namedcolor from "../namedcolor";
+import { UnreachableError } from "../../../util/error";
 
 export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTMLCanvasElement | OffscreenCanvas, state: ARIBB24ParserState, tokens: ARIBB24Token[], rendererOption: CanvasRendererOption): void => {
   // render background
@@ -48,7 +49,7 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
           break;
         default:
           const exhaustive: never = token;
-          throw new Error(`Unhandled ARIB Parsed Token (${exhaustive})`);
+          throw new UnreachableError(`Unhandled ARIB Parsed Token (${exhaustive})`);
       }
     }
   }

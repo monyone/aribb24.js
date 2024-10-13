@@ -62,7 +62,6 @@ export default abstract class DecodingFeeder implements Feeder {
   private async pump() {
     while (!this.isDestroyed) {
       for await (const { pts, data } of this.generator(this.abortController.signal)) {
-        // TODO: FIXME: NEED* 個々のロジックは外部に出す
         const datagroup = extractPES(data);
         if (datagroup == null) { continue; }
         if (datagroup.tag !== this.option.recieve.type) { continue; }
