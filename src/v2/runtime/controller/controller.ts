@@ -18,7 +18,9 @@ export default class PGSController {
   private timer: number | null = null;
   // Seeking Handler
   private readonly onSeekingHandler = this.onSeeking.bind(this);
-  private readonly onSeekedHandler = this.onSeeked.bind(this);
+  // Play/Pause Handler
+  private readonly onPlayHandler = this.onPlay.bind(this);
+  private readonly onPauseHandler = this.onPause.bind(this);
   // Renderer
   private renderers: ARIBB24Renderer[] = [];
   private privious_pts: number | null = null;
@@ -43,9 +45,6 @@ export default class PGSController {
       this.renderers.forEach((renderer) => renderer.onAttach(this.container!));
     }
     this.setupHandlers();
-
-    // prepare Event Loop
-    this.onTimeupdate();
   }
 
   public detachMedia(): void {
@@ -61,8 +60,9 @@ export default class PGSController {
 
     // setup media handler
     this.media.addEventListener('seeking', this.onSeekingHandler);
-    this.media.addEventListener('seeked', this.onSeekedHandler);
     this.media.addEventListener('resize', this.onVideoResizeHandler);
+    this.media.addEventListener('play', this.onPlayHandler);
+    this.media.addEventListener('pause', this.onPauseHandler);
 
     // setup container Resize Handler
     this.resize_observer = new ResizeObserver(this.onContainerResizeHandler);
@@ -71,11 +71,10 @@ export default class PGSController {
 
   private cleanupHandlers() {
     // cleanup media seeking handler
-    if (this.media) {
-      this.media.removeEventListener('seeking', this.onSeekingHandler);
-      this.media.removeEventListener('seeked', this.onSeekedHandler);
-      this.media.removeEventListener('resize', this.onVideoResizeHandler);
-    }
+    this.media?.removeEventListener('seeking', this.onSeekingHandler);
+    this.media?.removeEventListener('resize', this.onVideoResizeHandler);
+    this.media?.removeEventListener('play', this.onPlayHandler);
+    this.media?.removeEventListener('pause', this.onPauseHandler);
 
     // setup container Resize Handler
     if (this.container) {
@@ -115,10 +114,6 @@ export default class PGSController {
     this.clear();
   }
 
-  private onSeeked() {
-    this.clear();
-  }
-
   private onContainerResize(entries: ResizeObserverEntry[]) {
     if (!this.media || !this.container) { return; }
 
@@ -146,9 +141,28 @@ export default class PGSController {
   private onTimeupdate() {
     // not showing, do not show
     if (!this.isShowing) { return; }
-    this.timer = requestAnimationFrame(this.onTimeupdateHandler);
 
+    this.registerRenderingLoop();
     this.paint(false);
+  }
+
+  private registerRenderingLoop(): void {
+    this.timer = requestAnimationFrame(this.onTimeupdateHandler);
+  }
+
+  private unregisterRenderingLoop(): void {
+    if (this.timer == null) { return; }
+    cancelAnimationFrame(this.timer);
+    this.timer = null;
+  }
+
+  private onPlay(): void {
+    if (this.timer != null) { return }
+    this.registerRenderingLoop();
+  }
+
+  private onPause(): void {
+    this.unregisterRenderingLoop();
   }
 
   private paint(repaint: boolean) {
@@ -195,17 +209,14 @@ export default class PGSController {
   public show(): void {
     this.isShowing = true;
     if (this.timer == null) {
-      this.timer = requestAnimationFrame(this.onTimeupdateHandler);
+      this.registerRenderingLoop();
     }
-    this.onTimeupdate();
+    this.paint(true);
   }
 
   public hide(): void {
     this.isShowing = false;
-    if (this.timer != null) {
-      cancelAnimationFrame(this.timer);
-      this.timer = null;
-    }
+    this.unregisterRenderingLoop();
     this.clear();
   }
 
