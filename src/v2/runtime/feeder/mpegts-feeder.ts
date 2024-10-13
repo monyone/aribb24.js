@@ -10,21 +10,21 @@ export default class MPEGTSFeeder extends DecodingFeeder {
     super(option);
   }
 
-  public feedB24(data: ArrayBuffer, pts: number, dts: number) {
-    this.feed(data, pts, dts);
+  public feedB24(data: ArrayBuffer, pts: number, dts?: number) {
+    this.feed(data, pts, dts ?? pts);
   }
 
-  public feedID3(data: ArrayBuffer, pts: number, dts: number) {
+  public feedID3(data: ArrayBuffer, pts: number, dts?: number) {
     for (const frame of parseID3v2(data)) {
       switch (frame.id) {
         case 'PRIV': {
           if (frame.owner !== 'aribb24.js') { break; }
-          this.feed(frame.data, pts, dts);
+          this.feed(frame.data, pts, dts ?? pts);
           break;
         }
         case 'TXXX': {
           if (frame.description !== 'aribb24.js') { break; }
-          this.feed(base64ToUint8Array(frame.text).buffer, pts, dts);
+          this.feed(base64ToUint8Array(frame.text).buffer, pts, dts ?? pts);
           break;
         }
       }
