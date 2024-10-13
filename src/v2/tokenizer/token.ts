@@ -577,6 +577,16 @@ export const OrnamentControl = {
   }
 };
 
+export type BuiltinSoundReplay = {
+  tag: 'BuiltinSoundReplay';
+  sound: number;
+};
+export const BuiltinSoundReplay = {
+  from(sound: number): BuiltinSoundReplay {
+    return { tag: 'BuiltinSoundReplay', sound };
+  }
+};
+
 export type ARIBB24Token =
   // 文字
   Character |
@@ -635,5 +645,6 @@ export type ARIBB24Token =
   SetHorizontalSpacing |
   SetVerticalSpacing |
   ActiveCoordinatePositionSet |
-  OrnamentControl;
+  OrnamentControl |
+  BuiltinSoundReplay;
 

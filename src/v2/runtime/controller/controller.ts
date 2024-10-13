@@ -1,6 +1,8 @@
 import ARIBB24Feeder from "../feeder/feeder";
 import ARIBB24Renderer from "../renderer/renderer";
 import { ControllerOption } from "./controller-option";
+import EventEmitter from "./eventemitter";
+import { Event, EventType, BuiltinSound } from "./events";
 
 export default class PGSController {
   // Option
@@ -28,6 +30,8 @@ export default class PGSController {
   private feeder: ARIBB24Feeder | null = null;
   // Control
   private isShowing: boolean = true;
+  // Event Bus
+  private emitter: EventEmitter = new EventEmitter();
 
   public constructor(option?: Partial<ControllerOption>) {
     this.option = {
@@ -106,6 +110,13 @@ export default class PGSController {
   public detachRenderer(renderer: ARIBB24Renderer) {
     renderer.onDetach();
     this.renderers = this.renderers.filter((elem) => elem !== renderer);
+  }
+
+  public on<T extends keyof Event>(type: T, handler: ((payload: Event[T]) => void)): void {
+    this.emitter.on(type, handler);
+  }
+  public off<T extends keyof Event>(type: T, handler: ((payload: Event[T]) => void)): void {
+    this.emitter.off(type, handler);
   }
 
   private onSeeking() {
@@ -192,6 +203,11 @@ export default class PGSController {
       if (this.privious_pts === end) { return; }
       this.renderers.forEach((renderer) => renderer.clear());
       this.privious_pts = end; // end is finite
+
+      // Builtin Sound Callback
+      for (const token of current.data.filter((data) => data.tag === 'BuiltinSoundReplay')) {
+        this.emitter.emit(EventType.BuiltinSound, BuiltinSound.from(token.sound));
+      }
     } else { // render
       if (this.privious_pts === current.pts) { return; }
       this.renderers.forEach((renderer) => renderer.render(current.state, current.data));
