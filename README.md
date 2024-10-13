@@ -1,13 +1,22 @@
 # aribb24.js [![npm](https://img.shields.io/npm/v/aribb24.js.svg?style=flat)](https://www.npmjs.com/package/aribb24.js)
+NOTE: v1 README is [here](./README_v1.md)
 
-An HTML5 subtitle renderer.  
-It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).  
+ARIB STD-B24 Captione Renderer
 
 ## Feature
 
-* HTML5 Canvas based dot by dot subtitle rendering
-* Fully compatible of [b24.js](https://github.com/xqq/b24.js) API
-* Colored rendering with font color and background color specified by data packet
+* ARIB STD-B24 Caption Rendering
+    * Caption (A Profile)
+    * Superimpose (A Profile)
+* Support various broadcast specification
+    * ARIB STD-B24 (TR-B14, TR-B15)
+    * STTVD ABNT NBR 15606-1
+* Support various streaming protocol embedded ARIB STD-B24
+    * MPEG-TS ([xqq/mpegts.js](https://github.com/xqq/mpegts.js)):
+        * Private Stream: Specified by ARIB STD-B24
+        * ID3 Timed Metadata: Sent by [xtne6f/tsreadex](https://github.com/xtne6f/tsreadex)
+    * HLS:
+        * ID3 Timed Metadata: above MPEG-TS ID3 Timed Metadata
 
 ## Special Thanks
 
@@ -20,221 +29,69 @@ It is alternative implementation for [b24.js](https://github.com/xqq/b24.js).
 
 ## Options
 
-* data_identifier: Specify number 0x80 (caption) or 0x81 (superimpose). default: 0x80 (caption)
-* data_group_id: Specify number 0x01 (1st language) or 0x02 (2nd language). default: 0x01 (1st language)
-* forceStrokeColor: Specify a color or true for always drawing character's stroke.
-* forceBackgroundColor: Specify a color for always drawing character's background
-* normalFont: Specify a font for drawing normal characters
-* gainiFont: Specify a font for drawing ARIB gaiji characters
-* drcsReplacement: Replace DRCS to text if possible
-* drcsReplaceMapping: add more DRCS Mapping by Object (ex. { md5: character })
-    * currently, replace to full-width character only supported.
-* PRACallback: specify PRA callback for SuperImpose
-    * Type Definition is PRA (index: number) => unknown
-* keepAspectRatio: keep caption's aspect ratio in any container. (default: true)
-* enableRawCanvas: enable raw video resolution canvas. it can get getRawCanvas method.
-* useStroke: use render outer stroke by strokeText or stroke (strokeText or stroke) API. (default: true)
-* usePUA: use PUA (Private Use Area) instead of unicode 5.2 (for Windows TV Gothic)
-* useHighResTextTrack: use polling instead of native cuechange event for b24 TextTrackCue handling.
-* useHighResTimeupdate: use polling instead of native timeupdate event for id3 TextTrackCue handling.
-* enableAutoInBandMetadataTextTrackDetection: enable InBand Metadata (id3) TextTrack auto detection. (default: true)
-    * Recommended enableAutoInBandMetadataTextTrackDetection Settings
-        * Safari (iOS, iPadOS, Mac OS) Native HLS Player: true
-        * Legacy Edge Native HLS Player: true 
-        * hls.js : false (Please use FRAG_PARSING_METADATA event instead of this option)
-        * video.js : false (Please set video.js's Timed Metadata TextTrack manually, not supported auto detection.)
-
-## Build
-
-### Preparing
-
-```bash
-git clone https://github.com/monyone/aribb24.js
-cd aribb24.js
-yarn
+### Feeder
+```typescript
+type FeederOption = Partial<{
+  timeshift: number; // shift caption time
+  recieve: {
+    association: 'ARIB' | 'SBTVD' | null; // null is AutoDetect
+    type: 'Caption' | 'Superimpose';
+    language: number | string; // index or iso language code
+  },
+  tokenizer: {
+    pua: boolean; // use PUA for ARIB NON-STANDARD CHARACTER
+  };
+}>;
 ```
 
-### Compiling aribb24.js library
-
-```bash
-yarn run build
+### Renderer
+#### CanvasRenderer
+```typescript
+type CanvasRendererOption = Partial<{
+  font: {
+    normal: string;
+    arib: string;
+  },
+  replace: {
+    half: boolean, // default: true
+    small: boolean // default: true
+    drcs: Map<string, string>,
+    glyph: Map<string, PathElement>,
+  }
+  color: {
+    stroke: string | null,
+    foreground: string | null,
+    background: string | null,
+  },
+  resize: {
+    target: 'video' | 'container'
+    objectFit: 'contain' | 'none'
+  }
+}>;
 ```
 
-## Getting Started 
+## Getting Started
 
-### with native player and hls.js (for id3 timed-metadata inserted stream)
+### mpegts.js
 
-```html
-<script src="hls.min.js"></script>
-<script src="aribb24.js"></script>
-<video id="videoElement"></video>
-<script>
-    var video = document.getElementById('videoElement');
-    var videoSrc = 'something.m3u8';
+```javascript
+<script src="mpegts.js"></script>
+<script type="module">
+    import { Controller, MPEGTSFeeder, CanvasWebWorkerRenderer, CanvasMainThreadRenderer } from "./aribb24.mjs";
+    const video = document.getElementById('video');
 
-    var renderer = new aribb24js.CanvasRenderer({
-        // Options are here!
+    const controller = new Controller();
+    const feeder = new MPEGTSFeeder();
+    const renderer = new CanvasWebWorkerRenderer();
 
-        // forceStrokeColor?: string,
-        // forceBackgroundColor?: string,
-        // normalFont?: string,
-        // gaijiFont?: string,
-        // drcsReplacement?: boolean
-        enableAutoInBandMetadataTextTrackDetection: !Hls.isSupported(), // FRAG_PARSING_METADATA instead of auto detection
+    controller.attachFeeder(feeder);
+    controller.attachRenderer(renderer);
+    controller.attachMedia(video);
+
+    player.on(mpegts.Events.PES_PRIVATE_DATA_ARRIVED, (data) => {
+        feeder.feedB24(new Uint8Array(data.data).buffer, (data.pts ?? data.nearest_pts) / 1000, (data.dts  ?? data.nearest_pts) / 1000);
     });
-    // renderer.attachMedia(video, subtitleElement) also accepted
-    renderer.attachMedia(video);
-
-    if (Hls.isSupported()) {
-        var hls = new Hls();
-        hls.on(Hls.Events.FRAG_PARSING_METADATA, function (event, data) {
-            for (var sample of data.samples) {
-                renderer.pushID3v2Data(sample.pts, sample.data);
-            }
-        }
-
-        hls.loadSource(videoSrc);
-        hls.attachMedia(video);
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = videoSrc;
-    }
-
-    video.play();
-</script>
-```
-
-### with video.js (for id3 timed-metadata inserted stream)
-
-```html
-<link href="video-js.css" rel="stylesheet" />
-<script src="video.min.js"></script>
-<script src="aribb24.js"></script>
-<video id="videoElement"></video>
-<script>
-    var video = document.getElementById('videoElement');
-    var videoSrc = 'something.m3u8';
-
-    var aribb24Renderer = new aribb24js.CanvasRenderer({
-        // Options are here!
-
-        // forceStrokeColor?: string,
-        // forceBackgroundColor?: string,
-        // normalFont?: string,
-        // gaijiFont?: string,
-        // drcsReplacement?: boolean
-        useHighResTextTrack: true, // for IE11 (avoid video.js error on IE11)
-    })
-
-    var player = videojs(video);
-    aribb24Renderer.attachMedia(video);
-    document.getElementById('video').querySelector('.vjs-control-bar').style.zIndex = 1;
-
-    const track = player.addTextTrack('subtitles', 'aribb24.js')
-    if (track.mode === 'showing') {
-        aribb24Renderer.show();
-    } else {
-        aribb24Renderer.hide();
-    }
-
-    player.textTracks().addEventListener('addtrack', function (event) {
-        var track = event.track;
-        if (track.label === 'Timed Metadata') {
-            aribb24Renderer.setInBandMetadataTextTrack(track);
-        }
-    })
-
-    track.addEventListener('modechange', function (event) {
-        if (track.mode === 'showing') {
-            aribb24Renderer.show();
-        } else {
-            aribb24Renderer.hide();
-        }
-    })
-
-    player.src(videoSrc);
-</script>
-```
-
-### with shaka-player (for id3 timed-metadata inserted stream)
-
-```html
-<script src="mux.min.js"></script>
-<script src="shaka-player.ui.js"></script>
-<link rel="stylesheet" href="controls.css">
-<video id="videoElement"></video>
-<script>
-    var video = document.getElementById('videoElement');
-    var videoSrc = 'something.m3u8';
-
-    var aribb24Renderer = new aribb24js.CanvasRenderer({
-        // Options are here!
-
-        // forceStrokeColor?: string,
-        // forceBackgroundColor?: string,
-        // normalFont?: string,
-        // gaijiFont?: string,
-        // drcsReplacement?: boolean
-    })
-
-    shaka.polyfill.installAll();
-    if (shaka.Player.isBrowserSupported()) {
-        var player = new shaka.Player(video);
-        aribb24Renderer.attachMedia(video);
-
-        player.addEventListener('metadata', function (payload) {
-            var startTime = data.startTime;
-            var key = data.payload.key;
-
-            if (key === 'PRIV') {
-                var owner = data.payload.owner;
-                var binary = data.payload.data;
-                aribb24Renderer.pushID3v2PRIVData(startTime, owner, binary);
-            } else if(key === 'TXXX') {
-                var description = data.payload.description;
-                var base64 = data.payload.data;
-                aribb24Renderer.pushID3v2TXXXData(startTime, description, base64);
-            }
-        })
-     }
-</script>
-```
-
-### with hls-b24.js (for private_stream_1 inserted stream)
-
-```html
-<script src="hls.min.js"></script>
-<script src="aribb24.js"></script>
-<video id="videoElement"></video>
-<script>
-    var video = document.getElementById('videoElement');
-    var hls = new Hls();
-    hls.loadSource('something.m3u8')
-    hls.attachMedia(video);
-    video.play();
-
-    var renderer = new aribb24js.CanvasRenderer({
-      // Options are here!
-
-      // forceStrokeColor?: string,
-      // forceBackgroundColor?: string,
-      // normalFont?: string,
-      // gaijiFont?: string,
-      // drcsReplacement?: boolean
+    player.on(mpegts.Events.TIMED_ID3_METADATA_ARRIVED, (data) => {
+        feeder.feedID3(new Uint8Array(data.data).buffer, (data.pts ?? data.nearest_pts) / 1000, (data.dts  ?? data.nearest_pts) / 1000);
     });
-    renderer.attachMedia(video);
-    // renderer.attachMedia(video, subtitleElement) also accepted
-
-    hls.on(Hls.Events.FRAG_PARSING_PRIVATE_DATA, function (event, data) {
-        for (var sample of data.samples) {
-            renderer.pushData(sample.pid, sample.data, sample.pts);
-        }
-    }
 </script>
-```
-
-## Limitations
-
-* CanvasRenderer in Android Chrome with native HLS player dose not work
-    * Because not support id3 timedmetadata in Android Chrome
-* aribb24-embedded.js on IE11 requires [path2d-polyfill](https://github.com/nilzona/path2d-polyfill).
-    * Embedded glyph rendering use Path2D. IE11 does not support this feature.
