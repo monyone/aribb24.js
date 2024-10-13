@@ -66,5 +66,30 @@ export const FromMainToWorkerEventRender = {
     };
   }
 }
+export type FromMainToWorkerEventImageBitmap = {
+  type: 'imagebitmap';
+};
+export const FromMainToWorkerEventImageBitmap = {
+  from (): FromMainToWorkerEventImageBitmap {
+    return {
+      type: 'imagebitmap',
+    };
+  }
+}
 
-export type FromMainToWorkerEvent = FromMainToWorkerEventInitialize | FromMainToWorkerEventClear | FromMainToWorkerEventTerminate | FromMainToWorkerEventResize | FromMainToWorkerEventRender;
+export type FromMainToWorkerEvent = FromMainToWorkerEventInitialize | FromMainToWorkerEventClear | FromMainToWorkerEventTerminate | FromMainToWorkerEventResize | FromMainToWorkerEventRender | FromMainToWorkerEventImageBitmap;
+
+export type FromWorkerToMainEventImageBitmap = {
+  type: 'imagebitmap';
+  bitmap: ImageBitmap | null;
+};
+export const FromWorkerToMainEventImageBitmap = {
+  from (bitmap?: ImageBitmap): FromWorkerToMainEventImageBitmap {
+    return {
+      type: 'imagebitmap',
+      bitmap: bitmap ?? null
+    };
+  }
+}
+
+export type FromWorkerToMainEvent = FromWorkerToMainEventImageBitmap;

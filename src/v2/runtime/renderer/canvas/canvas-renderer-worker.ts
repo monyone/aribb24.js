@@ -5,12 +5,14 @@ import { RendererOption } from "../renderer-option";
 import { replaceDRCS } from "../../../tokenizer/b24/jis8/tokenizer";
 
 import RenderingWorker from "./canvas-renderer-worker.worker?worker&inline";
-import { FromMainToWorkerEventClear, FromMainToWorkerEventInitialize, FromMainToWorkerEventRender, FromMainToWorkerEventResize } from "./canvas-renderer-worker.event";
+import { FromMainToWorkerEventClear, FromMainToWorkerEventInitialize, FromMainToWorkerEventRender, FromMainToWorkerEventResize, FromWorkerToMainEvent, FromWorkerToMainEventImageBitmap } from "./canvas-renderer-worker.event";
 
 export default class CanvasWebWorkerRenderer extends CanvasRenderer {
   private buffer: OffscreenCanvas;
   private present: OffscreenCanvas;
   private worker: Worker;
+  private waitPromise: Promise<void> | null = null;
+  private waitResolve: () => void = () => {};
 
   public constructor(option?: Partial<RendererOption>) {
     super(option);
@@ -35,5 +37,33 @@ export default class CanvasWebWorkerRenderer extends CanvasRenderer {
 
   public render(state: ARIBB24ParserState, tokens: ARIBB24Token[]): void {
     this.worker.postMessage(FromMainToWorkerEventRender.from(state, replaceDRCS(tokens, this.option.replace.drcs), this.option));
+  }
+
+  public async getPresentationImageBitmap(): Promise<ImageBitmap | null> {
+    if (this.waitPromise != null) {
+      await this.waitPromise;
+      this.waitPromise = null;
+      this.waitResolve = () => {};
+    }
+
+    // Waiter
+    this.waitPromise = new Promise((resolve) => {
+      this.waitResolve = resolve;
+    });
+
+    this.worker.postMessage(FromWorkerToMainEventImageBitmap.from());
+    const promise: Promise<ImageBitmap | null> = new Promise((resolve) => {
+      this.worker.addEventListener('message', (event: MessageEvent<FromWorkerToMainEvent>) => {
+        switch (event.data.type) {
+          case 'imagebitmap': {
+            resolve(event.data.bitmap);
+            this.waitResolve();
+            return;
+          }
+        }
+      }, { once: true });
+    });
+
+    return promise;
   }
 }

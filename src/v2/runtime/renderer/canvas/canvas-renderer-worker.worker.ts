@@ -1,5 +1,5 @@
 import render from "./canvas-renderer-strategy"
-import { FromMainToWorkerEvent } from "./canvas-renderer-worker.event";
+import { FromMainToWorkerEvent, FromWorkerToMainEventImageBitmap } from "./canvas-renderer-worker.event";
 
 let present: OffscreenCanvas | null = null;
 let buffer: OffscreenCanvas | null = null;
@@ -43,6 +43,15 @@ self.addEventListener('message', (event: MessageEvent<FromMainToWorkerEvent>) =>
 
       const { state, tokens, option } = event.data;
       render(present, buffer, state, tokens, option);
+
+      break;
+    }
+    case 'imagebitmap': {
+      if (present == null) { break; }
+
+      createImageBitmap(present).then((bitmap) => {
+        self.postMessage(FromWorkerToMainEventImageBitmap.from(bitmap));
+      });
 
       break;
     }
