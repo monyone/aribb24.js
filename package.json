@@ -1,6 +1,6 @@
 {
   "name": "aribb24.js",
-  "version": "2.0.0-beta.0",
+  "version": "2.0.0-beta.1",
   "main": "dist/aribb24.umd.js",
   "files": [
     "dist",
@@ -29,7 +29,8 @@
   "license": "MIT",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "tsc && vite build"
+    "build": "tsc && vite build",
+    "prepublishOnly": "rimraf dist && tsc && vite build"
   },
   "devDependencies": {
     "rimraf": "^6.0.1",
