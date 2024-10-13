@@ -1,115 +1,17 @@
 import AVLTree from '../../util/avl';
 
-import Feeder, { FeederOption, FeederRawData, FeederTokenizedData, getTokenizeInformation } from './feeder';
-import extractPES from '../../tokenizer/b24/mpegts/extract';
-import extractDatagroup, { CaptionManagement } from '../../tokenizer/b24/datagroup'
-import JPNJIS8Tokenizer from '../../tokenizer/b24/jis8/ARIB/index';
-import { ClearScreen } from '../../tokenizer/token';
-import { initialState } from '../../parser/index';
+import { FeederOption } from './feeder';
 import { parseID3v2 } from '../../util/id3';
 import { base64ToUint8Array } from '../../util/binary';
+import DecodingFeeder from './decoding-feeder';
 
-const compare = (a: number, b: number) => {
-  return Math.sign(a - b) as (-1 | 0 | 1);
-}
-
-export default class MPEGTSFeeder implements Feeder {
-  private option: FeederOption;
-  private priviousTime: number | null = null;
-  private priviousManagementData: CaptionManagement | null = null;
-  private decode: AVLTree<number, FeederRawData> = new AVLTree<number, FeederRawData>(compare);
-  private decodeBuffer: FeederRawData[] = [];
-  private decodingPromise: Promise<void>;
-  private decodingNotify: (() => void) = Promise.resolve;
-  private abortController: AbortController = new AbortController();
-  private present: AVLTree<number, FeederTokenizedData> = new AVLTree<number, FeederTokenizedData>(compare);
-  private isDestroyed: boolean = false;
-
+export default class MPEGTSFeeder extends DecodingFeeder {
   public constructor(option?: Partial<FeederOption>) {
-    this.option = FeederOption.from(option);
-    this.decodingPromise = new Promise((resolve) => {
-      this.decodingNotify = resolve;
-    });
-    this.pump();
-  }
-
-  private notify(segment: FeederRawData | null): void {
-    if (segment != null) {
-      this.decodeBuffer.push(segment);
-    } else {
-      this.abortController.abort();
-      this.abortController = new AbortController();
-    }
-
-    this.decodingNotify?.();
-  }
-
-  private async *generator(signal: AbortSignal) {
-    while (true) {
-      await this.decodingPromise;
-      this.decodingPromise = new Promise<void>((resolve) => {
-        this.decodingNotify = resolve;
-      });
-      if (signal.aborted) {
-        this.decodeBuffer = [];
-        return;
-      }
-
-      const recieved = [... this.decodeBuffer];
-      this.decodeBuffer = [];
-
-      yield* recieved;
-    }
-  }
-
-  private async pump() {
-    while (!this.isDestroyed) {
-      for await (const { pts, data } of this.generator(this.abortController.signal)) {
-        // TODO: FIXME: NEED* 個々のロジックは外部に出す
-        const datagroup = extractPES(data);
-        if (datagroup == null) { continue; }
-        if (datagroup.tag !== this.option.recieve.type) { continue; }
-
-        const caption = extractDatagroup(datagroup.data);
-        if (caption == null) { continue; }
-        if (caption.tag === 'CaptionManagement') {
-          if (this.priviousManagementData?.group === caption.group) { continue; }
-          this.priviousManagementData = caption;
-          this.present.insert(pts, { pts, duration: Number.POSITIVE_INFINITY, state: initialState, data: [ClearScreen.from()] });
-          continue;
-        }
-
-        // Caption
-        if (this.priviousManagementData == null) { continue; }
-
-        const entry = this.priviousManagementData.languages.find((entry) => entry.lang === caption.lang);
-        if (entry == null) { continue; }
-        if (this.option.recieve.language !== caption.lang && this.option.recieve.language !== entry?.iso_639_language_code) { continue; }
-
-        const specification = getTokenizeInformation(entry.iso_639_language_code, this.option);
-        if (specification == null) { continue; }
-
-        const [tokenizer, state] = specification;
-        const tokenized = tokenizer.tokenize(caption);
-
-        let duration = Number.POSITIVE_INFINITY;
-        let elapse = 0;
-        for (const token of tokenized) {
-          if (token.tag === 'ClearScreen') {
-            if (elapse === 0) { continue; }
-            duration = elapse;
-          } else if (token.tag === 'TimeControlWait') {
-            elapse += token.seconds;
-          }
-        }
-
-        this.present.insert(pts, { pts, duration, state, data: tokenized });
-      }
-    }
+    super(option);
   }
 
   public feedB24(data: ArrayBuffer, pts: number, dts: number) {
-    this.decode.insert(dts, { pts, data });
+    this.feed(data, pts, dts);
   }
 
   public feedID3(data: ArrayBuffer, pts: number, dts: number) {
@@ -117,51 +19,15 @@ export default class MPEGTSFeeder implements Feeder {
       switch (frame.id) {
         case 'PRIV': {
           if (frame.owner !== 'aribb24.js') { break; }
-          this.decode.insert(dts, { pts, data: frame.data });
+          this.feed(frame.data, pts, dts);
           break;
         }
         case 'TXXX': {
           if (frame.description !== 'aribb24.js') { break; }
-          this.decode.insert(dts, { pts, data: base64ToUint8Array(frame.text).buffer });
+          this.feed(base64ToUint8Array(frame.text).buffer, pts, dts);
           break;
         }
       }
     }
-  }
-
-  public content(time: number): FeederTokenizedData | null {
-    if (this.priviousTime != null) {
-      for (const segment of this.decode.range(this.priviousTime, time)) {
-        this.notify(segment);
-      }
-    }
-    this.priviousTime = time;
-
-    time -= this.option.timeshift;
-    return this.present.floor(time) ?? null;
-  }
-
-  private clear(): void {
-    this.present.clear();
-    this.priviousTime = null;
-    this.priviousManagementData = null;
-    this.notify(null);
-  }
-
-  public onAttach(): void {
-    this.clear();
-  }
-
-  public onDetach(): void {
-    this.clear();
-  }
-
-  public onSeeking(): void {
-    this.clear();
-  }
-
-  public destroy(): void {
-    this.isDestroyed = true;
-    this.clear();
   }
 }

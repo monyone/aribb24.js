@@ -66,6 +66,7 @@ export type FeederTokenizedData = {
 
 export default interface Feeder {
   content(time: number): FeederTokenizedData | null;
+  destroy(): void;
   onAttach(): void;
   onDetach(): void;
   onSeeking(): void;
