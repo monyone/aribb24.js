@@ -112,7 +112,13 @@ export default class TextRenderer implements Renderer {
   public show(): void {}
 
   public render(state: ARIBB24ParserState, tokens: ARIBB24Token[]): void {
-    const parser = new ARIBB24Parser(state)
+    // if SBTVD, it is overwritten screen and insert space to erase, so CS Insert
+    if (state.association === 'SBTVD' && this.text != null) {
+      this.text = '';
+    }
+
+    let privious_y = null;
+    const parser = new ARIBB24Parser(state);
     for (const token of parser.parse(replaceDRCS(tokens, this.option.replace.drcs))) {
       switch (token.tag) {
         case 'Character': {
@@ -121,6 +127,12 @@ export default class TextRenderer implements Renderer {
 
           // if ARIB, SSZ is almost ruby
           if (state.association === 'ARIB' && state.size === CHARACTER_SIZE.Small) { break; }
+
+          // if differ y, newline inserted
+          if (privious_y != null && state.position[1] !== privious_y) {
+            this.text += '\n';
+          }
+          privious_y = state.position[1];
 
           // Otherwise, apply half
           if (this.option.replace.half && state.size === CHARACTER_SIZE.Small && TextRenderer.half.has(character)) {
@@ -134,6 +146,12 @@ export default class TextRenderer implements Renderer {
         }
         case 'DRCS': {
           if (this.text == null) { break; }
+
+          if (privious_y != null && state.position[1] !== privious_y) {
+            this.text += '\n';
+          }
+          privious_y = state.position[1];
+
           this.text += '〓';
           break;
         }
