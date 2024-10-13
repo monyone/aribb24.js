@@ -35,8 +35,8 @@ export default class CanvasWebWorkerRenderer extends CanvasRenderer {
     this.worker.postMessage(FromMainToWorkerEventClear.from());
   }
 
-  public render(state: ARIBB24ParserState, tokens: ARIBB24Token[]): void {
-    this.worker.postMessage(FromMainToWorkerEventRender.from(state, replaceDRCS(tokens, this.option.replace.drcs), this.option));
+  public render(initialState: ARIBB24ParserState, tokens: ARIBB24Token[]): void {
+    this.worker.postMessage(FromMainToWorkerEventRender.from(initialState, replaceDRCS(tokens, this.option.replace.drcs), this.option));
   }
 
   public async getPresentationImageBitmap(): Promise<ImageBitmap | null> {

@@ -21,7 +21,7 @@ export default abstract class CanvasRenderer implements Renderer {
   public abstract resize(width: number, height: number): void;
   public abstract destroy(): void;
   public abstract clear(): void;
-  public abstract render(state: ARIBB24ParserState, tokens: ARIBB24Token[]): void;
+  public abstract render(initialState: ARIBB24ParserState, tokens: ARIBB24Token[]): void;
 
   public onAttach(element: HTMLElement): void {
     element.appendChild(this.canvas);
