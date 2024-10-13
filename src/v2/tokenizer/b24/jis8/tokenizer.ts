@@ -121,7 +121,7 @@ export const replaceDRCS = (tokens: ARIBB24Token[], replace: Map<string, string>
     const hash = md5(token.binary);
 
     if (replace.has(hash)) {
-      return Character.from(replace.get(hash)!);
+      return Character.from(replace.get(hash)!, false);
     } else {
       return token;
     }
@@ -134,13 +134,15 @@ export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
   private GB: [DictEntry, DictEntry, DictEntry, DictEntry];
   private character_dicts: Record<string, CharacterDictEntry>;
   private drcs_dicts: Record<string, DRCSDictEntry | MacroDictEntry>;
+  private non_spacing: Set<string>;
 
-  public constructor(GL: 0 | 1 | 2 | 3, GR: 0 | 1 | 2 | 3, GB: [DictEntry, DictEntry, DictEntry, DictEntry], character_dicts: Record<string, CharacterDictEntry>, drcs_dicts: Record<string, DRCSDictEntry | MacroDictEntry>) {
+  public constructor(GL: 0 | 1 | 2 | 3, GR: 0 | 1 | 2 | 3, GB: [DictEntry, DictEntry, DictEntry, DictEntry], character_dicts: Record<string, CharacterDictEntry>, drcs_dicts: Record<string, DRCSDictEntry | MacroDictEntry>, non_spacing: Set<string>) {
     this.GL = GL;
     this.GR = GR;
     this.GB = GB;
     this.character_dicts = character_dicts;
     this.drcs_dicts = structuredClone(drcs_dicts);
+    this.non_spacing = non_spacing;
   }
 
   public tokenize(data: CaptionData): ARIBB24Token[] {
@@ -175,7 +177,11 @@ export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
 
         switch (type) {
           case 'Character':
-            if (dict.has(code)) { result.push(Character.from(dict.get(code)!)); }
+            if (dict.has(code)) {
+              const ch = dict.get(code)!;
+              const non_spacing = this.non_spacing.has(ch);
+              result.push(Character.from(ch, non_spacing));
+            }
             break;
           case 'DRCS':
             if (dict.has(code)) {
@@ -202,7 +208,11 @@ export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
         const { type, dict } = this.GB[this.GR];
         switch (type) {
           case 'Character':
-            if (dict.has(code)) { result.push(Character.from(dict.get(code)!)); }
+            if (dict.has(code)) {
+              const ch = dict.get(code)!;
+              const non_spacing = this.non_spacing.has(ch);
+              result.push(Character.from(ch, non_spacing));
+            }
             break;
           case 'DRCS':
             if (dict.has(code)) {
@@ -283,7 +293,11 @@ export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
 
           switch (type) {
             case 'Character':
-              if (dict.has(code)) { result.push(Character.from(dict.get(code)!)); }
+              if (dict.has(code)) {
+                const ch = dict.get(code)!;
+                const non_spacing = this.non_spacing.has(ch);
+                result.push(Character.from(ch, non_spacing));
+              }
               break;
             case 'DRCS':
               if (dict.has(code)) {
@@ -368,7 +382,11 @@ export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
 
           switch (type) {
             case 'Character':
-              if (dict.has(code)) { result.push(Character.from(dict.get(code)!)); }
+              if (dict.has(code)) {
+                const ch = dict.get(code)!;
+                const non_spacing = this.non_spacing.has(ch);
+                result.push(Character.from(ch, non_spacing));
+              }
               break;
             case 'DRCS':
               if (dict.has(code)) {

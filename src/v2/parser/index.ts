@@ -198,17 +198,29 @@ export class ARIBB24Parser {
   public parse(tokens: ARIBB24Token[]): ARIBB24ParsedToken[] {
     const result: ARIBB24ParsedToken[] = [];
 
+    let non_spacings: ARIBB24CharacterParsedToken[] = [];
+
     for (const token of tokens) {
       switch (token.tag) {
         // character
         case 'Character':
-          result.push({
-            tag: 'Character',
-            character: token,
-            state: structuredClone(this.state),
-            option: structuredClone(this.option),
-          });
-          this.move_relative_pos(1, 0);
+          if (!token.non_spacing) {
+            result.push({
+              tag: 'Character',
+              character: token,
+              state: structuredClone(this.state),
+              option: structuredClone(this.option),
+            }, ... non_spacings);
+            non_spacings = [];
+            this.move_relative_pos(1, 0);
+          } else {
+            non_spacings.push({
+              tag: 'Character',
+              character: token,
+              state: structuredClone(this.state),
+              option: structuredClone(this.option),
+            });
+          }
           break;
         case 'DRCS':
           result.push({
@@ -216,16 +228,18 @@ export class ARIBB24Parser {
             drcs: token,
             state: structuredClone(this.state),
             option: structuredClone(this.option),
-          });
+          }, ... non_spacings);
+          non_spacings = [];
           this.move_relative_pos(1, 0);
           break;
         case 'Space': {
           result.push({
             tag: 'Character',
-            character: Character.from('　'),
+            character: Character.from('　', false),
             state: structuredClone(this.state),
             option: structuredClone(this.option),
-          });
+          }, ... non_spacings);
+          non_spacings = [];
           this.move_relative_pos(1, 0);
           break;
         }

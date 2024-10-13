@@ -147,18 +147,21 @@ const renderUnderline = (context: CanvasRenderingContext2D | OffscreenCanvasRend
 }
 
 const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken, magnification: [number, number], rendererOption: CanvasRendererOption): void => {
-  const { state, option, character: { character: key } } = token;
+  const { state, option, character: { character: key, non_spacing } } = token;
   const is_halfwidth = state.size === CHARACTER_SIZE.Middle || state.size === CHARACTER_SIZE.Small;
   const replace_halfwidth = (rendererOption.replace.half && state.size === CHARACTER_SIZE.Middle) || (rendererOption.replace.small && state.size === CHARACTER_SIZE.Small)
   const character = replace_halfwidth && halfwidth.has(key) ? halfwidth.get(key)! : key;
-  // clear
-  clear(context, token, magnification, rendererOption);
-  // background
-  renderBackground(context, token, magnification, rendererOption);
-  // Highlight
-  renderHighlight(context, token, magnification, rendererOption);
-  // Underline
-  renderUnderline(context, token, magnification, rendererOption);
+  // is spacing, do bg related render
+  if (!non_spacing) {
+    // clear
+    clear(context, token, magnification, rendererOption);
+    // background
+    renderBackground(context, token, magnification, rendererOption);
+    // Highlight
+    renderHighlight(context, token, magnification, rendererOption);
+    // Underline
+    renderUnderline(context, token, magnification, rendererOption);
+  }
 
   const stroke = rendererOption.color.stroke != null ? (namedcolor.get(rendererOption.color.stroke) ?? rendererOption.color.stroke) : null;
   const orn = stroke ?? (state.ornament != null ? colortable[state.ornament] : null);

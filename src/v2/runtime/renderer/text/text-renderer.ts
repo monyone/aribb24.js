@@ -111,14 +111,14 @@ export default class TextRenderer implements Renderer {
   public hide(): void {}
   public show(): void {}
 
-  public render(state: ARIBB24ParserState, tokens: ARIBB24Token[]): void {
+  public render(initialState: ARIBB24ParserState, tokens: ARIBB24Token[]): void {
     // if SBTVD, it is overwritten screen and insert space to erase, so CS Insert
-    if (state.association === 'SBTVD' && this.text != null) {
+    if (initialState.association === 'SBTVD' && this.text != null) {
       this.text = '';
     }
 
     let privious_y = null;
-    const parser = new ARIBB24Parser(state);
+    const parser = new ARIBB24Parser(initialState);
     for (const token of parser.parse(replaceDRCS(tokens, this.option.replace.drcs))) {
       switch (token.tag) {
         case 'Character': {
@@ -147,10 +147,10 @@ export default class TextRenderer implements Renderer {
         case 'DRCS': {
           if (this.text == null) { break; }
 
-          if (privious_y != null && state.position[1] !== privious_y) {
+          if (privious_y != null && initialState.position[1] !== privious_y) {
             this.text += '\n';
           }
-          privious_y = state.position[1];
+          privious_y = initialState.position[1];
 
           this.text += '〓';
           break;

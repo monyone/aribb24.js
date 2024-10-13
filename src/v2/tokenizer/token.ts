@@ -1,10 +1,11 @@
 export type Character = {
   tag: 'Character';
   character: string;
+  non_spacing: boolean;
 };
 export const Character = {
-  from(character: string): Character {
-    return { tag: 'Character', character };
+  from(character: string, non_spacing: boolean): Character {
+    return { tag: 'Character', character, non_spacing };
   }
 };
 

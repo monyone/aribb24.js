@@ -130,7 +130,27 @@ export default class ARIBJapaneseJIS8Tokenizer extends ARIBB24JIS8Tokenizer {
     super(0, 2,
       [USING_NORMAL_DICT.KANJI, USING_NORMAL_DICT.ASCII, USING_NORMAL_DICT.HIRAGANA, JAPAN_DRCS_DICTS.MACRO],
       USING_NORMAL_DICT,
-      JAPAN_DRCS_DICTS
+      JAPAN_DRCS_DICTS,
+      new Set<string>([
+         /* ACUTE ACCENT */
+        '\u00B4', // half
+        /* GRAVE ACCENT */
+        '\u0060', // half
+        '\uFF40', // full
+        /* DIAERESIS */
+        '\u00A8', // half
+        /* CIRCUMFLEX ACCENT */
+        '\u005E', // half
+        '\uFF3E', // full
+        /* OVERLINE */
+        '\u203E', // half
+        '\uFFE3', // full
+        /* LOWLINE */
+        '\u005F', // half
+        '\uFF3F', // full
+        /* LARGE CIRCLE */
+        '\u25EF', // full
+      ])
     );
   }
 }
