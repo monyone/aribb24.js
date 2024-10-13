@@ -6,6 +6,8 @@ import extractDatagroup, { CaptionManagement } from '../../tokenizer/b24/datagro
 import JPNJIS8Tokenizer from '../../tokenizer/b24/jis8/ARIB/index';
 import { ClearScreen } from '../../tokenizer/token';
 import { initialState } from '../../parser/index';
+import { parseID3v2 } from '../../util/id3';
+import { base64ToUint8Array } from '../../util/binary';
 
 const compare = (a: number, b: number) => {
   return Math.sign(a - b) as (-1 | 0 | 1);
@@ -106,8 +108,25 @@ export default class MPEGTSFeeder implements Feeder {
     }
   }
 
-  public feed(data: ArrayBuffer, pts: number, dts: number, timescale: number) {
-    this.decode.insert(pts / timescale, { pts: pts / timescale , data });
+  public feedB24(data: ArrayBuffer, pts: number, dts: number) {
+    this.decode.insert(dts, { pts, data });
+  }
+
+  public feedID3(data: ArrayBuffer, pts: number, dts: number) {
+    for (const frame of parseID3v2(data)) {
+      switch (frame.id) {
+        case 'PRIV': {
+          if (frame.owner !== 'aribb24.js') { break; }
+          this.decode.insert(dts, { pts, data: frame.data });
+          break;
+        }
+        case 'TXXX': {
+          if (frame.description !== 'aribb24.js') { break; }
+          this.decode.insert(dts, { pts, data: base64ToUint8Array(frame.text).buffer });
+          break;
+        }
+      }
+    }
   }
 
   public content(time: number): FeederTokenizedData | null {
