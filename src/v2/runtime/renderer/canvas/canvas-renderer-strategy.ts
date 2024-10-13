@@ -9,7 +9,7 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
   // render background
   let magnification: [number, number] = [1, 1];
   {
-    const context = buffer.getContext('2d');
+    const context = buffer.getContext('2d') as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D; // Type Issue
     if (context == null) { return; }
 
     const parser = new ARIBB24Parser(state);
@@ -55,7 +55,7 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
 
   // render Foregroud
   if (target != null) {
-    const context = target.getContext('2d');
+    const context = target.getContext('2d') as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D; // Type Issue;
     if (context == null) { return; }
     context.clearRect(0, 0, target.width, target.height);
 

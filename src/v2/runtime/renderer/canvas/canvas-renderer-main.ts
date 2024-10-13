@@ -13,6 +13,23 @@ export default class CanvasMainThreadRenderer extends CanvasRenderer {
     this.buffer = document.createElement('canvas');
   }
 
+  public resize(width: number, height: number): void {
+    this.canvas.width = width;
+    this.canvas.height = height;
+  }
+
+  public destroy(): void {
+    this.resize(0, 0);
+    this.buffer.width = this.buffer.height = 0;
+  }
+
+  public clear(): void {
+    const context = this.canvas.getContext('2d');
+    if (context == null) { return; }
+
+    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
   public render(state: ARIBB24ParserState, tokens: ARIBB24Token[]): void {
     render(this.canvas, this.buffer, state, replaceDRCS(tokens, this.option.replace.drcs), this.option);
   }

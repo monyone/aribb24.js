@@ -18,23 +18,9 @@ export default abstract class CanvasRenderer implements Renderer {
     this.canvas.style.height = '100%';
   }
 
-  public resize(width: number, height: number): void {
-    if (this.canvas == null) { return; }
-    this.canvas.width = width;
-    this.canvas.height = height;
-  }
-
-  public destroy(): void {
-    this.resize(0, 0);
-  }
-
-  public clear(): void {
-    const context = this.canvas.getContext('2d');
-    if (context == null) { return; }
-
-    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-  }
-
+  public abstract resize(width: number, height: number): void;
+  public abstract destroy(): void;
+  public abstract clear(): void;
   public abstract render(state: ARIBB24ParserState, tokens: ARIBB24Token[]): void;
 
   public onAttach(element: HTMLElement): void {
