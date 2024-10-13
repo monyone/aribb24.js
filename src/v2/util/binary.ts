@@ -1,12 +1,3 @@
-export function readID3Size (binary: Uint8Array, begin: number, end: number): number {
-  let result = 0;
-  for (let i = begin; i < end; i++) {
-    result <<= 7;
-    result |= (binary[i] & 0x7F);
-  }
-  return result;
-}
-
 export function binaryToPercentString(binary: Uint8Array, begin: number, end: number): string {
   let result = '';
   for (let i = begin; i < end; i++) {
