@@ -11,7 +11,7 @@ const compare = (a: number, b: number) => {
   return Math.sign(a - b) as (-1 | 0 | 1);
 }
 
-export default class ARIBB24MPEGTSFeeder implements Feeder {
+export default class MPEGTSFeeder implements Feeder {
   private option: FeederOption;
   private priviousTime: number | null = null;
   private priviousManagementData: CaptionManagement | null = null;
