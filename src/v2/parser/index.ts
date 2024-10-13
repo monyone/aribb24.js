@@ -112,11 +112,7 @@ export type ARIBB24DRCSPrasedToken = ARIBB24CommonParsedToken & {
   tag: 'DRCS';
   drcs: DRCS;
 };
-export type ARIBB24PRAParsedToken = ARIBB24CommonParsedToken & {
-  tag: 'PRA';
-  sound: number;
-};
-export type ARIBB24ParsedToken = ARIBB24ClearScreenParsedToken | ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken | ARIBB24PRAParsedToken;
+export type ARIBB24ParsedToken = ARIBB24ClearScreenParsedToken | ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken;
 
 export class ARIBB24Parser {
   private state: ARIBB24ParserState;

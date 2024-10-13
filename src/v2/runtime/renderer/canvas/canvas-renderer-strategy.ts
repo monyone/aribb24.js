@@ -45,8 +45,6 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
             context.clearRect(0, 0, buffer.width, buffer.height);
           }
           break;
-        case 'PRA':
-          break;
         default:
           const exhaustive: never = token;
           throw new UnreachableError(`Unhandled ARIB Parsed Token (${exhaustive})`);
