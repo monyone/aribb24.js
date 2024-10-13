@@ -1,5 +1,4 @@
 import { ARIBB24ParserState, initialState, latenInitialState } from "../../parser/index";
-import { CaptionManagement } from "../../tokenizer/b24/datagroup";
 import ARIBJapaneseJIS8Tokenizer from "../../tokenizer/b24/jis8/ARIB/index";
 import ARIBBrazilianJIS8Tokenizer from "../../tokenizer/b24/jis8/SBTVD/index";
 import ARIBB24Tokenizer from "../../tokenizer/b24/tokenizer";
