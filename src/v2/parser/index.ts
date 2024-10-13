@@ -136,12 +136,15 @@ export class ARIBB24Parser {
 
   public static box(state: ARIBB24ParserState): [number, number] {
     return [
-      (state.fontsize[0] + state.hspace) * CHARACTER_SIZE_MAP.get(state.size)![0],
-      (state.fontsize[1] + state.vspace) * CHARACTER_SIZE_MAP.get(state.size)![1]
+      Math.floor((state.fontsize[0] + state.hspace) * CHARACTER_SIZE_MAP.get(state.size)![0]),
+      Math.floor((state.fontsize[1] + state.vspace) * CHARACTER_SIZE_MAP.get(state.size)![1])
     ];
   }
   public static offset(state: ARIBB24ParserState): [number, number] {
-    return [state.hspace * CHARACTER_SIZE_MAP.get(state.size)![0] / 2, state.vspace * CHARACTER_SIZE_MAP.get(state.size)![1] / 2];
+    return [
+      Math.floor(state.hspace * CHARACTER_SIZE_MAP.get(state.size)![0] / 2),
+      Math.floor(state.vspace * CHARACTER_SIZE_MAP.get(state.size)![1] / 2)
+    ];
   }
   public static scale(state: ARIBB24ParserState): [number, number] {
     return CHARACTER_SIZE_MAP.get(state.size)!;
