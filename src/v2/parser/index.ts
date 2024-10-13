@@ -228,6 +228,28 @@ export class ARIBB24Parser {
         }
         // display
         case 'SetWritingFormat': // SWF
+          switch (token.format) {
+            // horizontal
+            case 0:
+            case 2:
+            case 4:
+              break;
+            case 5:
+              this.state.plane = [1920, 1080];
+              break;
+            case 7:
+              this.state.plane = [960, 540];
+              break;
+            case 9:
+              this.state.plane = [720, 480];
+              break;
+            case 11:
+              this.state.plane = [1280, 720];
+              break;
+            // vertical
+            default:
+              break;
+          }
           break;
         case 'SetDisplayFormat': // SDF
           this.state.area = [token.horizontal * this.option.magnification, token.vertical * this.option.magnification];
