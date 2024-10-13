@@ -31,11 +31,18 @@ self.addEventListener('message', (event: MessageEvent<FromMainToWorkerEvent>) =>
       break;
     }
     case 'clear': {
-      if (present == null) { break;}
-      const context = present.getContext('2d');
-      if (context == null) { break; }
-
-      context.clearRect(0, 0, present.width, present.height);
+      if (present) {
+        const context = present.getContext('2d');
+        if (context) {
+          context.clearRect(0, 0, present.width, present.height);
+        }
+      }
+      if (buffer) {
+        const context = buffer.getContext('2d');
+        if (context) {
+          context.clearRect(0, 0, buffer.width, buffer.height);
+        }
+      }
       break;
     }
     case 'render': {

@@ -24,10 +24,18 @@ export default class CanvasMainThreadRenderer extends CanvasRenderer {
   }
 
   public clear(): void {
-    const context = this.canvas.getContext('2d');
-    if (context == null) { return; }
+    {
+      const context = this.buffer.getContext('2d');
+      if (context == null) { return; }
 
-    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      context.clearRect(0, 0, this.buffer.width, this.buffer.height);
+    }
+    {
+      const context = this.canvas.getContext('2d');
+      if (context == null) { return; }
+
+      context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
   }
 
   public render(state: ARIBB24ParserState, tokens: ARIBB24Token[]): void {
