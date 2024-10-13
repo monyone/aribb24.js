@@ -4,6 +4,8 @@ import { ARIBB24Token } from "../../tokenizer/token";
 export default interface Renderer {
   render(initialState: ARIBB24ParserState, tokens: ARIBB24Token[]): void;
   clear(): void;
+  hide(): void;
+  show(): void;
   destroy(): void;
 
   onAttach(element: HTMLElement): void;

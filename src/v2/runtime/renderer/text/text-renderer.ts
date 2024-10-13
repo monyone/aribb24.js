@@ -108,6 +108,9 @@ export default class TextRenderer implements Renderer {
   public clear(): void {
     this.text = null;
   }
+  public hide(): void {}
+  public show(): void {}
+
   public render(state: ARIBB24ParserState, tokens: ARIBB24Token[]): void {
     const parser = new ARIBB24Parser(state)
     for (const token of parser.parse(replaceDRCS(tokens, this.option.replace.drcs))) {

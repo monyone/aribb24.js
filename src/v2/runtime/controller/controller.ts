@@ -228,12 +228,13 @@ export default class PGSController {
       this.registerRenderingLoop();
     }
     this.paint(true);
+    this.renderers.forEach((renderer) => renderer.show());
   }
 
   public hide(): void {
     this.isShowing = false;
     this.unregisterRenderingLoop();
-    this.clear();
+    this.renderers.forEach((renderer) => renderer.hide());
   }
 
   public showing(): boolean {
