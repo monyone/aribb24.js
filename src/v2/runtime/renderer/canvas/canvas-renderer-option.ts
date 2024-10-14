@@ -8,7 +8,6 @@ export type CanvasRendererOption = RendererOption & {
   },
   replace: {
     half: boolean,
-    small: boolean
     drcs: Map<string, string>,
     glyph: Map<string, PathElement>,
   }
@@ -33,7 +32,6 @@ export const CanvasRendererOption = {
       },
       replace: {
         half: true,
-        small: true,
         drcs: new Map<string, string>(),
         glyph: new Map<string, PathElement>(),
         ... option?.replace,

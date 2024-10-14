@@ -1,4 +1,5 @@
 import { ARIBB24ParserState } from "../../../parser";
+import { CaptionLanguageInformation } from "../../../tokenizer/b24/datagroup";
 import { ARIBB24Token } from "../../../tokenizer/token";
 import { CanvasRendererOption } from "./canvas-renderer-option";
 
@@ -54,14 +55,16 @@ export type FromMainToWorkerEventRender = {
   type: 'render';
   state: ARIBB24ParserState,
   tokens: ARIBB24Token[],
+  info: CaptionLanguageInformation,
   option: CanvasRendererOption,
 };
 export const FromMainToWorkerEventRender = {
-  from (state: ARIBB24ParserState, tokens: ARIBB24Token[], option: CanvasRendererOption): FromMainToWorkerEventRender {
+  from (state: ARIBB24ParserState, tokens: ARIBB24Token[], info: CaptionLanguageInformation, option: CanvasRendererOption): FromMainToWorkerEventRender {
     return {
       type: 'render',
       state,
       tokens,
+      info,
       option,
     };
   }

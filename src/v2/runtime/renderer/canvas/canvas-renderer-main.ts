@@ -40,7 +40,7 @@ export default class CanvasMainThreadRenderer extends CanvasRenderer {
   }
 
   public render(initialState: ARIBB24ParserState, tokens: ARIBB24Token[], info: CaptionLanguageInformation): void {
-    render(this.canvas, this.buffer, initialState, replaceDRCS(tokens, this.option.replace.drcs), this.option);
+    render(this.canvas, this.buffer, initialState, replaceDRCS(tokens, this.option.replace.drcs), info, this.option);
   }
 
   public getPresentationCanvas(): HTMLCanvasElement {

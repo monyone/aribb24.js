@@ -49,8 +49,8 @@ self.addEventListener('message', (event: MessageEvent<FromMainToWorkerEvent>) =>
       if (present == null) { break; }
       if (buffer == null) { break;}
 
-      const { state, tokens, option } = event.data;
-      render(present, buffer, state, tokens, option);
+      const { state, tokens, info, option } = event.data;
+      render(present, buffer, state, tokens, info, option);
 
       break;
     }

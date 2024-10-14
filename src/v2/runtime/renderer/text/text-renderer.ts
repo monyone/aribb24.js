@@ -6,6 +6,7 @@ import Renderer from "../renderer";
 import { TextRendererOption } from "./text-renderer-option";
 import halfwidth from "../halfwidth"
 import { CaptionLanguageInformation } from "../../../tokenizer/b24/datagroup";
+import { shouldHalfWidth, shouldIgnoreSmallAsRuby } from "../quirk";
 
 export default class TextRenderer implements Renderer {
   private option: TextRendererOption;
@@ -127,7 +128,7 @@ export default class TextRenderer implements Renderer {
           if (this.text == null) { break; }
 
           // if ARIB in Japanese, SSZ is almost ruby
-          if (info.association === 'ARIB' && info.language === 'jpn' && state.size === CHARACTER_SIZE.Small) { break; }
+          if (shouldIgnoreSmallAsRuby(state.size, info)) { break; }
 
           // if differ y, newline inserted
           if (privious_y != null && state.position[1] !== privious_y) {
@@ -136,9 +137,7 @@ export default class TextRenderer implements Renderer {
           privious_y = state.position[1];
 
           // Otherwise, apply half
-          if (this.option.replace.half && state.size === CHARACTER_SIZE.Small && TextRenderer.half.has(character)) {
-            this.text += TextRenderer.half.get(character)!;
-          } else if (this.option.replace.half && state.size === CHARACTER_SIZE.Middle && TextRenderer.half.has(character)) {
+          if (this.option.replace.half && shouldHalfWidth(state.size, info)) {
             this.text += TextRenderer.half.get(character)!;
           } else {
             this.text += character;
