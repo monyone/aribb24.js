@@ -1,5 +1,5 @@
 import { ARIBB24ParserState, initialState, latenInitialState } from "../../parser/index";
-import { CaptionLanguageInformation } from "../../tokenizer/b24/datagroup";
+import datagroup, { CaptionLanguageInformation } from "../../tokenizer/b24/datagroup";
 import ARIBJapaneseJIS8Tokenizer from "../../tokenizer/b24/jis8/ARIB/index";
 import ARIBBrazilianJIS8Tokenizer from "../../tokenizer/b24/jis8/SBTVD/index";
 import ARIBB24Tokenizer from "../../tokenizer/b24/tokenizer";
@@ -54,11 +54,11 @@ export const getTokenizeInformation = (language: string, option: FeederOption): 
   return ['UNKNOWN', new ARIBJapaneseJIS8Tokenizer({ usePUA: option.tokenizer.pua }), initialState];
 }
 
-export type FeederRawData = {
+export type FeederDecodingData = {
   pts: number;
-  data: ArrayBuffer;
+  caption: Exclude<ReturnType<typeof datagroup>, null>;
 };
-export type FeederTokenizedData = {
+export type FeederPresentationData = {
   pts: number;
   duration: number;
   state: ARIBB24ParserState;
@@ -67,7 +67,7 @@ export type FeederTokenizedData = {
 };
 
 export default interface Feeder {
-  content(time: number): FeederTokenizedData | null;
+  content(time: number): FeederPresentationData | null;
   destroy(): void;
   onAttach(): void;
   onDetach(): void;
