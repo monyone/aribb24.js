@@ -164,7 +164,12 @@ export default abstract class DecodingFeeder implements Feeder {
     return this.present.floor(time) ?? null;
   }
 
-  private clear(): void {
+  public clear(): void {
+    this.decoder.clear();
+    this.disappearance();
+  }
+
+  private disappearance(): void {
     this.present.clear();
     this.priviousTime = null;
     this.priviousManagementData = null;
@@ -172,19 +177,19 @@ export default abstract class DecodingFeeder implements Feeder {
   }
 
   public onAttach(): void {
-    this.clear();
+    this.disappearance();
   }
 
   public onDetach(): void {
-    this.clear();
+    this.disappearance();
   }
 
   public onSeeking(): void {
-    this.clear();
+    this.disappearance();
   }
 
   public destroy(): void {
     this.isDestroyed = true;
-    this.clear();
+    this.disappearance();
   }
 }
