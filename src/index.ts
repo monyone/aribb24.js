@@ -13,11 +13,11 @@ export { default as CanvasWebWorkerRenderer } from './v2/runtime/renderer/canvas
 // SVG
 export type { SVGDOMRendererOption } from './v2/runtime/renderer/svg/svg-dom-renderer-option';
 export { default as SVGDOMRenderer } from './v2/runtime/renderer/svg/svg-dom-renderer';
-
 // Text
 export type { TextRendererOption } from './v2/runtime/renderer/text/text-renderer-option';
 export { default as TextRenderer } from './v2/runtime/renderer/text/text-renderer';
 
+// Tokenizer
 export type { ARIBB24Token } from './v2/tokenizer/token';
 export type { default as ARIBB24Tokenizer } from './v2/tokenizer/b24/tokenizer';
 export { default as ARIBB24JIS8Tokenizer } from './v2/tokenizer/b24/jis8/tokenizer';
@@ -25,6 +25,7 @@ export { default as ARIBB24JapanJIS8Tokenizer } from './v2/tokenizer/b24/jis8/AR
 export type { ARIBB24JapaneseJIS8TokenizerOption } from './v2/tokenizer/b24/jis8/ARIB';
 export { default as ARIBBrazilianJIS8Tokenizer } from './v2/tokenizer/b24/jis8/SBTVD';
 
+// Parser
 export { ARIBB24Parser } from './v2/parser';
 export type {
   ARIBB24ParsedToken,
@@ -33,4 +34,5 @@ export type {
   ARIBB24DRCSPrasedToken
 } from './v2/parser';
 
+// Utils
 export { EOFError, NotImplementedError, UnreachableError } from './v2/util/error'
