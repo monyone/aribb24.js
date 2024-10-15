@@ -234,7 +234,7 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSPrasedToken, magnification: [number, number], delta: [number, number], color: string): void => {
+const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSPrasedToken, magnification: [number, number], foreground: string, orn: string | null): void => {
   const { state, option, drcs: { width, height, depth, binary } } = token;
   const uint8 = new Uint8Array(binary);
 
@@ -242,23 +242,39 @@ const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasR
   const start_y = (state.margin[1] + state.position[1] + (1 - ARIBB24Parser.box(state)[1] + ARIBB24Parser.offset(state)[1])) * magnification[1];
   context.translate(start_x, start_y);
   context.scale(option.magnification * magnification[0], option.magnification * magnification[1]);
-  context.fillStyle = color;
 
-  for(let sy = 0; sy < height; sy++){
-    for(let sx = 0; sx < width; sx++){
+  if (orn != null) {
+    context.strokeStyle = orn;
+    context.lineJoin = 'round';
+    context.lineWidth = 2 * option.magnification;
+    for(let y = 0; y < height; y++){
+      for(let x = 0; x < width; x++){
+        let value = 0;
+        for(let d = 0; d < depth; d++){
+          const byte = Math.floor(((((y * width) + x) * depth) + d) / 8);
+          const index = 7 - (((((y * width) + x) * depth) + d) % 8);
+          value *= 2;
+          value += ((uint8[byte] & (1 << index)) >> index);
+        }
+
+        if (value === 0) { continue; }
+        context.strokeRect(x, y, 1, 1);
+      }
+    }
+  }
+
+  context.fillStyle = foreground;
+  for(let y = 0; y < height; y++){
+    for(let x = 0; x < width; x++){
       let value = 0;
       for(let d = 0; d < depth; d++){
-        const byte = Math.floor(((((sy * width) + sx) * depth) + d) / 8);
-        const index = 7 - (((((sy * width) + sx) * depth) + d) % 8);
+        const byte = Math.floor(((((y * width) + x) * depth) + d) / 8);
+        const index = 7 - (((((y * width) + x) * depth) + d) % 8);
         value *= 2;
         value += ((uint8[byte] & (1 << index)) >> index);
       }
 
-      const x = sx + delta[0];
-      const y = sy + delta[1];
-
       if (value === 0) { continue; }
-
       context.fillRect(x, y, 1, 1);
     }
   }
@@ -281,15 +297,5 @@ const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRendering
   const orn = stroke ?? (state.ornament != null ? colortable[state.ornament] : null);
   const foreground = rendererOption.color.foreground ?? colortable[state.foreground];
 
-  // orn
-  if (orn !== null && orn !== foreground) {
-    for (let dy = -2; dy <= 2; dy++) {
-      for (let dx = -2; dx <= 2; dx++) {
-        renderDRCSInternal(context, token, magnification, [dx, dy], orn);
-      }
-    }
-  }
-
-  // foreground
-  renderDRCSInternal(context, token, magnification, [0, 0], foreground);
+  renderDRCSInternal(context, token, magnification, foreground, orn);
 }
