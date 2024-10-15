@@ -10,6 +10,10 @@ export type { RendererOption } from './v2/runtime/renderer/renderer-option';
 export type { CanvasRendererOption } from './v2/runtime/renderer/canvas/canvas-renderer-option';
 export { default as CanvasMainThreadRenderer } from './v2/runtime/renderer/canvas/canvas-renderer-main';
 export { default as CanvasWebWorkerRenderer } from './v2/runtime/renderer/canvas/canvas-renderer-worker';
+// SVG
+export type { SVGDOMRendererOption } from './v2/runtime/renderer/svg/svg-dom-renderer-option';
+export { default as SVGDOMRenderer } from './v2/runtime/renderer/svg/svg-dom-renderer';
+
 // Text
 export type { TextRendererOption } from './v2/runtime/renderer/text/text-renderer-option';
 export { default as TextRenderer } from './v2/runtime/renderer/text/text-renderer';
