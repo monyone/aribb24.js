@@ -4,6 +4,7 @@ import { CanvasRendererOption } from "./canvas-renderer-option";
 import colortable from "../colortable";
 import halfwidth from "../halfwidth";
 import namedcolor from "../namedcolor";
+import arib_symbols from "../../../tokenizer/b24/jis8/ARIB/arib-symbol-set";
 import { UnreachableError } from "../../../util/error";
 import { CaptionLanguageInformation } from "../../../tokenizer/b24/datagroup";
 import { shouldHalfWidth } from "../quirk";
@@ -202,7 +203,7 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
   }
 
   // detect
-  const font = rendererOption.font.normal;
+  const font = arib_symbols.has(character) ? rendererOption.font.arib : rendererOption.font.normal;
   context.font = `${state.fontsize[0]}px ${font}`;
   const { width }  = context.measureText(character);
   const fullwidth_font = width >= state.fontsize[0];
