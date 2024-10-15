@@ -26,7 +26,7 @@ const compareKey = (a: DecodingOrderedKey, b: DecodingOrderedKey) => {
 
 export default abstract class DecodingFeeder implements Feeder {
   private option: FeederOption;
-  private priviousTime: number | null = null;
+  private priviousTime: number = Number.NEGATIVE_INFINITY;
   private priviousManagementData: CaptionManagement | null = null;
   private decoder: AVLTree<DecodingOrderedKey, FeederDecodingData> = new AVLTree<DecodingOrderedKey, FeederDecodingData>(compareKey);
   private decoderBuffer: FeederDecodingData[] = [];
@@ -153,10 +153,8 @@ export default abstract class DecodingFeeder implements Feeder {
   }
 
   public content(time: number): FeederPresentationData | null {
-    if (this.priviousTime != null) {
-      for (const segment of this.decoder.range({ dts: this.priviousTime }, { dts: time })) {
-        this.notify(segment);
-      }
+    for (const segment of this.decoder.range({ dts: this.priviousTime }, { dts: time })) {
+      this.notify(segment);
     }
     this.priviousTime = time;
 
@@ -171,7 +169,7 @@ export default abstract class DecodingFeeder implements Feeder {
 
   private disappearance(): void {
     this.present.clear();
-    this.priviousTime = null;
+    this.priviousTime = Number.NEGATIVE_INFINITY;
     this.priviousManagementData = null;
     this.notify(null);
   }
