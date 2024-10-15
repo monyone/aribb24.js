@@ -87,7 +87,7 @@ export default class ARIBJapaneseJIS8Tokenizer extends ARIBB24JIS8Tokenizer {
       }
     }
 
-    for (let ch1 = 0x21; ch1 < 0x75; ch1++) {
+    for (let ch1 = 0x75; ch1 < 0x7f; ch1++) {
       for (let ch2 = 0x21; ch2 < 0x7f; ch2++) {
         const code = (ch1 << 8) | ch2;
         if (!symbol_pua.has(code)) { continue; }
@@ -95,7 +95,7 @@ export default class ARIBJapaneseJIS8Tokenizer extends ARIBB24JIS8Tokenizer {
       }
     }
 
-    for (let ch1 = 0x21; ch1 < 0x75; ch1++) {
+    for (let ch1 = 0x75; ch1 < 0x7f; ch1++) {
       for (let ch2 = 0x21; ch2 < 0x7f; ch2++) {
         const code = (ch1 << 8) | ch2;
         if (!symbol_unicode.has(code)) { continue; }
