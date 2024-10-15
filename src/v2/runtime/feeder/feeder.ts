@@ -50,7 +50,7 @@ export const getTokenizeInformation = (language: string, option: FeederOption): 
       return ['SBTVD', new ARIBBrazilianJIS8Tokenizer(), latenInitialState];
   }
 
-  // Treat as ARIB-B24 JIS8
+  // Otherwise, Treat as ARIB-B24 JIS8
   return ['UNKNOWN', new ARIBJapaneseJIS8Tokenizer({ usePUA: option.tokenizer.pua }), initialState];
 }
 
