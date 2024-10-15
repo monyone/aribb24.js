@@ -1,5 +1,3 @@
-import AVLTree from '../../util/avl';
-
 import { FeederOption } from './feeder';
 import { parseID3v2 } from '../../util/id3';
 import { base64ToUint8Array } from '../../util/binary';
