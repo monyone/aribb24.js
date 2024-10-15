@@ -171,12 +171,12 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
   const orn = stroke ?? (state.ornament != null ? colortable[state.ornament] : null);
   const foreground = rendererOption.color.foreground ?? colortable[state.foreground];
 
-  const center_x = Math.floor((state.margin[0] + (state.position[0] + 0) + ARIBB24Parser.box(state)[0] / 2) * magnification[0]);
-  const center_y = Math.floor((state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1] / 2) * magnification[1]);
-  context.translate(center_x, center_y);
-
   // if embedded glyph, use
   if (rendererOption.replace.glyph.has(character)) {
+    const start_x = Math.floor((state.margin[0] + (state.position[0] + 0) +                           0 + ARIBB24Parser.offset(state)[0]) * magnification[0]);
+    const start_y = Math.floor((state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1] + ARIBB24Parser.offset(state)[1]) * magnification[1]);
+    context.translate(start_x, start_y);
+
     const { viewBox, path } = rendererOption.replace.glyph.get(character)!
     const path2d = new Path2D(path);
 
@@ -190,7 +190,7 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
     if (orn !== null && orn !== foreground) {
       context.strokeStyle = orn;
       context.lineJoin = 'round';
-      context.lineWidth = 4 * option.magnification;
+      context.lineWidth = 4 * Math.max(width / state.fontsize[0], height / state.fontsize[1]) * option.magnification;
       context.stroke(path2d);
     }
 
@@ -201,6 +201,11 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
     context.setTransform(1, 0, 0, 1, 0, 0);
     return;
   }
+
+  // move
+  const center_x = Math.floor((state.margin[0] + (state.position[0] + 0) + ARIBB24Parser.box(state)[0] / 2) * magnification[0]);
+  const center_y = Math.floor((state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1] / 2) * magnification[1]);
+  context.translate(center_x, center_y);
 
   // detect
   const font = arib_symbols.has(character) ? rendererOption.font.arib : rendererOption.font.normal;
