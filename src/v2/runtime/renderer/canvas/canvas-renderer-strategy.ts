@@ -4,10 +4,9 @@ import { CanvasRendererOption } from "./canvas-renderer-option";
 import colortable from "../colortable";
 import halfwidth from "../halfwidth";
 import namedcolor from "../namedcolor";
-import arib_symbols from "../../../tokenizer/b24/jis8/ARIB/arib-symbol-set";
 import { UnreachableError } from "../../../util/error";
 import { CaptionLanguageInformation } from "../../../tokenizer/b24/datagroup";
-import { shouldHalfWidth } from "../quirk";
+import { shouldHalfWidth, shouldUseARIBFont } from "../quirk";
 
 export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTMLCanvasElement | OffscreenCanvas, state: ARIBB24ParserState, tokens: ARIBB24Token[], info: CaptionLanguageInformation, rendererOption: CanvasRendererOption): void => {
   // render background
@@ -208,7 +207,7 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
   context.translate(center_x, center_y);
 
   // detect
-  const font = arib_symbols.has(character) ? rendererOption.font.arib : rendererOption.font.normal;
+  const font = shouldUseARIBFont(character) ? rendererOption.font.arib : rendererOption.font.normal;
   context.font = `${state.fontsize[0]}px ${font}`;
   const { width }  = context.measureText(character);
   const fullwidth_font = width >= state.fontsize[0];
