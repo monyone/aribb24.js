@@ -206,11 +206,12 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
   context.font = `${state.fontsize[0]}px ${font}`;
   const { width }  = context.measureText(character);
   const fullwidth_font = width >= state.fontsize[0];
+  const scale_halfwidth = !fullwidth_font && is_halfwidth;
 
-  if (fullwidth_font || !is_halfwidth) {
-    context.scale(ARIBB24Parser.scale(state)[0] * magnification[0], ARIBB24Parser.scale(state)[1] * magnification[1]);
-  } else {
+  if (scale_halfwidth) {
     context.scale(magnification[0], ARIBB24Parser.scale(state)[1] * magnification[1]);
+  } else {
+    context.scale(ARIBB24Parser.scale(state)[0] * magnification[0], ARIBB24Parser.scale(state)[1] * magnification[1]);
   }
 
   // orn
@@ -221,7 +222,7 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
     context.textBaseline = 'middle';
     context.textAlign = 'center';
     context.lineWidth = 4 * option.magnification;
-    context.strokeText(character, 0, 0);
+    context.strokeText(character, 0, 0, state.fontsize[0] * (scale_halfwidth ? ARIBB24Parser.scale(state)[0] : 1));
   }
 
   // text
@@ -229,7 +230,7 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
   context.fillStyle = foreground;
   context.textBaseline = 'middle';
   context.textAlign = 'center';
-  context.fillText(character, 0, 0);
+  context.fillText(character, 0, 0, state.fontsize[0] * (scale_halfwidth ? ARIBB24Parser.scale(state)[0] : 1));
 
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
