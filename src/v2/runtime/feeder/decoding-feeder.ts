@@ -91,7 +91,6 @@ export default abstract class DecodingFeeder implements Feeder {
             const index = (typeof(this.option.recieve.language) === 'string') ? 0 : this.option.recieve.language[1];
             const lang = [... caption.languages].sort(({ lang: fst }, { lang: snd}) => fst - snd).filter(({ iso_639_language_code }) => iso_639_language_code === name);
             this.desiredLang = lang?.[index]?.lang ?? null;
-            console.log(this.desiredLang, lang);
           }
           this.priviousManagementData = caption;
 
