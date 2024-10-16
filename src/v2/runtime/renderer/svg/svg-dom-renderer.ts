@@ -1,4 +1,4 @@
-import { ARIBB24Parser, ARIBB24ParserState } from "../../../parser/index";
+import { ARIBB24Parser, ARIBB24ParserState } from "../../../parser/parser";
 import { CaptionLanguageInformation } from "../../../tokenizer/b24/datagroup";
 import { replaceDRCS } from "../../../tokenizer/b24/jis8/tokenizer";
 import { ARIBB24Token } from "../../../tokenizer/token";

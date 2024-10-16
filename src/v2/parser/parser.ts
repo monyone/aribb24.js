@@ -54,7 +54,7 @@ export type ARIBB24ParserState = {
 export type ARIBB24ParserOption = {
   magnification: number;
 }
-const ARIBB24ParserStateOption = {
+export const ARIBB24ParserOption = {
   from(option?: Partial<ARIBB24ParserOption>): ARIBB24ParserOption {
     return {
       magnification: 2,
@@ -90,12 +90,6 @@ export const initialState: Readonly<ARIBB24ParserState> = {
   end_time: null,
 };
 
-export const latenInitialState: Readonly<ARIBB24ParserState> = {
-  ... initialState,
-  // association
-  size: CHARACTER_SIZE.Middle,
-};
-
 export type ARIBB24CommonParsedToken = {
   state: ARIBB24ParserState;
   option: ARIBB24ParserOption;
@@ -121,7 +115,7 @@ export class ARIBB24Parser {
 
   public constructor(state: Readonly<ARIBB24ParserState> = initialState, option?: ARIBB24ParserOption) {
     this.state = structuredClone(state);
-    this.option = ARIBB24ParserStateOption.from(option);
+    this.option = ARIBB24ParserOption.from(option);
     // magnification
     this.state.plane = [this.state.plane[0] * this.option.magnification, this.state.plane[1] * this.option.magnification];
     this.state.area = [this.state.area[0] * this.option.magnification, this.state.area[1] * this.option.magnification];

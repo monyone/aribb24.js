@@ -1,4 +1,4 @@
-import { CHARACTER_SIZE } from "../../parser";
+import { CHARACTER_SIZE } from "../../parser/parser";
 import { CaptionLanguageInformation } from "../../tokenizer/b24/datagroup";
 
 import symbol_pua from "../../tokenizer/b24/jis8/ARIB/symbol-pua";

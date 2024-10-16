@@ -1,5 +1,5 @@
 import { ARIBB24Token } from "../../../tokenizer/token";
-import { ARIBB24ParserState } from "../../../parser/index";
+import { ARIBB24ParserState } from "../../../parser/parser";
 import CanvasRenderer from "./canvas-renderer";
 import { RendererOption } from "../renderer-option";
 import render from "./canvas-renderer-strategy"

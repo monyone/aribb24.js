@@ -4,7 +4,7 @@ import Feeder, { FeederOption, FeederDecodingData, FeederPresentationData, getTo
 import extractPES from '../../tokenizer/b24/mpegts/extract';
 import extractDatagroup, { CaptionManagement } from '../../tokenizer/b24/datagroup'
 import { ClearScreen } from '../../tokenizer/token';
-import { initialState } from '../../parser/index';
+import { initialState } from '../../parser/parser';
 import { UnreachableError } from '../../util/error';
 
 type DecodingOrderedKey = {

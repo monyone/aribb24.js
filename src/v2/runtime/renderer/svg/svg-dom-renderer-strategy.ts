@@ -1,4 +1,4 @@
-import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARIBB24ParserState, CHARACTER_SIZE } from "../../../parser/index";
+import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARIBB24ParserState, CHARACTER_SIZE } from "../../../parser/parser";
 import { ARIBB24Token } from "../../../tokenizer/token";
 import colortable from "../colortable";
 import halfwidth from "../halfwidth";

@@ -1,4 +1,4 @@
-import { ARIBB24Parser, ARIBB24ParserState, CHARACTER_SIZE } from "../../../parser/index";
+import { ARIBB24Parser, ARIBB24ParserState, CHARACTER_SIZE } from "../../../parser/parser";
 import { replaceDRCS } from "../../../tokenizer/b24/jis8/tokenizer";
 import { ARIBB24Token } from "../../../tokenizer/token";
 import { UnreachableError } from "../../../util/error";
