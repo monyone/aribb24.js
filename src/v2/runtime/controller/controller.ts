@@ -236,7 +236,6 @@ export default class PGSController {
     if (this.timer == null) {
       this.registerRenderingLoop();
     }
-    this.paint(true);
     this.renderers.forEach((renderer) => renderer.show());
   }
 
