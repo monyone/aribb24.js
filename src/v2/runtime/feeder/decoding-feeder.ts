@@ -169,6 +169,10 @@ export default abstract class DecodingFeeder implements Feeder {
     this.disappearance();
   }
 
+  public prepare(time: number): void {
+    this.priviousTime = time;
+  }
+
   private disappearance(): void {
     this.present.clear();
     this.priviousTime = null;

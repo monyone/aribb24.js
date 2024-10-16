@@ -48,6 +48,7 @@ export default class PGSController {
     if (this.container) {
       this.renderers.forEach((renderer) => renderer.onAttach(this.container!));
     }
+    this.feeder?.prepare(this.media.currentTime);
     this.setupHandlers();
   }
 
@@ -92,6 +93,10 @@ export default class PGSController {
     this.detachFeeder();
     this.feeder = feeder;
     this.feeder.onAttach();
+
+    if (this.media != null) {
+      this.feeder.prepare(this.media.currentTime);
+    }
   }
 
   public detachFeeder() {
@@ -168,6 +173,10 @@ export default class PGSController {
   }
 
   private onPlay(): void {
+    if (this.media != null) {
+      this.feeder?.prepare(this.media.currentTime);
+    }
+
     if (this.timer != null) { return }
     this.registerRenderingLoop();
   }
