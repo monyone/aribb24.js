@@ -1,7 +1,9 @@
 {
   "name": "aribb24.js",
   "version": "2.0.0-beta.3",
-  "main": "dist/aribb24.umd.js",
+  "main": "dist/aribb24.js",
+  "umd:main": "dist/aribb24.umd.js",
+  "module": "./dist/aribb24.mjs",
   "files": [
     "dist",
     "src",
@@ -10,8 +12,9 @@
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
+      "umd": "./dist/aribb24.umd.js",
       "import": "./dist/aribb24.mjs",
-      "require": "./dist/aribb24.umd.js"
+      "require": "./dist/aribb24.js"
     }
   },
   "author": "monyone <monyone.teihen@gmail.com>",

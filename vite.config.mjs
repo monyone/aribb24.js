@@ -9,7 +9,7 @@ export default defineConfig({
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'aribb24js',
       fileName: 'aribb24',
-      formats: ['es', 'umd'],
+      formats: ['es', 'cjs', 'umd'],
     },
   },
 })
