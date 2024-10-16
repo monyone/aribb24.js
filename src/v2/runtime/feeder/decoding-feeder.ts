@@ -152,6 +152,10 @@ export default abstract class DecodingFeeder implements Feeder {
     }
   }
 
+  public prepare(time: number): void {
+    this.priviousTime = time;
+  }
+
   public content(time: number): FeederPresentationData | null {
     if (this.priviousTime != null) {
       for (const segment of this.decoder.range({ dts: this.priviousTime }, { dts: time })) {
@@ -167,10 +171,6 @@ export default abstract class DecodingFeeder implements Feeder {
   public clear(): void {
     this.decoder.clear();
     this.disappearance();
-  }
-
-  public prepare(time: number): void {
-    this.priviousTime = time;
   }
 
   private disappearance(): void {

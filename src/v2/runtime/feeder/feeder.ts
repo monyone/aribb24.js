@@ -69,9 +69,9 @@ export type FeederPresentationData = {
 };
 
 export default interface Feeder {
+  prepare(time: number): void;
   content(time: number): FeederPresentationData | null;
   clear(): void;
-  prepare(time: number): void;
   destroy(): void;
   onAttach(): void;
   onDetach(): void;
