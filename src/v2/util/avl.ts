@@ -1,5 +1,5 @@
-interface AVLTreeNodeInterface<K, V> {
-  get parent(): AVLTreeNodeInterface<K, V> | null;
+interface AVLTreeNodeInterface<K, V, O> {
+  get parent(): AVLTreeNodeInterface<K, V, O> | null;
   get balanced(): boolean;
   get bias(): number;
   refresh(): void;
@@ -8,21 +8,25 @@ interface AVLTreeNodeInterface<K, V> {
   get(key: K): V | undefined;
   floor(key: K): V | undefined;
   ceil(key: K): V | undefined;
-  range(from: K, to: K): Iterable<V>;
   insert(key: K, value: V): void;
   delete(key: K): void;
-  replace(from: AVLTreeNode<K, V>, to: AVLTreeNode<K, V> | null): void;
+  replace(from: AVLTreeNode<K, V, O>, to: AVLTreeNode<K, V, O> | null): void;
+  range(from: O, to: O): Generator<V>;
 }
 
-class AVLTreeDummyNode<K, V> implements AVLTreeNodeInterface<K, V> {
-  private actual: AVLTreeNode<K, V> | null = null;
-  private compare: (fst: K, snd: K) => -1 | 0 | 1;
+class AVLTreeDummyNode<K, V, O = K> implements AVLTreeNodeInterface<K, V, O> {
+  private actual: AVLTreeNode<K, V, O> | null = null;
+  private compareKey: (fst: K, snd: K) => -1 | 0 | 1;
+  private compareOrder: (fst: O, snd: O) => -1 | 0 | 1;
+  private calculateOrder: (key: K) => O;
 
-  public constructor(compare: (fst: K, snd: K) => -1 | 0 | 1) {
-    this.compare = compare;
+  public constructor(compareKey: (fst: K, snd: K) => -1 | 0 | 1, compareOrder: (fst: O, snd: O) => -1 | 0 | 1, calculateOrder: (key: K) => O) {
+    this.compareKey = compareKey;
+    this.compareOrder = compareOrder;
+    this.calculateOrder = calculateOrder;
   }
 
-  public get parent(): AVLTreeNodeInterface<K, V> | null {
+  public get parent(): AVLTreeNodeInterface<K, V, O> | null {
     return null;
   }
 
@@ -57,13 +61,9 @@ class AVLTreeDummyNode<K, V> implements AVLTreeNodeInterface<K, V> {
     return this.actual?.ceil(key) ?? undefined;
   }
 
-  public *range(from: K, to: K): Iterable<V> {
-    yield* this.actual?.range(from, to) ?? [];
-  }
-
   public insert(key: K, value: V): void {
     if (this.actual == null) {
-      this.actual = new AVLTreeNode(key, value, this, this.compare);
+      this.actual = new AVLTreeNode(key, value, this, this.compareKey, this.compareOrder, this.calculateOrder);
     } else {
       this.actual.insert(key, value);
     }
@@ -73,7 +73,7 @@ class AVLTreeDummyNode<K, V> implements AVLTreeNodeInterface<K, V> {
     this.actual?.delete(key);
   }
 
-  public replace(from: AVLTreeNode<K, V>, to: AVLTreeNode<K, V> | null): void {
+  public replace(from: AVLTreeNode<K, V, O>, to: AVLTreeNode<K, V, O> | null): void {
     if (from == null) { return; }
     if (this.actual !== from) { return; }
     from.parent = null;
@@ -81,24 +81,34 @@ class AVLTreeDummyNode<K, V> implements AVLTreeNodeInterface<K, V> {
     if (to == null) { return; }
     to.parent = this;
   }
+
+  public *range(from: O, to: O): Generator<V> {
+    yield* this.actual?.range(from, to) ?? [];
+  }
 }
 
-class AVLTreeNode<K, V> implements AVLTreeNodeInterface<K, V> {
+class AVLTreeNode<K, V, O = K> implements AVLTreeNodeInterface<K, V, O> {
   public key: K;
   public value: V;
+  public order: O;
 
-  public parent: AVLTreeNodeInterface<K, V> | null;
+  public parent: AVLTreeNodeInterface<K, V, O> | null;
 
-  private left: AVLTreeNode<K, V> | null = null;
-  private right: AVLTreeNode<K, V> | null = null;
+  private left: AVLTreeNode<K, V, O> | null = null;
+  private right: AVLTreeNode<K, V, O> | null = null;
   private depth: number = 1;
-  private compare: (fst: K, snd: K) => -1 | 0 | 1;
+  private compareKey: (fst: K, snd: K) => -1 | 0 | 1;
+  private compareOrder: (fst: O, snd: O) => -1 | 0 | 1;
+  private calculateOrder: (key: K) => O;
 
-  public constructor(key: K, value: V, parent: AVLTreeNodeInterface<K, V>, compare: (fst: K, snd: K) => -1 | 0 | 1) {
+  public constructor(key: K, value: V, parent: AVLTreeNodeInterface<K, V, O>, compareKey: (fst: K, snd: K) => -1 | 0 | 1, compareOrder: (fst: O, snd: O) => -1 | 0 | 1, calculateOrder: (key: K) => O) {
     this.key = key;
     this.value = value;
     this.parent = parent;
-    this.compare = compare;
+    this.compareKey = compareKey;
+    this.compareOrder = compareOrder;
+    this.calculateOrder = calculateOrder;
+    this.order = this.calculateOrder(this.key);
   }
 
   public refresh(): void {
@@ -115,12 +125,12 @@ class AVLTreeNode<K, V> implements AVLTreeNodeInterface<K, V> {
     return (this.left?.depth ?? 0) - (this.right?.depth ?? 0);
   }
 
-  public leftmost(): AVLTreeNode<K, V> {
+  public leftmost(): AVLTreeNode<K, V, O> {
     if (this.left == null) { return this; }
     return this.left.leftmost();
   }
 
-  public rightmost(): AVLTreeNode<K, V> {
+  public rightmost(): AVLTreeNode<K, V, O> {
     if (this.right == null) { return this; }
     return this.right.rightmost();
   }
@@ -175,12 +185,12 @@ class AVLTreeNode<K, V> implements AVLTreeNodeInterface<K, V> {
     }
   }
 
-  private find(key: K, algorithm: 'exact' | 'floor' | 'ceil' = 'exact'): AVLTreeNode<K, V> | null {
-    let node: AVLTreeNode<K, V> = this;
+  private find(key: K, algorithm: 'exact' | 'floor' | 'ceil' = 'exact'): AVLTreeNode<K, V, O> | null {
+    let node: AVLTreeNode<K, V, O> = this;
 
     FIND:
     while (true) {
-      const compare = this.compare(key, node.key);
+      const compare = this.compareKey(key, node.key);
       switch (compare) {
         case 0:
           return node;
@@ -223,22 +233,13 @@ class AVLTreeNode<K, V> implements AVLTreeNodeInterface<K, V> {
     return this.find(key, 'ceil')?.value ?? undefined;
   }
 
-  public *range(from: K, to: K): Iterable<V> {
-    const f = this.compare(from, this.key);
-    const t = this.compare(to, this.key);
-
-    if (f <= 0) { yield* (this.left?.range(from, to) ?? []); }
-    if (f <= 0 && t > 0){ yield this.value; }
-    if (t > 0) { yield* (this.right?.range(from, to) ?? []); }
-  }
-
   public insert(key: K, value: V): void {
-    let node: AVLTreeNode<K, V> = this;
+    let node: AVLTreeNode<K, V, O> = this;
 
     // Insertion
     FIND:
     while (true) {
-      const compare = this.compare(key, node.key);
+      const compare = this.compareKey(key, node.key);
       switch (compare) {
         case 0:
           node.value = value;
@@ -248,7 +249,7 @@ class AVLTreeNode<K, V> implements AVLTreeNodeInterface<K, V> {
             node = node.left;
             continue FIND;
           }
-          node.left = new AVLTreeNode(key, value, node, this.compare);
+          node.left = new AVLTreeNode(key, value, node, this.compareKey, this.compareOrder, this.calculateOrder);
           node = node.left;
           break FIND;
         case 1:
@@ -256,7 +257,7 @@ class AVLTreeNode<K, V> implements AVLTreeNodeInterface<K, V> {
             node = node.right;
             continue FIND;
           }
-          node.right = new AVLTreeNode(key, value, node, this.compare);
+          node.right = new AVLTreeNode(key, value, node, this.compareKey, this.compareOrder, this.calculateOrder);
           node = node.right;
           break FIND;
         default:
@@ -273,7 +274,7 @@ class AVLTreeNode<K, V> implements AVLTreeNodeInterface<K, V> {
   }
 
   public delete(key: K): void {
-    let node: AVLTreeNode<K, V> | null = this.find(key);
+    let node: AVLTreeNode<K, V, O> | null = this.find(key);
     if (node == null) { return; }
 
     // Deletion
@@ -308,7 +309,7 @@ class AVLTreeNode<K, V> implements AVLTreeNodeInterface<K, V> {
     }
   }
 
-  replace(from: AVLTreeNode<K, V>, to: AVLTreeNode<K, V> | null): void {
+  public replace(from: AVLTreeNode<K, V, O>, to: AVLTreeNode<K, V, O> | null): void {
     if (this.left === from) {
       if (from.parent === this.left) { from.parent = null; }
       if (to != null) { to.parent = this; }
@@ -320,19 +321,32 @@ class AVLTreeNode<K, V> implements AVLTreeNodeInterface<K, V> {
       this.right = to;
     }
   }
+
+  public *range(from: O, to: O): Generator<V> {
+    const f = this.compareOrder(from, this.order);
+    const t = this.compareOrder(to, this.order);
+
+    if (f <= 0) { yield* (this.left?.range(from, to) ?? []); }
+    if (f <= 0 && t > 0){ yield this.value; }
+    if (t > 0) { yield* (this.right?.range(from, to) ?? []); }
+  }
 }
 
-export default class AVLTree<K, V>  {
-  private root: AVLTreeNodeInterface<K, V>;
-  private compare: (fst: K, snd: K) => -1 | 0 | 1;
+export default class AVLTree<K, V, O = K>  {
+  private root: AVLTreeNodeInterface<K, V, O>;
+  private compareKey: (fst: K, snd: K) => -1 | 0 | 1;
+  private compareOrder: (fst: O, snd: O) => -1 | 0 | 1;
+  private calculateOrder: (key: K) => O;
 
-  public constructor(compare: (fst: K, snd: K) => -1 | 0 | 1) {
-    this.compare = compare;
-    this.root = new AVLTreeDummyNode<K, V>(this.compare);
+  public constructor(compare: (fst: K, snd: K) => -1 | 0 | 1, compareOrder: (fst: O, snd: O) => -1 | 0 | 1, calculateOrder: (key: K) => O) {
+    this.compareKey = compare;
+    this.compareOrder = compareOrder;
+    this.calculateOrder = calculateOrder;
+    this.root = new AVLTreeDummyNode<K, V, O>(this.compareKey, this.compareOrder, this.calculateOrder);
   }
 
   public clear() {
-    this.root = new AVLTreeDummyNode<K, V>(this.compare);
+    this.root = new AVLTreeDummyNode<K, V, O>(this.compareKey, this.compareOrder, this.calculateOrder);
   }
 
   public has(key: K): boolean {
@@ -351,7 +365,7 @@ export default class AVLTree<K, V>  {
     return this.root.ceil(key);
   }
 
-  public *range(from: K, to: K): Iterable<V> {
+  public *range(from: O, to: O): Generator<V> {
     yield* this.root.range(from, to);
   }
 

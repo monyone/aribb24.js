@@ -12,6 +12,10 @@ type DecodingOrderedKey = {
   lang?: number;
 };
 
+const calcDecodingOrder = ({ dts }: DecodingOrderedKey): number => {
+  return dts;
+}
+
 const compareNumber = (a: number, b: number) => {
   return Math.sign(a - b) as (-1 | 0 | 1);
 }
@@ -28,12 +32,12 @@ export default abstract class DecodingFeeder implements Feeder {
   private option: FeederOption;
   private priviousTime: number | null = null;
   private priviousManagementData: CaptionManagement | null = null;
-  private decoder: AVLTree<DecodingOrderedKey, FeederDecodingData> = new AVLTree<DecodingOrderedKey, FeederDecodingData>(compareKey);
+  private decoder: AVLTree<DecodingOrderedKey, FeederDecodingData, number> = new AVLTree<DecodingOrderedKey, FeederDecodingData, number>(compareKey, compareNumber, calcDecodingOrder);
   private decoderBuffer: FeederDecodingData[] = [];
   private decodingPromise: Promise<void>;
   private decodingNotify: (() => void) = Promise.resolve;
   private abortController: AbortController = new AbortController();
-  private present: AVLTree<number, FeederPresentationData> = new AVLTree<number, FeederPresentationData>(compareNumber);
+  private present: AVLTree<number, FeederPresentationData> = new AVLTree<number, FeederPresentationData>(compareNumber, compareNumber, (pts) => pts);
   private isDestroyed: boolean = false;
 
   public constructor(option?: Partial<FeederOption>) {
@@ -138,18 +142,8 @@ export default abstract class DecodingFeeder implements Feeder {
     const caption = extractDatagroup(datagroup.data);
     if (caption == null) { return ; }
 
-    const lang = caption.tag === 'CaptionStatement' ? caption.lang : 0;
-    switch (datagroup.tag) {
-      case 'Caption':
-        this.decoder.insert({ dts, lang }, { pts, caption });
-        break;
-      case 'Superimpose':
-        this.decoder.insert({ dts, lang }, { pts, caption });
-        break;
-      default:
-        const exhaustive: never = datagroup;
-        throw new UnreachableError(`Undefined data identifier in STD-B24 (${exhaustive})`);
-    }
+    const lang = caption.tag === 'CaptionStatement' ? (caption.lang + 1) : 0;
+    this.decoder.insert({ dts, lang }, { pts, caption });
   }
 
   public prepare(time: number): void {
@@ -158,7 +152,7 @@ export default abstract class DecodingFeeder implements Feeder {
 
   public content(time: number): FeederPresentationData | null {
     if (this.priviousTime != null) {
-      for (const segment of this.decoder.range({ dts: this.priviousTime }, { dts: time })) {
+      for (const segment of this.decoder.range(this.priviousTime, time)) {
         this.notify(segment);
       }
     }
