@@ -12,7 +12,7 @@ export type FeederOption = {
   recieve: {
     association: 'ARIB' | 'SBTVD' | null; // null is AutoDetect
     type: 'Caption' | 'Superimpose';
-    language: number | string;
+    language: number | string | [string, number];
   },
   tokenizer: {
     pua: boolean;

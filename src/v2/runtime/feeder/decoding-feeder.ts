@@ -32,6 +32,7 @@ export default abstract class DecodingFeeder implements Feeder {
   private option: FeederOption;
   private priviousTime: number | null = null;
   private priviousManagementData: CaptionManagement | null = null;
+  private desiredLang: number | null = null;
   private decoder: AVLTree<DecodingOrderedKey, FeederDecodingData, number> = new AVLTree<DecodingOrderedKey, FeederDecodingData, number>(compareKey, compareNumber, calcDecodingOrder);
   private decoderBuffer: FeederDecodingData[] = [];
   private decodingPromise: Promise<void>;
@@ -82,7 +83,18 @@ export default abstract class DecodingFeeder implements Feeder {
       for await (const { pts, caption } of this.generator(this.abortController.signal)) {
         if (caption.tag === 'CaptionManagement') {
           if (this.priviousManagementData?.group === caption.group) { continue; }
+
+          if (typeof(this.option.recieve.language) === 'number') {
+            this.desiredLang = this.option.recieve.language;
+          } else {
+            const name = (typeof(this.option.recieve.language) === 'string') ? this.option.recieve.language : this.option.recieve.language[0];
+            const index = (typeof(this.option.recieve.language) === 'string') ? 0 : this.option.recieve.language[1];
+            const lang = [... caption.languages].sort(({ lang: fst }, { lang: snd}) => fst - snd).filter(({ iso_639_language_code }) => iso_639_language_code === name);
+            this.desiredLang = lang?.[index]?.lang ?? null;
+            console.log(this.desiredLang, lang);
+          }
           this.priviousManagementData = caption;
+
           this.present.insert(pts, {
             pts,
             duration: Number.POSITIVE_INFINITY,
@@ -101,7 +113,7 @@ export default abstract class DecodingFeeder implements Feeder {
 
         const entry = this.priviousManagementData.languages.find((entry) => entry.lang === caption.lang);
         if (entry == null) { continue; }
-        if (this.option.recieve.language !== caption.lang && this.option.recieve.language !== entry?.iso_639_language_code) { continue; }
+        if (this.desiredLang !== caption.lang) { continue; }
 
         const specification = getTokenizeInformation(entry.iso_639_language_code, this.option);
         if (specification == null) { continue; }
