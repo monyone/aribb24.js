@@ -6,7 +6,7 @@ import Renderer from "../renderer";
 import { TextRendererOption } from "./text-renderer-option";
 import halfwidth from "../halfwidth"
 import { CaptionLanguageInformation } from "../../../tokenizer/b24/datagroup";
-import { shouldHalfWidth, shouldIgnoreSmallAsRuby } from "../quirk";
+import { shouldHalfWidth, shouldIgnoreSmallAsRuby, shouldNotAssumeUseClearScreen, shouldRemoveTransparentSpace } from "../quirk";
 
 export default class TextRenderer implements Renderer {
   private option: TextRendererOption;
@@ -115,7 +115,7 @@ export default class TextRenderer implements Renderer {
 
   public render(initialState: ARIBB24ParserState, tokens: ARIBB24Token[], info: CaptionLanguageInformation): void {
     // if SBTVD, it is overwritten screen and insert space to erase, so CS Insert
-    if (info.association === 'SBTVD' && this.text != null) {
+    if (shouldNotAssumeUseClearScreen(info)) {
       this.text = '';
     }
 
@@ -126,6 +126,8 @@ export default class TextRenderer implements Renderer {
         case 'Character': {
           const { state, character: { character }} = token;
           if (this.text == null) { break; }
+
+          if ((character === ' ' || character === '　') && state.background === 8 && shouldRemoveTransparentSpace(info)) { break; }
 
           // if ARIB in Japanese, SSZ is almost ruby
           if (shouldIgnoreSmallAsRuby(state.size, info)) { break; }
