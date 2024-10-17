@@ -731,7 +731,7 @@ export default class HTMLProvider {
       const ch2 = ((key & 0x00FF) >> 0) - 0x21
 
       if (ch1 === 0 && 12 <= ch2 && ch2 <= 17) {
-        this.non_spacing = ['\u0301', '\u3000', '\u0308', '\u0302', '\u0305', '\u0332'][ch2 - 12];
+        this.non_spacing = ['\u0301', '\u0300', '\u0308', '\u0302', '\u0305', '\u0332'][ch2 - 12];
         return;
       } else if (ch1 === 1 && ch2 === 93) {
         this.non_spacing += '\u20DD';
