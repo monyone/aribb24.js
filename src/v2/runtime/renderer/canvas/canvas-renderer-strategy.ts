@@ -85,7 +85,7 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
 const clear = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionLanguageInformation, rendererOption: CanvasRendererOption): void => {
   const { state } = token;
 
-  // background
+  // clear
   context.clearRect(
     (state.margin[0] + (state.position[0] + 0)  -                          0) * magnification[0],
     (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1]) * magnification[1],

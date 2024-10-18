@@ -12,13 +12,19 @@ export default (target: SVGElement, state: ARIBB24ParserState, tokens: ARIBB24To
   const parser = new ARIBB24Parser(state);
 
   const texts: SVGTextElement[] = [];
+  const bg_paths = new Map<string, string>();
+
 
   for (const token of parser.parse(tokens)) {
     target.setAttribute('viewBox', `0 0 ${token.state.plane[0]} ${token.state.plane[1]}`)
 
     switch (token.tag) {
       case 'Character': {
-        texts.push(retriveSVGTextElement(token, info, rendererOption));
+        // bg
+        const [background, path] = retriveBackroundPathString(token, info, rendererOption);
+        bg_paths.set(background, `${bg_paths.get(background) ?? ''}${bg_paths.has(background) ? ' ' : ''}${path}`);
+
+        texts.push(retriveCharacterSVGTextElement(token, info, rendererOption));
         break;
       }
       case 'DRCS': {
@@ -39,8 +45,17 @@ export default (target: SVGElement, state: ARIBB24ParserState, tokens: ARIBB24To
   }
 
   const fragment = new DocumentFragment();
+  // bg
+  for (const [ color, path ] of bg_paths.entries()) {
+    const bg = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    bg.setAttribute('d', path);
+    bg.setAttribute('fill', color);
+    fragment.append(bg);
+  }
+  // text
   fragment.append(... texts);
 
+  // Fragment
   target.appendChild(fragment);
 }
 
@@ -186,7 +201,16 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
 }
 */
 
-const retriveSVGTextElement = (token: ARIBB24CharacterParsedToken, info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): SVGTextElement => {
+const retriveBackroundPathString = (token: ARIBB24CharacterParsedToken, info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): [string, String] => {
+  const { state } = token;
+  const color = rendererOption.color.background ?? colortable[state.background];
+  const origin_x = Math.floor(state.margin[0] + (state.position[0] + 0) +                           0);
+  const origin_y = Math.floor(state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1]);
+
+  return [color, `M ${origin_x} ${origin_y} h ${ARIBB24Parser.box(state)[0]} v ${ARIBB24Parser.box(state)[1]} H ${origin_x} Z`];
+}
+
+const retriveCharacterSVGTextElement = (token: ARIBB24CharacterParsedToken, info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): SVGTextElement => {
   const { state, option, character: { character: key }} = token;
 
   const should_halfwidth = shouldHalfWidth(state.size, info);
@@ -204,10 +228,10 @@ const retriveSVGTextElement = (token: ARIBB24CharacterParsedToken, info: Caption
   const foreground = rendererOption.color.foreground ?? colortable[state.foreground];
 
   const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  text.setAttribute('x', '0');
-  text.setAttribute('y', '0');
-  text.setAttribute('transform', `translate(${center_x} ${center_y}) scale(${scale_x} ${scale_y})`);
-  text.setAttribute('transform-origin', `0 0`);
+  text.setAttribute('x', `${center_x}`);
+  text.setAttribute('y', `${center_y}`);
+  text.setAttribute('transform', `scale(${scale_x} ${scale_y})`);
+  text.setAttribute('transform-origin', `${center_x} ${center_y}`);
   text.setAttribute('font-size', `${state.fontsize[0]}`);
   text.setAttribute('font-family', rendererOption.font.normal);
   text.setAttribute('dominant-baseline', 'central');
