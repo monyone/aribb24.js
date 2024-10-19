@@ -54,6 +54,9 @@ export default abstract class CanvasRenderer implements Renderer {
     return true;
   }
 
+  public onPlay(): void {}
+  public onPause(): void {}
+
   public onSeeking(): void {
     this.clear();
   }

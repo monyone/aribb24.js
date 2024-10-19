@@ -8,7 +8,7 @@ import render from "./svg-dom-renderer-strategy";
 
 export default class SVGDOMRenderer implements Renderer {
   protected option: SVGDOMRendererOption;
-  protected svg: SVGElement;
+  protected svg: SVGSVGElement;
 
   public constructor(option?: Partial<SVGDOMRendererOption>) {
     this.option = SVGDOMRendererOption.from(option);
@@ -23,13 +23,14 @@ export default class SVGDOMRenderer implements Renderer {
 
   public resize(width: number, height: number): void {};
   public destroy(): void {
-    this.clear;
+    this.clear();
   }
   public clear(): void {
     while (this.svg.firstChild) {
       this.svg.removeChild(this.svg.firstChild);
     }
   }
+
   public hide(): void {
     this.svg.style.visibility = 'hidden';
   }
@@ -50,6 +51,15 @@ export default class SVGDOMRenderer implements Renderer {
 
   public onContainerResize(width: number, height: number): boolean { return false; }
   public onVideoResize(width: number, height: number): boolean { return false; }
+
+  public onPlay(): void {
+    if (!this.option.animation.pause) { return; }
+    this.svg.unpauseAnimations();
+  }
+  public onPause(): void {
+    if (!this.option.animation.pause) { return; }
+    this.svg.pauseAnimations();
+  }
 
   public onSeeking(): void {
     this.clear();

@@ -16,6 +16,9 @@ export type SVGDOMRendererOption = RendererOption & {
     foreground: string | null,
     background: string | null,
   },
+  animation: {
+    pause: boolean,
+  },
 };
 
 export const SVGDOMRendererOption = {
@@ -37,6 +40,10 @@ export const SVGDOMRendererOption = {
         foreground: null,
         background: null,
         ... option?.color,
+      },
+      animation: {
+        pause: true,
+        ... option?.animation,
       },
     };
   }

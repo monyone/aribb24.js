@@ -13,5 +13,7 @@ export default interface Renderer {
   onDetach(): void;
   onContainerResize(width: number, height: number): boolean;
   onVideoResize(width: number, height: number): boolean;
+  onPlay(): void;
+  onPause(): void;
   onSeeking(): void;
 }

@@ -177,11 +177,19 @@ export default class PGSController {
       this.feeder?.prepare(this.media.currentTime);
     }
 
+    this.renderers.forEach((renderer) => {
+      renderer.onPlay();
+    });
+
     if (this.timer != null) { return }
     this.registerRenderingLoop();
   }
 
   private onPause(): void {
+    this.renderers.forEach((renderer) => {
+      renderer.onPause();
+    });
+
     this.unregisterRenderingLoop();
   }
 

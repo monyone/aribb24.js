@@ -178,6 +178,9 @@ export default class TextRenderer implements Renderer {
     return false;
   }
 
+  public onPlay(): void {}
+  public onPause(): void {}
+
   public onSeeking(): void {
     this.clear();
   }
