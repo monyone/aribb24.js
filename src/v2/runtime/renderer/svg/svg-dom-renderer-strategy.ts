@@ -1,5 +1,5 @@
 import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24ParsedToken, ARIBB24Parser, ARIBB24ParserState, CHARACTER_SIZE } from "../../../parser/parser";
-import { ARIBB24Token } from "../../../tokenizer/token";
+import { ARIBB24Token, FlashingControlType } from "../../../tokenizer/token";
 import colortable from "../colortable";
 import halfwidth from "../halfwidth";
 import namedcolor from "../namedcolor";
@@ -14,7 +14,6 @@ export default (target: SVGElement, state: ARIBB24ParserState, tokens: ARIBB24To
   const fg_groups: SVGGElement[] = [];
   const bg_paths = new Map<string, string>();
 
-
   for (const token of parser.parse(tokens)) {
     target.setAttribute('viewBox', `0 0 ${token.state.plane[0]} ${token.state.plane[1]}`)
 
@@ -27,6 +26,9 @@ export default (target: SVGElement, state: ARIBB24ParserState, tokens: ARIBB24To
         const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         group.appendChild(retriveCharacterSVGTextElement(token, info, rendererOption));
         group.appendChild(retriveDecorationSVGPathElement(token, info, rendererOption));
+        const animate = retriveFlashingAnimateElement(token, info, rendererOption);
+        if (animate) { group.appendChild(animate); }
+        // group
         fg_groups.push(group);
         break;
       }
@@ -40,6 +42,9 @@ export default (target: SVGElement, state: ARIBB24ParserState, tokens: ARIBB24To
           group.appendChild(drcs);
         }
         group.appendChild(retriveDecorationSVGPathElement(token, info, rendererOption));
+        const animate = retriveFlashingAnimateElement(token, info, rendererOption);
+        if (animate) { group.appendChild(animate); }
+        // group
         fg_groups.push(group);
         break;
       }
@@ -70,6 +75,11 @@ export default (target: SVGElement, state: ARIBB24ParserState, tokens: ARIBB24To
 
   // Fragment
   target.appendChild(fragment);
+
+  // Animation Start
+  for (const animate of Array.from(target.getElementsByTagNameNS('http://www.w3.org/2000/svg', 'animate'))) {
+    (animate as SVGAnimateElement).beginElement();
+  }
 }
 
 const retriveDecorationSVGPathElement = (token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): SVGPathElement => {
@@ -108,10 +118,14 @@ const retriveDecorationSVGPathElement = (token: ARIBB24CharacterParsedToken | AR
   return elem;
 }
 
-const retriveFlushingAnimateElement = (token: ARIBB24CharacterParsedToken, info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): SVGAnimateElement => {
+const retriveFlashingAnimateElement = (token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): SVGAnimateElement | null => {
+  const { state } = token;
+
+  if (state.flashing === FlashingControlType.STOP) { return null; }
+
   const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
   animate.setAttribute('attributeName', 'opacity');
-  animate.setAttribute('values', '1;0');
+  animate.setAttribute('values', state.flashing === FlashingControlType.NORMAL ? '1;0' : '0;1');
   animate.setAttribute('dur', '1s');
   animate.setAttribute('calcMode', 'discrete');
   animate.setAttribute('repeatCount', 'indefinite');

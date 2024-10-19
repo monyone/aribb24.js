@@ -1,4 +1,4 @@
-import { ARIBB24Token, Character, CharacterSizeControlType, DRCS, OrnamentControlType } from "../tokenizer/token";
+import { ARIBB24Token, Character, CharacterSizeControlType, DRCS, FlashingControlType, OrnamentControlType } from "../tokenizer/token";
 import { UnreachableError } from "../util/error";
 
 export const CHARACTER_SIZE = {
@@ -46,6 +46,7 @@ export type ARIBB24ParserState = {
   underline: boolean;
   highlight: number;
   ornament: number | null;
+  flashing: (typeof FlashingControlType)[keyof typeof FlashingControlType];
   // time
   elapsed_time: number;
   end_time: number | null;
@@ -85,6 +86,7 @@ export const initialState: Readonly<ARIBB24ParserState> = {
   underline: false,
   highlight: 0,
   ornament: null,
+  flashing: FlashingControlType.STOP,
   // time
   elapsed_time: 0,
   end_time: null,
@@ -394,6 +396,9 @@ export class ARIBB24Parser {
               break;
             }
           }
+          break;
+        case 'FlashingControl':
+          this.state.flashing = token.type;
           break;
         // time
         case 'ClearScreen':
