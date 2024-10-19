@@ -1,4 +1,4 @@
-import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARIBB24ParserState, CHARACTER_SIZE } from "../../../parser/parser";
+import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24ParsedToken, ARIBB24Parser, ARIBB24ParserState, CHARACTER_SIZE } from "../../../parser/parser";
 import { ARIBB24Token } from "../../../tokenizer/token";
 import colortable from "../colortable";
 import halfwidth from "../halfwidth";
@@ -11,7 +11,7 @@ import { SVGDOMRendererOption } from "./svg-dom-renderer-option";
 export default (target: SVGElement, state: ARIBB24ParserState, tokens: ARIBB24Token[], info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): void => {
   const parser = new ARIBB24Parser(state);
 
-  const texts: SVGTextElement[] = [];
+  const texts: (SVGTextElement | SVGPathElement)[] = [];
   const bg_paths = new Map<string, string>();
 
 
@@ -23,12 +23,16 @@ export default (target: SVGElement, state: ARIBB24ParserState, tokens: ARIBB24To
         // bg
         const [background, path] = retriveBackroundPathString(token, info, rendererOption);
         bg_paths.set(background, `${bg_paths.get(background) ?? ''}${bg_paths.has(background) ? ' ' : ''}${path}`);
-
+        // text
         texts.push(retriveCharacterSVGTextElement(token, info, rendererOption));
         break;
       }
       case 'DRCS': {
-        // TODO:
+        // bg
+        const [background, path] = retriveBackroundPathString(token, info, rendererOption);
+        bg_paths.set(background, `${bg_paths.get(background) ?? ''}${bg_paths.has(background) ? ' ' : ''}${path}`);
+        // DRCS
+        texts.push(... retriveDRCSSVGPathElement(token, info, rendererOption));
         break;
       }
       case 'ClearScreen':
@@ -48,6 +52,7 @@ export default (target: SVGElement, state: ARIBB24ParserState, tokens: ARIBB24To
   // bg
   for (const [ color, path ] of bg_paths.entries()) {
     const bg = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    bg.setAttribute('shape-rendering', 'crispEdges');
     bg.setAttribute('d', path);
     bg.setAttribute('fill', color);
     fragment.append(bg);
@@ -60,19 +65,6 @@ export default (target: SVGElement, state: ARIBB24ParserState, tokens: ARIBB24To
 }
 
 /*
-const renderBackground = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionLanguageInformation,rendererOption: CanvasRendererOption): void => {
-  const { state } = token;
-
-  // background
-  context.fillStyle = rendererOption.color.background ?? colortable[state.background];
-  context.fillRect(
-    (state.margin[0] + (state.position[0] + 0)  -                          0) * magnification[0],
-    (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1]) * magnification[1],
-    ARIBB24Parser.box(state)[0] * magnification[0],
-    ARIBB24Parser.box(state)[1] * magnification[1]
-  );
-}
-
 const renderHighlight = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionLanguageInformation,rendererOption: CanvasRendererOption): void => {
   const { state, option } = token;
 
@@ -201,7 +193,18 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
 }
 */
 
-const retriveBackroundPathString = (token: ARIBB24CharacterParsedToken, info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): [string, String] => {
+const retriveFlushingAnimateElement = (token: ARIBB24CharacterParsedToken, info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): SVGAnimateElement => {
+  const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+  animate.setAttribute('attributeName', 'opacity');
+  animate.setAttribute('values', '1;0');
+  animate.setAttribute('dur', '1s');
+  animate.setAttribute('calcMode', 'discrete');
+  animate.setAttribute('repeatCount', 'indefinite');
+
+  return animate;
+}
+
+const retriveBackroundPathString = (token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): [string, String] => {
   const { state } = token;
   const color = rendererOption.color.background ?? colortable[state.background];
   const origin_x = Math.floor(state.margin[0] + (state.position[0] + 0) +                           0);
@@ -246,36 +249,51 @@ const retriveCharacterSVGTextElement = (token: ARIBB24CharacterParsedToken, info
   return text;
 }
 
-const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSPrasedToken, magnification: [number, number], delta: [number, number], color: string): void => {
+const retriveDRCSSVGPathElement = (token: ARIBB24DRCSPrasedToken, info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): [SVGPathElement, SVGPathElement] => {
   const { state, option, drcs: { width, height, depth, binary } } = token;
   const uint8 = new Uint8Array(binary);
 
-  const start_x = (state.margin[0] + state.position[0] + (0 -                           0 + ARIBB24Parser.offset(state)[0])) * magnification[0];
-  const start_y = (state.margin[1] + state.position[1] + (1 - ARIBB24Parser.box(state)[1] + ARIBB24Parser.offset(state)[1])) * magnification[1];
-  context.translate(start_x, start_y);
-  context.scale(option.magnification * magnification[0], option.magnification * magnification[1]);
-  context.fillStyle = color;
+  const stroke = rendererOption.color.stroke != null ? (namedcolor.get(rendererOption.color.stroke) ?? rendererOption.color.stroke) : null;
+  const orn = stroke ?? (state.ornament != null ? colortable[state.ornament] : null);
+  const foreground = rendererOption.color.foreground ?? colortable[state.foreground];
 
-  for(let sy = 0; sy < height; sy++){
-    for(let sx = 0; sx < width; sx++){
+  const start_x = state.margin[0] + state.position[0] + (0 -                           0 + ARIBB24Parser.offset(state)[0]);
+  const start_y = state.margin[1] + state.position[1] + (1 - ARIBB24Parser.box(state)[1] + ARIBB24Parser.offset(state)[1]);
+
+  let path = '';
+  for (let dy = 0; dy < height; dy++) {
+    for (let dx = 0; dx < width; dx++) {
+      const x = start_x + dx * option.magnification;
+      const y = start_y + dy * option.magnification;
+
       let value = 0;
       for(let d = 0; d < depth; d++){
-        const byte = Math.floor(((((sy * width) + sx) * depth) + d) / 8);
-        const index = 7 - (((((sy * width) + sx) * depth) + d) % 8);
+        const byte = Math.floor(((((dy * width) + dx) * depth) + d) / 8);
+        const index = 7 - (((((dy * width) + dx) * depth) + d) % 8);
         value *= 2;
         value += ((uint8[byte] & (1 << index)) >> index);
       }
 
-      const x = sx + delta[0];
-      const y = sy + delta[1];
-
       if (value === 0) { continue; }
 
-      context.fillRect(x, y, 1, 1);
+      path += (path === '' ? '' : ' ') + `M ${x} ${y} h ${option.magnification} v ${option.magnification} H ${x} Z`;
     }
   }
 
-  context.setTransform(1, 0, 0, 1, 0, 0);
+  const stroke_path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  const fill_path = document.createElementNS('http://www.w3.org/2000/svg', 'path');;
+  stroke_path.setAttribute('shape-rendering', 'crispEdges');
+  fill_path.setAttribute('shape-rendering', 'crispEdges');
+  stroke_path.setAttribute('d', path);
+  fill_path.setAttribute('d', path);
+  stroke_path.setAttribute('stroke', orn ?? 'transparent');
+  fill_path.setAttribute('stroke', 'transparent');
+  stroke_path.setAttribute('fill', 'transparent');
+  fill_path.setAttribute('fill', foreground);
+  stroke_path.setAttribute('stroke-width', orn != null ? `${4 * option.magnification}` : '0');
+  stroke_path.setAttribute('stroke-linejoin', 'round');
+
+  return [stroke_path, fill_path];
 }
 
 /*
