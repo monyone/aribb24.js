@@ -159,7 +159,7 @@ const retriveCharacterSVGTextElement = (token: ARIBB24CharacterParsedToken, info
 
   const center_x = Math.floor(state.margin[0] + (state.position[0] + 0) + ARIBB24Parser.box(state)[0] / 2);
   const center_y = Math.floor(state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1] / 2);
-  const scale_x = replace_halfwidth && has_halfwidth ? 1 : ARIBB24Parser.scale(state)[0];
+  const scale_x = ARIBB24Parser.scale(state)[0];
   const scale_y = ARIBB24Parser.scale(state)[1];
 
   const stroke = rendererOption.color.stroke != null ? (namedcolor.get(rendererOption.color.stroke) ?? rendererOption.color.stroke) : null;
@@ -169,7 +169,7 @@ const retriveCharacterSVGTextElement = (token: ARIBB24CharacterParsedToken, info
   const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
   text.setAttribute('x', `${center_x}`);
   text.setAttribute('y', `${center_y}`);
-  text.setAttribute('transform', `scale(${scale_x} ${scale_y})`);
+  text.setAttribute('transform', `scale(${1} ${scale_y})`);
   text.setAttribute('transform-origin', `${center_x} ${center_y}`);
   text.setAttribute('font-size', `${state.fontsize[0]}`);
   text.setAttribute('font-family', rendererOption.font.normal);
@@ -180,6 +180,8 @@ const retriveCharacterSVGTextElement = (token: ARIBB24CharacterParsedToken, info
   text.setAttribute('stroke-linejoin', 'round');
   text.setAttribute('stroke-width', orn != null ? `${4 * option.magnification}` : '0');
   text.setAttribute('stroke', orn != null ? orn : 'transparent');
+  text.setAttribute('textLength', `${state.fontsize[0] * scale_x}`);
+  text.setAttribute('lengthAdjust', 'spacingAndGlyphs');
   text.appendChild(document.createTextNode(character));
 
   return text;

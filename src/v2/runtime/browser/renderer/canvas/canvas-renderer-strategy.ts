@@ -150,7 +150,6 @@ const renderUnderline = (context: CanvasRenderingContext2D | OffscreenCanvasRend
 
 const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken, magnification: [number, number], info: CaptionLanguageInformation, rendererOption: CanvasRendererOption): void => {
   const { state, option, character: { character: key, non_spacing } } = token;
-  const is_halfwidth = state.size === CHARACTER_SIZE.Middle || state.size === CHARACTER_SIZE.Small;
   const should_halfwidth = shouldHalfWidth(state.size, info);
   const replace_halfwidth = rendererOption.replace.half  && should_halfwidth;
   const character = replace_halfwidth && halfwidth.has(key) ? halfwidth.get(key)! : key;
@@ -208,16 +207,7 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
 
   // detect
   const font = shouldUseARIBFont(character) ? rendererOption.font.arib : rendererOption.font.normal;
-  context.font = `${state.fontsize[0]}px ${font}`;
-  const { width }  = context.measureText(character);
-  const fullwidth_font = width >= state.fontsize[0];
-  const scale_halfwidth = !fullwidth_font && is_halfwidth;
-
-  if (scale_halfwidth) {
-    context.scale(magnification[0], ARIBB24Parser.scale(state)[1] * magnification[1]);
-  } else {
-    context.scale(ARIBB24Parser.scale(state)[0] * magnification[0], ARIBB24Parser.scale(state)[1] * magnification[1]);
-  }
+  context.scale(magnification[0] * 1, ARIBB24Parser.scale(state)[1] * magnification[1]);
 
   // orn
   if (orn !== null && orn !== foreground) {
@@ -227,7 +217,7 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
     context.textBaseline = 'middle';
     context.textAlign = 'center';
     context.lineWidth = 4 * option.magnification;
-    context.strokeText(character, 0, 0, state.fontsize[0] * (scale_halfwidth ? ARIBB24Parser.scale(state)[0] : 1));
+    context.strokeText(character, 0, 0, state.fontsize[0] * ARIBB24Parser.scale(state)[0]);
   }
 
   // text
@@ -235,7 +225,7 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
   context.fillStyle = foreground;
   context.textBaseline = 'middle';
   context.textAlign = 'center';
-  context.fillText(character, 0, 0, state.fontsize[0] * (scale_halfwidth ? ARIBB24Parser.scale(state)[0] : 1));
+  context.fillText(character, 0, 0, state.fontsize[0] * ARIBB24Parser.scale(state)[0]);
 
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
