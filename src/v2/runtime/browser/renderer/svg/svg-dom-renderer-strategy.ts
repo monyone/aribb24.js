@@ -94,7 +94,7 @@ export default (target: SVGSVGElement, state: ARIBB24ParserState, tokens: ARIBB2
   }
   // rendererd visible
   for (const child of Array.from(target.children)) {
-    child.setAttribute('visibility', 'visible');
+    child.removeAttribute('visibility');
   }
 }
 
