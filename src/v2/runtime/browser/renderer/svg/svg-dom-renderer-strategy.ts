@@ -1,10 +1,10 @@
-import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24ParsedToken, ARIBB24Parser, ARIBB24ParserState, CHARACTER_SIZE } from "../../../parser/parser";
-import { ARIBB24Token, FlashingControlType } from "../../../tokenizer/token";
+import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24ParsedToken, ARIBB24Parser, ARIBB24ParserState, CHARACTER_SIZE } from "../../../../parser/parser";
+import { ARIBB24Token, FlashingControlType } from "../../../../tokenizer/token";
 import colortable from "../colortable";
 import halfwidth from "../halfwidth";
 import namedcolor from "../namedcolor";
-import { UnreachableError } from "../../../util/error";
-import { CaptionLanguageInformation } from "../../../tokenizer/b24/datagroup";
+import { UnreachableError } from "../../../../util/error";
+import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup";
 import { shouldHalfWidth } from "../quirk";
 import { SVGDOMRendererOption } from "./svg-dom-renderer-option";
 

@@ -1,11 +1,11 @@
-import { ARIBB24Parser, ARIBB24ParserState, CHARACTER_SIZE } from "../../../parser/parser";
-import { replaceDRCS } from "../../../tokenizer/b24/jis8/tokenizer";
-import { ARIBB24Token } from "../../../tokenizer/token";
-import { UnreachableError } from "../../../util/error";
+import { ARIBB24Parser, ARIBB24ParserState, CHARACTER_SIZE } from "../../../../parser/parser";
+import { replaceDRCS } from "../../../../tokenizer/b24/jis8/tokenizer";
+import { ARIBB24Token } from "../../../../tokenizer/token";
+import { UnreachableError } from "../../../../util/error";
 import Renderer from "../renderer";
 import { TextRendererOption } from "./text-renderer-option";
 import halfwidth from "../halfwidth"
-import { CaptionLanguageInformation } from "../../../tokenizer/b24/datagroup";
+import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup";
 import { shouldHalfWidth, shouldIgnoreSmallAsRuby, shouldNotAssumeUseClearScreen, shouldRemoveTransparentSpace } from "../quirk";
 
 export default class TextRenderer implements Renderer {

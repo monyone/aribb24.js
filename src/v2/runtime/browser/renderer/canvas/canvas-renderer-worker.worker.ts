@@ -1,4 +1,4 @@
-import { UnreachableError } from "../../../util/error";
+import { UnreachableError } from "../../../../util/error";
 import render from "./canvas-renderer-strategy"
 import { FromMainToWorkerEvent, FromWorkerToMainEventImageBitmap } from "./canvas-renderer-worker.event";
 

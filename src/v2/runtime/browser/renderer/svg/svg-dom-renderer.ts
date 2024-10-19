@@ -1,7 +1,7 @@
-import { ARIBB24Parser, ARIBB24ParserState } from "../../../parser/parser";
-import { CaptionLanguageInformation } from "../../../tokenizer/b24/datagroup";
-import { replaceDRCS } from "../../../tokenizer/b24/jis8/tokenizer";
-import { ARIBB24Token } from "../../../tokenizer/token";
+import { ARIBB24Parser, ARIBB24ParserState } from "../../../../parser/parser";
+import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup";
+import { replaceDRCS } from "../../../../tokenizer/b24/jis8/tokenizer";
+import { ARIBB24Token } from "../../../../tokenizer/token";
 import { shouldNotAssumeUseClearScreen } from "../quirk";
 import Renderer from "../renderer";
 import { SVGDOMRendererOption } from "./svg-dom-renderer-option";

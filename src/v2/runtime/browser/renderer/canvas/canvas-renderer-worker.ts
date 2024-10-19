@@ -1,12 +1,12 @@
-import { ARIBB24Token } from "../../../tokenizer/token";
-import { ARIBB24ParserState } from "../../../parser/parser";
+import { ARIBB24Token } from "../../../../tokenizer/token";
+import { ARIBB24ParserState } from "../../../../parser/parser";
 import CanvasRenderer from "./canvas-renderer";
 import { RendererOption } from "../renderer-option";
-import { replaceDRCS } from "../../../tokenizer/b24/jis8/tokenizer";
+import { replaceDRCS } from "../../../../tokenizer/b24/jis8/tokenizer";
 
 import RenderingWorker from "./canvas-renderer-worker.worker?worker&inline";
 import { FromMainToWorkerEventClear, FromMainToWorkerEventInitialize, FromMainToWorkerEventRender, FromMainToWorkerEventResize, FromWorkerToMainEvent, FromWorkerToMainEventImageBitmap } from "./canvas-renderer-worker.event";
-import { CaptionLanguageInformation } from "../../../tokenizer/b24/datagroup";
+import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup";
 
 export default class CanvasWebWorkerRenderer extends CanvasRenderer {
   private buffer: OffscreenCanvas;

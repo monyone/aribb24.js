@@ -1,10 +1,10 @@
-import { ARIBB24Token } from "../../../tokenizer/token";
-import { ARIBB24ParserState } from "../../../parser/parser";
+import { ARIBB24Token } from "../../../../tokenizer/token";
+import { ARIBB24ParserState } from "../../../../parser/parser";
 import CanvasRenderer from "./canvas-renderer";
 import { RendererOption } from "../renderer-option";
 import render from "./canvas-renderer-strategy"
-import { replaceDRCS } from "../../../tokenizer/b24/jis8/tokenizer";
-import { CaptionLanguageInformation } from "../../../tokenizer/b24/datagroup";
+import { replaceDRCS } from "../../../../tokenizer/b24/jis8/tokenizer";
+import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup";
 
 export default class CanvasMainThreadRenderer extends CanvasRenderer {
   private buffer: HTMLCanvasElement;

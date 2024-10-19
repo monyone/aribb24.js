@@ -1,21 +1,21 @@
-export { default as Controller } from './v2/runtime/controller/controller';
+export { default as Controller } from './v2/runtime/browser/controller/controller';
 
-export type { FeederOption } from './v2/runtime/feeder/feeder'
-export { default as MPEGTSFeeder } from './v2/runtime/feeder/mpegts-feeder';
-export type { Event } from './v2/runtime/controller/events';
-export { EventType } from './v2/runtime/controller/events';
+export type { FeederOption } from './v2/runtime/browser/feeder/feeder'
+export { default as MPEGTSFeeder } from './v2/runtime/browser/feeder/mpegts-feeder';
+export type { Event } from './v2/runtime/browser/controller/events';
+export { EventType } from './v2/runtime/browser/controller/events';
 
-export type { RendererOption } from './v2/runtime/renderer/renderer-option';
+export type { RendererOption } from './v2/runtime/browser/renderer/renderer-option';
 // Canvas
-export type { CanvasRendererOption } from './v2/runtime/renderer/canvas/canvas-renderer-option';
-export { default as CanvasMainThreadRenderer } from './v2/runtime/renderer/canvas/canvas-renderer-main';
-export { default as CanvasWebWorkerRenderer } from './v2/runtime/renderer/canvas/canvas-renderer-worker';
+export type { CanvasRendererOption } from './v2/runtime/browser/renderer/canvas/canvas-renderer-option';
+export { default as CanvasMainThreadRenderer } from './v2/runtime/browser/renderer/canvas/canvas-renderer-main';
+export { default as CanvasWebWorkerRenderer } from './v2/runtime/browser/renderer/canvas/canvas-renderer-worker';
 // SVG
-export type { SVGDOMRendererOption } from './v2/runtime/renderer/svg/svg-dom-renderer-option';
-export { default as SVGDOMRenderer } from './v2/runtime/renderer/svg/svg-dom-renderer';
+export type { SVGDOMRendererOption } from './v2/runtime/browser/renderer/svg/svg-dom-renderer-option';
+export { default as SVGDOMRenderer } from './v2/runtime/browser/renderer/svg/svg-dom-renderer';
 // Text
-export type { TextRendererOption } from './v2/runtime/renderer/text/text-renderer-option';
-export { default as TextRenderer } from './v2/runtime/renderer/text/text-renderer';
+export type { TextRendererOption } from './v2/runtime/browser/renderer/text/text-renderer-option';
+export { default as TextRenderer } from './v2/runtime/browser/renderer/text/text-renderer';
 
 // Tokenizer
 export type { ARIBB24Token } from './v2/tokenizer/token';

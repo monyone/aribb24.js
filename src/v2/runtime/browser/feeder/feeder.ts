@@ -1,11 +1,11 @@
-import { ARIBB24ParserState } from "../../parser/parser";
-import aribInitialState from "../../parser/state/ARIB";
-import sbtvdInitialState from "../../parser/state/SBTVD"
-import datagroup, { CaptionLanguageInformation } from "../../tokenizer/b24/datagroup";
-import ARIBJapaneseJIS8Tokenizer from "../../tokenizer/b24/jis8/ARIB/index";
-import ARIBBrazilianJIS8Tokenizer from "../../tokenizer/b24/jis8/SBTVD/index";
-import ARIBB24Tokenizer from "../../tokenizer/b24/tokenizer";
-import { ARIBB24Token } from "../../tokenizer/token";
+import { ARIBB24ParserState } from "../../../parser/parser";
+import aribInitialState from "../../../parser/state/ARIB";
+import sbtvdInitialState from "../../../parser/state/SBTVD"
+import datagroup, { CaptionLanguageInformation } from "../../../tokenizer/b24/datagroup";
+import ARIBJapaneseJIS8Tokenizer from "../../../tokenizer/b24/jis8/ARIB/index";
+import ARIBBrazilianJIS8Tokenizer from "../../../tokenizer/b24/jis8/SBTVD/index";
+import ARIBB24Tokenizer from "../../../tokenizer/b24/tokenizer";
+import { ARIBB24Token } from "../../../tokenizer/token";
 
 export type FeederOption = {
   timeshift: number;
