@@ -121,16 +121,23 @@ const retriveDecorationSVGPathElement = (token: ARIBB24CharacterParsedToken | AR
 const retriveFlashingAnimateElement = (token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): SVGAnimateElement | null => {
   const { state } = token;
 
-  if (state.flashing === FlashingControlType.STOP) { return null; }
-
-  const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
-  animate.setAttribute('attributeName', 'opacity');
-  animate.setAttribute('values', state.flashing === FlashingControlType.NORMAL ? '1;0' : '0;1');
-  animate.setAttribute('dur', '1s');
-  animate.setAttribute('calcMode', 'discrete');
-  animate.setAttribute('repeatCount', 'indefinite');
-
-  return animate;
+  switch (state.flashing) {
+    case FlashingControlType.STOP:
+      return null;
+    case FlashingControlType.NORMAL:
+    case FlashingControlType.INVERTED: {
+      const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+      animate.setAttribute('attributeName', 'opacity');
+      animate.setAttribute('values', state.flashing === FlashingControlType.NORMAL ? '1;0' : '0;1');
+      animate.setAttribute('dur', '1s');
+      animate.setAttribute('calcMode', 'discrete');
+      animate.setAttribute('repeatCount', 'indefinite');
+      return animate;
+    }
+    default:
+      const exhaustive: never = state.flashing;
+      throw new UnreachableError(`Unhandled Flasing Token (${exhaustive})`);
+  }
 }
 
 const retriveBackroundPathString = (token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): [string, String] => {
