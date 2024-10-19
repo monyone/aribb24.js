@@ -8,7 +8,7 @@ import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup"
 import { shouldHalfWidth } from "../quirk";
 import { SVGDOMRendererOption } from "./svg-dom-renderer-option";
 
-export default (target: SVGElement, state: ARIBB24ParserState, tokens: ARIBB24Token[], info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): void => {
+export default (target: SVGSVGElement, state: ARIBB24ParserState, tokens: ARIBB24Token[], info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): void => {
   const parser = new ARIBB24Parser(state);
 
   const fg_groups: SVGGElement[] = [];
@@ -73,12 +73,28 @@ export default (target: SVGElement, state: ARIBB24ParserState, tokens: ARIBB24To
   // text
   fragment.append(... fg_groups);
 
-  // Fragment
+  // rendererd hidden
+  for (const child of Array.from(fragment.children)) {
+    child.setAttribute('visibility', 'hidden');
+  }
+
+  // Fragment append
   target.appendChild(fragment);
 
+  // Calc textSize
+  for (const text of Array.from(target.getElementsByTagNameNS('http://www.w3.org/2000/svg', 'text'))) {
+    const { width } = text.getBoundingClientRect();
+    text.setAttribute('textLength', `${Math.min(width, Number.parseInt(text.dataset.width!, 10))}`);
+    delete text.dataset.width;
+    text.setAttribute('lengthAdjust', 'spacingAndGlyphs');
+  }
   // Animation Start
   for (const animate of Array.from(target.getElementsByTagNameNS('http://www.w3.org/2000/svg', 'animate'))) {
     (animate as SVGAnimateElement).beginElement();
+  }
+  // rendererd visible
+  for (const child of Array.from(target.children)) {
+    child.setAttribute('visibility', 'visible');
   }
 }
 
@@ -180,8 +196,7 @@ const retriveCharacterSVGTextElement = (token: ARIBB24CharacterParsedToken, info
   text.setAttribute('stroke-linejoin', 'round');
   text.setAttribute('stroke-width', orn != null ? `${4 * option.magnification}` : '0');
   text.setAttribute('stroke', orn != null ? orn : 'transparent');
-  text.setAttribute('textLength', `${state.fontsize[0] * scale_x}`);
-  text.setAttribute('lengthAdjust', 'spacingAndGlyphs');
+  text.dataset.width = `${state.fontsize[0] * scale_x}`;
   text.appendChild(document.createTextNode(character));
 
   return text;
