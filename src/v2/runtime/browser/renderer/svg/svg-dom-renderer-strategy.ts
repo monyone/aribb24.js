@@ -83,7 +83,7 @@ export default (target: SVGSVGElement, state: ARIBB24ParserState, tokens: ARIBB2
 
   // Calc textSize
   for (const text of Array.from(target.getElementsByTagNameNS('http://www.w3.org/2000/svg', 'text'))) {
-    const { width } = text.getBoundingClientRect();
+    const { width } = (text as SVGTextElement).getBBox()
     text.setAttribute('textLength', `${Math.min(width, Number.parseInt(text.dataset.width!, 10))}`);
     delete text.dataset.width;
     text.setAttribute('lengthAdjust', 'spacingAndGlyphs');
