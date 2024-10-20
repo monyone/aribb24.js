@@ -708,7 +708,7 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
             if (entry == null || entry.type !== 'DRCS') { continue };
 
             entry.dict.set(ch, DRCS.from(width, height, bits, binary));
-          }else{
+          } else {
             const index = 0x40;
             const ch = CharacterCode & 0x7F7F;
 
