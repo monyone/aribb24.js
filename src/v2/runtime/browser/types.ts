@@ -136,11 +136,13 @@ export const ARIBB24BitmapParsedToken = {
 
 export type ARIBB24BrowserParsedToken = ARIBB24ParsedToken | ARIBB24BitmapParsedToken;
 
-export const decodeBitmap = async (tokens: ARIBB24Token[], pallet: string[]): Promise<ARIBB24BrowserToken[]> => {
+export const toBrowserToken = async (tokens: ARIBB24Token[], pallet: string[], decode = true): Promise<ARIBB24BrowserToken[]> => {
   let result: ARIBB24BrowserToken[] = [];
   for (const token of tokens) {
     if (token.tag !== 'Bitmap') {
       result.push(token);
+      continue;
+    } else if (!decode) {
       continue;
     }
 

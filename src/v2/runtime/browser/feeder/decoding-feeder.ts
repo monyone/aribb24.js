@@ -5,7 +5,7 @@ import extractPES from '../../../tokenizer/b24/mpegts/extract';
 import extractDatagroup, { CaptionManagement } from '../../../tokenizer/b24/datagroup'
 import { ClearScreen } from '../../../tokenizer/token';
 import { initialState } from '../../../parser/parser';
-import { decodeBitmap } from '../types';
+import { toBrowserToken } from '../types';
 
 type DecodingOrderedKey = {
   dts: number;
@@ -25,6 +25,14 @@ const compareKey = (a: DecodingOrderedKey, b: DecodingOrderedKey) => {
     return compareNumber(a.dts, b.dts);
   } else {
     return compareNumber(a.lang ?? -1, b.lang ?? -1)
+  }
+}
+
+const closeValueImageBitmap = (value: FeederPresentationData) => {
+  for (const token of value.data) {
+    if (token.tag !== 'Bitmap') { continue; }
+    token.normal_bitmap.close();
+    token.flashing_bitmap?.close();
   }
 }
 
@@ -118,7 +126,7 @@ export default abstract class DecodingFeeder implements Feeder {
         if (specification == null) { continue; }
 
         const [association, tokenizer, state] = specification;
-        const tokenized = await decodeBitmap(tokenizer.tokenize(caption), []);
+        const tokenized = await toBrowserToken(tokenizer.tokenize(caption), []);
 
         let duration = Number.POSITIVE_INFINITY;
         let elapse = 0;
@@ -179,6 +187,7 @@ export default abstract class DecodingFeeder implements Feeder {
   }
 
   private disappearance(): void {
+    this.present.forEach(closeValueImageBitmap);
     this.present.clear();
     this.priviousTime = null;
     this.priviousManagementData = null;

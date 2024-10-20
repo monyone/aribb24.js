@@ -11,6 +11,7 @@ interface AVLTreeNodeInterface<K, V, O> {
   insert(key: K, value: V): void;
   delete(key: K): void;
   replace(from: AVLTreeNode<K, V, O>, to: AVLTreeNode<K, V, O> | null): void;
+  forEach(func: (value: V) => void): void;
   range(from: O, to: O): Generator<V>;
 }
 
@@ -80,6 +81,10 @@ class AVLTreeDummyNode<K, V, O = K> implements AVLTreeNodeInterface<K, V, O> {
     this.actual = to;
     if (to == null) { return; }
     to.parent = this;
+  }
+
+  public forEach(func: (value: V) => void): void {
+    this.actual?.forEach(func);
   }
 
   public *range(from: O, to: O): Generator<V> {
@@ -322,6 +327,12 @@ class AVLTreeNode<K, V, O = K> implements AVLTreeNodeInterface<K, V, O> {
     }
   }
 
+  public forEach(func: (value: V) => void): void {
+    if (this.left != null) { this.left.forEach(func); }
+    func(this.value);
+    if (this.right != null) { this.right.forEach(func); }
+  }
+
   public *range(from: O, to: O): Generator<V> {
     const f = this.compareOrder(from, this.order);
     const t = this.compareOrder(to, this.order);
@@ -363,6 +374,10 @@ export default class AVLTree<K, V, O = K>  {
 
   public ceil(key: K): V | undefined {
     return this.root.ceil(key);
+  }
+
+  public forEach(func: (value: V) => void): void {
+    this.root.forEach(func);
   }
 
   public *range(from: O, to: O): Generator<V> {
