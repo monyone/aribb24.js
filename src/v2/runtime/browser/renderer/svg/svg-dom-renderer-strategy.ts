@@ -1,6 +1,6 @@
 import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARIBB24ParserState } from "../../../../parser/parser";
 import { FlashingControlType } from "../../../../tokenizer/token";
-import colortable from "../colortable";
+import colortable from "../../../colortable";
 import halfwidth from "../halfwidth";
 import namedcolor from "../namedcolor";
 import { NotImplementedError, UnreachableError } from "../../../../util/error";

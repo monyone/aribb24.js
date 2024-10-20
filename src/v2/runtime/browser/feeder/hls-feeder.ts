@@ -18,7 +18,7 @@ export default class HLSFeeder extends DecodingFeeder {
     super(option);
   }
 
-  public attachMedia(media: HTMLVideoElement, container?: HTMLElement): void {
+  public attachMedia(media: HTMLVideoElement): void {
     this.detachMedia();
     this.media = media;
 

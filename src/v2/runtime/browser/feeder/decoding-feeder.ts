@@ -6,6 +6,7 @@ import extractDatagroup, { CaptionManagement } from '../../../tokenizer/b24/data
 import { ClearScreen } from '../../../tokenizer/token';
 import { initialState } from '../../../parser/parser';
 import { toBrowserToken } from '../types';
+import colortable from '../../colortable';
 
 type DecodingOrderedKey = {
   dts: number;
@@ -126,7 +127,7 @@ export default abstract class DecodingFeeder implements Feeder {
         if (specification == null) { continue; }
 
         const [association, tokenizer, state] = specification;
-        const tokenized = await toBrowserToken(tokenizer.tokenize(caption), []);
+        const tokenized = await toBrowserToken(tokenizer.tokenize(caption), colortable);
 
         let duration = Number.POSITIVE_INFINITY;
         let elapse = 0;
