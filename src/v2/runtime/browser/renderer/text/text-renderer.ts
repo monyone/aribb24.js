@@ -147,12 +147,13 @@ export default class TextRenderer implements Renderer {
           break;
         }
         case 'DRCS': {
+          const { state } = token;
           if (this.text == null) { break; }
 
-          if (privious_y != null && initialState.position[1] !== privious_y) {
+          if (privious_y != null && state.position[1] !== privious_y) {
             this.text += '\n';
           }
-          privious_y = initialState.position[1];
+          privious_y = state.position[1];
 
           this.text += '〓';
           break;
@@ -167,6 +168,8 @@ export default class TextRenderer implements Renderer {
           throw new UnreachableError(`Unhandled ARIB Parsed Token (${exhaustive})`);
       }
     }
+
+    console.log(this.text);
   }
 
   public onAttach(element: HTMLElement): void {}
