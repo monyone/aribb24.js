@@ -128,7 +128,9 @@ const retriveDecorationSVGPathElement = (token: ARIBB24CharacterParsedToken | AR
   const elem = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
   elem.setAttribute('shape-rendering', 'crispEdges');
-  elem.setAttribute('d', path);
+  if (path !== '') {
+    elem.setAttribute('d', path);
+  }
   elem.setAttribute('fill', foreground);
 
   return elem;
