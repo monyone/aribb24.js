@@ -1,10 +1,8 @@
 import { ByteStream } from "../../../util/bytestream";
-import { CaptionData, CaptionManagement } from "../datagroup";
 
 import type { ARIBB24Token } from '../../token';
-import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, BuiltinSoundReplay, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, Delete, DRCS, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControl, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, YellowForeground } from "../../token";
+import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, Bitmap, BlackForeground, BlueForeground, BuiltinSoundReplay, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, Delete, DRCS, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControl, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, YellowForeground } from "../../token";
 import ARIBB24Tokenizer from "../tokenizer";
-import md5 from "../../../util/md5";
 import { NotImplementedError, UnreachableError } from "../../../util/error";
 
 export const CONTROL_CODES = {
@@ -115,20 +113,7 @@ export type MacroDictEntry = {
 
 export type DictEntry = CharacterDictEntry | DRCSDictEntry | MacroDictEntry;
 
-export const replaceDRCS = (tokens: ARIBB24Token[], replace: Map<string, string>): ARIBB24Token[] => {
-  return tokens.map((token) => {
-    if (token.tag !== 'DRCS') { return token; }
-    const hash = md5(token.binary);
-
-    if (replace.has(hash)) {
-      return Character.from(replace.get(hash)!, false);
-    } else {
-      return token;
-    }
-  });
-}
-
-export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
+export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
   private GL: 0 | 1 | 2 | 3;
   private GR: 0 | 1 | 2 | 3;
   private GB: [DictEntry, DictEntry, DictEntry, DictEntry];
@@ -137,28 +122,13 @@ export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
   private non_spacing: Set<string>;
 
   public constructor(GL: 0 | 1 | 2 | 3, GR: 0 | 1 | 2 | 3, GB: [DictEntry, DictEntry, DictEntry, DictEntry], character_dicts: Record<string, CharacterDictEntry>, drcs_dicts: Record<string, DRCSDictEntry | MacroDictEntry>, non_spacing: Set<string>) {
+    super();
     this.GL = GL;
     this.GR = GR;
     this.GB = GB;
     this.character_dicts = character_dicts;
     this.drcs_dicts = structuredClone(drcs_dicts);
     this.non_spacing = non_spacing;
-  }
-
-  public tokenize(data: CaptionData): ARIBB24Token[] {
-    const result: ARIBB24Token[] = [];
-    for (const unit of data.units) {
-      switch (unit.tag) {
-        case 'Statement':
-          result.push(... this.tokenizeStatement(unit.data));
-          break;
-        case 'DRCS':
-          this.tokenizeDRCS(unit.bytes, unit.data);
-          break;
-      }
-    }
-
-    return result;
   }
 
   public tokenizeStatement(arraybuffer: ArrayBuffer): ARIBB24Token[] {
@@ -708,7 +678,7 @@ export default abstract class ARIBB24JIS8Tokenizer implements ARIBB24Tokenizer {
     return result;
   }
 
-  public tokenizeDRCS(bytes: 1 | 2, arraybuffer: ArrayBuffer): void {
+  public processDRCS(bytes: 1 | 2, arraybuffer: ArrayBuffer): void {
     const uint8 = new Uint8Array(arraybuffer);
     let begin = 0, end = uint8.byteLength;
     const NumberOfCode = uint8[begin + 0];

@@ -1,6 +1,6 @@
-import { ARIBB24Parser, ARIBB24ParserState } from "../../../../parser/parser";
+import { ARIBB24ParserState } from "../../../../parser/parser";
 import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup";
-import { replaceDRCS } from "../../../../tokenizer/b24/jis8/tokenizer";
+import { replaceDRCS } from "../../../../tokenizer/b24/tokenizer";
 import { ARIBB24Token } from "../../../../tokenizer/token";
 import { shouldNotAssumeUseClearScreen } from "../quirk";
 import Renderer from "../renderer";

@@ -10,7 +10,11 @@ export type DRCSDataUnit = {
   data: ArrayBuffer;
   bytes: 1 | 2;
 }
-export type DataUnit = StatementDataUnit | DRCSDataUnit;
+export type BitmapDataUnit = {
+  tag: 'Bitmap'
+  data: ArrayBuffer;
+}
+export type DataUnit = StatementDataUnit | DRCSDataUnit | BitmapDataUnit;
 
 export const CaptionManagementTCS = {
   JIS8: 0b00,
@@ -93,15 +97,22 @@ export default (data: ArrayBuffer, readSTM: boolean = false): CaptionData | null
         const data_unit_parameter = stream.readU8();
         const data_unit_size = stream.readU24();
 
-        if (data_unit_parameter === 0x20) {
-          units.push({ tag: 'Statement', data: stream.read(data_unit_size) });
-        } else if (data_unit_parameter == 0x30) {
-          units.push({ tag: 'DRCS', bytes: 1, data: stream.read(data_unit_size) });
-        } else if (data_unit_parameter == 0x31) {
-          units.push({ tag: 'DRCS', bytes: 2, data: stream.read(data_unit_size) });
-        } else {
-          // TODO: FIXME: Other Ignored...
-          stream.read(data_unit_size);
+        switch (data_unit_parameter) {
+          case 0x20:
+            units.push({ tag: 'Statement', data: stream.read(data_unit_size) });
+            break;
+          case 0x30:
+            units.push({ tag: 'DRCS', bytes: 1, data: stream.read(data_unit_size) });
+            break;
+          case 0x31:
+            units.push({ tag: 'DRCS', bytes: 2, data: stream.read(data_unit_size) });
+            break;
+          case 0x35:
+            units.push({ tag: 'Bitmap', data: stream.read(data_unit_size) });
+            break;
+          default: // TODO: FIXME: Other Ignored...
+            stream.read(data_unit_size);
+            break;
         }
 
         offset += 5 + data_unit_size;

@@ -19,8 +19,8 @@ export { default as TextRenderer } from './v2/runtime/browser/renderer/text/text
 
 // Tokenizer
 export type { ARIBB24Token } from './v2/tokenizer/token';
-export type { default as ARIBB24Tokenizer } from './v2/tokenizer/b24/tokenizer';
-export { default as ARIBB24JIS8Tokenizer, replaceDRCS as ARIBB24JIS8ReplaceDRCS } from './v2/tokenizer/b24/jis8/tokenizer';
+export type { default as ARIBB24Tokenizer, replaceDRCS as ARIBB24JIS8ReplaceDRCS } from './v2/tokenizer/b24/tokenizer';
+export { default as ARIBB24JIS8Tokenizer } from './v2/tokenizer/b24/jis8/tokenizer';
 export { default as ARIBB24JapanJIS8Tokenizer } from './v2/tokenizer/b24/jis8/ARIB';
 export type { ARIBB24JapaneseJIS8TokenizerOption } from './v2/tokenizer/b24/jis8/ARIB';
 export { default as ARIBB24BrazilianJIS8Tokenizer } from './v2/tokenizer/b24/jis8/SBTVD';

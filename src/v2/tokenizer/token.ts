@@ -32,6 +32,20 @@ export const DRCS = {
   }
 };
 
+export type Bitmap = {
+  tag: 'Bitmap';
+  x_position: number;
+  y_position: number;
+  flc_colors: number[];
+  binary: ArrayBuffer;
+};
+export const Bitmap = {
+  from(x_position: number, y_position: number, flc_colors: number[], binary: ArrayBuffer): Bitmap {
+    return { tag: 'Bitmap' ,x_position, y_position, flc_colors, binary };
+  }
+};
+
+
 export type Null = { // NUL
   tag: 'Null';
 };
@@ -589,6 +603,8 @@ export const BuiltinSoundReplay = {
 };
 
 export type ARIBB24Token =
+  // ビットマップ
+  Bitmap |
   // 文字
   Character |
   Mosaic |
