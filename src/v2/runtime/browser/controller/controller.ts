@@ -222,7 +222,7 @@ export default class PGSController {
       this.privious_pts = end; // end is finite
     } else { // render
       if (this.privious_pts === current.pts) { return; }
-      this.renderers.forEach((renderer) => renderer.render(current.state, current.data, current.info));
+      this.renderers.forEach((renderer) => renderer.render(structuredClone(current.state), structuredClone(current.data), structuredClone(current.info)));
       this.privious_pts = current.pts
 
       // Builtin Sound Callback

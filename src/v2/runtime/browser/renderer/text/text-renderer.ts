@@ -157,7 +157,9 @@ export default class TextRenderer implements Renderer {
           this.text += '〓';
           break;
         }
-        case 'Bitmap': // IGNORE
+        case 'Bitmap':
+          token.normal_bitmap.close();
+          token.flashing_bitmap?.close();
           break;
         case 'ClearScreen':
           if (token.time === 0) {
