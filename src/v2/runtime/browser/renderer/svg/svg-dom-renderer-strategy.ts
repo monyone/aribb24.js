@@ -13,6 +13,7 @@ export default (target: SVGSVGElement, state: ARIBB24ParserState, tokens: ARIBB2
   const parser = new ARIBB24BrowserParser(state);
 
   const fg_groups: SVGGElement[] = [];
+  const bitmap_groups: SVGElement[] = [];
   const bg_paths = new Map<string, string>();
 
   for (const token of parser.parse(tokens)) {
@@ -49,9 +50,40 @@ export default (target: SVGSVGElement, state: ARIBB24ParserState, tokens: ARIBB2
         fg_groups.push(group);
         break;
       }
-      case 'Bitmap':
-        // TODO
-        throw new NotImplementedError('Not Implemented Bitmap');
+      case 'Bitmap': {
+        token.normal_bitmap.close();
+        token.flashing_bitmap?.close();
+        {
+          const image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+          image.setAttribute('href', token.normal_dataurl);
+          image.setAttribute('x', `${token.x_position}`);
+          image.setAttribute('y', `${token.y_position}`);
+          image.setAttribute('width', `${token.width}`);
+          image.setAttribute('height', `${token.height}`);
+
+          bitmap_groups.push(image);
+        }
+        if (token.flashing_dataurl != null) {
+          const flcImage = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+          flcImage.setAttribute('href', token.flashing_dataurl);
+          flcImage.setAttribute('x', `${token.x_position}`);
+          flcImage.setAttribute('y', `${token.y_position}`);
+          flcImage.setAttribute('width', `${token.width}`);
+          flcImage.setAttribute('height', `${token.height}`);
+
+          const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+          animate.setAttribute('attributeName', 'opacity');
+          animate.setAttribute('values', '1;0');
+          animate.setAttribute('dur', '1s');
+          animate.setAttribute('calcMode', 'discrete');
+          animate.setAttribute('repeatCount', 'indefinite');
+          flcImage.appendChild(animate);
+
+          bitmap_groups.push(flcImage);
+        }
+
+        break;
+      }
       case 'ClearScreen':
         if (token.time !== 0) { break; }
 
@@ -76,6 +108,7 @@ export default (target: SVGSVGElement, state: ARIBB24ParserState, tokens: ARIBB2
   }
   // text
   fragment.append(... fg_groups);
+  fragment.append(... bitmap_groups);
 
   // rendererd hidden
   for (const child of Array.from(fragment.children)) {

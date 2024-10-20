@@ -157,9 +157,8 @@ export default class TextRenderer implements Renderer {
           this.text += '〓';
           break;
         }
-        case 'Bitmap':
-          // TODO
-          throw new NotImplementedError('Not Implemented Bitmap');
+        case 'Bitmap': // IGNORE
+          break;
         case 'ClearScreen':
           if (token.time === 0) {
             this.text = '';

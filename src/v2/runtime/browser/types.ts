@@ -60,7 +60,7 @@ export const DecodedBitmap = {
     const width = pngDataView.getInt32(16 /* PNG signature + 'IHDR' + size */, false);
     const height = pngDataView.getInt32(20 /* PNG signature + 'IHDR' + size + width */, false);
     const normalImage = new Image(width, height);
-    normalImage.src = 'data:image/png;base64,' + window.btoa(String.fromCharCode(...pngData));
+    normalImage.src = 'data:image/png;base64,' + btoa(String.fromCharCode(...pngData));
     await normalImage.decode();
     const normal_bitmap = await createImageBitmap(normalImage);
 
@@ -74,7 +74,7 @@ export const DecodedBitmap = {
       pngDataView.setInt32(trnsOffset + trnsSize - 4, CRC32(pngData, trnsOffset + 4, trnsOffset + 8 + trnsDataSize), false);
 
       const flashingImage = new Image(width, height);
-      flashingImage.src = 'data:image/png;base64,' + window.btoa(String.fromCharCode(...pngData));
+      flashingImage.src = 'data:image/png;base64,' + btoa(String.fromCharCode(...pngData));
       await flashingImage.decode();
       const flashing_bitmap = await createImageBitmap(flashingImage);
 
@@ -107,8 +107,32 @@ export type ARIBB24BrowserToken = Exclude<ARIBB24Token, Bitmap> | DecodedBitmap;
 
 export type ARIBB24BitmapParsedToken = ARIBB24CommonParsedToken & {
   tag: 'Bitmap';
-  bitmap: DecodedBitmap;
+  x_position: number;
+  y_position: number;
+  width: number;
+  height: number;
+  normal_dataurl: string;
+  normal_bitmap: ImageBitmap;
+  flashing_dataurl?: string;
+  flashing_bitmap?: ImageBitmap;
 };
+export const ARIBB24BitmapParsedToken = {
+  from(bitmap: DecodedBitmap, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24BitmapParsedToken {
+    return {
+      tag: 'Bitmap',
+      state,
+      option,
+      x_position: bitmap.x_position * option.magnification,
+      y_position: bitmap.x_position * option.magnification,
+      width: bitmap.x_position * option.magnification,
+      height: bitmap.x_position * option.magnification,
+      normal_dataurl: bitmap.normal_dataurl,
+      normal_bitmap: bitmap.normal_bitmap,
+      flashing_dataurl: bitmap.flashing_dataurl,
+      flashing_bitmap: bitmap.flashing_bitmap,
+    };
+  }
+}
 
 export type ARIBB24BrowserParsedToken = ARIBB24ParsedToken | ARIBB24BitmapParsedToken;
 
@@ -135,12 +159,7 @@ export class ARIBB24BrowserParser {
 
   private parseBitmapOrInherit(token: ARIBB24BrowserToken): ARIBB24BrowserParsedToken[] {
     if (token.tag !== 'Bitmap') { return this.praser.parseToken(token as ARIBB24Token); }
-    return [{
-      tag: 'Bitmap',
-      state: this.praser.currentState(),
-      option: this.praser.currentOption(),
-      bitmap: token
-    }];
+    return [ARIBB24BitmapParsedToken.from(token, this.praser.currentState(), this.praser.currentOption())];
   }
 
   public parse(tokens: ARIBB24BrowserToken[]): ARIBB24BrowserParsedToken[] {
