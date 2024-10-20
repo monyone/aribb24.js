@@ -33,9 +33,9 @@ export default abstract class ARIBB24Tokenizer {
     const uint8 = new Uint8Array(arraybuffer);
     let begin = 0;
 
-    const x_position = (uint8[begin] << 8) | uint8[begin + 1];
+    const x_position = (((uint8[begin] << 8) | uint8[begin + 1]) << 16) >> 16;
     begin += 2;
-    const y_position = (uint8[begin] << 8) | uint8[begin + 1];
+    const y_position = (((uint8[begin] << 8) | uint8[begin + 1]) << 16) >> 16;
     begin += 2;
     const number_of_flc_colors = uint8[begin];
     begin += 1;
