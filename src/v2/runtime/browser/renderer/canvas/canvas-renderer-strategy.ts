@@ -153,7 +153,7 @@ const renderUnderline = (context: CanvasRenderingContext2D | OffscreenCanvasRend
 }
 
 const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken, magnification: [number, number], info: CaptionLanguageInformation, rendererOption: CanvasRendererOption): void => {
-  const { state, option, character: { character: key, non_spacing } } = token;
+  const { state, option, character: key, non_spacing } = token;
   const should_halfwidth = shouldHalfWidth(state.size, info);
   const replace_halfwidth = rendererOption.replace.half  && should_halfwidth;
   const character = replace_halfwidth && halfwidth.has(key) ? halfwidth.get(key)! : key;
@@ -235,7 +235,7 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
 }
 
 const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSPrasedToken, magnification: [number, number], foreground: string, orn: string | null): void => {
-  const { state, option, drcs: { width, height, depth, binary } } = token;
+  const { state, option, width, height, depth, binary } = token;
   const uint8 = new Uint8Array(binary);
 
   const start_x = (state.margin[0] + state.position[0] + (0 -                           0 + ARIBB24Parser.offset(state)[0])) * magnification[0];

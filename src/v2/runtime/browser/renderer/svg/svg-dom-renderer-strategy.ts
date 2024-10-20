@@ -22,8 +22,10 @@ export default (target: SVGSVGElement, state: ARIBB24ParserState, tokens: ARIBB2
     switch (token.tag) {
       case 'Character': {
         // bg
-        const [background, path] = retriveBackroundPathString(token, info, rendererOption);
-        bg_paths.set(background, `${bg_paths.get(background) ?? ''}${bg_paths.has(background) ? ' ' : ''}${path}`);
+        if (!token.non_spacing) {
+          const [background, path] = retriveBackroundPathString(token, info, rendererOption);
+          bg_paths.set(background, `${bg_paths.get(background) ?? ''}${bg_paths.has(background) ? ' ' : ''}${path}`);
+        }
         // text
         const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         group.appendChild(retriveCharacterSVGTextElement(token, info, rendererOption));
@@ -205,7 +207,7 @@ const retriveBackroundPathString = (token: ARIBB24CharacterParsedToken | ARIBB24
 }
 
 const retriveCharacterSVGTextElement = (token: ARIBB24CharacterParsedToken, info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): SVGTextElement => {
-  const { state, option, character: { character: key }} = token;
+  const { state, option, character: key } = token;
 
   const should_halfwidth = shouldHalfWidth(state.size, info);
   const replace_halfwidth = rendererOption.replace.half  && should_halfwidth;
@@ -242,7 +244,7 @@ const retriveCharacterSVGTextElement = (token: ARIBB24CharacterParsedToken, info
 }
 
 const retriveDRCSSVGPathElement = (token: ARIBB24DRCSPrasedToken, info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): [SVGPathElement, SVGPathElement] => {
-  const { state, option, drcs: { width, height, depth, binary } } = token;
+  const { state, option, width, height, depth, binary } = token;
   const uint8 = new Uint8Array(binary);
 
   const stroke = rendererOption.color.stroke != null ? (namedcolor.get(rendererOption.color.stroke) ?? rendererOption.color.stroke) : null;

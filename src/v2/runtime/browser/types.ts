@@ -105,16 +105,8 @@ export const DecodedBitmap = {
 
 export type ARIBB24BrowserToken = Exclude<ARIBB24Token, Bitmap> | DecodedBitmap;
 
-export type ARIBB24BitmapParsedToken = ARIBB24CommonParsedToken & {
+export type ARIBB24BitmapParsedToken = ARIBB24CommonParsedToken & Omit<DecodedBitmap, 'tag'> & {
   tag: 'Bitmap';
-  x_position: number;
-  y_position: number;
-  width: number;
-  height: number;
-  normal_dataurl: string;
-  normal_bitmap: ImageBitmap;
-  flashing_dataurl?: string;
-  flashing_bitmap?: ImageBitmap;
 };
 export const ARIBB24BitmapParsedToken = {
   from(bitmap: DecodedBitmap, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24BitmapParsedToken {

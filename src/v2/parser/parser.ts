@@ -1,4 +1,4 @@
-import { ARIBB24Token, Character, CharacterSizeControlType, DRCS, FlashingControlType, OrnamentControlType } from "../tokenizer/token";
+import { ARIBB24Token, Character, CharacterSizeControlType, ClearScreen, DRCS, FlashingControlType, OrnamentControlType } from "../tokenizer/token";
 import { UnreachableError } from "../util/error";
 
 export const CHARACTER_SIZE = {
@@ -101,14 +101,46 @@ export type ARIBB24ClearScreenParsedToken = ARIBB24CommonParsedToken & {
   tag: 'ClearScreen';
   time: number;
 };
-export type ARIBB24CharacterParsedToken = ARIBB24CommonParsedToken & {
-  tag: 'Character';
-  character: Character;
+export const ARIBB24ClearScreenParsedToken = {
+  from(time: number, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24ClearScreenParsedToken {
+    return {
+      tag: 'ClearScreen',
+      state: structuredClone(state),
+      option: structuredClone(option),
+      time
+    };
+  }
+}
+export type ARIBB24CharacterParsedToken = ARIBB24CommonParsedToken & Omit<Character, 'tag'> & {
+  tag: 'Character'
 };
-export type ARIBB24DRCSPrasedToken = ARIBB24CommonParsedToken & {
+export const ARIBB24CharacterParsedToken = {
+  from({ character, non_spacing }: Character, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24CharacterParsedToken {
+    return {
+      tag: 'Character',
+      state: structuredClone(state),
+      option: structuredClone(option),
+      character,
+      non_spacing
+    };
+  }
+}
+export type ARIBB24DRCSPrasedToken = ARIBB24CommonParsedToken & Omit<DRCS, 'tag'> & {
   tag: 'DRCS';
-  drcs: DRCS;
 };
+export const ARIBB24DRCSPrasedToken = {
+  from({ width, height, depth, binary }: DRCS, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24DRCSPrasedToken {
+    return {
+      tag: 'DRCS',
+      state: structuredClone(state),
+      option: structuredClone(option),
+      width,
+      height,
+      depth,
+      binary
+    };
+  }
+}
 export type ARIBB24ParsedToken = ARIBB24ClearScreenParsedToken | ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken;
 
 export class ARIBB24Parser {
@@ -200,41 +232,21 @@ export class ARIBB24Parser {
       // character
       case 'Character':
         if (!token.non_spacing) {
-          const result = [{
-            tag: 'Character',
-            character: token,
-            state: structuredClone(this.state),
-            option: structuredClone(this.option),
-          } as const, ... this.non_spacings];
+          const result = [ARIBB24CharacterParsedToken.from(token, this.state, this.option), ... this.non_spacings];
           this.non_spacings = [];
           this.move_relative_pos(1, 0);
           return result;
         } else {
-          this.non_spacings.push({
-            tag: 'Character',
-            character: token,
-            state: structuredClone(this.state),
-            option: structuredClone(this.option),
-          });
+          this.non_spacings.push(ARIBB24CharacterParsedToken.from(token, this.state, this.option));
         }
         break;
       case 'DRCS':
-        const result = [{
-          tag: 'DRCS',
-          drcs: token,
-          state: structuredClone(this.state),
-          option: structuredClone(this.option),
-        } as const, ... this.non_spacings];
+        const result = [ARIBB24DRCSPrasedToken.from(token, this.state, this.option), ... this.non_spacings];
         this.non_spacings = [];
         this.move_relative_pos(1, 0);
         return result;
       case 'Space': {
-        const result = [{
-          tag: 'Character',
-          character: Character.from('　', false),
-          state: structuredClone(this.state),
-          option: structuredClone(this.option),
-        } as const, ... this.non_spacings];
+        const result = [ARIBB24CharacterParsedToken.from(Character.from('　', false), this.state, this.option), ... this.non_spacings];
         this.non_spacings = [];
         this.move_relative_pos(1, 0);
         return result;
@@ -407,12 +419,7 @@ export class ARIBB24Parser {
         break;
       // time
       case 'ClearScreen':
-        return [{
-          tag: 'ClearScreen',
-          time: this.state.elapsed_time,
-          state: structuredClone(this.state),
-          option: structuredClone(this.option),
-        }];
+        return [ARIBB24ClearScreenParsedToken.from(this.state.elapsed_time, this.state, this.option)];
       case 'TimeControlWait':
         this.state.elapsed_time += token.seconds;
         break;

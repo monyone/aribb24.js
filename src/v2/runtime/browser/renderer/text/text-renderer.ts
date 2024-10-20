@@ -123,7 +123,7 @@ export default class TextRenderer implements Renderer {
     for (const token of parser.parse(replaceDRCS(tokens, this.option.replace.drcs))) {
       switch (token.tag) {
         case 'Character': {
-          const { state, character: { character }} = token;
+          const { state, character } = token;
           if (this.text == null) { break; }
 
           if ((character === ' ' || character === '　') && state.background === 8 && shouldRemoveTransparentSpace(info)) { break; }
