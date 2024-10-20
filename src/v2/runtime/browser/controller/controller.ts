@@ -136,8 +136,8 @@ export default class PGSController {
     const target = entries.find((entry) => entry.target === this.container);
     if (!target) { return; }
 
-    const width = target.devicePixelContentBoxSize[0].inlineSize;
-    const height = target.devicePixelContentBoxSize[0].blockSize;
+    const width = target.devicePixelContentBoxSize != null ? target.devicePixelContentBoxSize[0].inlineSize : Math.floor(target.contentBoxSize[0].inlineSize * devicePixelRatio);
+    const height = target.devicePixelContentBoxSize != null ? target.devicePixelContentBoxSize[0].blockSize : Math.floor(target.contentBoxSize[0].blockSize * devicePixelRatio);
 
     this.renderers.forEach((renderer) => {
       if (!renderer.onContainerResize(width, height)) { return; }
