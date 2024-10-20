@@ -54,7 +54,7 @@ type CONTROL_C2 =
   typeof CONTROL_CODES.CSI |
   typeof CONTROL_CODES.TIME;
 
-const is_control_start = new Set([
+const is_control_start_set = new Set<number>([
   CONTROL_CODES.NUL,
   CONTROL_CODES.BEL,
   CONTROL_CODES.APB,
@@ -74,9 +74,25 @@ const is_control_start = new Set([
   CONTROL_CODES.RS,
   CONTROL_CODES.US,
   CONTROL_CODES.SP,
-  CONTROL_CODES.DEL,
-  0xC2
+  CONTROL_CODES.DEL
 ]);
+
+const is_control_start = (stream: ByteStream) => {
+  if (stream.exists(1)) {
+    const c0 = stream.peekU8();
+    if (is_control_start_set.has(c0)) {
+      return true;
+    }
+  }
+  if (stream.exists(2)) {
+    const c1 = stream.peekU16();
+    if (0xC280 <= c1 && c1 <= 0xC29F) {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 export default class ARIBB24UTF8Tokenizer extends ARIBB24Tokenizer {
   private segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
@@ -87,9 +103,9 @@ export default class ARIBB24UTF8Tokenizer extends ARIBB24Tokenizer {
     const result: ARIBB24Token[] = [];
 
     while (!stream.isEmpty()) {
-      if (!is_control_start.has(stream.peekU8())) {
+      if (!is_control_start(stream)) {
         const string: number[] = [];
-        while (!stream.isEmpty() && is_control_start.has(stream.peekU8())) {
+        while (!stream.isEmpty() && is_control_start(stream)) {
           string.push(stream.readU8());
         }
         for (const ch of Array.from(this.segmenter.segment(this.decoder.decode(Uint8Array.from(string))), ({ segment }) => segment)) {
@@ -100,9 +116,9 @@ export default class ARIBB24UTF8Tokenizer extends ARIBB24Tokenizer {
       }
 
       const control = stream.peekU8() as CONTROL_START;
-      if ((0x00 <= control && control <= 0x20) || control === CONTROL_CODES.DEL) {
+      if (stream.exists(1) && (0x00 <= control && control <= 0x20) || control === CONTROL_CODES.DEL) {
         result.push(processC0(stream));
-      } else if (control === 0xC2) {
+      } else if (stream.exists(2) && 0xC280 <= stream.peekU16() && stream.peekU16() <= 0xC29F) {
         stream.readU8();
         result.push(processC1(stream));
       } else {
