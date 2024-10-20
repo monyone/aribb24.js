@@ -1,21 +1,21 @@
 import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARIBB24ParserState, CHARACTER_SIZE } from "../../../../parser/parser";
-import { ARIBB24Token } from "../../../../tokenizer/token";
 import { CanvasRendererOption } from "./canvas-renderer-option";
 import colortable from "../colortable";
 import halfwidth from "../halfwidth";
 import namedcolor from "../namedcolor";
-import { UnreachableError } from "../../../../util/error";
+import { NotImplementedError, UnreachableError } from "../../../../util/error";
 import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup";
 import { shouldHalfWidth, shouldUseARIBFont } from "../quirk";
+import { ARIBB24BrowserParser, ARIBB24BrowserToken } from "../../types";
 
-export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTMLCanvasElement | OffscreenCanvas, state: ARIBB24ParserState, tokens: ARIBB24Token[], info: CaptionLanguageInformation, rendererOption: CanvasRendererOption): void => {
+export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTMLCanvasElement | OffscreenCanvas, state: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionLanguageInformation, rendererOption: CanvasRendererOption): void => {
   // render background
   let magnification: [number, number] = [1, 1];
   {
     const context = buffer.getContext('2d') as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D; // Type Issue
     if (context == null) { return; }
 
-    const parser = new ARIBB24Parser(state);
+    const parser = new ARIBB24BrowserParser(state);
     for (const token of parser.parse(tokens)) {
       const plane_width = token.state.plane[0];
       const plane_height = token.state.plane[1];
@@ -41,6 +41,9 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
           renderDRCS(context, token, magnification, info, rendererOption);
           break;
         }
+        case 'Bitmap':
+          // TODO
+          throw new NotImplementedError('Not Implemented Bitmap');
         case 'ClearScreen':
           if (token.time === 0) {
             // erase internal buffer

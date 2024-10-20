@@ -5,6 +5,7 @@ import extractPES from '../../../tokenizer/b24/mpegts/extract';
 import extractDatagroup, { CaptionManagement } from '../../../tokenizer/b24/datagroup'
 import { ClearScreen } from '../../../tokenizer/token';
 import { initialState } from '../../../parser/parser';
+import { decodeBitmap } from '../types';
 
 type DecodingOrderedKey = {
   dts: number;
@@ -117,7 +118,7 @@ export default abstract class DecodingFeeder implements Feeder {
         if (specification == null) { continue; }
 
         const [association, tokenizer, state] = specification;
-        const tokenized = tokenizer.tokenize(caption);
+        const tokenized = await decodeBitmap(tokenizer.tokenize(caption), []);
 
         let duration = Number.POSITIVE_INFINITY;
         let elapse = 0;

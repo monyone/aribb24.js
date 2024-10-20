@@ -45,7 +45,6 @@ export const Bitmap = {
   }
 };
 
-
 export type Null = { // NUL
   tag: 'Null';
 };

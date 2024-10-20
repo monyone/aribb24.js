@@ -204,7 +204,7 @@ export default class PGSController {
       if (current == null || currentTime >= current.pts + current.duration) {
         this.renderers.forEach((renderer) => renderer.clear());
       } else {
-        this.renderers.forEach((renderer) => renderer.render(current.state, current.data, current.info));
+        this.renderers.forEach((renderer) => renderer.render(current.state, structuredClone(current.data), current.info));
       }
 
       return;

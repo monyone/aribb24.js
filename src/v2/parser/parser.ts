@@ -114,6 +114,7 @@ export type ARIBB24ParsedToken = ARIBB24ClearScreenParsedToken | ARIBB24Characte
 export class ARIBB24Parser {
   private state: ARIBB24ParserState;
   private option: ARIBB24ParserOption;
+  private non_spacings: ARIBB24CharacterParsedToken[] = [];
 
   public constructor(state: Readonly<ARIBB24ParserState> = initialState, option?: ARIBB24ParserOption) {
     this.state = structuredClone(state);
@@ -186,235 +187,241 @@ export class ARIBB24Parser {
     }
   }
 
-  public parse(tokens: ARIBB24Token[]): ARIBB24ParsedToken[] {
-    const result: ARIBB24ParsedToken[] = [];
+  public currentState(): ARIBB24ParserState {
+    return structuredClone(this.state);
+  }
 
-    let non_spacings: ARIBB24CharacterParsedToken[] = [];
+  public currentOption(): ARIBB24ParserOption {
+    return structuredClone(this.option);
+  }
 
-    for (const token of tokens) {
-      switch (token.tag) {
-        // character
-        case 'Character':
-          if (!token.non_spacing) {
-            result.push({
-              tag: 'Character',
-              character: token,
-              state: structuredClone(this.state),
-              option: structuredClone(this.option),
-            }, ... non_spacings);
-            non_spacings = [];
-            this.move_relative_pos(1, 0);
-          } else {
-            non_spacings.push({
-              tag: 'Character',
-              character: token,
-              state: structuredClone(this.state),
-              option: structuredClone(this.option),
-            });
-          }
-          break;
-        case 'DRCS':
-          result.push({
-            tag: 'DRCS',
-            drcs: token,
-            state: structuredClone(this.state),
-            option: structuredClone(this.option),
-          }, ... non_spacings);
-          non_spacings = [];
-          this.move_relative_pos(1, 0);
-          break;
-        case 'Space': {
-          result.push({
+  public parseToken(token: ARIBB24Token): ARIBB24ParsedToken[] {
+    switch (token.tag) {
+      // character
+      case 'Character':
+        if (!token.non_spacing) {
+          const result = [{
             tag: 'Character',
-            character: Character.from('　', false),
+            character: token,
             state: structuredClone(this.state),
             option: structuredClone(this.option),
-          }, ... non_spacings);
-          non_spacings = [];
+          } as const, ... this.non_spacings];
+          this.non_spacings = [];
           this.move_relative_pos(1, 0);
-          break;
-        }
-        // display
-        case 'SetWritingFormat': // SWF
-          switch (token.format) {
-            // horizontal
-            case 0:
-            case 2:
-            case 4:
-              break;
-            case 5:
-              this.state.plane = [1920 * this.option.magnification, 1080 * this.option.magnification];
-              break;
-            case 7:
-              this.state.plane = [960 * this.option.magnification, 540 * this.option.magnification];
-              break;
-            case 9:
-              this.state.plane = [720 * this.option.magnification, 480 * this.option.magnification];
-              break;
-            case 11:
-              this.state.plane = [1280 * this.option.magnification, 720 * this.option.magnification];
-              break;
-            // vertical
-            default:
-              break;
-          }
-          break;
-        case 'SetDisplayFormat': // SDF
-          this.state.area = [token.horizontal * this.option.magnification, token.vertical * this.option.magnification];
-          break;
-        case 'SetDisplayPosition': // SDP
-          this.state.margin = [token.horizontal * this.option.magnification, token.vertical * this.option.magnification];
-          break;
-        case 'CharacterCompositionDotDesignation': // SSM
-          this.state.fontsize = [token.horizontal * this.option.magnification, token.vertical * this.option.magnification];
-          break;
-        case 'SetHorizontalSpacing': // SHS
-          this.state.hspace = token.spacing * this.option.magnification;
-          break;
-        case 'SetVerticalSpacing': // SVS
-          this.state.vspace = token.spacing * this.option.magnification;
-          break;
-        // pos
-        case 'ActivePositionBackward': // APB
-          this.move_relative_pos(-1, 0);
-          break;
-        case 'ActivePositionForward': // APF
-          this.move_relative_pos(1, 0);
-          break;
-        case 'ActivePositionDown': // APD
-          this.move_relative_pos(0, 1);
-          break;
-        case 'ActivePositionUp': // APU
-          this.move_relative_pos(0, -1);
-          break;
-        case 'ActivePositionReturn': // APR
-          this.move_newline();
-          break;
-        case 'ParameterizedActivePositionForward': // PAPF
-          this.move_relative_pos(token.x, 0);
-          break;
-        case 'ActivePositionSet': // APS
-          this.move_absolute_pos(token.x, token.y);
-          break;
-        case 'ActiveCoordinatePositionSet': // ACPS
-          this.move_absolute_dot(token.x * this.option.magnification, token.y * this.option.magnification);
-          break;
-        // size
-        case 'SmallSize':
-          this.state.size = CHARACTER_SIZE.Small;
-          break;
-        case 'MiddleSize':
-          this.state.size = CHARACTER_SIZE.Middle;
-          break;
-        case 'NormalSize':
-          this.state.size = CHARACTER_SIZE.Normal;
-          break;
-        case 'CharacterSizeControl':
-          switch (token.type) {
-            case CharacterSizeControlType.TINY:
-              this.state.size = CHARACTER_SIZE.Tiny;
-              break;
-            case CharacterSizeControlType.DOUBLE_HEIGHT:
-              this.state.size = CHARACTER_SIZE.DoubleHeight;
-              break;
-            case CharacterSizeControlType.DOUBLE_WIDTH:
-              this.state.size = CHARACTER_SIZE.DoubleWidth;
-              break;
-            case CharacterSizeControlType.DOUBLE_HEIGHT_AND_WIDTH:
-              this.state.size = CHARACTER_SIZE.DoubleHeightAndWidth;
-              break;
-            case CharacterSizeControlType.SPECIAL_1:
-              this.state.size = CHARACTER_SIZE.Special1;
-              break;
-            case CharacterSizeControlType.SPECIAL_2:
-              this.state.size = CHARACTER_SIZE.Special2;
-              break;
-            default:
-              const exhaustive: never = token;
-              throw new UnreachableError(`Undefined Size Type in STD-B24 ARIB Caption (${exhaustive})`);
-          }
-          break;
-        // pallet
-        case 'PalletControl':
-          this.state.pallet = token.pallet;
-          break;
-        case 'BlackForeground':
-          this.state.foreground = (this.state.pallet << 4) | 0x00;
-          break;
-        case 'RedForeground':
-          this.state.foreground = (this.state.pallet << 4) | 0x01;
-          break;
-        case 'GreenForeground':
-          this.state.foreground = (this.state.pallet << 4) | 0x02;
-          break;
-        case 'YellowForeground':
-          this.state.foreground = (this.state.pallet << 4) | 0x03;
-          break;
-        case 'BlueForeground':
-          this.state.foreground = (this.state.pallet << 4) | 0x04;
-          break;
-        case 'MagentaForeground':
-          this.state.foreground = (this.state.pallet << 4) | 0x05;
-          break;
-        case 'CyanForeground':
-          this.state.foreground = (this.state.pallet << 4) | 0x06;
-          break;
-        case 'WhiteForeground':
-          this.state.foreground = (this.state.pallet << 4) | 0x07;
-          break;
-        case 'ColorControlForeground':
-          this.state.foreground = (this.state.pallet << 4) | token.color;
-          break;
-        case 'ColorControlHalfForeground':
-          this.state.halfforeground = (this.state.pallet << 4) | token.color;
-          break;
-        case 'ColorControlHalfBackground':
-          this.state.halfbackground = (this.state.pallet << 4) | token.color;
-          break;
-        case 'ColorControlBackground':
-          this.state.background = (this.state.pallet << 4) | token.color;
-          break;
-        // decoration
-        case 'StartLining':
-          this.state.underline = true;
-          break;
-        case 'StopLining':
-          this.state.underline = false;
-          break;
-        case 'HilightingCharacterBlock':
-          this.state.highlight = token.enclosure;
-          break;
-        case 'OrnamentControl':
-          switch (token.type) {
-            case OrnamentControlType.NONE:
-              this.state.ornament = null;
-              break;
-            case OrnamentControlType.HEMMING: {
-              const lower = Math.floor(token.ornament / 100);
-              const upper = token.ornament % 100;
-              this.state.ornament = (upper << 4) | lower;
-              break;
-            }
-          }
-          break;
-        case 'FlashingControl':
-          this.state.flashing = token.type;
-          break;
-        // time
-        case 'ClearScreen':
-          result.push({
-            tag: 'ClearScreen',
-            time: this.state.elapsed_time,
+          return result;
+        } else {
+          this.non_spacings.push({
+            tag: 'Character',
+            character: token,
             state: structuredClone(this.state),
             option: structuredClone(this.option),
           });
-          break;
-        case 'TimeControlWait':
-          this.state.elapsed_time += token.seconds;
-          break;
+        }
+        break;
+      case 'DRCS':
+        const result = [{
+          tag: 'DRCS',
+          drcs: token,
+          state: structuredClone(this.state),
+          option: structuredClone(this.option),
+        } as const, ... this.non_spacings];
+        this.non_spacings = [];
+        this.move_relative_pos(1, 0);
+        return result;
+      case 'Space': {
+        const result = [{
+          tag: 'Character',
+          character: Character.from('　', false),
+          state: structuredClone(this.state),
+          option: structuredClone(this.option),
+        } as const, ... this.non_spacings];
+        this.non_spacings = [];
+        this.move_relative_pos(1, 0);
+        return result;
       }
+      // display
+      case 'SetWritingFormat': // SWF
+        switch (token.format) {
+          // horizontal
+          case 0:
+          case 2:
+          case 4:
+            break;
+          case 5:
+            this.state.plane = [1920 * this.option.magnification, 1080 * this.option.magnification];
+            break;
+          case 7:
+            this.state.plane = [960 * this.option.magnification, 540 * this.option.magnification];
+            break;
+          case 9:
+            this.state.plane = [720 * this.option.magnification, 480 * this.option.magnification];
+            break;
+          case 11:
+            this.state.plane = [1280 * this.option.magnification, 720 * this.option.magnification];
+            break;
+          // vertical
+          default:
+            break;
+        }
+        break;
+      case 'SetDisplayFormat': // SDF
+        this.state.area = [token.horizontal * this.option.magnification, token.vertical * this.option.magnification];
+        break;
+      case 'SetDisplayPosition': // SDP
+        this.state.margin = [token.horizontal * this.option.magnification, token.vertical * this.option.magnification];
+        break;
+      case 'CharacterCompositionDotDesignation': // SSM
+        this.state.fontsize = [token.horizontal * this.option.magnification, token.vertical * this.option.magnification];
+        break;
+      case 'SetHorizontalSpacing': // SHS
+        this.state.hspace = token.spacing * this.option.magnification;
+        break;
+      case 'SetVerticalSpacing': // SVS
+        this.state.vspace = token.spacing * this.option.magnification;
+        break;
+      // pos
+      case 'ActivePositionBackward': // APB
+        this.move_relative_pos(-1, 0);
+        break;
+      case 'ActivePositionForward': // APF
+        this.move_relative_pos(1, 0);
+        break;
+      case 'ActivePositionDown': // APD
+        this.move_relative_pos(0, 1);
+        break;
+      case 'ActivePositionUp': // APU
+        this.move_relative_pos(0, -1);
+        break;
+      case 'ActivePositionReturn': // APR
+        this.move_newline();
+        break;
+      case 'ParameterizedActivePositionForward': // PAPF
+        this.move_relative_pos(token.x, 0);
+        break;
+      case 'ActivePositionSet': // APS
+        this.move_absolute_pos(token.x, token.y);
+        break;
+      case 'ActiveCoordinatePositionSet': // ACPS
+        this.move_absolute_dot(token.x * this.option.magnification, token.y * this.option.magnification);
+        break;
+      // size
+      case 'SmallSize':
+        this.state.size = CHARACTER_SIZE.Small;
+        break;
+      case 'MiddleSize':
+        this.state.size = CHARACTER_SIZE.Middle;
+        break;
+      case 'NormalSize':
+        this.state.size = CHARACTER_SIZE.Normal;
+        break;
+      case 'CharacterSizeControl':
+        switch (token.type) {
+          case CharacterSizeControlType.TINY:
+            this.state.size = CHARACTER_SIZE.Tiny;
+            break;
+          case CharacterSizeControlType.DOUBLE_HEIGHT:
+            this.state.size = CHARACTER_SIZE.DoubleHeight;
+            break;
+          case CharacterSizeControlType.DOUBLE_WIDTH:
+            this.state.size = CHARACTER_SIZE.DoubleWidth;
+            break;
+          case CharacterSizeControlType.DOUBLE_HEIGHT_AND_WIDTH:
+            this.state.size = CHARACTER_SIZE.DoubleHeightAndWidth;
+            break;
+          case CharacterSizeControlType.SPECIAL_1:
+            this.state.size = CHARACTER_SIZE.Special1;
+            break;
+          case CharacterSizeControlType.SPECIAL_2:
+            this.state.size = CHARACTER_SIZE.Special2;
+            break;
+          default:
+            const exhaustive: never = token;
+            throw new UnreachableError(`Undefined Size Type in STD-B24 ARIB Caption (${exhaustive})`);
+        }
+        break;
+      // pallet
+      case 'PalletControl':
+        this.state.pallet = token.pallet;
+        break;
+      case 'BlackForeground':
+        this.state.foreground = (this.state.pallet << 4) | 0x00;
+        break;
+      case 'RedForeground':
+        this.state.foreground = (this.state.pallet << 4) | 0x01;
+        break;
+      case 'GreenForeground':
+        this.state.foreground = (this.state.pallet << 4) | 0x02;
+        break;
+      case 'YellowForeground':
+        this.state.foreground = (this.state.pallet << 4) | 0x03;
+        break;
+      case 'BlueForeground':
+        this.state.foreground = (this.state.pallet << 4) | 0x04;
+        break;
+      case 'MagentaForeground':
+        this.state.foreground = (this.state.pallet << 4) | 0x05;
+        break;
+      case 'CyanForeground':
+        this.state.foreground = (this.state.pallet << 4) | 0x06;
+        break;
+      case 'WhiteForeground':
+        this.state.foreground = (this.state.pallet << 4) | 0x07;
+        break;
+      case 'ColorControlForeground':
+        this.state.foreground = (this.state.pallet << 4) | token.color;
+        break;
+      case 'ColorControlHalfForeground':
+        this.state.halfforeground = (this.state.pallet << 4) | token.color;
+        break;
+      case 'ColorControlHalfBackground':
+        this.state.halfbackground = (this.state.pallet << 4) | token.color;
+        break;
+      case 'ColorControlBackground':
+        this.state.background = (this.state.pallet << 4) | token.color;
+        break;
+      // decoration
+      case 'StartLining':
+        this.state.underline = true;
+        break;
+      case 'StopLining':
+        this.state.underline = false;
+        break;
+      case 'HilightingCharacterBlock':
+        this.state.highlight = token.enclosure;
+        break;
+      case 'OrnamentControl':
+        switch (token.type) {
+          case OrnamentControlType.NONE:
+            this.state.ornament = null;
+            break;
+          case OrnamentControlType.HEMMING: {
+            const lower = Math.floor(token.ornament / 100);
+            const upper = token.ornament % 100;
+            this.state.ornament = (upper << 4) | lower;
+            break;
+          }
+        }
+        break;
+      case 'FlashingControl':
+        this.state.flashing = token.type;
+        break;
+      // time
+      case 'ClearScreen':
+        return [{
+          tag: 'ClearScreen',
+          time: this.state.elapsed_time,
+          state: structuredClone(this.state),
+          option: structuredClone(this.option),
+        }];
+      case 'TimeControlWait':
+        this.state.elapsed_time += token.seconds;
+        break;
     }
 
-    return result;
+    return [];
+  }
+
+  public parse(tokens: ARIBB24Token[]): ARIBB24ParsedToken[] {
+    return tokens.flatMap(this.parseToken.bind(this));
   }
 }

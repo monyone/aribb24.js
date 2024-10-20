@@ -6,6 +6,7 @@ import ARIBJapaneseJIS8Tokenizer from "../../../tokenizer/b24/jis8/ARIB/index";
 import ARIBBrazilianJIS8Tokenizer from "../../../tokenizer/b24/jis8/SBTVD/index";
 import ARIBB24Tokenizer from "../../../tokenizer/b24/tokenizer";
 import { ARIBB24Token } from "../../../tokenizer/token";
+import { ARIBB24BrowserToken } from "../types";
 
 export type FeederOption = {
   timeshift: number;
@@ -65,7 +66,7 @@ export type FeederPresentationData = {
   duration: number;
   state: ARIBB24ParserState;
   info: CaptionLanguageInformation,
-  data: ARIBB24Token[];
+  data: ARIBB24BrowserToken[];
 };
 
 export default interface Feeder {

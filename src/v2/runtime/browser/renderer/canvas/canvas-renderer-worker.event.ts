@@ -1,6 +1,7 @@
 import { ARIBB24ParserState } from "../../../../parser/parser";
 import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup";
 import { ARIBB24Token } from "../../../../tokenizer/token";
+import { ARIBB24BrowserToken } from "../../types";
 import { CanvasRendererOption } from "./canvas-renderer-option";
 
 export type FromMainToWorkerEventInitialize = {
@@ -54,12 +55,12 @@ export const FromMainToWorkerEventResize = {
 export type FromMainToWorkerEventRender = {
   type: 'render';
   state: ARIBB24ParserState,
-  tokens: ARIBB24Token[],
+  tokens: ARIBB24BrowserToken[],
   info: CaptionLanguageInformation,
   option: CanvasRendererOption,
 };
 export const FromMainToWorkerEventRender = {
-  from (state: ARIBB24ParserState, tokens: ARIBB24Token[], info: CaptionLanguageInformation, option: CanvasRendererOption): FromMainToWorkerEventRender {
+  from (state: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionLanguageInformation, option: CanvasRendererOption): FromMainToWorkerEventRender {
     return {
       type: 'render',
       state,

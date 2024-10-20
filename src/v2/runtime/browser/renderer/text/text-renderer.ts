@@ -1,12 +1,11 @@
-import { ARIBB24Parser, ARIBB24ParserState, CHARACTER_SIZE } from "../../../../parser/parser";
-import { replaceDRCS } from "../../../../tokenizer/b24/tokenizer";
-import { ARIBB24Token } from "../../../../tokenizer/token";
-import { UnreachableError } from "../../../../util/error";
+import { ARIBB24ParserState } from "../../../../parser/parser";
+import { NotImplementedError, UnreachableError } from "../../../../util/error";
 import Renderer from "../renderer";
 import { TextRendererOption } from "./text-renderer-option";
 import halfwidth from "../halfwidth"
 import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup";
 import { shouldHalfWidth, shouldIgnoreSmallAsRuby, shouldNotAssumeUseClearScreen, shouldRemoveTransparentSpace } from "../quirk";
+import { ARIBB24BrowserParser, ARIBB24BrowserToken, replaceDRCS } from "../../types";
 
 export default class TextRenderer implements Renderer {
   private option: TextRendererOption;
@@ -113,14 +112,14 @@ export default class TextRenderer implements Renderer {
   public hide(): void {}
   public show(): void {}
 
-  public render(initialState: ARIBB24ParserState, tokens: ARIBB24Token[], info: CaptionLanguageInformation): void {
+  public render(initialState: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionLanguageInformation): void {
     // if SBTVD, it is overwritten screen and insert space to erase, so CS Insert
     if (shouldNotAssumeUseClearScreen(info)) {
       this.text = '';
     }
 
     let privious_y = null;
-    const parser = new ARIBB24Parser(initialState);
+    const parser = new ARIBB24BrowserParser(initialState);
     for (const token of parser.parse(replaceDRCS(tokens, this.option.replace.drcs))) {
       switch (token.tag) {
         case 'Character': {
@@ -158,6 +157,9 @@ export default class TextRenderer implements Renderer {
           this.text += '〓';
           break;
         }
+        case 'Bitmap':
+          // TODO
+          throw new NotImplementedError('Not Implemented Bitmap');
         case 'ClearScreen':
           if (token.time === 0) {
             this.text = '';
@@ -168,8 +170,6 @@ export default class TextRenderer implements Renderer {
           throw new UnreachableError(`Unhandled ARIB Parsed Token (${exhaustive})`);
       }
     }
-
-    console.log(this.text);
   }
 
   public onAttach(element: HTMLElement): void {}
