@@ -5,7 +5,9 @@ import datagroup, { CaptionLanguageInformation } from "../../../tokenizer/b24/da
 import ARIBJapaneseJIS8Tokenizer from "../../../tokenizer/b24/jis8/ARIB/index";
 import ARIBBrazilianJIS8Tokenizer from "../../../tokenizer/b24/jis8/SBTVD/index";
 import ARIBB24Tokenizer from "../../../tokenizer/b24/tokenizer";
+import ARIBB24UTF8Tokenizer from "../../../tokenizer/b24/ucs/tokenizer";
 import { ARIBB24Token } from "../../../tokenizer/token";
+import { UnreachableError } from "../../../util/error";
 import { ARIBB24BrowserToken } from "../types";
 
 export type FeederOption = {
@@ -38,7 +40,13 @@ export const FeederOption = {
   }
 }
 
-export const getTokenizeInformation = (language: string, option: FeederOption): [CaptionLanguageInformation['association'], ARIBB24Tokenizer, ARIBB24ParserState] | null => {
+export const getTokenizeInformation = (language: string, TCS: number, option: FeederOption): [CaptionLanguageInformation['association'], ARIBB24Tokenizer, ARIBB24ParserState] | null => {
+  if (TCS === 1) {
+    return ['ARIB', new ARIBB24UTF8Tokenizer(), aribInitialState];
+  } else if (TCS !== 0) {
+    throw new UnreachableError('Undefined TCS');
+  }
+
   switch (option.recieve.association) {
     case 'ARIB': return ['ARIB', new ARIBJapaneseJIS8Tokenizer({ usePUA: option.tokenizer.pua }), aribInitialState];
     case 'SBTVD': return ['SBTVD', new ARIBBrazilianJIS8Tokenizer(), sbtvdInitialState];

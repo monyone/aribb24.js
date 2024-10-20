@@ -123,7 +123,7 @@ export default abstract class DecodingFeeder implements Feeder {
         if (entry == null) { continue; }
         if (this.desiredLang !== caption.lang) { continue; }
 
-        const specification = getTokenizeInformation(entry.iso_639_language_code, this.option);
+        const specification = getTokenizeInformation(entry.iso_639_language_code, entry.TCS, this.option);
         if (specification == null) { continue; }
 
         const [association, tokenizer, state] = specification;

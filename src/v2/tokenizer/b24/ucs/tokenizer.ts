@@ -78,7 +78,7 @@ const is_control_start = new Set([
   0xC2
 ]);
 
-export default abstract class ARIBB24UTF8Tokenizer extends ARIBB24Tokenizer {
+export default class ARIBB24UTF8Tokenizer extends ARIBB24Tokenizer {
   private segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
   private decoder = new TextDecoder('utf-8', { fatal: true });
 
