@@ -601,6 +601,16 @@ export const BuiltinSoundReplay = {
   }
 };
 
+export type RasterColourCommand = {
+  tag: 'RasterColourCommand';
+  color: number;
+};
+export const RasterColourCommand = {
+  from(color: number): RasterColourCommand {
+    return { tag: 'RasterColourCommand', color };
+  }
+};
+
 export type ARIBB24Token =
   // ビットマップ
   Bitmap |
@@ -662,5 +672,6 @@ export type ARIBB24Token =
   SetVerticalSpacing |
   ActiveCoordinatePositionSet |
   OrnamentControl |
-  BuiltinSoundReplay;
+  BuiltinSoundReplay |
+  RasterColourCommand;
 
