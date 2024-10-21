@@ -25,7 +25,7 @@ describe("ARIB STD-B24 UCS", () => {
     ]);
   });
 
-  test('Decode UTF-8 ASCII', () => {
+  test('Decode UTF-8 2byte String', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
     const encoder = new TextEncoder();
 
@@ -42,4 +42,15 @@ describe("ARIB STD-B24 UCS", () => {
       Character.from('界', false),
     ]);
   });
+
+  test('Decode UTF-8 Combining Character', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+    const encoder = new TextEncoder();
+
+    const tokens = tokenizer.tokenizeStatement(encoder.encode("👨‍👩").buffer);
+
+    expect(tokens).toStrictEqual([
+      Character.from('👨‍👩', false),
+    ]);
+  })
 });
