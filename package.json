@@ -33,14 +33,17 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "vite build",
-    "build:tsc": "tsc",
+    "build:tsc": "tsc --build tsconfig.build.json",
     "build:watch": "vite build --watch",
-    "build:all": "tsc && vite build",
+    "build:all": "tsc --build tsconfig.build.json && vite build",
+    "build:watch:all": "tsc --build tsconfig.build.json && vite build --watch",
+    "test": "vitest",
     "prepublishOnly": "rimraf dist && tsc && vite build"
   },
   "devDependencies": {
     "rimraf": "^6.0.1",
     "typescript": "^5.6.3",
-    "vite": "^5.4.8"
+    "vite": "^5.4.8",
+    "vitest": "^2.1.3"
   }
 }

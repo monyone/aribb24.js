@@ -6,6 +6,11 @@
     "lib": ["ES2023", "DOM"],
     "types": ["vite/client"],
 
+    /* Paths */
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
     /* Bundler mode */
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
@@ -22,6 +27,6 @@
     "strict": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["./src/**/*.ts"],
-  "exclude": ["./**/dist"]
+  "include": ["./src/**/*.ts", "./test/**/*.ts"],
+  "exclude": ["./dist/**/*.ts"]
 }
