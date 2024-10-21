@@ -105,7 +105,7 @@ export default class ARIBB24UTF8Tokenizer extends ARIBB24Tokenizer {
     while (!stream.isEmpty()) {
       if (!is_control_start(stream)) {
         const string: number[] = [];
-        while (!stream.isEmpty() && is_control_start(stream)) {
+        while (!stream.isEmpty() && !is_control_start(stream)) {
           string.push(stream.readU8());
         }
         for (const ch of Array.from(this.segmenter.segment(this.decoder.decode(Uint8Array.from(string))), ({ segment }) => segment)) {
