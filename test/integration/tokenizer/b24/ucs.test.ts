@@ -2,7 +2,7 @@ import { describe, test, expect } from 'vitest';
 import ARIBB24UTF8Tokenizer from '@/v2/tokenizer/b24/ucs/tokenizer';
 import { Character, Space } from '@/v2/tokenizer/token';
 import { CONTROL_CODES } from '@/v2/tokenizer/b24/tokenizer';
-import { UnreachableError } from '@/index';
+import { UnreachableError } from '@/v2/util/error';
 
 const generateBinary = (... operation: (number | string)[]): ArrayBuffer => {
   const encoder = new TextEncoder();
