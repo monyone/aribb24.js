@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import ARIBB24UTF8Tokenizer from '@/v2/tokenizer/b24/ucs/tokenizer';
-import { Character, Space } from '@/v2/tokenizer/token';
+import { ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, Cancel, Character, ClearScreen, Delete, Null, ParameterizedActivePositionForward, RecordSeparator, Space, UnitSeparator } from '@/v2/tokenizer/token';
 import { CONTROL_CODES } from '@/v2/tokenizer/b24/tokenizer';
 import { UnreachableError } from '@/v2/util/error';
 
@@ -93,5 +93,125 @@ describe("ARIB STD-B24 UCS", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(() => tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.ESC))).toThrowError(UnreachableError);
+  });
+
+  test('Tokenize NULL', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.NUL))).toStrictEqual([
+      Null.from()
+    ]);
+  });
+
+  test('Tokenize BEL', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.BEL))).toStrictEqual([
+      Bell.from()
+    ]);
+  });
+
+  test('Tokenize APB', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.APB))).toStrictEqual([
+      ActivePositionBackward.from()
+    ]);
+  });
+
+  test('Tokenize APF', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.APF))).toStrictEqual([
+      ActivePositionForward.from()
+    ]);
+  });
+
+  test('Tokenize APD', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.APD))).toStrictEqual([
+      ActivePositionDown.from()
+    ]);
+  });
+
+  test('Tokenize APU', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.APU))).toStrictEqual([
+      ActivePositionUp.from()
+    ]);
+  });
+
+  test('Tokenize CS', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.CS))).toStrictEqual([
+      ClearScreen.from()
+    ]);
+  });
+
+  test('Tokenize APR', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.APR))).toStrictEqual([
+      ActivePositionReturn.from()
+    ]);
+  });
+
+  test('Tokenize PAPF', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.PAPF, 5))).toStrictEqual([
+      ParameterizedActivePositionForward.from(5)
+    ]);
+  });
+
+  test('Tokenize CAN', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.CAN))).toStrictEqual([
+      Cancel.from()
+    ]);
+  });
+
+  test('Tokenize APS', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.APS, 1, 3))).toStrictEqual([
+      ActivePositionSet.from(3, 1)
+    ]);
+  });
+
+  test('Tokenize RS', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.RS))).toStrictEqual([
+      RecordSeparator.from()
+    ]);
+  });
+
+  test('Tokenize US', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.US))).toStrictEqual([
+      UnitSeparator.from()
+    ]);
+  });
+
+  test('Tokenize SP', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.SP))).toStrictEqual([
+      Space.from()
+    ]);
+  });
+
+  test('Tokenize DEL', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.DEL))).toStrictEqual([
+      Delete.from()
+    ]);
   });
 });
