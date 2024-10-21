@@ -2,8 +2,8 @@ import { ARIBB24ParserState } from "../../../parser/parser";
 import aribInitialState from "../../../parser/state/ARIB";
 import sbtvdInitialState from "../../../parser/state/SBTVD"
 import datagroup, { CaptionLanguageInformation } from "../../../tokenizer/b24/datagroup";
-import ARIBJapaneseJIS8Tokenizer from "../../../tokenizer/b24/jis8/ARIB/index";
-import ARIBBrazilianJIS8Tokenizer from "../../../tokenizer/b24/jis8/SBTVD/index";
+import ARIBB24JapaneseJIS8Tokenizer from "../../../tokenizer/b24/jis8/ARIB/index";
+import ARIBB24BrazilianJIS8Tokenizer from "../../../tokenizer/b24/jis8/SBTVD/index";
 import ARIBB24Tokenizer from "../../../tokenizer/b24/tokenizer";
 import ARIBB24UTF8Tokenizer from "../../../tokenizer/b24/ucs/tokenizer";
 import { ARIBB24Token } from "../../../tokenizer/token";
@@ -48,21 +48,21 @@ export const getTokenizeInformation = (language: string, TCS: number, option: Fe
   }
 
   switch (option.recieve.association) {
-    case 'ARIB': return ['ARIB', new ARIBJapaneseJIS8Tokenizer({ usePUA: option.tokenizer.pua }), aribInitialState];
-    case 'SBTVD': return ['SBTVD', new ARIBBrazilianJIS8Tokenizer(), sbtvdInitialState];
+    case 'ARIB': return ['ARIB', new ARIBB24JapaneseJIS8Tokenizer({ usePUA: option.tokenizer.pua }), aribInitialState];
+    case 'SBTVD': return ['SBTVD', new ARIBB24BrazilianJIS8Tokenizer(), sbtvdInitialState];
   }
 
   switch (language) {
     case 'jpn':
     case 'eng':
-      return ['ARIB', new ARIBJapaneseJIS8Tokenizer({ usePUA: option.tokenizer.pua }), aribInitialState];
+      return ['ARIB', new ARIBB24JapaneseJIS8Tokenizer({ usePUA: option.tokenizer.pua }), aribInitialState];
     case 'spa':
     case 'por':
-      return ['SBTVD', new ARIBBrazilianJIS8Tokenizer(), sbtvdInitialState];
+      return ['SBTVD', new ARIBB24BrazilianJIS8Tokenizer(), sbtvdInitialState];
   }
 
   // Otherwise, Treat as ARIB-B24 JIS8
-  return ['UNKNOWN', new ARIBJapaneseJIS8Tokenizer({ usePUA: option.tokenizer.pua }), aribInitialState];
+  return ['UNKNOWN', new ARIBB24JapaneseJIS8Tokenizer({ usePUA: option.tokenizer.pua }), aribInitialState];
 }
 
 export type FeederDecodingData = {

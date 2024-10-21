@@ -68,7 +68,7 @@ export type ARIBB24JapaneseJIS8TokenizerOption = {
   usePUA: boolean
 };
 
-export default class ARIBJapaneseJIS8Tokenizer extends ARIBB24JIS8Tokenizer {
+export default class ARIBB24JapaneseJIS8Tokenizer extends ARIBB24JIS8Tokenizer {
   static NORMAL_DICT_USE_PUA = { ... JAPAN_NORMAL_DICTS };
   static NORMAL_DICT_USE_UNICODE = { ... JAPAN_NORMAL_DICTS };
   static {
@@ -126,7 +126,7 @@ export default class ARIBJapaneseJIS8Tokenizer extends ARIBB24JIS8Tokenizer {
   }
 
   public constructor(option?: ARIBB24JapaneseJIS8TokenizerOption) {
-    const USING_NORMAL_DICT = option?.usePUA ? ARIBJapaneseJIS8Tokenizer.NORMAL_DICT_USE_PUA : ARIBJapaneseJIS8Tokenizer.NORMAL_DICT_USE_UNICODE;
+    const USING_NORMAL_DICT = option?.usePUA ? ARIBB24JapaneseJIS8Tokenizer.NORMAL_DICT_USE_PUA : ARIBB24JapaneseJIS8Tokenizer.NORMAL_DICT_USE_UNICODE;
     super(0, 2,
       [USING_NORMAL_DICT.KANJI, USING_NORMAL_DICT.ASCII, USING_NORMAL_DICT.HIRAGANA, JAPAN_DRCS_DICTS.MACRO],
       USING_NORMAL_DICT,

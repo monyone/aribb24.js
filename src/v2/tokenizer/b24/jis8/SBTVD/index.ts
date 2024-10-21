@@ -13,7 +13,7 @@ const BRAZIL_NORMAL_DICTS = {
 // DRCS
 const BRAZIL_DRCS_DICT = {} as const;
 
-export default class ARIBBrazilianJIS8Tokenizer extends ARIBB24JIS8Tokenizer {
+export default class ARIBB24BrazilianJIS8Tokenizer extends ARIBB24JIS8Tokenizer {
   public constructor() {
     super(0, 2,
       [BRAZIL_NORMAL_DICTS.ASCII, BRAZIL_NORMAL_DICTS.ASCII, BRAZIL_NORMAL_DICTS.LATIN_EXTENSION, BRAZIL_NORMAL_DICTS.SPECIAL_CHARACTERS],
