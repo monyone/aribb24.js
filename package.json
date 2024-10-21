@@ -32,7 +32,10 @@
   "license": "MIT",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "tsc && vite build",
+    "build": "vite build",
+    "build:tsc": "tsc",
+    "build:watch": "vite build --watch",
+    "build:all": "tsc && vite build",
     "prepublishOnly": "rimraf dist && tsc && vite build"
   },
   "devDependencies": {
