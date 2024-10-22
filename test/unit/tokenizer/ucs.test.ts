@@ -1,9 +1,9 @@
 import { describe, test, expect } from 'vitest';
-import ARIBB24UTF8Tokenizer from '@/v2/tokenizer/b24/ucs/tokenizer';
-import { ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, Character, CharacterSizeControl, CharacterSizeControlType, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, ConcealmentMode, ConcealmentModeType, CyanForeground, Delete, DRCS, FlashingControl, FlashingControlType, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, PatternPolarityControlType, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, ReplacingConcealmentModeType, SingleConcealmentMode, SingleConcealmentModeType, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlModeType, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, WritingModeModificationType, YellowForeground } from '@/v2/tokenizer/token';
-import { CONTROL_CODES, replaceDRCS } from '@/v2/tokenizer/b24/tokenizer';
-import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from '@/v2/util/error';
-import md5 from '@/v2/util/md5';
+import ARIBB24UTF8Tokenizer from '@/tokenizer/b24/ucs/tokenizer';
+import { ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, Character, CharacterSizeControl, CharacterSizeControlType, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, ConcealmentMode, ConcealmentModeType, CyanForeground, Delete, DRCS, FlashingControl, FlashingControlType, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, PatternPolarityControlType, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, ReplacingConcealmentModeType, SingleConcealmentMode, SingleConcealmentModeType, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlModeType, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, WritingModeModificationType, YellowForeground } from '@/tokenizer/token';
+import { CONTROL_CODES, replaceDRCS } from '@/tokenizer/b24/tokenizer';
+import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from '@/util/error';
+import md5 from '@/util/md5';
 
 const generateBinary = (... operation: (number | string)[]): ArrayBuffer => {
   const encoder = new TextEncoder();
