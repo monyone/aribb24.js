@@ -1,14 +1,14 @@
 import { ARIBB24ParserState } from "../../../../parser/parser";
 import CanvasRenderer from "./canvas-renderer";
-import { RendererOption } from "../renderer-option";
 import render from "./canvas-renderer-strategy"
 import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup";
 import { ARIBB24BrowserToken, replaceDRCS } from "../../types";
+import { CanvasRendererOption } from "./canvas-renderer-option";
 
 export default class CanvasMainThreadRenderer extends CanvasRenderer {
   private buffer: HTMLCanvasElement;
 
-  public constructor(option?: Partial<RendererOption>) {
+  public constructor(option?: Partial<CanvasRendererOption>) {
     super(option);
     this.buffer = document.createElement('canvas');
   }

@@ -1,11 +1,11 @@
 import { ARIBB24ParserState } from "../../../../parser/parser";
 import CanvasRenderer from "./canvas-renderer";
-import { RendererOption } from "../renderer-option";
 
 import RenderingWorker from "./canvas-renderer-worker.worker?worker&inline";
 import { FromMainToWorkerEventClear, FromMainToWorkerEventInitialize, FromMainToWorkerEventRender, FromMainToWorkerEventResize, FromWorkerToMainEvent, FromWorkerToMainEventImageBitmap } from "./canvas-renderer-worker.event";
 import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup";
 import { ARIBB24BrowserToken, replaceDRCS } from "../../types";
+import { CanvasRendererOption } from "./canvas-renderer-option";
 
 export default class CanvasWebWorkerRenderer extends CanvasRenderer {
   private buffer: OffscreenCanvas;
@@ -14,7 +14,7 @@ export default class CanvasWebWorkerRenderer extends CanvasRenderer {
   private waitPromise: Promise<void> | null = null;
   private waitResolve: () => void = () => {};
 
-  public constructor(option?: Partial<RendererOption>) {
+  public constructor(option?: Partial<CanvasRendererOption>) {
     super(option);
     this.present = this.canvas.transferControlToOffscreen();
     this.buffer = new OffscreenCanvas(0, 0);

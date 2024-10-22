@@ -9,9 +9,15 @@ export default defineConfig({
   },
 
   test: {
+    browser: {
+      enabled: true,
+      name: "chromium",
+      provider: "playwright",
+      headless: true,
+      viewport: { width: 960, height: 540 }
+    },
     include: [
-      './test/unit/**/*.ts',
-      './test/integration/**/*.ts',
+      './test/e2e/**/*.ts',
     ]
   }
 });
