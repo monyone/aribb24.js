@@ -314,6 +314,8 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
           }
 
           begin += 4 + length
+        } else {
+          return;
         }
       }
     }

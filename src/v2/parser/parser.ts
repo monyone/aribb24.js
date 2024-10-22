@@ -115,7 +115,7 @@ export type ARIBB24CharacterParsedToken = ARIBB24CommonParsedToken & Omit<Charac
   tag: 'Character'
 };
 export const ARIBB24CharacterParsedToken = {
-  from({ character, non_spacing }: Character, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24CharacterParsedToken {
+  from({ character, non_spacing }: Omit<Character, 'tag'>, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24CharacterParsedToken {
     return {
       tag: 'Character',
       state: structuredClone(state),
@@ -125,11 +125,11 @@ export const ARIBB24CharacterParsedToken = {
     };
   }
 }
-export type ARIBB24DRCSPrasedToken = ARIBB24CommonParsedToken & Omit<DRCS, 'tag'> & {
+export type ARIBB24DRCSPrasedToken = ARIBB24CommonParsedToken & Omit<DRCS, 'tag' | 'combine'> & {
   tag: 'DRCS';
 };
 export const ARIBB24DRCSPrasedToken = {
-  from({ width, height, depth, binary }: DRCS, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24DRCSPrasedToken {
+  from({ width, height, depth, binary }: Omit<DRCS, 'tag' | 'combine'>, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24DRCSPrasedToken {
     return {
       tag: 'DRCS',
       state: structuredClone(state),
@@ -241,12 +241,16 @@ export class ARIBB24Parser {
         }
         break;
       case 'DRCS':
-        const result = [ARIBB24DRCSPrasedToken.from(token, this.state, this.option), ... this.non_spacings];
+        const result = [
+          ARIBB24DRCSPrasedToken.from(token, this.state, this.option),
+          ... token.combine === '' ? [] : [ARIBB24CharacterParsedToken.from(Character.from('　', true), this.state, this.option)],
+          ... this.non_spacings
+        ];
         this.non_spacings = [];
         this.move_relative_pos(1, 0);
         return result;
       case 'Space': {
-        const result = [ARIBB24CharacterParsedToken.from(Character.from('　', false), this.state, this.option), ... this.non_spacings];
+        const result = [ARIBB24CharacterParsedToken.from(Character.from('　'), this.state, this.option), ... this.non_spacings];
         this.non_spacings = [];
         this.move_relative_pos(1, 0);
         return result;

@@ -381,7 +381,7 @@ export const replaceDRCS = (tokens: ARIBB24Token[], replace: Map<string, string>
     const hash = md5(token.binary);
 
     if (replace.has(hash.toLowerCase()) || replace.has(hash.toUpperCase())) {
-      return Character.from(replace.get(hash)!, false);
+      return Character.from(replace.get(hash)! + token.combine);
     } else {
       return token;
     }

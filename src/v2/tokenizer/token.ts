@@ -4,7 +4,7 @@ export type Character = {
   non_spacing: boolean;
 };
 export const Character = {
-  from(character: string, non_spacing: boolean): Character {
+  from(character: string, non_spacing: boolean = false): Character {
     return { tag: 'Character', character, non_spacing };
   }
 };
@@ -25,10 +25,11 @@ export type DRCS = {
   height: number;
   depth: number;
   binary: ArrayBuffer;
+  combine: string;
 };
 export const DRCS = {
-  from(width: number, height: number, depth: number, binary: ArrayBuffer): DRCS {
-    return { tag: 'DRCS', width, height, depth, binary };
+  from(width: number, height: number, depth: number, binary: ArrayBuffer, combine: string = ''): DRCS {
+    return { tag: 'DRCS', width, height, depth, binary, combine };
   }
 };
 

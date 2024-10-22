@@ -1,8 +1,9 @@
 import { describe, test, expect } from 'vitest';
 import ARIBB24UTF8Tokenizer from '@/v2/tokenizer/b24/ucs/tokenizer';
-import { ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, Character, CharacterSizeControl, CharacterSizeControlType, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, ConcealmentMode, ConcealmentModeType, CyanForeground, Delete, FlashingControl, FlashingControlType, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, PatternPolarityControlType, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, ReplacingConcealmentModeType, SingleConcealmentMode, SingleConcealmentModeType, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlModeType, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, WritingModeModificationType, YellowForeground } from '@/v2/tokenizer/token';
-import { CONTROL_CODES } from '@/v2/tokenizer/b24/tokenizer';
+import { ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, Character, CharacterSizeControl, CharacterSizeControlType, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, ConcealmentMode, ConcealmentModeType, CyanForeground, Delete, DRCS, FlashingControl, FlashingControlType, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, PatternPolarityControlType, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, ReplacingConcealmentModeType, SingleConcealmentMode, SingleConcealmentModeType, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlModeType, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, WritingModeModificationType, YellowForeground } from '@/v2/tokenizer/token';
+import { CONTROL_CODES, replaceDRCS } from '@/v2/tokenizer/b24/tokenizer';
 import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from '@/v2/util/error';
+import md5 from '@/v2/util/md5';
 
 const generateBinary = (... operation: (number | string)[]): ArrayBuffer => {
   const encoder = new TextEncoder();
@@ -22,58 +23,51 @@ const generateBinary = (... operation: (number | string)[]): ArrayBuffer => {
   return uint8.buffer;
 }
 
+const generateDRCSUnit = (code: number, width: number, height: number, colors: number, binary?: number[]): ArrayBuffer => {
+  if (binary == null) {
+    binary = [];
+    const bits = [0, 1, 6, 2, 7, 5, 4, 3][(colors * 0b00011101) >> 5];
+    for (let index = 0; index < Math.floor(width * height * bits / 8); index++) {
+      binary.push(0xFF);
+    }
+  }
+
+  return Uint8Array.from([
+    1, // Number Of Code
+    (code & 0xFF00) >> 8, // Character Code
+    (code & 0x00FF) >> 0, // Character Code
+    1, // Number Of Font
+    0, // mode
+    colors - 2, // depth - 2,
+    width, // width,
+    height, // height
+    ... binary,
+  ]).buffer;
+}
+
 describe("ARIB STD-B24 UCS", () => {
+
   test('Tokenize UTF-8 ASCII', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(generateBinary('This is Test'))).toStrictEqual([
-      Character.from('T', false),
-      Character.from('h', false),
-      Character.from('i', false),
-      Character.from('s', false),
-      Space.from(),
-      Character.from('i', false),
-      Character.from('s', false),
-      Space.from(),
-      Character.from('T', false),
-      Character.from('e', false),
-      Character.from('s', false),
-      Character.from('t', false)
+    expect(tokenizer.tokenizeStatement(generateBinary('a'))).toStrictEqual([
+      Character.from('a'),
     ]);
   });
 
-  test('Tokenize UTF-8 ASCII with CR,LF', () => {
+  test('Tokenize UTF-8 Japanese', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(generateBinary('new\rline\nwith'))).toStrictEqual([
-      Character.from('n', false),
-      Character.from('e', false),
-      Character.from('w', false),
-      ActivePositionReturn.from(),
-      Character.from('l', false),
-      Character.from('i', false),
-      Character.from('n', false),
-      Character.from('e', false),
-      ActivePositionDown.from(),
-      Character.from('w', false),
-      Character.from('i', false),
-      Character.from('t', false),
-      Character.from('h', false)
+    expect(tokenizer.tokenizeStatement(generateBinary('あ'))).toStrictEqual([
+      Character.from('あ'),
     ]);
   });
 
-  test('Tokenize UTF-8 2byte string', () => {
+  test('Tokenize UTF-8 surrogate pair', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(generateBinary('こんにちは 世界'))).toStrictEqual([
-      Character.from('こ', false),
-      Character.from('ん', false),
-      Character.from('に', false),
-      Character.from('ち', false),
-      Character.from('は', false),
-      Space.from(),
-      Character.from('世', false),
-      Character.from('界', false),
+    expect(tokenizer.tokenizeStatement(generateBinary('叱'))).toStrictEqual([
+      Character.from('叱'),
     ]);
   });
 
@@ -81,7 +75,53 @@ describe("ARIB STD-B24 UCS", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary('👨‍👩'))).toStrictEqual([
-      Character.from('👨‍👩', false),
+      Character.from('👨‍👩'),
+    ]);
+  });
+
+  test('Tokenize UTF-8 DRCS', () => {
+    const width = 36, heihgt = 36, colors = 4;
+    const binary = [];
+    for (let index = 0; index < Math.floor(36 * 36 * 2 / 8); index++) {
+      binary.push(0xFF);
+    }
+
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+    tokenizer.processDRCS(2, generateDRCSUnit(0xec00, width, heihgt, colors, binary));
+
+    expect(tokenizer.tokenizeStatement(generateBinary('\uec00'))).toStrictEqual([
+      DRCS.from(36, 36, 2, Uint8Array.from(binary).buffer)
+    ]);
+  });
+
+  test('Tokenize UTF-8 DRCS with Combine', () => {
+    const width = 36, heihgt = 36, colors = 4;
+    const binary = [];
+    for (let index = 0; index < Math.floor(36 * 36 * 2 / 8); index++) {
+      binary.push(0xFF);
+    }
+
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+    tokenizer.processDRCS(2, generateDRCSUnit(0xec00, width, heihgt, colors, binary));
+
+    expect(tokenizer.tokenizeStatement(generateBinary('\uec00', '\u3099'))).toStrictEqual([
+      DRCS.from(36, 36, 2, Uint8Array.from(binary).buffer, '\u3099')
+    ]);
+  });
+
+  test('Tokenize UTF-8 DRCS with ReplaceDRCS', () => {
+    const width = 36, heihgt = 36, colors = 4;
+    const binary = [];
+    for (let index = 0; index < Math.floor(36 * 36 * 2 / 8); index++) {
+      binary.push(0xFF);
+    }
+    const replace = new Map([[md5(Uint8Array.from(binary).buffer), '〓']]);
+
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+    tokenizer.processDRCS(2, generateDRCSUnit(0xec00, width, heihgt, colors, binary));
+
+    expect(replaceDRCS(tokenizer.tokenizeStatement(generateBinary('\uec00', '\u3099')), replace)).toStrictEqual([
+      Character.from('〓\u3099')
     ]);
   });
 

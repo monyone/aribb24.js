@@ -1,92 +1,32 @@
 import { ByteStream } from "../../../util/bytestream";
 
-import type { ARIBB24Token } from '../../token';
-import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, Bitmap, BlackForeground, BlueForeground, BuiltinSoundReplay, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, Delete, DRCS, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControl, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, YellowForeground } from "../../token";
-import ARIBB24Tokenizer, { CONTROL_CODES, CSI_CODE, processC0, processC1 } from "../tokenizer";
+import { ARIBB24Token, DRCS } from '../../token';
+import { Character } from "../../token";
+import ARIBB24Tokenizer, { CONTROL_CODES, processC0, processC1 } from "../tokenizer";
 import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from "../../../util/error";
 
-type CONTROL_START =
-  typeof CONTROL_CODES.NUL |
-  typeof CONTROL_CODES.BEL |
-  typeof CONTROL_CODES.APB |
-  typeof CONTROL_CODES.APF |
-  typeof CONTROL_CODES.APD |
-  typeof CONTROL_CODES.APU |
-  typeof CONTROL_CODES.CS |
-  typeof CONTROL_CODES.APR |
-  typeof CONTROL_CODES.LS1 |
-  typeof CONTROL_CODES.LS0 |
-  typeof CONTROL_CODES.PAPF |
-  typeof CONTROL_CODES.CAN |
-  typeof CONTROL_CODES.SS2 |
-  typeof CONTROL_CODES.ESC |
-  typeof CONTROL_CODES.APS |
-  typeof CONTROL_CODES.SS3 |
-  typeof CONTROL_CODES.RS |
-  typeof CONTROL_CODES.US |
-  typeof CONTROL_CODES.SP |
-  typeof CONTROL_CODES.DEL |
-  0xC2;
-
-type CONTROL_C2 =
-  typeof CONTROL_CODES.BKF |
-  typeof CONTROL_CODES.RDF |
-  typeof CONTROL_CODES.GRF |
-  typeof CONTROL_CODES.YLF |
-  typeof CONTROL_CODES.BLF |
-  typeof CONTROL_CODES.MGF |
-  typeof CONTROL_CODES.CNF |
-  typeof CONTROL_CODES.WHF |
-  typeof CONTROL_CODES.SSZ |
-  typeof CONTROL_CODES.MSZ |
-  typeof CONTROL_CODES.NSZ |
-  typeof CONTROL_CODES.SZX |
-  typeof CONTROL_CODES.COL |
-  typeof CONTROL_CODES.FLC |
-  typeof CONTROL_CODES.CDC |
-  typeof CONTROL_CODES.POL |
-  typeof CONTROL_CODES.WMM |
-  typeof CONTROL_CODES.MACRO |
-  typeof CONTROL_CODES.HLC |
-  typeof CONTROL_CODES.RPC |
-  typeof CONTROL_CODES.SPL |
-  typeof CONTROL_CODES.STL |
-  typeof CONTROL_CODES.CSI |
-  typeof CONTROL_CODES.TIME;
-
-const is_control_start_set = new Set<number>([
-  CONTROL_CODES.NUL,
-  CONTROL_CODES.BEL,
-  CONTROL_CODES.APB,
-  CONTROL_CODES.APF,
-  CONTROL_CODES.APD,
-  CONTROL_CODES.APU,
-  CONTROL_CODES.CS,
-  CONTROL_CODES.APR,
-  CONTROL_CODES.LS1,
-  CONTROL_CODES.LS0,
-  CONTROL_CODES.PAPF,
-  CONTROL_CODES.CAN,
-  CONTROL_CODES.SS2,
-  CONTROL_CODES.ESC,
-  CONTROL_CODES.APS,
-  CONTROL_CODES.SS3,
-  CONTROL_CODES.RS,
-  CONTROL_CODES.US,
-  CONTROL_CODES.SP,
-  CONTROL_CODES.DEL
-]);
+type DRCSData = Omit<DRCS, 'tag' | 'combine'>;
+const DRCSData = {
+  from(width: number, height: number, depth: number, binary: ArrayBuffer): DRCSData {
+    return {
+      width,
+      height,
+      depth,
+      binary,
+    }
+  }
+};
 
 const is_control_start = (stream: ByteStream) => {
   if (stream.exists(1)) {
     const c0 = stream.peekU8();
-    if (is_control_start_set.has(c0)) {
+    if ((0x00 <= c0 && c0 <= 0x20) || c0 == 0x7F) { // C0 + SP + DEL
       return true;
     }
   }
   if (stream.exists(2)) {
     const c1 = stream.peekU16();
-    if (0xC280 <= c1 && c1 <= 0xC29F) {
+    if (0xC280 <= c1 && c1 <= 0xC29F) { // C1
       return true;
     }
   }
@@ -97,6 +37,7 @@ const is_control_start = (stream: ByteStream) => {
 export default class ARIBB24UTF8Tokenizer extends ARIBB24Tokenizer {
   private segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
   private decoder = new TextDecoder('utf-8', { fatal: true });
+  private drcs = new Map<string, DRCSData>();
 
   public tokenizeStatement(arraybuffer: ArrayBuffer): ARIBB24Token[] {
     const stream = new ByteStream(arraybuffer);
@@ -109,13 +50,19 @@ export default class ARIBB24UTF8Tokenizer extends ARIBB24Tokenizer {
           string.push(stream.readU8());
         }
         for (const ch of Array.from(this.segmenter.segment(this.decoder.decode(Uint8Array.from(string))), ({ segment }) => segment)) {
-          result.push(Character.from(ch, false));
+          const [value ,... rest] = Array.from(ch);
+          if (this.drcs.has(value)) {
+            const { width, height, depth, binary} = this.drcs.get(value)!;
+            result.push(DRCS.from(width, height, depth, binary, rest.join('')));
+          } else {
+            result.push(Character.from(ch));
+          }
         }
 
         continue;
       }
 
-      const control = stream.peekU8() as CONTROL_START;
+      const control = stream.peekU8();
       if (stream.exists(1) && (0x00 <= control && control <= 0x20) || control === CONTROL_CODES.DEL) {
         switch (control) {
           case CONTROL_CODES.LS0:
@@ -139,5 +86,39 @@ export default class ARIBB24UTF8Tokenizer extends ARIBB24Tokenizer {
     return result;
   }
 
-  public processDRCS(bytes: 1 | 2, arraybuffer: ArrayBuffer): void {}
+  public processDRCS(bytes: 1 | 2, arraybuffer: ArrayBuffer): void {
+    if (bytes === 1) {
+      throw new NotUsedDueToStandardError('Not used 1-byte DRCS in UTF-8');
+    }
+
+    const uint8 = new Uint8Array(arraybuffer);
+    let begin = 0, end = uint8.byteLength;
+    const NumberOfCode = uint8[begin + 0];
+    begin += 1
+    while (begin < end){
+      const CharacterCode = (uint8[begin + 0] << 8) | uint8[begin + 1];
+      const NumberOfFont = uint8[begin + 2];
+      begin += 3
+
+      for (let font = 0; font < NumberOfFont; font++) {
+        const fontId = (uint8[begin + 0] & 0xF0) >> 4
+        const mode = (uint8[begin + 0] & 0x0F)
+
+        if (mode === 0 || mode === 1) { // FIXME: Other Mode Not Supported
+          const colors = uint8[begin + 1] + 2;
+          const width = uint8[begin + 2];
+          const height = uint8[begin + 3];
+          const depth = [0, 1, 6, 2, 7, 5, 4, 3][(colors * 0b00011101) >> 5]; // De Brujin Sequence in 8 bit
+          const length = Math.floor(width * height * depth / 8);
+          const binary = uint8.slice(begin + 4, begin + 4 + length).buffer;
+
+          this.drcs.set(String.fromCodePoint(CharacterCode), DRCSData.from(width, height, depth, binary));
+
+          begin += 4 + length
+        } else {
+          return;
+        }
+      }
+    }
+  }
 }
