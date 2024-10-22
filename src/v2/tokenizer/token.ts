@@ -365,9 +365,22 @@ export const FlashingControl = {
   }
 };
 
+
+export const ConcealmentModeType = {
+  STOP: 0x4F,
+} as const;
+export type ConcealmentMode = {
+  tag: 'ConcealmentMode';
+  type: (typeof ConcealmentModeType)[keyof typeof ConcealmentModeType];
+};
+export const ConcealmentMode = {
+  from(type: (typeof ConcealmentModeType)[keyof typeof ConcealmentModeType]): ConcealmentMode {
+    return { tag: 'ConcealmentMode', type };
+  }
+};
+
 export const SingleConcealmentModeType = {
   START: 0x40,
-  STOP: 0x4F,
 } as const;
 export type SingleConcealmentMode = {
   tag: 'SingleConcealmentMode';
@@ -391,7 +404,6 @@ export const ReplacingConcealmentModeType = {
   EIGHTH: 0x48,
   NINTH: 0x49,
   TENTH: 0x4a,
-  STOP: 0x4F,
 } as const;
 export type ReplacingConcealmentMode = {
   tag: 'ReplacingConcealmentMode';
@@ -653,6 +665,7 @@ export type ARIBB24Token =
   ColorControlHalfBackground |
   PalletControl |
   FlashingControl |
+  ConcealmentMode |
   SingleConcealmentMode |
   ReplacingConcealmentMode |
   PatternPolarityControl |

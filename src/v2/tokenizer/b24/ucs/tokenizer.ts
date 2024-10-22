@@ -3,7 +3,7 @@ import { ByteStream } from "../../../util/bytestream";
 import type { ARIBB24Token } from '../../token';
 import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, Bitmap, BlackForeground, BlueForeground, BuiltinSoundReplay, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, Delete, DRCS, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControl, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, YellowForeground } from "../../token";
 import ARIBB24Tokenizer, { CONTROL_CODES, CSI_CODE, processC0, processC1 } from "../tokenizer";
-import { NotImplementedError, UnreachableError } from "../../../util/error";
+import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from "../../../util/error";
 
 type CONTROL_START =
   typeof CONTROL_CODES.NUL |
@@ -117,6 +117,16 @@ export default class ARIBB24UTF8Tokenizer extends ARIBB24Tokenizer {
 
       const control = stream.peekU8() as CONTROL_START;
       if (stream.exists(1) && (0x00 <= control && control <= 0x20) || control === CONTROL_CODES.DEL) {
+        switch (control) {
+          case CONTROL_CODES.LS0:
+          case CONTROL_CODES.LS1:
+          case CONTROL_CODES.SS2:
+          case CONTROL_CODES.SS3:
+            throw new NotUsedDueToStandardError('Single/Locking Shift is Not used in UTF-8');
+          case CONTROL_CODES.ESC:
+            throw new NotImplementedError('ESC in UTF-8 is Not Implemented');
+        }
+
         result.push(processC0(stream));
       } else if (stream.exists(2) && 0xC280 <= stream.peekU16() && stream.peekU16() <= 0xC29F) {
         stream.readU8();

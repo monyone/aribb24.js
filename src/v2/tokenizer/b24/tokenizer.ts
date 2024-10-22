@@ -1,7 +1,7 @@
 import { ByteStream } from "../../util/bytestream";
-import { NotImplementedError, UnreachableError } from "../../util/error";
+import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from "../../util/error";
 import md5 from "../../util/md5";
-import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, ARIBB24Token, Bell, Bitmap, BlackForeground, BlueForeground, BuiltinSoundReplay, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfForeground, CyanForeground, Delete, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControl, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RasterColourCommand, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, YellowForeground } from "../token";
+import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, ARIBB24Token, Bell, Bitmap, BlackForeground, BlueForeground, BuiltinSoundReplay, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, ConcealmentMode, ConcealmentModeType, CyanForeground, Delete, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControl, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RasterColourCommand, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SingleConcealmentModeType, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, YellowForeground } from "../token";
 import { CaptionData } from "./datagroup";
 
 export const CONTROL_CODES = {
@@ -138,7 +138,7 @@ export const processC1 = (stream: ByteStream): ARIBB24Token => {
         case 0x40: return ColorControlForeground.from(color);
         case 0x50: return ColorControlBackground.from(color);
         case 0x60: return ColorControlHalfForeground.from(color);
-        case 0x70: return ColorControlBackground.from(color);
+        case 0x70: return ColorControlHalfBackground.from(color);
       }
 
       throw new UnreachableError('Undefined COL');
@@ -170,11 +170,12 @@ export const processC1 = (stream: ByteStream): ARIBB24Token => {
           case 0x48: // 8th
           case 0x49: // 9th
           case 0x4a: // 10th
-          case 0x4f: // Stop
             return ReplacingConcealmentMode.from(P2);
         }
-      } else if (P1 === 0x40 || P1 === 0x4F) {
+      } else if (P1 === SingleConcealmentModeType.START) {
         return SingleConcealmentMode.from(P1);
+      } else if (P1 === ConcealmentModeType.STOP) {
+        return ConcealmentMode.from(P1);
       }
 
       throw new UnreachableError('Undefined CDC');
@@ -317,7 +318,7 @@ export const processC1 = (stream: ByteStream): ARIBB24Token => {
         }
         case 0x29: {
           // FIXME: I can't understand this operation....
-          throw new NotImplementedError(`TIME 0x29 is Not Implemeted!`);
+          throw new NotUsedDueToStandardError(`TIME 0x29 (Specify Time) is Not Used by Specification`);
         }
         default:
           throw new UnreachableError('Undefined TIME');

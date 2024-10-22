@@ -1,8 +1,8 @@
 import { describe, test, expect } from 'vitest';
 import ARIBB24UTF8Tokenizer from '@/v2/tokenizer/b24/ucs/tokenizer';
-import { ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, Cancel, Character, ClearScreen, Delete, Null, ParameterizedActivePositionForward, RecordSeparator, Space, UnitSeparator } from '@/v2/tokenizer/token';
+import { ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, Character, CharacterSizeControl, CharacterSizeControlType, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, ConcealmentMode, ConcealmentModeType, CyanForeground, Delete, FlashingControl, FlashingControlType, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, PatternPolarityControlType, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, ReplacingConcealmentModeType, SingleConcealmentMode, SingleConcealmentModeType, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlModeType, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, WritingModeModificationType, YellowForeground } from '@/v2/tokenizer/token';
 import { CONTROL_CODES } from '@/v2/tokenizer/b24/tokenizer';
-import { UnreachableError } from '@/v2/util/error';
+import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from '@/v2/util/error';
 
 const generateBinary = (... operation: (number | string)[]): ArrayBuffer => {
   const encoder = new TextEncoder();
@@ -23,7 +23,7 @@ const generateBinary = (... operation: (number | string)[]): ArrayBuffer => {
 }
 
 describe("ARIB STD-B24 UCS", () => {
-  test('Decode UTF-8 ASCII as is', () => {
+  test('Tokenize UTF-8 ASCII', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary('This is Test'))).toStrictEqual([
@@ -42,7 +42,27 @@ describe("ARIB STD-B24 UCS", () => {
     ]);
   });
 
-  test('Decode UTF-8 2byte string as is', () => {
+  test('Tokenize UTF-8 ASCII with CR,LF', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary('new\rline\nwith'))).toStrictEqual([
+      Character.from('n', false),
+      Character.from('e', false),
+      Character.from('w', false),
+      ActivePositionReturn.from(),
+      Character.from('l', false),
+      Character.from('i', false),
+      Character.from('n', false),
+      Character.from('e', false),
+      ActivePositionDown.from(),
+      Character.from('w', false),
+      Character.from('i', false),
+      Character.from('t', false),
+      Character.from('h', false)
+    ]);
+  });
+
+  test('Tokenize UTF-8 2byte string', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary('こんにちは 世界'))).toStrictEqual([
@@ -57,7 +77,7 @@ describe("ARIB STD-B24 UCS", () => {
     ]);
   });
 
-  test('Decode UTF-8 combining character as is', () => {
+  test('Tokenize UTF-8 combining character', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary('👨‍👩'))).toStrictEqual([
@@ -65,34 +85,34 @@ describe("ARIB STD-B24 UCS", () => {
     ]);
   });
 
-  test('SS2 throw UnreachableError', () => {
+  test('Tokenize SS2 throw NotUsedDueToStandardError', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.SS2))).toThrowError(UnreachableError);
+    expect(() => tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.SS2))).toThrowError(NotUsedDueToStandardError);
   });
 
-  test('SS3 throw UnreachableError', () => {
+  test('Tokenize SS3 throw NotUsedDueToStandardError', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.SS3))).toThrowError(UnreachableError);
+    expect(() => tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.SS3))).toThrowError(NotUsedDueToStandardError);
   });
 
-  test('LS0 throw UnreachableError', () => {
+  test('Tokenize LS0 throw NotUsedDueToStandardError', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.LS0))).toThrowError(UnreachableError);
+    expect(() => tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.LS0))).toThrowError(NotUsedDueToStandardError);
   });
 
-  test('LS1 throw UnreachableError', () => {
+  test('Tokenize Tokenize LS1 throw NotUsedDueToStandardError', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.LS1))).toThrowError(UnreachableError);
+    expect(() => tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.LS1))).toThrowError(NotUsedDueToStandardError);
   });
 
-  test('ESC throw UnreachableError', () => {
+  test('Tokenize ESC throw NotImplementedError', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.ESC))).toThrowError(UnreachableError);
+    expect(() => tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.ESC))).toThrowError(NotImplementedError);
   });
 
   test('Tokenize NULL', () => {
@@ -213,5 +233,443 @@ describe("ARIB STD-B24 UCS", () => {
     expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.DEL))).toStrictEqual([
       Delete.from()
     ]);
+  });
+
+  test('Tokenize BKF', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.BKF))).toStrictEqual([
+      BlackForeground.from()
+    ]);
+  });
+
+  test('Tokenize RDF', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.RDF))).toStrictEqual([
+      RedForeground.from()
+    ]);
+  });
+
+  test('Tokenize GRF', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.GRF))).toStrictEqual([
+      GreenForeground.from()
+    ]);
+  });
+
+  test('Tokenize YLF', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.YLF))).toStrictEqual([
+      YellowForeground.from()
+    ]);
+  });
+
+  test('Tokenize BLF', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.BLF))).toStrictEqual([
+      BlueForeground.from()
+    ]);
+  });
+
+  test('Tokenize MGF', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.MGF))).toStrictEqual([
+      MagentaForeground.from()
+    ]);
+  });
+
+  test('Tokenize CNF', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CNF))).toStrictEqual([
+      CyanForeground.from()
+    ]);
+  });
+
+  test('Tokenize WHF', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.WHF))).toStrictEqual([
+      WhiteForeground.from()
+    ]);
+  });
+
+  test('Tokenize SSZ', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.SSZ))).toStrictEqual([
+      SmallSize.from()
+    ]);
+  });
+
+  test('Tokenize MSZ', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.MSZ))).toStrictEqual([
+      MiddleSize.from()
+    ]);
+  });
+
+  test('Tokenize NSZ', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.NSZ))).toStrictEqual([
+      NormalSize.from()
+    ]);
+  });
+
+  test('Tokenize SZX Tiny', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.SZX, 0x60))).toStrictEqual([
+      CharacterSizeControl.from(CharacterSizeControlType.TINY)
+    ]);
+  });
+
+  test('Tokenize SZX Double Height', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.SZX, 0x41))).toStrictEqual([
+      CharacterSizeControl.from(CharacterSizeControlType.DOUBLE_HEIGHT)
+    ]);
+  });
+
+  test('Tokenize SZX Double Width', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.SZX, 0x44))).toStrictEqual([
+      CharacterSizeControl.from(CharacterSizeControlType.DOUBLE_WIDTH)
+    ]);
+  });
+
+  test('Tokenize SZX Double Width and Width', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.SZX, 0x45))).toStrictEqual([
+      CharacterSizeControl.from(CharacterSizeControlType.DOUBLE_HEIGHT_AND_WIDTH)
+    ]);
+  });
+
+  test('Tokenize SZX Special1', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.SZX, 0x6b))).toStrictEqual([
+      CharacterSizeControl.from(CharacterSizeControlType.SPECIAL_1)
+    ]);
+  });
+
+  test('Tokenize SZX Special2', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.SZX, 0x64))).toStrictEqual([
+      CharacterSizeControl.from(CharacterSizeControlType.SPECIAL_2)
+    ]);
+  });
+
+  test('Tokenize COL Foreground', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    // SBDTV used transparent space
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.COL, 0x48))).toStrictEqual([
+      ColorControlForeground.from(8)
+    ]);
+  });
+
+  test('Tokenize COL BackGround', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    // SBDTV used black background
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.COL, 0x50))).toStrictEqual([
+      ColorControlBackground.from(0)
+    ]);
+  });
+
+  test('Tokenize COL HalfForeground', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.COL, 0x61))).toStrictEqual([
+      ColorControlHalfForeground.from(1)
+    ]);
+  });
+
+  test('Tokenize COL HalfBackground', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.COL, 0x72))).toStrictEqual([
+      ColorControlHalfBackground.from(2)
+    ]);
+  });
+
+  test('Tokenize COL Pallet', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.COL, 0x20, 0x45))).toStrictEqual([
+      PalletControl.from(5)
+    ]);
+  });
+
+  test('Tokenize FLC Normal', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.FLC, 0x40))).toStrictEqual([
+      FlashingControl.from(FlashingControlType.NORMAL)
+    ]);
+  });
+
+  test('Tokenize FLC Inverted', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.FLC, 0x47))).toStrictEqual([
+      FlashingControl.from(FlashingControlType.INVERTED)
+    ]);
+  });
+
+  test('Tokenize FLC Stop', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.FLC, 0x4F))).toStrictEqual([
+      FlashingControl.from(FlashingControlType.STOP)
+    ]);
+  });
+
+  test('Tokenize CDC Signle Start', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x40))).toStrictEqual([
+      SingleConcealmentMode.from(SingleConcealmentModeType.START)
+    ]);
+  });
+
+  test('Tokenize CDC Replacing Start', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x40))).toStrictEqual([
+      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.START)
+    ]);
+  });
+
+  test('Tokenize CDC Replacing First', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x41))).toStrictEqual([
+      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.FIRST)
+    ]);
+  });
+
+  test('Tokenize CDC Replacing Second', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x42))).toStrictEqual([
+      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.SECOND)
+    ]);
+  });
+
+  test('Tokenize CDC Replacing Third', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x43))).toStrictEqual([
+      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.THIRD)
+    ]);
+  });
+
+  test('Tokenize CDC Replacing Fourth', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x44))).toStrictEqual([
+      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.FOURTH)
+    ]);
+  });
+
+  test('Tokenize CDC Replacing Fifth', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x45))).toStrictEqual([
+      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.FIFTH)
+    ]);
+  });
+
+  test('Tokenize CDC Replacing Sixth', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x46))).toStrictEqual([
+      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.SIXTH)
+    ]);
+  });
+
+  test('Tokenize CDC Replacing Seventh', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x47))).toStrictEqual([
+      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.SEVENTH)
+    ]);
+  });
+
+  test('Tokenize CDC Replacing Eighth', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x48))).toStrictEqual([
+      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.EIGHTH)
+    ]);
+  });
+
+  test('Tokenize CDC Replacing Ninth', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x49))).toStrictEqual([
+      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.NINTH)
+    ]);
+  });
+
+  test('Tokenize CDC Replacing Tenth', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x4A))).toStrictEqual([
+      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.TENTH)
+    ]);
+  });
+
+  test('Tokenize CDC Stop', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x4F))).toStrictEqual([
+      ConcealmentMode.from(ConcealmentModeType.STOP)
+    ]);
+  });
+
+  test('Tokenize POL Normal', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.POL, 0x40))).toStrictEqual([
+      PatternPolarityControl.from(PatternPolarityControlType.NORMAL)
+    ]);
+  });
+
+  test('Tokenize POL Inverted1', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.POL, 0x41))).toStrictEqual([
+      PatternPolarityControl.from(PatternPolarityControlType.INVERTED_1)
+    ]);
+  });
+
+  test('Tokenize POL Inverted2', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.POL, 0x42))).toStrictEqual([
+      PatternPolarityControl.from(PatternPolarityControlType.INVERTED_2)
+    ]);
+  });
+
+  test('Tokenize WMM Both', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.WMM, 0x40))).toStrictEqual([
+      WritingModeModification.from(WritingModeModificationType.BOTH)
+    ]);
+  });
+
+  test('Tokenize WMM Foreground', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.WMM, 0x44))).toStrictEqual([
+      WritingModeModification.from(WritingModeModificationType.FOREGROUND)
+    ]);
+  });
+
+  test('Tokenize WMM Background', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.WMM, 0x45))).toStrictEqual([
+      WritingModeModification.from(WritingModeModificationType.BACKGROUND)
+    ]);
+  });
+
+  test('Tokenize MACRO throw NotImplementedError', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(() => tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.MACRO))).toThrowError(NotImplementedError);
+  });
+
+  test('Tokenize HLC', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.HLC, 0x4F))).toStrictEqual([
+      HilightingCharacterBlock.from(0x0F)
+    ]);
+  });
+
+  test('Tokenize RPC', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.RPC, 0x7F))).toStrictEqual([
+      RepeatCharacter.from(0x3F)
+    ]);
+  });
+
+  test('Tokenize SPL', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.SPL))).toStrictEqual([
+      StopLining.from()
+    ]);
+  });
+
+  test('Tokenize STL', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.STL))).toStrictEqual([
+      StartLining.from()
+    ]);
+  });
+
+  test('Tokenize Time Wait', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.TIME, 0x20, 0x7F))).toStrictEqual([
+      TimeControlWait.from(0x3F / 10)
+    ]);
+  });
+
+  test('Tokenize Time TMD Mode Free', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.TIME, 0x28, 0x40))).toStrictEqual([
+      TimeControlMode.from(TimeControlModeType.FREE)
+    ]);
+  });
+
+  test('Tokenize Time TMD Mode Real', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.TIME, 0x28, 0x41))).toStrictEqual([
+      TimeControlMode.from(TimeControlModeType.REAL)
+    ]);
+  });
+
+  test('Tokenize Time TMD Mode Offset', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.TIME, 0x28, 0x42))).toStrictEqual([
+      TimeControlMode.from(TimeControlModeType.OFFSET)
+    ]);
+  });
+
+  test('Tokenize Time TMD Mode Unique', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.TIME, 0x28, 0x43))).toStrictEqual([
+      TimeControlMode.from(TimeControlModeType.UNIQUE)
+    ]);
+  });
+
+  test('Tokenize Time Specify throw NotUsedDueToStandardError', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(() => tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.TIME, 0x29))).toThrowError(NotUsedDueToStandardError);
   });
 });
