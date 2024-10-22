@@ -2,12 +2,12 @@ import { describe, test, expect } from 'vitest';
 import { page } from '@vitest/browser/context'
 
 import { CanvasMainThreadRenderer } from '@/index';
-import { initialState } from '@/parser/parser';
+import aribInitialState from '@/parser/state/ARIB';
 import { CaptionLanguageInformation } from '@/tokenizer/b24/datagroup';
-import { Character, ColorControlBackground, PalletControl, WhiteForeground } from '@/tokenizer/token';
+import { ActivePositionReturn, Character, ColorControlBackground, PalletControl, WhiteForeground } from '@/tokenizer/token';
 
 describe('ARIB B24 Canvas Renderer', () => {
-  test('Render', async () => {
+  test('Rendering Test', async () => {
     const width = 960, height = 540;
     const info: CaptionLanguageInformation = {
       association: 'ARIB',
@@ -24,22 +24,30 @@ describe('ARIB B24 Canvas Renderer', () => {
         objectFit: 'none'
       },
     });
+
+    page.viewport(width, height);
     renderer.onAttach(document.body);
     renderer.onContainerResize(width, height);
 
-    const canvas = renderer.getPresentationCanvas();
-    canvas.style.position = 'absolute';
-    canvas.style.top = '0';
-    canvas.style.left = '0';
-
-    renderer.render(initialState, [
+    renderer.render(aribInitialState, [
       PalletControl.from(4),
       ColorControlBackground.from(1),
       PalletControl.from(0),
       WhiteForeground.from(),
-      Character.from('a'),
+      Character.from('A'),
+      Character.from('R'),
+      Character.from('I'),
+      Character.from('B'),
+      ActivePositionReturn.from(),
+      Character.from('C'),
+      Character.from('A'),
+      Character.from('P'),
+      Character.from('T'),
+      Character.from('I'),
+      Character.from('O'),
+      Character.from('N'),
     ], info);
 
-    await page.elementLocator(renderer.getPresentationCanvas()).screenshot();
+    await page.screenshot({ element: renderer.getPresentationCanvas() });
   });
 });
