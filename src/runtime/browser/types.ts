@@ -1,4 +1,4 @@
-import CRC32 from "../../../v1/utils/crc32";
+import CRC32 from "../../util/crc32";
 import { ARIBB24Token, Bitmap } from "../../tokenizer/token";
 import { replaceDRCS as tokenizerReplaceDRCS } from "../../tokenizer/b24/tokenizer";
 import { ARIBB24CommonParsedToken, ARIBB24ParsedToken, ARIBB24Parser, ARIBB24ParserOption, ARIBB24ParserState } from "../../parser/parser";
