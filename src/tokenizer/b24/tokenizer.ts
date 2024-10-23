@@ -294,7 +294,7 @@ export const processC1 = (stream: ByteStream): ARIBB24Token => {
         case CSI_CODE.SCS:
           throw new NotImplementedError(`SCS is Not Implemented!`);
         default:
-          throw new NotImplementedError(`Unhandled CSI Code in STD-B24 ARIB Caption (0x${F.toString(16)})`);
+          throw new UnreachableError(`Unhandled CSI Code in STD-B24 ARIB Caption (0x${F.toString(16)})`);
       }
     }
     case CONTROL_CODES.TIME: {

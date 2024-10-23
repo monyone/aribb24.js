@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import ARIBB24UTF8Tokenizer from '@/tokenizer/b24/ucs/tokenizer';
-import { ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, Character, CharacterSizeControl, CharacterSizeControlType, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, ConcealmentMode, ConcealmentModeType, CyanForeground, Delete, DRCS, FlashingControl, FlashingControlType, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, PatternPolarityControlType, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, ReplacingConcealmentModeType, SingleConcealmentMode, SingleConcealmentModeType, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlModeType, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, WritingModeModificationType, YellowForeground } from '@/tokenizer/token';
-import { CONTROL_CODES, replaceDRCS } from '@/tokenizer/b24/tokenizer';
+import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, BuiltinSoundReplay, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, CharacterSizeControlType, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, ConcealmentMode, ConcealmentModeType, CyanForeground, Delete, DRCS, FlashingControl, FlashingControlType, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControl, OrnamentControlType, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, PatternPolarityControlType, RasterColourCommand, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, ReplacingConcealmentModeType, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SingleConcealmentModeType, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlModeType, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, WritingModeModificationType, YellowForeground } from '@/tokenizer/token';
+import { CONTROL_CODES, CSI_CODE, replaceDRCS } from '@/tokenizer/b24/tokenizer';
 import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from '@/util/error';
 import md5 from '@/util/md5';
 
@@ -21,6 +21,24 @@ const generateBinary = (... operation: (number | string)[]): ArrayBuffer => {
     uint8.set(inject[i], offset);
   }
   return uint8.buffer;
+}
+
+const generateCSI = (F: number, ... values: number[]): number[] => {
+  const ops = [F];
+
+  let sp: 0x20 | 0x3b = 0x20;
+  for (let value of values.toReversed()) {
+    ops.unshift(sp);
+    while (value !== 0) {
+      ops.unshift(0x30 | (value % 10));
+      value = Math.floor(value / 10);
+    }
+
+    sp = 0x3b;
+  }
+  ops.unshift(CONTROL_CODES.CSI);
+
+  return ops;
 }
 
 const generateDRCSUnit = (code: number, width: number, height: number, colors: number, binary?: number[]): ArrayBuffer => {
@@ -711,5 +729,187 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(() => tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.TIME, 0x29))).toThrowError(NotUsedDueToStandardError);
+  });
+
+  test('Tokenize CSI GSM throw NotImplementedError', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(() => tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.GSM)))).toThrowError(NotImplementedError);
+  });
+
+  test('Tokenize CSI SWF', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.SWF, 7)))).toStrictEqual([
+      SetWritingFormat.from(7)
+    ]);
+  });
+
+  test('Tokenize CSI CCC throw NotImplementedError', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(() => tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.CCC)))).toThrowError(NotImplementedError);
+  });
+
+  test('Tokenize CSI SDF', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.SDF, 680, 480)))).toStrictEqual([
+      SetDisplayFormat.from(680, 480),
+    ]);
+  });
+
+  test('Tokenize CSI SSM', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.SSM, 24, 24)))).toStrictEqual([
+      CharacterCompositionDotDesignation.from(24, 24),
+    ]);
+  });
+
+  test('Tokenize CSI SHS', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.SHS, 1)))).toStrictEqual([
+      SetHorizontalSpacing.from(1)
+    ]);
+  });
+
+  test('Tokenize CSI SVS', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.SVS, 1)))).toStrictEqual([
+      SetVerticalSpacing.from(1)
+    ]);
+  });
+
+  test('Tokenize CSI PLD throw NotImplementedError', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(() => tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.PLD)))).toThrowError(NotImplementedError);
+  });
+
+  test('Tokenize CSI PLU throw NotImplementedError', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(() => tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.PLU)))).toThrowError(NotImplementedError);
+  });
+
+  test('Tokenize CSI GAA throw NotImplementedError', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(() => tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.GAA)))).toThrowError(NotImplementedError);
+  });
+
+  test('Tokenize CSI SRC throw NotImplementedError', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(() => tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.SRC)))).toThrowError(NotImplementedError);
+  });
+
+  test('Tokenize CSI SDP', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.SDP, 100, 100)))).toStrictEqual([
+      SetDisplayPosition.from(100, 100)
+    ]);
+  });
+
+  test('Tokenize CSI ACPS', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.ACPS, 700, 400)))).toStrictEqual([
+      ActiveCoordinatePositionSet.from(700, 400)
+    ]);
+  });
+
+  test('Tokenize CSI TCC', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(() => tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.TCC)))).toThrowError(NotImplementedError);
+  });
+
+  test('Tokenize CSI ORN NoneOrnament without CLMA', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.ORN, 0)))).toStrictEqual([
+      OrnamentControl.from(OrnamentControlType.NONE, 0),
+    ]);
+  });
+
+  test('Tokenize CSI ORN HemmingOrnament', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.ORN, 1, 0x7F)))).toStrictEqual([
+      OrnamentControl.from(OrnamentControlType.HEMMING, 0x7F),
+    ]);
+  });
+
+  test('Tokenize CSI ORN ShadeOrament', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.ORN, 2, 0x7F)))).toStrictEqual([
+      OrnamentControl.from(OrnamentControlType.SHADE, 0x7F),
+    ]);
+  });
+
+  test('Tokenize CSI ORN HollowOrament', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.ORN, 3, 0x7F)))).toStrictEqual([
+      OrnamentControl.from(OrnamentControlType.HOLLOW, 0x7F),
+    ]);
+  });
+
+  test('Tokenize CSI MDF throw NotImplementedError', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(() => tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.MDF)))).toThrowError(NotImplementedError);
+  });
+
+  test('Tokenize CSI CFS throw NotImplementedError', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(() => tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.CFS)))).toThrowError(NotImplementedError);
+  });
+
+  test('Tokenize CSI XCS throw NotImplementedError', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(() => tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.XCS)))).toThrowError(NotImplementedError);
+  });
+
+  test('Tokenize CSI PRA', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.PRA, 0)))).toStrictEqual([
+      BuiltinSoundReplay.from(0),
+    ]);
+  });
+
+  test('Tokenize CSI ACS throw NotImplementedError', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(() => tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.ACS)))).toThrowError(NotImplementedError);
+  });
+
+  test('Tokenize CSI UED throw NotImplementedError', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(() => tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.UED)))).toThrowError(NotImplementedError);
+  });
+
+  test('Tokenize CSI RCS', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.RCS, 0)))).toStrictEqual([
+      RasterColourCommand.from(0),
+    ]);
+  });
+
+  test('Tokenize CSI SCS throw NotImplementedError', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(() => tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.SCS)))).toThrowError(NotImplementedError);
   });
 });
