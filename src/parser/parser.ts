@@ -243,7 +243,7 @@ export class ARIBB24Parser {
       case 'DRCS':
         const result = [
           ARIBB24DRCSPrasedToken.from(token, this.state, this.option),
-          ... token.combine === '' ? [] : [ARIBB24CharacterParsedToken.from(Character.from('　', true), this.state, this.option)],
+          ... token.combine === '' ? [] : [ARIBB24CharacterParsedToken.from(Character.from('　' + token.combine, true), this.state, this.option)],
           ... this.non_spacings
         ];
         this.non_spacings = [];
