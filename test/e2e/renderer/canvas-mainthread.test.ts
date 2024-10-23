@@ -6,6 +6,11 @@ import aribInitialState from '@/parser/state/ARIB';
 import { CaptionLanguageInformation } from '@/tokenizer/b24/datagroup';
 import { ActivePositionReturn, Character, ColorControlBackground, PalletControl, WhiteForeground } from '@/tokenizer/token';
 
+const generateCharacter = (str: string) => {
+  const segmenter = new Intl.Segmenter();
+  return Array.from(segmenter.segment(str), ({ segment }) => segment).map((seg) => Character.from(seg));
+}
+
 describe('ARIB B24 Canvas Renderer', () => {
   test('Rendering Test', async () => {
     const width = 960, height = 540;
@@ -34,18 +39,9 @@ describe('ARIB B24 Canvas Renderer', () => {
       ColorControlBackground.from(1),
       PalletControl.from(0),
       WhiteForeground.from(),
-      Character.from('A'),
-      Character.from('R'),
-      Character.from('I'),
-      Character.from('B'),
+      ... generateCharacter('ARIB'),
       ActivePositionReturn.from(),
-      Character.from('C'),
-      Character.from('A'),
-      Character.from('P'),
-      Character.from('T'),
-      Character.from('I'),
-      Character.from('O'),
-      Character.from('N'),
+      ... generateCharacter('CAPTION'),
     ], info);
 
     await page.screenshot({ element: renderer.getPresentationCanvas() });
