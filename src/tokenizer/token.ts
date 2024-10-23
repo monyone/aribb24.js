@@ -25,11 +25,10 @@ export type DRCS = {
   height: number;
   depth: number;
   binary: ArrayBuffer;
-  combine: string;
 };
 export const DRCS = {
-  from(width: number, height: number, depth: number, binary: ArrayBuffer, combine: string = ''): DRCS {
-    return { tag: 'DRCS', width, height, depth, binary, combine };
+  from(width: number, height: number, depth: number, binary: ArrayBuffer): DRCS {
+    return { tag: 'DRCS', width, height, depth, binary };
   }
 };
 

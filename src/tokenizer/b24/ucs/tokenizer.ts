@@ -53,7 +53,7 @@ export default class ARIBB24UTF8Tokenizer extends ARIBB24Tokenizer {
           const [value ,... rest] = Array.from(ch);
           if (this.drcs.has(value)) {
             const { width, height, depth, binary} = this.drcs.get(value)!;
-            result.push(DRCS.from(width, height, depth, binary, rest.join('')));
+            result.push(DRCS.from(width, height, depth, binary));
           } else {
             result.push(Character.from(ch));
           }
