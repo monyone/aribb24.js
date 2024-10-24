@@ -1,7 +1,7 @@
 import { ByteStream } from "../../util/bytestream";
 import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from "../../util/error";
 import md5 from "../../util/md5";
-import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, ARIBB24Token, Bell, Bitmap, BlackForeground, BlueForeground, BuiltinSoundReplay, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, ConcealmentMode, ConcealmentModeType, CyanForeground, Delete, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControl, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RasterColourCommand, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SingleConcealmentModeType, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, YellowForeground } from "../token";
+import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, ARIBB24Token, Bell, Bitmap, BlackForeground, BlueForeground, BuiltinSoundReplay, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, ConcealmentMode, ConcealmentModeType, CyanForeground, Delete, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControlHemming, OrnamentControlHollow, OrnamentControlNone, OrnamentControlShade, OrnamentControlType, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RasterColourCommand, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SingleConcealmentModeType, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, YellowForeground } from "../token";
 import { CaptionData } from "./datagroup";
 
 export const CONTROL_CODES = {
@@ -267,11 +267,14 @@ export const processC1 = (stream: ByteStream): ARIBB24Token => {
           throw new NotImplementedError(`TCC is Not Implemented!`);
         case CSI_CODE.ORN:
           switch (values[0]) {
-            case 0x00:
-            case 0x01:
-            case 0x02:
-            case 0x03:
-              return OrnamentControl.from(values[0], values[1]);
+            case OrnamentControlType.NONE:
+              return OrnamentControlNone.from();
+            case OrnamentControlType.HEMMING:
+              return OrnamentControlHemming.from(values[1]);
+            case OrnamentControlType.SHADE:
+              return OrnamentControlShade.from(values[1]);
+            case OrnamentControlType.HOLLOW:
+              return OrnamentControlHollow.from();
           }
 
           throw new UnreachableError('Undefined ORN');

@@ -404,19 +404,15 @@ export class ARIBB24Parser {
       case 'HilightingCharacterBlock':
         this.state.highlight = token.enclosure;
         break;
-      case 'OrnamentControl':
-        switch (token.type) {
-          case OrnamentControlType.NONE:
-            this.state.ornament = null;
-            break;
-          case OrnamentControlType.HEMMING: {
-            const lower = Math.floor(token.ornament / 100);
-            const upper = token.ornament % 100;
-            this.state.ornament = (upper << 4) | lower;
-            break;
-          }
-        }
+      case 'OrnamentControlNone':
+        this.state.ornament = null;
         break;
+      case 'OrnamentControlHemming': {
+        const lower = Math.floor(token.color / 100);
+        const upper = token.color % 100;
+        this.state.ornament = (upper << 4) | lower;
+        break;
+      }
       case 'FlashingControl':
         this.state.flashing = token.type;
         break;

@@ -592,14 +592,41 @@ export const OrnamentControlType = {
   HOLLOW: 0x03,
 } as const;
 
-export type OrnamentControl = {
-  tag: 'OrnamentControl';
-  type: (typeof OrnamentControlType)[keyof typeof OrnamentControlType]
-  ornament: number;
+export type OrnamentControlNone = {
+  tag: 'OrnamentControlNone';
 };
-export const OrnamentControl = {
-  from(type: (typeof OrnamentControlType)[keyof typeof OrnamentControlType], ornament: number): OrnamentControl {
-    return { tag: 'OrnamentControl', type, ornament };
+export const OrnamentControlNone = {
+  from(): OrnamentControlNone {
+    return { tag: 'OrnamentControlNone' };
+  }
+};
+
+export type OrnamentControlHemming = {
+  tag: 'OrnamentControlHemming';
+  color: number;
+};
+export const OrnamentControlHemming = {
+  from(color: number): OrnamentControlHemming {
+    return { tag: 'OrnamentControlHemming', color};
+  }
+};
+
+export type OrnamentControlShade = {
+  tag: 'OrnamentControlShade';
+  color: number;
+};
+export const OrnamentControlShade = {
+  from(color: number): OrnamentControlShade {
+    return { tag: 'OrnamentControlShade', color};
+  }
+};
+
+export type OrnamentControlHollow = {
+  tag: 'OrnamentControlHollow';
+};
+export const OrnamentControlHollow = {
+  from(): OrnamentControlHollow {
+    return { tag: 'OrnamentControlHollow'};
   }
 };
 
@@ -684,7 +711,10 @@ export type ARIBB24Token =
   SetHorizontalSpacing |
   SetVerticalSpacing |
   ActiveCoordinatePositionSet |
-  OrnamentControl |
+  OrnamentControlNone |
+  OrnamentControlHemming |
+  OrnamentControlShade |
+  OrnamentControlHollow |
   BuiltinSoundReplay |
   RasterColourCommand;
 

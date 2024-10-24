@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import ARIBB24UTF8Tokenizer from '@/tokenizer/b24/ucs/tokenizer';
-import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, BuiltinSoundReplay, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, CharacterSizeControlType, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, ConcealmentMode, ConcealmentModeType, CyanForeground, Delete, DRCS, FlashingControl, FlashingControlType, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControl, OrnamentControlType, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, PatternPolarityControlType, RasterColourCommand, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, ReplacingConcealmentModeType, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SingleConcealmentModeType, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlModeType, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, WritingModeModificationType, YellowForeground } from '@/tokenizer/token';
+import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, BuiltinSoundReplay, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, CharacterSizeControlType, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, ConcealmentMode, ConcealmentModeType, CyanForeground, Delete, DRCS, FlashingControl, FlashingControlType, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControlHemming, OrnamentControlHollow, OrnamentControlNone, OrnamentControlShade, OrnamentControlType, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, PatternPolarityControlType, RasterColourCommand, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, ReplacingConcealmentModeType, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SingleConcealmentModeType, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlModeType, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, WritingModeModificationType, YellowForeground } from '@/tokenizer/token';
 import { CONTROL_CODES, CSI_CODE, replaceDRCS } from '@/tokenizer/b24/tokenizer';
 import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from '@/util/error';
 import md5 from '@/util/md5';
@@ -833,7 +833,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.ORN, 0)))).toStrictEqual([
-      OrnamentControl.from(OrnamentControlType.NONE, 0),
+      OrnamentControlNone.from(),
     ]);
   });
 
@@ -841,7 +841,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.ORN, 1, 0x7F)))).toStrictEqual([
-      OrnamentControl.from(OrnamentControlType.HEMMING, 0x7F),
+      OrnamentControlHemming.from(0x7F),
     ]);
   });
 
@@ -849,15 +849,15 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.ORN, 2, 0x7F)))).toStrictEqual([
-      OrnamentControl.from(OrnamentControlType.SHADE, 0x7F),
+      OrnamentControlShade.from(0x7F)
     ]);
   });
 
   test('Tokenize CSI ORN HollowOrament', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.ORN, 3, 0x7F)))).toStrictEqual([
-      OrnamentControl.from(OrnamentControlType.HOLLOW, 0x7F),
+    expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.ORN, 3)))).toStrictEqual([
+      OrnamentControlHollow.from()
     ]);
   });
 
