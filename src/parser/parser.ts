@@ -49,7 +49,6 @@ export type ARIBB24ParserState = {
   flashing: (typeof FlashingControlType)[keyof typeof FlashingControlType];
   // time
   elapsed_time: number;
-  end_time: number | null;
 };
 
 export type ARIBB24ParserOption = {
@@ -89,8 +88,7 @@ export const initialState: Readonly<ARIBB24ParserState> = {
   flashing: FlashingControlType.STOP,
   // time
   elapsed_time: 0,
-  end_time: null,
-};
+} as const;
 
 export type ARIBB24CommonParsedToken = {
   state: ARIBB24ParserState;
@@ -184,7 +182,7 @@ export class ARIBB24Parser {
 
   private move_absolute_pos(x: number, y: number) {
     this.state.position[0] = x * ARIBB24Parser.box(this.state)[0];
-    this.state.position[1] = (y + 1) * ARIBB24Parser.box(this.state)[1] - 1;
+    this.state.position[1] = (y + 1) * ARIBB24Parser.box(this.state)[1] - 1 * this.option.magnification;
   }
 
   private move_newline() {
@@ -216,6 +214,13 @@ export class ARIBB24Parser {
     while (y > 0){
       this.state.position[1] += ARIBB24Parser.box(this.state)[1];
       y--;
+    }
+
+    while (this.state.position[1] >= this.state.area[1]) {
+      this.state.position[1] -= this.state.area[1];
+    }
+    while (this.state.position[1] < 0) {
+      this.state.position[1] += this.state.area[1];
     }
   }
 
