@@ -181,6 +181,14 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     ]);
   });
 
+  test('Tokenize Null specified by UCS Null', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary('\0'))).toStrictEqual([
+      Null.from()
+    ]);
+  });
+
   test('Tokenize BEL', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
@@ -213,6 +221,14 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     ]);
   });
 
+  test('Tokenize APD specified by UCS Line Feed', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary('\n'))).toStrictEqual([
+      ActivePositionDown.from()
+    ]);
+  });
+
   test('Tokenize APU', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
@@ -229,10 +245,26 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     ]);
   });
 
+  test('Tokenize APB specified by UCS CS', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary('\f'))).toStrictEqual([
+      ClearScreen.from()
+    ]);
+  });
+
   test('Tokenize APR', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.APR))).toStrictEqual([
+      ActivePositionReturn.from()
+    ]);
+  });
+
+  test('Tokenize APR specified by UCS Carriage Return', () => {
+    const tokenizer = new ARIBB24UTF8Tokenizer();
+
+    expect(tokenizer.tokenizeStatement(generateBinary('\r'))).toStrictEqual([
       ActivePositionReturn.from()
     ]);
   });

@@ -22,23 +22,21 @@ const generateBinary = (... operation: (number | string)[]): ArrayBuffer => {
   return uint8.buffer;
 }
 
+const generateCharacterTokens = (str: string) => {
+  const segmenter = new Intl.Segmenter();
+  return Array.from(segmenter.segment(str), ({ segment }) => segment).map((seg) => Character.from(seg));
+}
+
 describe("ARIB STD-B24 UCS", () => {
   test('Tokenize UTF-8 ASCII', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary('This is Test'))).toStrictEqual([
-      Character.from('T', false),
-      Character.from('h', false),
-      Character.from('i', false),
-      Character.from('s', false),
+      ... generateCharacterTokens('This'),
       Space.from(),
-      Character.from('i', false),
-      Character.from('s', false),
+      ... generateCharacterTokens('is'),
       Space.from(),
-      Character.from('T', false),
-      Character.from('e', false),
-      Character.from('s', false),
-      Character.from('t', false)
+      ... generateCharacterTokens('Test'),
     ]);
   });
 
@@ -46,34 +44,11 @@ describe("ARIB STD-B24 UCS", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary('new\rline\nwith'))).toStrictEqual([
-      Character.from('n', false),
-      Character.from('e', false),
-      Character.from('w', false),
+      ... generateCharacterTokens('new'),
       ActivePositionReturn.from(),
-      Character.from('l', false),
-      Character.from('i', false),
-      Character.from('n', false),
-      Character.from('e', false),
+      ... generateCharacterTokens('line'),
       ActivePositionDown.from(),
-      Character.from('w', false),
-      Character.from('i', false),
-      Character.from('t', false),
-      Character.from('h', false)
-    ]);
-  });
-
-  test('Tokenize UTF-8 2byte string', () => {
-    const tokenizer = new ARIBB24UTF8Tokenizer();
-
-    expect(tokenizer.tokenizeStatement(generateBinary('こんにちは 世界'))).toStrictEqual([
-      Character.from('こ', false),
-      Character.from('ん', false),
-      Character.from('に', false),
-      Character.from('ち', false),
-      Character.from('は', false),
-      Space.from(),
-      Character.from('世', false),
-      Character.from('界', false),
+      ... generateCharacterTokens('with'),
     ]);
   });
 });

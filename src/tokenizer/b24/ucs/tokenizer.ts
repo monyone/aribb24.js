@@ -104,7 +104,7 @@ export default class ARIBB24UTF8Tokenizer extends ARIBB24Tokenizer {
         const fontId = (uint8[begin + 0] & 0xF0) >> 4
         const mode = (uint8[begin + 0] & 0x0F)
 
-        if (mode === 0 || mode === 1) { // FIXME: Other Mode Not Supported
+        if (mode === 0 || mode === 1) {
           const colors = uint8[begin + 1] + 2;
           const width = uint8[begin + 2];
           const height = uint8[begin + 3];
@@ -115,7 +115,7 @@ export default class ARIBB24UTF8Tokenizer extends ARIBB24Tokenizer {
           this.drcs.set(String.fromCodePoint(CharacterCode), DRCSData.from(width, height, depth, binary));
 
           begin += 4 + length
-        } else {
+        } else { // FIXME: Other Mode Not Supported
           return;
         }
       }
