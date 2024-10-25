@@ -98,14 +98,14 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
   });
 
   test('Tokenize UTF-8 DRCS', () => {
-    const width = 36, heihgt = 36, colors = 4;
+    const width = 36, height = 36, colors = 4;
     const binary = [];
     for (let index = 0; index < Math.floor(36 * 36 * 2 / 8); index++) {
       binary.push(0xFF);
     }
 
     const tokenizer = new ARIBB24UTF8Tokenizer();
-    tokenizer.processDRCS(2, generateDRCSUnit(0xec00, width, heihgt, colors, binary));
+    tokenizer.processDRCS(2, generateDRCSUnit(0xec00, width, height, colors, binary));
 
     expect(tokenizer.tokenizeStatement(generateBinary('\uec00'))).toStrictEqual([
       DRCS.from(36, 36, 2, Uint8Array.from(binary).buffer)
@@ -113,14 +113,14 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
   });
 
   test('Tokenize UTF-8 DRCS with Combine (ignore currently)', () => {
-    const width = 36, heihgt = 36, colors = 4;
+    const width = 36, height = 36, colors = 4;
     const binary = [];
     for (let index = 0; index < Math.floor(36 * 36 * 2 / 8); index++) {
       binary.push(0xFF);
     }
 
     const tokenizer = new ARIBB24UTF8Tokenizer();
-    tokenizer.processDRCS(2, generateDRCSUnit(0xec00, width, heihgt, colors, binary));
+    tokenizer.processDRCS(2, generateDRCSUnit(0xec00, width, height, colors, binary));
 
     expect(tokenizer.tokenizeStatement(generateBinary('\uec00', '\u3099'))).toStrictEqual([
       DRCS.from(36, 36, 2, Uint8Array.from(binary).buffer, '\u3099')
@@ -128,7 +128,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
   });
 
   test('Tokenize UTF-8 DRCS with ReplaceDRCS', () => {
-    const width = 36, heihgt = 36, colors = 4;
+    const width = 36, height = 36, colors = 4;
     const binary = [];
     for (let index = 0; index < Math.floor(36 * 36 * 2 / 8); index++) {
       binary.push(0xFF);
@@ -136,7 +136,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const replace = new Map([[md5(Uint8Array.from(binary).buffer), '〓']]);
 
     const tokenizer = new ARIBB24UTF8Tokenizer();
-    tokenizer.processDRCS(2, generateDRCSUnit(0xec00, width, heihgt, colors, binary));
+    tokenizer.processDRCS(2, generateDRCSUnit(0xec00, width, height, colors, binary));
 
     expect(replaceDRCS(tokenizer.tokenizeStatement(generateBinary('\uec00', '\u3099')), replace)).toStrictEqual([
       Character.from('〓\u3099')

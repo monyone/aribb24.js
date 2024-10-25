@@ -1,5 +1,7 @@
-import { ARIBB24Parser, ARIBB24CharacterParsedToken, ARIBB24ParserOption, ARIBB24ParserState, initialState, CHARACTER_SIZE, ARIBB24ClearScreenParsedToken } from '@/parser/parser';
-import { ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, BlackForeground, BlueForeground, Character, CharacterCompositionDotDesignation, CharacterSizeControl, CharacterSizeControlType, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, FlashingControl, FlashingControlType, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, OrnamentControlHemming, OrnamentControlNone, PalletControl, RedForeground, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SmallSize, StartLining, StopLining, TimeControlWait, WhiteForeground, YellowForeground } from '@/tokenizer/token';
+import { ARIBB24Parser, ARIBB24CharacterParsedToken, ARIBB24ParserOption, ARIBB24ParserState, initialState, CHARACTER_SIZE, ARIBB24ClearScreenParsedToken, ARIBB24DRCSPrasedToken } from '@/parser/parser';
+import { replaceDRCS } from '@/tokenizer/b24/tokenizer';
+import { ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, BlackForeground, BlueForeground, Character, CharacterCompositionDotDesignation, CharacterSizeControl, CharacterSizeControlType, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, DRCS, FlashingControl, FlashingControlType, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, OrnamentControlHemming, OrnamentControlNone, PalletControl, RedForeground, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SmallSize, StartLining, StopLining, TimeControlWait, WhiteForeground, YellowForeground } from '@/tokenizer/token';
+import md5 from '@/util/md5';
 import { describe, test, expect } from 'vitest';
 
 const initialStateMagnificated = (state: typeof initialState, option: ARIBB24ParserOption): ARIBB24ParserState => {
@@ -29,7 +31,81 @@ describe("ARIB STD-B24 Parser", () => {
     const parser = new ARIBB24Parser(initialState, option);
 
     expect(parser.parseToken(Character.from('a'))).toStrictEqual([
-      ARIBB24CharacterParsedToken.from(Character.from('a'), initialStateMagnificated(initialState, option), { magnification: 1 })
+      ARIBB24CharacterParsedToken.from(Character.from('a'), initialStateMagnificated(initialState, option), { magnification: 1 }),
+    ]);
+  });
+
+  test('Parse 2-bytes string', () => {
+    const option: ARIBB24ParserOption = { magnification: 1 };
+    const parser = new ARIBB24Parser(initialState, option);
+
+    expect(parser.parseToken(Character.from('あ'))).toStrictEqual([
+      ARIBB24CharacterParsedToken.from(Character.from('あ'), initialStateMagnificated(initialState, option), { magnification: 1 }),
+    ]);
+  });
+
+  test('Tokenize UTF-8 surrogate pair', () => {
+    const option: ARIBB24ParserOption = { magnification: 1 };
+    const parser = new ARIBB24Parser(initialState, option);
+
+    expect(parser.parseToken(Character.from('叱'))).toStrictEqual([
+      ARIBB24CharacterParsedToken.from(Character.from('叱'), initialStateMagnificated(initialState, option), { magnification: 1 }),
+    ]);
+  });
+
+  test('Tokenize UTF-8 combining character', () => {
+    const option: ARIBB24ParserOption = { magnification: 1 };
+    const parser = new ARIBB24Parser(initialState, option);
+
+    expect(parser.parseToken(Character.from('👨‍👩'))).toStrictEqual([
+      ARIBB24CharacterParsedToken.from(Character.from('👨‍👩'), initialStateMagnificated(initialState, option), { magnification: 1 }),
+    ]);
+  });
+
+  test('Tokenize UTF-8 DRCS', () => {
+    const width = 36, height = 36, colors = 4, depth = 2;
+    const binary = [];
+    for (let index = 0; index < Math.floor(36 * 36 * 2 / 8); index++) {
+      binary.push(0xFF);
+    }
+
+    const option: ARIBB24ParserOption = { magnification: 1 };
+    const parser = new ARIBB24Parser(initialState, option);
+
+    expect(parser.parseToken(DRCS.from(width, height, depth, Uint8Array.from(binary).buffer))).toStrictEqual([
+      ARIBB24DRCSPrasedToken.from(DRCS.from(width, height, depth, Uint8Array.from(binary).buffer), initialStateMagnificated(initialState, option), { magnification: 1 }),
+    ]);
+  });
+
+  test('Tokenize UTF-8 DRCS with Combine (ignore currently)', () => {
+    const width = 36, height = 36, colors = 4, depth = 2;
+    const binary = [];
+    for (let index = 0; index < Math.floor(36 * 36 * 2 / 8); index++) {
+      binary.push(0xFF);
+    }
+
+    const option: ARIBB24ParserOption = { magnification: 1 };
+    const parser = new ARIBB24Parser(initialState, option);
+
+    expect(parser.parseToken(DRCS.from(width, height, depth, Uint8Array.from(binary).buffer, '\u3099'))).toStrictEqual([
+      ARIBB24DRCSPrasedToken.from(DRCS.from(width, height, depth, Uint8Array.from(binary).buffer), initialStateMagnificated(initialState, option), { magnification: 1 }),
+      ARIBB24CharacterParsedToken.from(Character.from('　\u3099', true), initialStateMagnificated(initialState, option), { magnification: 1 }),
+    ]);
+  });
+
+  test('Tokenize UTF-8 DRCS with ReplaceDRCS', () => {
+    const width = 36, height = 36, colors = 4, depth = 2;
+    const binary = [];
+    for (let index = 0; index < Math.floor(36 * 36 * 2 / 8); index++) {
+      binary.push(0xFF);
+    }
+    const replace = new Map([[md5(Uint8Array.from(binary).buffer), '〓']]);
+
+    const option: ARIBB24ParserOption = { magnification: 1 };
+    const parser = new ARIBB24Parser(initialState, option);
+
+    expect(parser.parse(replaceDRCS([DRCS.from(width, height, depth, Uint8Array.from(binary).buffer, '\u3099')], replace))).toStrictEqual([
+      ARIBB24CharacterParsedToken.from(Character.from('〓\u3099'), initialStateMagnificated(initialState, option), { magnification: 1 }),
     ]);
   });
 
