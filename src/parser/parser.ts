@@ -123,11 +123,11 @@ export const ARIBB24CharacterParsedToken = {
     };
   }
 }
-export type ARIBB24DRCSPrasedToken = ARIBB24CommonParsedToken & Omit<DRCS, 'tag' | 'combine'> & {
+export type ARIBB24DRCSPrasedToken = ARIBB24CommonParsedToken & Omit<DRCS, 'tag' | 'combining'> & {
   tag: 'DRCS';
 };
 export const ARIBB24DRCSPrasedToken = {
-  from({ width, height, depth, binary }: Omit<DRCS, 'tag' | 'combine'>, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24DRCSPrasedToken {
+  from({ width, height, depth, binary }: Omit<DRCS, 'tag' | 'combining'>, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24DRCSPrasedToken {
     return {
       tag: 'DRCS',
       state: structuredClone(state),
@@ -248,6 +248,7 @@ export class ARIBB24Parser {
       case 'DRCS':
         const result = [
           ARIBB24DRCSPrasedToken.from(token, this.state, this.option),
+          ... (token.combining === '' ? [] : [ARIBB24CharacterParsedToken.from(Character.from('　' + token.combining, true), this.state, this.option)]),
           ... this.non_spacings
         ];
         this.non_spacings = [];

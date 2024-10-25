@@ -25,8 +25,8 @@ export const SVGDOMRendererOption = {
   from (option?: Partial<SVGDOMRendererOption>): SVGDOMRendererOption {
     return {
       font: {
-        normal: '"Hiragino Maru Gothic Pro", "BIZ UDGothic", sans-serif',
-        arib: '"Hiragino Maru Gothic Pro", "BIZ UDGothic", sans-serif',
+        normal: '"Hiragino Maru Gothic Pro", "BIZ UDGothic", "Yu Gothic Medium", sans-serif',
+        arib: '"Hiragino Maru Gothic Pro", "BIZ UDGothic", "Yu Gothic Medium", sans-serif',
         ... option?.font,
       },
       replace: {

@@ -123,7 +123,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     tokenizer.processDRCS(2, generateDRCSUnit(0xec00, width, heihgt, colors, binary));
 
     expect(tokenizer.tokenizeStatement(generateBinary('\uec00', '\u3099'))).toStrictEqual([
-      DRCS.from(36, 36, 2, Uint8Array.from(binary).buffer)
+      DRCS.from(36, 36, 2, Uint8Array.from(binary).buffer, '\u3099')
     ]);
   });
 
@@ -139,7 +139,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     tokenizer.processDRCS(2, generateDRCSUnit(0xec00, width, heihgt, colors, binary));
 
     expect(replaceDRCS(tokenizer.tokenizeStatement(generateBinary('\uec00', '\u3099')), replace)).toStrictEqual([
-      Character.from('〓')
+      Character.from('〓\u3099')
     ]);
   });
 

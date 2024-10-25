@@ -5,7 +5,7 @@ import { Character } from "../../token";
 import ARIBB24Tokenizer, { CONTROL_CODES, processC0, processC1 } from "../tokenizer";
 import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from "../../../util/error";
 
-type DRCSData = Omit<DRCS, 'tag' | 'combine'>;
+type DRCSData = Omit<DRCS, 'tag' | 'combining'>;
 const DRCSData = {
   from(width: number, height: number, depth: number, binary: ArrayBuffer): DRCSData {
     return {
@@ -53,7 +53,7 @@ export default class ARIBB24UTF8Tokenizer extends ARIBB24Tokenizer {
           const [value ,... rest] = Array.from(ch);
           if (this.drcs.has(value)) {
             const { width, height, depth, binary} = this.drcs.get(value)!;
-            result.push(DRCS.from(width, height, depth, binary));
+            result.push(DRCS.from(width, height, depth, binary, rest.join('')));
           } else {
             result.push(Character.from(ch));
           }
