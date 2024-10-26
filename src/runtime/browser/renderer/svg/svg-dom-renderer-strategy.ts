@@ -143,10 +143,10 @@ const retriveDecorationSVGPathElement = (token: ARIBB24CharacterParsedToken | AR
   let path = '';
 
   if ((state.highlight & 0b0001) !== 0) { // bottom
-    path += (path === '' ? '' : ' ') + `M ${x} ${y + ARIBB24Parser.box(state)[1] - 1} h ${ARIBB24Parser.box(state)[0]} v ${option.magnification} H ${x} Z`;
+    path += (path === '' ? '' : ' ') + `M ${x} ${y + ARIBB24Parser.box(state)[1] - 1 * option.magnification} h ${ARIBB24Parser.box(state)[0]} v ${option.magnification} H ${x} Z`;
   }
   if ((state.highlight & 0b0010) !== 0) { // right
-    path += (path === '' ? '' : ' ') + `M ${x + ARIBB24Parser.box(state)[0] - 1} ${y} h ${option.magnification} v ${ARIBB24Parser.box(state)[1]} H ${x} Z`;
+    path += (path === '' ? '' : ' ') + `M ${x + ARIBB24Parser.box(state)[0] - 1 * option.magnification} ${y} h ${option.magnification} v ${ARIBB24Parser.box(state)[1]} H ${x} Z`;
   }
   if ((state.highlight & 0b0100) !== 0) { // top
     path += (path === '' ? '' : ' ') + `M ${x} ${y} h ${ARIBB24Parser.box(state)[0]} v ${option.magnification} H ${x} Z`;
@@ -157,7 +157,7 @@ const retriveDecorationSVGPathElement = (token: ARIBB24CharacterParsedToken | AR
   }
 
   if (state.underline) {
-    path += (path === '' ? '' : ' ') + `M ${x} ${y + ARIBB24Parser.box(state)[1] - 1} h ${ARIBB24Parser.box(state)[0]} v ${option.magnification} H ${x} Z`;
+    path += (path === '' ? '' : ' ') + `M ${x} ${y + ARIBB24Parser.box(state)[1] - 1 * option.magnification} h ${ARIBB24Parser.box(state)[0]} v ${option.magnification} H ${x} Z`;
   }
 
   const elem = document.createElementNS('http://www.w3.org/2000/svg', 'path');
