@@ -13,8 +13,8 @@
     ".": {
       "types": "./dist/types/index.d.ts",
       "umd": "./dist/aribb24.umd.js",
-      "import": "./dist/aribb24.mjs",
-      "require": "./dist/aribb24.js"
+      "import": "./dist/es/index.mjs",
+      "require": "./dist/cjs/index.js"
     }
   },
   "author": "monyone <monyone.teihen@gmail.com>",
@@ -34,10 +34,10 @@
     "prebuild": "rimraf dist",
     "clean": "rimraf dist",
     "build": "vite build",
-    "build:tsc": "tsc --build tsconfig.build.json",
+    "build:module": "vite build --config vite.config.module.mjs",
+    "build:tsc": "tsc --project tsconfig.build.json",
     "build:watch": "vite build --watch",
-    "build:all": "tsc --build tsconfig.build.json && vite build",
-    "build:watch:all": "tsc --build tsconfig.build.json && vite build --watch",
+    "build:all": "rimraf dist && tsc --project tsconfig.build.json && vite build && vite build --config vite.config.module.mjs",
     "test": "vitest",
     "test:browser": "vitest --config vitest.browser.config.mjs",
     "prepublishOnly": "rimraf dist && tsc && vite build"
