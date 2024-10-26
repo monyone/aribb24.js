@@ -40,7 +40,7 @@
     "build:all": "rimraf dist && tsc --project tsconfig.build.json && vite build && vite build --config vite.config.module.mjs",
     "test": "vitest",
     "test:browser": "vitest --config vitest.browser.config.mjs",
-    "prepublishOnly": "rimraf dist && tsc && vite build && vite build --config vite.config.module.mjs"
+    "prepublishOnly": "rimraf dist && tsc --project tsconfig.build.json && vite build && vite build --config vite.config.module.mjs"
   },
   "devDependencies": {
     "@vitest/browser": "^2.1.3",
