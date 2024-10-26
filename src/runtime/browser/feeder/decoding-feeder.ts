@@ -1,6 +1,6 @@
 import AVLTree from '../../../util/avl';
 
-import Feeder, { FeederOption, FeederDecodingData, FeederPresentationData, getTokenizeInformation } from './feeder';
+import Feeder, { FeederOption, FeederDecodingData, FeederPresentationData, getTokenizeInformation, PartialFeederOption } from './feeder';
 import extractPES from '../../../tokenizer/b24/mpegts/extract';
 import extractDatagroup, { CaptionManagement } from '../../../tokenizer/b24/datagroup'
 import { ClearScreen } from '../../../tokenizer/token';
@@ -50,7 +50,7 @@ export default abstract class DecodingFeeder implements Feeder {
   private present: AVLTree<number, FeederPresentationData> = new AVLTree<number, FeederPresentationData>(compareNumber, compareNumber, (pts) => pts);
   private isDestroyed: boolean = false;
 
-  public constructor(option?: Partial<FeederOption>) {
+  public constructor(option?: PartialFeederOption) {
     this.option = FeederOption.from(option);
     this.decodingPromise = new Promise((resolve) => {
       this.decodingNotify = resolve;
@@ -163,6 +163,9 @@ export default abstract class DecodingFeeder implements Feeder {
     if (caption == null) { return ; }
 
     const lang = caption.tag === 'CaptionStatement' ? (caption.lang + 1) : 0;
+
+    pts += this.option.offset.pts;
+    dts += this.option.offset.dts;
     this.decoder.insert({ dts, lang }, { pts, caption });
   }
 
@@ -177,8 +180,6 @@ export default abstract class DecodingFeeder implements Feeder {
       }
     }
     this.priviousTime = time;
-
-    time -= this.option.timeshift;
     return this.present.floor(time) ?? null;
   }
 

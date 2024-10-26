@@ -1,4 +1,4 @@
-import { FeederOption } from './feeder';
+import { PartialFeederOption } from './feeder';
 import { parseID3v2 } from '../../../util/id3';
 import { base64ToUint8Array } from '../../../util/binary';
 import DecodingFeeder from './decoding-feeder';
@@ -14,7 +14,7 @@ export default class HLSFeeder extends DecodingFeeder {
   private readonly onPauseHandler = this.onPause.bind(this);
   private readonly interspactHandler = this.interspact.bind(this);
 
-  public constructor(option?: Partial<FeederOption>) {
+  public constructor(option?: PartialFeederOption) {
     super(option);
   }
 

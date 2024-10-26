@@ -10,21 +10,34 @@ import { ARIBB24Token } from "../../../tokenizer/token";
 import { UnreachableError } from "../../../util/error";
 import { ARIBB24BrowserToken } from "../types";
 
-export type FeederOption = {
-  timeshift: number;
-  recieve: {
-    association: 'ARIB' | 'SBTVD' | null; // null is AutoDetect
-    type: 'Caption' | 'Superimpose';
-    language: number | string | [string, number];
-  },
-  tokenizer: {
-    pua: boolean;
-  };
+type FeederTimeOffsetOption = {
+  pts: number;
+  dts: number;
 };
+
+type FeederTokenizeOption = {
+  pua: boolean;
+}
+
+type FeederRecieveOption = {
+  association: 'ARIB' | 'SBTVD' | null; // null is AutoDetect
+  type: 'Caption' | 'Superimpose';
+  language: number | string | [string, number];
+};
+
+export type FeederOption = {
+  recieve: FeederRecieveOption;
+  tokenizer: FeederTokenizeOption;
+  offset: FeederTimeOffsetOption;
+};
+export type PartialFeederOption = {
+  recieve: Partial<FeederRecieveOption>;
+  tokenizer: Partial<FeederTokenizeOption>;
+  offset: Partial<FeederTimeOffsetOption>;
+}
 export const FeederOption = {
-  from (option?: Partial<FeederOption>): FeederOption {
+  from (option?: PartialFeederOption): FeederOption {
     return {
-      timeshift: 0,
       ... option,
       recieve: {
         association: null,
@@ -34,8 +47,13 @@ export const FeederOption = {
       },
       tokenizer: {
         pua: false,
-        ... option?.tokenizer
+        ... option?.tokenizer,
       },
+      offset: {
+        pts: 0,
+        dts: 0,
+        ... option?.offset,
+      }
     };
   }
 }

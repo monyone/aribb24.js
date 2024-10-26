@@ -1,10 +1,10 @@
-import { FeederOption } from './feeder';
+import { PartialFeederOption } from './feeder';
 import { parseID3v2 } from '../../../util/id3';
 import { base64ToUint8Array } from '../../../util/binary';
 import DecodingFeeder from './decoding-feeder';
 
 export default class MPEGTSFeeder extends DecodingFeeder {
-  public constructor(option?: Partial<FeederOption>) {
+  public constructor(option?: PartialFeederOption) {
     super(option);
   }
 
