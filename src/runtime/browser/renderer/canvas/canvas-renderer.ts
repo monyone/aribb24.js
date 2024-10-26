@@ -2,13 +2,13 @@ import { ARIBB24ParserState } from "../../../../parser/parser";
 import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup";
 import { ARIBB24BrowserToken } from "../../types";
 import Renderer from "../renderer";
-import { CanvasRendererOption } from "./canvas-renderer-option";
+import { CanvasRendererOption, PartialCanvasRendererOption } from "./canvas-renderer-option";
 
 export default abstract class CanvasRenderer implements Renderer {
   protected option: CanvasRendererOption;
   protected canvas: HTMLCanvasElement;
 
-  public constructor(option?: Partial<CanvasRendererOption>) {
+  public constructor(option?: PartialCanvasRendererOption) {
     this.option = CanvasRendererOption.from(option);
     // Setup Canvas
     this.canvas = document.createElement('canvas');

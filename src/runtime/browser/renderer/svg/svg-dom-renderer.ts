@@ -3,14 +3,14 @@ import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup"
 import { ARIBB24BrowserToken, replaceDRCS } from "../../types";
 import { shouldNotAssumeUseClearScreen } from "../quirk";
 import Renderer from "../renderer";
-import { SVGDOMRendererOption } from "./svg-dom-renderer-option";
+import { PartialSVGDOMRendererOption, SVGDOMRendererOption } from "./svg-dom-renderer-option";
 import render from "./svg-dom-renderer-strategy";
 
 export default class SVGDOMRenderer implements Renderer {
   protected option: SVGDOMRendererOption;
   protected svg: SVGSVGElement;
 
-  public constructor(option?: Partial<SVGDOMRendererOption>) {
+  public constructor(option?: PartialSVGDOMRendererOption) {
     this.option = SVGDOMRendererOption.from(option);
     // Setup SVG
     this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');

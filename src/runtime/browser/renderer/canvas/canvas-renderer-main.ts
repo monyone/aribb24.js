@@ -3,12 +3,12 @@ import CanvasRenderer from "./canvas-renderer";
 import render from "./canvas-renderer-strategy"
 import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup";
 import { ARIBB24BrowserToken, replaceDRCS } from "../../types";
-import { CanvasRendererOption } from "./canvas-renderer-option";
+import { PartialCanvasRendererOption } from "./canvas-renderer-option";
 
 export default class CanvasMainThreadRenderer extends CanvasRenderer {
   private buffer: HTMLCanvasElement;
 
-  public constructor(option?: Partial<CanvasRendererOption>) {
+  public constructor(option?: PartialCanvasRendererOption) {
     super(option);
     this.buffer = document.createElement('canvas');
   }
