@@ -32,6 +32,7 @@
   "license": "MIT",
   "scripts": {
     "prebuild": "rimraf dist",
+    "clean": "rimraf dist",
     "build": "vite build",
     "build:tsc": "tsc --build tsconfig.build.json",
     "build:watch": "vite build --watch",
