@@ -7,6 +7,5 @@ yarn-debug.log*
 yarn-error.log*
 tsconfig.build.tsbuildinfo
 test/e2e/**/__screenshots__
-test/e2e/**/__snapshots__
 
 .node-version

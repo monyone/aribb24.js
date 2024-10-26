@@ -1,0 +1,246 @@
+<svg
+  style="position: absolute; left: 0px; top: 0px; pointer-events: none; width: 100%; height: 100%;"
+  viewBox="0 0 1920 1080"
+>
+  <svg
+    height="960"
+    viewBox="0 0 1680 960"
+    width="1680"
+    x="116"
+    y="58"
+  >
+    <path
+      d="M 160 839 h 40 v 120 H 160 Z M 200 839 h 80 v 120 H 200 Z M 280 839 h 80 v 120 H 280 Z M 360 839 h 40 v 120 H 360 Z M 440 839 h 80 v 120 H 440 Z M 520 839 h 80 v 120 H 520 Z M 600 839 h 80 v 120 H 600 Z M 680 839 h 80 v 120 H 680 Z"
+      fill="#00000080"
+      shape-rendering="crispEdges"
+    />
+    <g>
+      <text
+        dominant-baseline="central"
+        fill="#FFFFFFFF"
+        font-family="'Hiragino Maru Gothic Pro', 'BIZ UDGothic', 'Yu Gothic Medium', sans-serif"
+        font-size="72"
+        lengthAdjust="spacingAndGlyphs"
+        paint-order="stroke"
+        stroke="#000000FF"
+        stroke-linejoin="round"
+        stroke-width="8"
+        text-anchor="middle"
+        textLength="28.09375"
+        transform="scale(1 1)"
+        transform-origin="180 899"
+        x="180"
+        y="899"
+      >
+        [
+      </text>
+      <path
+        fill="#FFFFFFFF"
+        shape-rendering="crispEdges"
+      />
+      <animate
+        attributeName="opacity"
+        calcMode="discrete"
+        dur="1s"
+        repeatCount="indefinite"
+        values="1;0"
+      />
+    </g>
+    <g>
+      <text
+        dominant-baseline="central"
+        fill="#FFFFFFFF"
+        font-family="'Hiragino Maru Gothic Pro', 'BIZ UDGothic', 'Yu Gothic Medium', sans-serif"
+        font-size="72"
+        lengthAdjust="spacingAndGlyphs"
+        paint-order="stroke"
+        stroke="#000000FF"
+        stroke-linejoin="round"
+        stroke-width="8"
+        text-anchor="middle"
+        textLength="72"
+        transform="scale(1 1)"
+        transform-origin="240 899"
+        x="240"
+        y="899"
+      >
+        携
+      </text>
+      <path
+        fill="#FFFFFFFF"
+        shape-rendering="crispEdges"
+      />
+      <animate
+        attributeName="opacity"
+        calcMode="discrete"
+        dur="1s"
+        repeatCount="indefinite"
+        values="1;0"
+      />
+    </g>
+    <g>
+      <text
+        dominant-baseline="central"
+        fill="#FFFFFFFF"
+        font-family="'Hiragino Maru Gothic Pro', 'BIZ UDGothic', 'Yu Gothic Medium', sans-serif"
+        font-size="72"
+        lengthAdjust="spacingAndGlyphs"
+        paint-order="stroke"
+        stroke="#000000FF"
+        stroke-linejoin="round"
+        stroke-width="8"
+        text-anchor="middle"
+        textLength="72"
+        transform="scale(1 1)"
+        transform-origin="320 899"
+        x="320"
+        y="899"
+      >
+        帯
+      </text>
+      <path
+        fill="#FFFFFFFF"
+        shape-rendering="crispEdges"
+      />
+      <animate
+        attributeName="opacity"
+        calcMode="discrete"
+        dur="1s"
+        repeatCount="indefinite"
+        values="1;0"
+      />
+    </g>
+    <g>
+      <text
+        dominant-baseline="central"
+        fill="#FFFFFFFF"
+        font-family="'Hiragino Maru Gothic Pro', 'BIZ UDGothic', 'Yu Gothic Medium', sans-serif"
+        font-size="72"
+        lengthAdjust="spacingAndGlyphs"
+        paint-order="stroke"
+        stroke="#000000FF"
+        stroke-linejoin="round"
+        stroke-width="8"
+        text-anchor="middle"
+        textLength="28.09375"
+        transform="scale(1 1)"
+        transform-origin="380 899"
+        x="380"
+        y="899"
+      >
+        ]
+      </text>
+      <path
+        fill="#FFFFFFFF"
+        shape-rendering="crispEdges"
+      />
+      <animate
+        attributeName="opacity"
+        calcMode="discrete"
+        dur="1s"
+        repeatCount="indefinite"
+        values="1;0"
+      />
+    </g>
+    <g>
+      <text
+        dominant-baseline="central"
+        fill="#FFFFFFFF"
+        font-family="'Hiragino Maru Gothic Pro', 'BIZ UDGothic', 'Yu Gothic Medium', sans-serif"
+        font-size="72"
+        lengthAdjust="spacingAndGlyphs"
+        paint-order="stroke"
+        stroke="#000000FF"
+        stroke-linejoin="round"
+        stroke-width="8"
+        text-anchor="middle"
+        textLength="72"
+        transform="scale(1 1)"
+        transform-origin="480 899"
+        x="480"
+        y="899"
+      >
+        ブ
+      </text>
+      <path
+        fill="#FFFFFFFF"
+        shape-rendering="crispEdges"
+      />
+    </g>
+    <g>
+      <text
+        dominant-baseline="central"
+        fill="#FFFFFFFF"
+        font-family="'Hiragino Maru Gothic Pro', 'BIZ UDGothic', 'Yu Gothic Medium', sans-serif"
+        font-size="72"
+        lengthAdjust="spacingAndGlyphs"
+        paint-order="stroke"
+        stroke="#000000FF"
+        stroke-linejoin="round"
+        stroke-width="8"
+        text-anchor="middle"
+        textLength="72"
+        transform="scale(1 1)"
+        transform-origin="560 899"
+        x="560"
+        y="899"
+      >
+        ル
+      </text>
+      <path
+        fill="#FFFFFFFF"
+        shape-rendering="crispEdges"
+      />
+    </g>
+    <g>
+      <text
+        dominant-baseline="central"
+        fill="#FFFFFFFF"
+        font-family="'Hiragino Maru Gothic Pro', 'BIZ UDGothic', 'Yu Gothic Medium', sans-serif"
+        font-size="72"
+        lengthAdjust="spacingAndGlyphs"
+        paint-order="stroke"
+        stroke="#000000FF"
+        stroke-linejoin="round"
+        stroke-width="8"
+        text-anchor="middle"
+        textLength="72"
+        transform="scale(1 1)"
+        transform-origin="640 899"
+        x="640"
+        y="899"
+      >
+        ブ
+      </text>
+      <path
+        fill="#FFFFFFFF"
+        shape-rendering="crispEdges"
+      />
+    </g>
+    <g>
+      <text
+        dominant-baseline="central"
+        fill="#FFFFFFFF"
+        font-family="'Hiragino Maru Gothic Pro', 'BIZ UDGothic', 'Yu Gothic Medium', sans-serif"
+        font-size="72"
+        lengthAdjust="spacingAndGlyphs"
+        paint-order="stroke"
+        stroke="#000000FF"
+        stroke-linejoin="round"
+        stroke-width="8"
+        text-anchor="middle"
+        textLength="72"
+        transform="scale(1 1)"
+        transform-origin="720 899"
+        x="720"
+        y="899"
+      >
+        ル
+      </text>
+      <path
+        fill="#FFFFFFFF"
+        shape-rendering="crispEdges"
+      />
+    </g>
+  </svg>
+</svg>
