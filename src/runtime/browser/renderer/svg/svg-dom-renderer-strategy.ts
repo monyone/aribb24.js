@@ -2,8 +2,8 @@ import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARI
 import { FlashingControlType } from "../../../../tokenizer/token";
 import colortable from "../../../colortable";
 import halfwidth from "../halfwidth";
-import namedcolor from "../namedcolor";
-import { NotImplementedError, UnreachableError } from "../../../../util/error";
+import namedcolor from "../../../namedcolor";
+import { UnreachableError } from "../../../../util/error";
 import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup";
 import { shouldHalfWidth } from "../quirk";
 import { SVGDOMRendererOption } from "./svg-dom-renderer-option";
