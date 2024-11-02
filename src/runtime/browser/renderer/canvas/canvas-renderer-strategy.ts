@@ -1,10 +1,10 @@
-import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARIBB24ParserState, CHARACTER_SIZE } from "../../../../parser/parser";
+import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARIBB24ParserState, CHARACTER_SIZE } from "../../../../lib/parser/parser";
 import { CanvasRendererOption } from "./canvas-renderer-option";
 import colortable from "../../../colortable";
 import halfwidth from "../halfwidth";
 import namedcolor from "../../../namedcolor";
 import { UnreachableError } from "../../../../util/error";
-import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup";
+import { CaptionLanguageInformation } from "../../../../lib/tokenizer/b24/datagroup";
 import { shouldHalfWidth, shouldUseARIBFont } from "../quirk";
 import { ARIBB24BitmapParsedToken, ARIBB24BrowserParser, ARIBB24BrowserToken } from "../../types";
 

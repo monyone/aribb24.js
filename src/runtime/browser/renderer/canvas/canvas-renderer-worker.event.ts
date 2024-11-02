@@ -1,6 +1,6 @@
-import { ARIBB24ParserState } from "../../../../parser/parser";
-import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup";
-import { ARIBB24Token } from "../../../../tokenizer/token";
+import { ARIBB24ParserState } from "../../../../lib/parser/parser";
+import { CaptionLanguageInformation } from "../../../../lib/tokenizer/b24/datagroup";
+import { ARIBB24Token } from "../../../../lib/tokenizer/token";
 import { ARIBB24BrowserToken } from "../../types";
 import { CanvasRendererOption } from "./canvas-renderer-option";
 

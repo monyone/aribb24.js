@@ -2,9 +2,9 @@ import { describe, test, expect } from 'vitest';
 import { page } from '@vitest/browser/context'
 
 import { CanvasMainThreadRenderer } from '@/index';
-import aribInitialState from '@/parser/state/ARIB';
-import { CaptionLanguageInformation } from '@/tokenizer/b24/datagroup';
-import { ActivePositionReturn, Character, ColorControlBackground, PalletControl, WhiteForeground } from '@/tokenizer/token';
+import aribInitialState from '@/lib/parser/state/ARIB';
+import { CaptionLanguageInformation } from '@/lib/tokenizer/b24/datagroup';
+import { ActivePositionReturn, Character, ColorControlBackground, PalletControl, WhiteForeground } from '@/lib/tokenizer/token';
 
 const generateCharacter = (str: string) => {
   const segmenter = new Intl.Segmenter();

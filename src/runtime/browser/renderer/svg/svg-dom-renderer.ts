@@ -1,5 +1,5 @@
-import { ARIBB24ParserState } from "../../../../parser/parser";
-import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup";
+import { ARIBB24ParserState } from "../../../../lib/parser/parser";
+import { CaptionLanguageInformation } from "../../../../lib/tokenizer/b24/datagroup";
 import { ARIBB24BrowserToken, replaceDRCS } from "../../types";
 import { shouldNotAssumeUseClearScreen } from "../quirk";
 import Renderer from "../renderer";

@@ -1,5 +1,5 @@
-import { ByteStream } from "../../util/bytestream";
-import { EOFError } from "../../util/error";
+import { ByteStream } from "../../../util/bytestream";
+import { EOFError } from "../../../util/error";
 
 export type StatementDataUnit = {
   tag: 'Statement';

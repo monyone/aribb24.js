@@ -1,5 +1,5 @@
 import { ARIBB24Token, Character, CharacterSizeControlType, ClearScreen, DRCS, FlashingControlType, OrnamentControlType } from "../tokenizer/token";
-import { UnreachableError } from "../util/error";
+import { UnreachableError } from "../../util/error";
 
 export const CHARACTER_SIZE = {
   Small: 'Small',

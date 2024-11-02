@@ -2,9 +2,9 @@ import { describe, test, expect } from 'vitest';
 import { page } from '@vitest/browser/context'
 
 import { CanvasMainThreadRenderer, SVGDOMRenderer } from '@/index';
-import aribInitialState from '@/parser/state/ARIB';
-import { CaptionLanguageInformation } from '@/tokenizer/b24/datagroup';
-import { ActivePositionForward, ActivePositionReturn, ActivePositionSet, Character, CharacterCompositionDotDesignation, ClearScreen, ColorControlBackground, FlashingControl, FlashingControlType, MiddleSize, NormalSize, PalletControl, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, WhiteForeground } from '@/tokenizer/token';
+import aribInitialState from '@/lib/parser/state/ARIB';
+import { CaptionLanguageInformation } from '@/lib/tokenizer/b24/datagroup';
+import { ActivePositionForward, ActivePositionReturn, ActivePositionSet, Character, CharacterCompositionDotDesignation, ClearScreen, ColorControlBackground, FlashingControl, FlashingControlType, MiddleSize, NormalSize, PalletControl, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, WhiteForeground } from '@/lib/tokenizer/token';
 
 const generateCharacter = (str: string) => {
   const segmenter = new Intl.Segmenter();

@@ -1,7 +1,7 @@
-import { ARIBB24ParserState } from "../../../../parser/parser";
+import { ARIBB24ParserState } from "../../../../lib/parser/parser";
 import CanvasRenderer from "./canvas-renderer";
 import render from "./canvas-renderer-strategy"
-import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup";
+import { CaptionLanguageInformation } from "../../../../lib/tokenizer/b24/datagroup";
 import { ARIBB24BrowserToken, replaceDRCS } from "../../types";
 import { PartialCanvasRendererOption } from "./canvas-renderer-option";
 

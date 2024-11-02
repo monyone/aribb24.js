@@ -1,9 +1,9 @@
-import { ByteStream } from "../../../util/bytestream";
+import { ByteStream } from "../../../../util/bytestream";
 
 import { ARIBB24Token, DRCS } from '../../token';
 import { Character } from "../../token";
 import ARIBB24Tokenizer, { CONTROL_CODES, processC0, processC1 } from "../tokenizer";
-import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from "../../../util/error";
+import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from "../../../../util/error";
 
 type DRCSData = Omit<DRCS, 'tag' | 'combining'>;
 const DRCSData = {

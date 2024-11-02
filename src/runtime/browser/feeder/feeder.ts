@@ -1,12 +1,12 @@
-import { ARIBB24ParserState } from "../../../parser/parser";
-import aribInitialState from "../../../parser/state/ARIB";
-import sbtvdInitialState from "../../../parser/state/SBTVD"
-import datagroup, { CaptionLanguageInformation } from "../../../tokenizer/b24/datagroup";
-import ARIBB24JapaneseJIS8Tokenizer from "../../../tokenizer/b24/jis8/ARIB/index";
-import ARIBB24BrazilianJIS8Tokenizer from "../../../tokenizer/b24/jis8/SBTVD/index";
-import ARIBB24Tokenizer from "../../../tokenizer/b24/tokenizer";
-import ARIBB24UTF8Tokenizer from "../../../tokenizer/b24/ucs/tokenizer";
-import { ARIBB24Token } from "../../../tokenizer/token";
+import { ARIBB24ParserState } from "../../../lib/parser/parser";
+import aribInitialState from "../../../lib/parser/state/ARIB";
+import sbtvdInitialState from "../../../lib/parser/state/SBTVD"
+import datagroup, { CaptionLanguageInformation } from "../../../lib/tokenizer/b24/datagroup";
+import ARIBB24JapaneseJIS8Tokenizer from "../../../lib/tokenizer/b24/jis8/ARIB/index";
+import ARIBB24BrazilianJIS8Tokenizer from "../../../lib/tokenizer/b24/jis8/SBTVD/index";
+import ARIBB24Tokenizer from "../../../lib/tokenizer/b24/tokenizer";
+import ARIBB24UTF8Tokenizer from "../../../lib/tokenizer/b24/ucs/tokenizer";
+import { ARIBB24Token } from "../../../lib/tokenizer/token";
 import { UnreachableError } from "../../../util/error";
 import { ARIBB24BrowserToken } from "../types";
 

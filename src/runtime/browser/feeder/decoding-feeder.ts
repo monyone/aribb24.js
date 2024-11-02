@@ -1,10 +1,10 @@
 import AVLTree from '../../../util/avl';
 
 import Feeder, { FeederOption, FeederDecodingData, FeederPresentationData, getTokenizeInformation, PartialFeederOption } from './feeder';
-import extractPES from '../../../tokenizer/b24/mpegts/extract';
-import extractDatagroup, { CaptionManagement } from '../../../tokenizer/b24/datagroup'
-import { ClearScreen } from '../../../tokenizer/token';
-import { initialState } from '../../../parser/parser';
+import extractPES from '../../../lib/tokenizer/b24/mpegts/extract';
+import extractDatagroup, { CaptionManagement } from '../../../lib/tokenizer/b24/datagroup'
+import { ClearScreen } from '../../../lib/tokenizer/token';
+import { initialState } from '../../../lib/parser/parser';
 import { toBrowserToken } from '../types';
 import colortable from '../../colortable';
 

@@ -1,9 +1,9 @@
-import { ARIBB24ParserState } from "../../../../parser/parser";
+import { ARIBB24ParserState } from "../../../../lib/parser/parser";
 import CanvasRenderer from "./canvas-renderer";
 
 import RenderingWorker from "./canvas-renderer-worker.worker?worker&inline";
 import { FromMainToWorkerEventClear, FromMainToWorkerEventInitialize, FromMainToWorkerEventRender, FromMainToWorkerEventResize, FromWorkerToMainEvent, FromWorkerToMainEventImageBitmap } from "./canvas-renderer-worker.event";
-import { CaptionLanguageInformation } from "../../../../tokenizer/b24/datagroup";
+import { CaptionLanguageInformation } from "../../../../lib/tokenizer/b24/datagroup";
 import { ARIBB24BrowserToken, replaceDRCS } from "../../types";
 import { PartialCanvasRendererOption } from "./canvas-renderer-option";
 

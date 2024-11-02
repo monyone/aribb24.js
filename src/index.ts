@@ -18,24 +18,24 @@ export type { TextRendererOption } from './runtime/browser/renderer/text/text-re
 export { default as TextRenderer } from './runtime/browser/renderer/text/text-renderer';
 
 // Tokenizer
-export type { ARIBB24Token } from './tokenizer/token';
-export type { default as ARIBB24Tokenizer, replaceDRCS as ARIBB24JIS8ReplaceDRCS } from './tokenizer/b24/tokenizer';
-export { default as ARIBB24JIS8Tokenizer } from './tokenizer/b24/jis8/tokenizer';
-export { default as ARIBB24JapanJIS8Tokenizer } from './tokenizer/b24/jis8/ARIB';
-export type { ARIBB24JapaneseJIS8TokenizerOption } from './tokenizer/b24/jis8/ARIB';
-export { default as ARIBB24BrazilianJIS8Tokenizer } from './tokenizer/b24/jis8/SBTVD';
+export type { ARIBB24Token } from './lib/tokenizer/token';
+export type { default as ARIBB24Tokenizer, replaceDRCS as ARIBB24JIS8ReplaceDRCS } from './lib/tokenizer/b24/tokenizer';
+export { default as ARIBB24JIS8Tokenizer } from './lib/tokenizer/b24/jis8/tokenizer';
+export { default as ARIBB24JapanJIS8Tokenizer } from './lib/tokenizer/b24/jis8/ARIB';
+export type { ARIBB24JapaneseJIS8TokenizerOption } from './lib/tokenizer/b24/jis8/ARIB';
+export { default as ARIBB24BrazilianJIS8Tokenizer } from './lib/tokenizer/b24/jis8/SBTVD';
 
 // Parser
-export { ARIBB24Parser, ARIBB24ParserOption } from './parser/parser';
+export { ARIBB24Parser, ARIBB24ParserOption } from './lib/parser/parser';
 export type {
   ARIBB24ParsedToken,
   ARIBB24ClearScreenParsedToken,
   ARIBB24CharacterParsedToken,
   ARIBB24DRCSPrasedToken,
   ARIBB24ParserState,
-} from './parser/parser';
-export { default as ARIBB24JapaneseInitialParserState } from './parser/state/ARIB'
-export { default as ARIBB24BrazilianInitialParserState } from './parser/state/ARIB'
+} from './lib/parser/parser';
+export { default as ARIBB24JapaneseInitialParserState } from './lib/parser/state/ARIB'
+export { default as ARIBB24BrazilianInitialParserState } from './lib/parser/state/ARIB'
 
 // Utils
 export { EOFError, NotImplementedError, UnreachableError } from './util/error'

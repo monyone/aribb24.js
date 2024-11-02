@@ -1,7 +1,7 @@
 import CRC32 from "../../util/crc32";
-import { ARIBB24Token, Bitmap } from "../../tokenizer/token";
-import { replaceDRCS as tokenizerReplaceDRCS } from "../../tokenizer/b24/tokenizer";
-import { ARIBB24CommonParsedToken, ARIBB24ParsedToken, ARIBB24Parser, ARIBB24ParserOption, ARIBB24ParserState } from "../../parser/parser";
+import { ARIBB24Token, Bitmap } from "../../lib/tokenizer/token";
+import { replaceDRCS as tokenizerReplaceDRCS } from "../../lib/tokenizer/b24/tokenizer";
+import { ARIBB24CommonParsedToken, ARIBB24ParsedToken, ARIBB24Parser, ARIBB24ParserOption, ARIBB24ParserState } from "../../lib/parser/parser";
 
 export type DecodedBitmap = {
   tag: 'Bitmap';
