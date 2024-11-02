@@ -3,7 +3,7 @@ import { page } from '@vitest/browser/context'
 
 import { CanvasMainThreadRenderer } from '@/index';
 import aribInitialState from '@/lib/parser/state/ARIB';
-import { CaptionLanguageInformation } from '@/lib/tokenizer/b24/datagroup';
+import { CaptionLanguageInformation } from '@/lib/demuxer/b24/datagroup';
 import { ActivePositionReturn, Character, ColorControlBackground, PalletControl, WhiteForeground } from '@/lib/tokenizer/token';
 
 const generateCharacter = (str: string) => {

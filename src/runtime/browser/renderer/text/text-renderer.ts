@@ -3,7 +3,7 @@ import { NotImplementedError, UnreachableError } from "../../../../util/error";
 import Renderer from "../renderer";
 import { TextRendererOption } from "./text-renderer-option";
 import halfwidth from "../halfwidth"
-import { CaptionLanguageInformation } from "../../../../lib/tokenizer/b24/datagroup";
+import { CaptionLanguageInformation } from "../../../../lib/demuxer/b24/datagroup";
 import { shouldHalfWidth, shouldIgnoreSmallAsRuby, shouldNotAssumeUseClearScreen, shouldRemoveTransparentSpace } from "../quirk";
 import { ARIBB24BrowserParser, ARIBB24BrowserToken, replaceDRCS } from "../../types";
 

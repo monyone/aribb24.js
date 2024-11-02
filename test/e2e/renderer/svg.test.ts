@@ -3,7 +3,7 @@ import { page } from '@vitest/browser/context'
 
 import { CanvasMainThreadRenderer, SVGDOMRenderer } from '@/index';
 import aribInitialState from '@/lib/parser/state/ARIB';
-import { CaptionLanguageInformation } from '@/lib/tokenizer/b24/datagroup';
+import { CaptionLanguageInformation } from '@/lib/demuxer/b24/datagroup';
 import { ActivePositionForward, ActivePositionReturn, ActivePositionSet, Character, CharacterCompositionDotDesignation, ClearScreen, ColorControlBackground, FlashingControl, FlashingControlType, MiddleSize, NormalSize, PalletControl, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, WhiteForeground } from '@/lib/tokenizer/token';
 
 const generateCharacter = (str: string) => {

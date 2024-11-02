@@ -1,5 +1,5 @@
 import { CHARACTER_SIZE } from "../../../lib/parser/parser";
-import { CaptionLanguageInformation } from "../../../lib/tokenizer/b24/datagroup";
+import { CaptionLanguageInformation } from "../../../lib/demuxer/b24/datagroup";
 
 import symbol_pua from "../../../lib/tokenizer/b24/jis8/ARIB/symbol-pua";
 import symbol_unicode from "../../../lib/tokenizer/b24/jis8/ARIB/symbol-unicode";

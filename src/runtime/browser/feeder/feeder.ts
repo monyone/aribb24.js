@@ -1,7 +1,7 @@
 import { ARIBB24ParserState } from "../../../lib/parser/parser";
 import aribInitialState from "../../../lib/parser/state/ARIB";
 import sbtvdInitialState from "../../../lib/parser/state/SBTVD"
-import datagroup, { CaptionLanguageInformation } from "../../../lib/tokenizer/b24/datagroup";
+import datagroup, { CaptionLanguageInformation } from "../../../lib/demuxer/b24/datagroup";
 import ARIBB24JapaneseJIS8Tokenizer from "../../../lib/tokenizer/b24/jis8/ARIB/index";
 import ARIBB24BrazilianJIS8Tokenizer from "../../../lib/tokenizer/b24/jis8/SBTVD/index";
 import ARIBB24Tokenizer from "../../../lib/tokenizer/b24/tokenizer";

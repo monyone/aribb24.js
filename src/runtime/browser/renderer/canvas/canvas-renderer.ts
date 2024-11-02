@@ -1,5 +1,5 @@
 import { ARIBB24ParserState } from "../../../../lib/parser/parser";
-import { CaptionLanguageInformation } from "../../../../lib/tokenizer/b24/datagroup";
+import { CaptionLanguageInformation } from "../../../../lib/demuxer/b24/datagroup";
 import { ARIBB24BrowserToken } from "../../types";
 import Renderer from "../renderer";
 import { CanvasRendererOption, PartialCanvasRendererOption } from "./canvas-renderer-option";
