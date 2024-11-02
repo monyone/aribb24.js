@@ -1,7 +1,7 @@
 import AVLTree from '../../../util/avl';
 
 import Feeder, { FeederOption, FeederDecodingData, FeederPresentationData, getTokenizeInformation, PartialFeederOption } from './feeder';
-import extractPES from '../../../lib/demuxer/b24/mpegts/extract';
+import extractPES from '../../../lib/demuxer/b24/independent/extract';
 import extractDatagroup, { CaptionManagement } from '../../../lib/demuxer/b24/datagroup'
 import { ClearScreen } from '../../../lib/tokenizer/token';
 import { initialState } from '../../../lib/parser/parser';

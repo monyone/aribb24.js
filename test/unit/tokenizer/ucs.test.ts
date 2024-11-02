@@ -64,7 +64,6 @@ const generateDRCSUnit = (code: number, width: number, height: number, colors: n
 }
 
 describe("ARIB STD-B24 UCS Tokenizer", () => {
-
   test('Tokenize UTF-8 ASCII', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
@@ -81,7 +80,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     ]);
   });
 
-  test('Tokenize UTF-8 surrogate pair', () => {
+  test('Tokenize UTF-8 Surrogate Pair', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary('叱'))).toStrictEqual([
@@ -89,7 +88,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     ]);
   });
 
-  test('Tokenize UTF-8 combining character', () => {
+  test('Tokenize UTF-8 Combining Character', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary('👨‍👩'))).toStrictEqual([
@@ -112,7 +111,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     ]);
   });
 
-  test('Tokenize UTF-8 DRCS with Combine (ignore currently)', () => {
+  test('Tokenize UTF-8 DRCS with Combine', () => {
     const width = 36, height = 36, colors = 4;
     const binary = [];
     for (let index = 0; index < Math.floor(36 * 36 * 2 / 8); index++) {
@@ -855,7 +854,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     ]);
   });
 
-  test('Tokenize CSI TCC', () => {
+  test('Tokenize CSI TCC throw NotImplementedError', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(() => tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.TCC)))).toThrowError(NotImplementedError);

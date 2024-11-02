@@ -18,7 +18,6 @@ const initialStateMagnificated = (state: typeof initialState, option: ARIBB24Par
 }
 
 describe("ARIB STD-B24 Parser", () => {
-
   test('Parse With Magnification', () => {
     const option: ARIBB24ParserOption = { magnification: 2 };
     const parser = new ARIBB24Parser(initialState, option);

@@ -1,18 +1,32 @@
 import { ByteStream } from "../../../util/bytestream";
-import { EOFError } from "../../../util/error";
 
 export type StatementDataUnit = {
   tag: 'Statement';
   data: ArrayBuffer;
+}
+export const StatementDataUnit = {
+  from(data: ArrayBuffer): StatementDataUnit {
+    return { tag: 'Statement', data };
+  }
 }
 export type DRCSDataUnit = {
   tag: 'DRCS'
   data: ArrayBuffer;
   bytes: 1 | 2;
 }
+export const DRCSDataUnit = {
+  from(data: ArrayBuffer, bytes: 1 | 2): DRCSDataUnit {
+    return { tag: 'DRCS', data, bytes };
+  }
+}
 export type BitmapDataUnit = {
   tag: 'Bitmap'
   data: ArrayBuffer;
+}
+export const BitmapDataUnit = {
+  from(data: ArrayBuffer): BitmapDataUnit {
+    return { tag: 'Bitmap', data };
+  }
 }
 export type DataUnit = StatementDataUnit | DRCSDataUnit | BitmapDataUnit;
 
