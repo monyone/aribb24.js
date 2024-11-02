@@ -45,17 +45,21 @@ describe("ARIB STD-B24 Parser", () => {
       Character.from(')')
     ];
 
+    const expectedState = {
+      plane: [960 * option.magnification, 540 * option.magnification],
+      area: [840 * option.magnification, 480 * option.magnification],
+      margin: [58 * option.magnification, 29 * option.magnification],
+      fontsize: [36 * option.magnification, 36 * option.magnification],
+      hspace: 4 * option.magnification,
+      vspace: 24 * option.magnification,
+    } as ARIBB24ParserState;
+
     expect(parser.parse(tokens)).toStrictEqual([
       ARIBB24ClearScreenParsedToken.from(0, initialStateMagnificated(initialState, option), { magnification: 2 }),
       ARIBB24CharacterParsedToken.from(
         Character.from('('), {
           ... initialStateMagnificated(initialState, option),
-          plane: [960 * option.magnification, 540 * option.magnification],
-          area: [840 * option.magnification, 480 * option.magnification],
-          margin: [58 * option.magnification, 29 * option.magnification],
-          fontsize: [36 * option.magnification, 36 * option.magnification],
-          hspace: 4 * option.magnification,
-          vspace: 24 * option.magnification,
+          ... expectedState,
           size: CHARACTER_SIZE.Middle,
           position: [340 * option.magnification, 479 * option.magnification],
           pallet: 4,
@@ -66,12 +70,7 @@ describe("ARIB STD-B24 Parser", () => {
       ARIBB24CharacterParsedToken.from(
         Character.from('テ'), {
           ... initialStateMagnificated(initialState, option),
-          plane: [960 * option.magnification, 540 * option.magnification],
-          area: [840 * option.magnification, 480 * option.magnification],
-          margin: [58 * option.magnification, 29 * option.magnification],
-          fontsize: [36 * option.magnification, 36 * option.magnification],
-          hspace: 4 * option.magnification,
-          vspace: 24 * option.magnification,
+          ... expectedState,
           size: CHARACTER_SIZE.Normal,
           position: [360 * option.magnification, 479 * option.magnification],
           pallet: 4,
@@ -82,12 +81,7 @@ describe("ARIB STD-B24 Parser", () => {
       ARIBB24CharacterParsedToken.from(
         Character.from('ス'), {
           ... initialStateMagnificated(initialState, option),
-          plane: [960 * option.magnification, 540 * option.magnification],
-          area: [840 * option.magnification, 480 * option.magnification],
-          margin: [58 * option.magnification, 29 * option.magnification],
-          fontsize: [36 * option.magnification, 36 * option.magnification],
-          hspace: 4 * option.magnification,
-          vspace: 24 * option.magnification,
+          ... expectedState,
           size: CHARACTER_SIZE.Normal,
           position: [400 * option.magnification, 479 * option.magnification],
           pallet: 4,
@@ -98,12 +92,7 @@ describe("ARIB STD-B24 Parser", () => {
       ARIBB24CharacterParsedToken.from(
         Character.from('ト'), {
           ... initialStateMagnificated(initialState, option),
-          plane: [960 * option.magnification, 540 * option.magnification],
-          area: [840 * option.magnification, 480 * option.magnification],
-          margin: [58 * option.magnification, 29 * option.magnification],
-          fontsize: [36 * option.magnification, 36 * option.magnification],
-          hspace: 4 * option.magnification,
-          vspace: 24 * option.magnification,
+          ... expectedState,
           size: CHARACTER_SIZE.Normal,
           position: [440 * option.magnification, 479 * option.magnification],
           pallet: 4,
@@ -114,12 +103,7 @@ describe("ARIB STD-B24 Parser", () => {
       ARIBB24CharacterParsedToken.from(
         Character.from(')'), {
           ... initialStateMagnificated(initialState, option),
-          plane: [960 * option.magnification, 540 * option.magnification],
-          area: [840 * option.magnification, 480 * option.magnification],
-          margin: [58 * option.magnification, 29 * option.magnification],
-          fontsize: [36 * option.magnification, 36 * option.magnification],
-          hspace: 4 * option.magnification,
-          vspace: 24 * option.magnification,
+          ... expectedState,
           size: CHARACTER_SIZE.Middle,
           position: [480 * option.magnification, 479 * option.magnification],
           pallet: 4,
@@ -163,17 +147,21 @@ describe("ARIB STD-B24 Parser", () => {
       Character.from('ル'),
     ];
 
+    const expectedState = {
+      plane: [960 * option.magnification, 540 * option.magnification],
+      area: [840 * option.magnification, 480 * option.magnification],
+      margin: [58 * option.magnification, 29 * option.magnification],
+      fontsize: [36 * option.magnification, 36 * option.magnification],
+      hspace: 4 * option.magnification,
+      vspace: 24 * option.magnification,
+    } as ARIBB24ParserState;
+
     expect(parser.parse(tokens)).toStrictEqual([
       ARIBB24ClearScreenParsedToken.from(0, initialStateMagnificated(initialState, option), { magnification: 2 }),
       ARIBB24CharacterParsedToken.from(
         Character.from('['), {
           ... initialStateMagnificated(initialState, option),
-          plane: [960 * option.magnification, 540 * option.magnification],
-          area: [840 * option.magnification, 480 * option.magnification],
-          margin: [58 * option.magnification, 29 * option.magnification],
-          fontsize: [36 * option.magnification, 36 * option.magnification],
-          hspace: 4 * option.magnification,
-          vspace: 24 * option.magnification,
+          ... expectedState,
           size: CHARACTER_SIZE.Middle,
           position: [80 * option.magnification, 479 * option.magnification],
           pallet: 4,
@@ -185,12 +173,7 @@ describe("ARIB STD-B24 Parser", () => {
       ARIBB24CharacterParsedToken.from(
         Character.from('携'), {
           ... initialStateMagnificated(initialState, option),
-          plane: [960 * option.magnification, 540 * option.magnification],
-          area: [840 * option.magnification, 480 * option.magnification],
-          margin: [58 * option.magnification, 29 * option.magnification],
-          fontsize: [36 * option.magnification, 36 * option.magnification],
-          hspace: 4 * option.magnification,
-          vspace: 24 * option.magnification,
+          ... expectedState,
           size: CHARACTER_SIZE.Normal,
           position: [100 * option.magnification, 479 * option.magnification],
           pallet: 4,
@@ -202,12 +185,7 @@ describe("ARIB STD-B24 Parser", () => {
       ARIBB24CharacterParsedToken.from(
         Character.from('帯'), {
           ... initialStateMagnificated(initialState, option),
-          plane: [960 * option.magnification, 540 * option.magnification],
-          area: [840 * option.magnification, 480 * option.magnification],
-          margin: [58 * option.magnification, 29 * option.magnification],
-          fontsize: [36 * option.magnification, 36 * option.magnification],
-          hspace: 4 * option.magnification,
-          vspace: 24 * option.magnification,
+          ... expectedState,
           size: CHARACTER_SIZE.Normal,
           position: [140 * option.magnification, 479 * option.magnification],
           pallet: 4,
@@ -219,12 +197,7 @@ describe("ARIB STD-B24 Parser", () => {
       ARIBB24CharacterParsedToken.from(
         Character.from(']'), {
           ... initialStateMagnificated(initialState, option),
-          plane: [960 * option.magnification, 540 * option.magnification],
-          area: [840 * option.magnification, 480 * option.magnification],
-          margin: [58 * option.magnification, 29 * option.magnification],
-          fontsize: [36 * option.magnification, 36 * option.magnification],
-          hspace: 4 * option.magnification,
-          vspace: 24 * option.magnification,
+          ... expectedState,
           size: CHARACTER_SIZE.Middle,
           position: [180 * option.magnification, 479 * option.magnification],
           pallet: 4,
@@ -236,12 +209,7 @@ describe("ARIB STD-B24 Parser", () => {
       ARIBB24CharacterParsedToken.from(
         Character.from('ブ'), {
           ... initialStateMagnificated(initialState, option),
-          plane: [960 * option.magnification, 540 * option.magnification],
-          area: [840 * option.magnification, 480 * option.magnification],
-          margin: [58 * option.magnification, 29 * option.magnification],
-          fontsize: [36 * option.magnification, 36 * option.magnification],
-          hspace: 4 * option.magnification,
-          vspace: 24 * option.magnification,
+          ... expectedState,
           size: CHARACTER_SIZE.Normal,
           position: [220 * option.magnification, 479 * option.magnification],
           pallet: 4,
@@ -253,12 +221,7 @@ describe("ARIB STD-B24 Parser", () => {
       ARIBB24CharacterParsedToken.from(
         Character.from('ル'), {
           ... initialStateMagnificated(initialState, option),
-          plane: [960 * option.magnification, 540 * option.magnification],
-          area: [840 * option.magnification, 480 * option.magnification],
-          margin: [58 * option.magnification, 29 * option.magnification],
-          fontsize: [36 * option.magnification, 36 * option.magnification],
-          hspace: 4 * option.magnification,
-          vspace: 24 * option.magnification,
+          ... expectedState,
           size: CHARACTER_SIZE.Normal,
           position: [260 * option.magnification, 479 * option.magnification],
           pallet: 4,
@@ -270,12 +233,7 @@ describe("ARIB STD-B24 Parser", () => {
       ARIBB24CharacterParsedToken.from(
         Character.from('ブ'), {
           ... initialStateMagnificated(initialState, option),
-          plane: [960 * option.magnification, 540 * option.magnification],
-          area: [840 * option.magnification, 480 * option.magnification],
-          margin: [58 * option.magnification, 29 * option.magnification],
-          fontsize: [36 * option.magnification, 36 * option.magnification],
-          hspace: 4 * option.magnification,
-          vspace: 24 * option.magnification,
+          ... expectedState,
           size: CHARACTER_SIZE.Normal,
           position: [300 * option.magnification, 479 * option.magnification],
           pallet: 4,
@@ -287,12 +245,7 @@ describe("ARIB STD-B24 Parser", () => {
       ARIBB24CharacterParsedToken.from(
         Character.from('ル'), {
           ... initialStateMagnificated(initialState, option),
-          plane: [960 * option.magnification, 540 * option.magnification],
-          area: [840 * option.magnification, 480 * option.magnification],
-          margin: [58 * option.magnification, 29 * option.magnification],
-          fontsize: [36 * option.magnification, 36 * option.magnification],
-          hspace: 4 * option.magnification,
-          vspace: 24 * option.magnification,
+          ... expectedState,
           size: CHARACTER_SIZE.Normal,
           position: [340 * option.magnification, 479 * option.magnification],
           pallet: 4,
