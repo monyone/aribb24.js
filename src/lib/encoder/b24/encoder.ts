@@ -140,7 +140,7 @@ export default abstract class ARIBB24Encoder {
       case 'SetDisplayPosition':
         return generateCSI(CSI_CODE.SDP, control.horizontal, control.vertical);
       case 'CharacterCompositionDotDesignation':
-        return generateCSI(CSI_CODE.SSM, control.horizontal, control.horizontal);
+        return generateCSI(CSI_CODE.SSM, control.horizontal, control.vertical);
       case 'SetHorizontalSpacing':
         return generateCSI(CSI_CODE.SHS, control.spacing);
       case 'SetVerticalSpacing':

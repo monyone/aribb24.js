@@ -83,8 +83,8 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
   test('Tokenize UTF-8 Surrogate Pair', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(generateBinary('叱'))).toStrictEqual([
-      Character.from('叱'),
+    expect(tokenizer.tokenizeStatement(generateBinary('𠮟'))).toStrictEqual([
+      Character.from('𠮟'),
     ]);
   });
 
@@ -244,7 +244,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     ]);
   });
 
-  test('Tokenize APB specified by UCS CS', () => {
+  test('Tokenize CS specified by UCS CS', () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary('\f'))).toStrictEqual([

@@ -23,8 +23,8 @@ describe("ARIB STD-B24 UCS Encoder", () => {
   test('Encode UTF-8 surrogate pair', () => {
     const encoder = new ARIBB24UTF8Encoder();
 
-    expect(encoder.encodeToken(Character.from('叱'))).toStrictEqual(
-      Uint8Array.from([0xE5, 0x8F, 0xB1]).buffer
+    expect(encoder.encodeToken(Character.from('𠮟'))).toStrictEqual(
+      Uint8Array.from([0xF0, 0xA0, 0xAE, 0x9F]).buffer
     );
   });
 

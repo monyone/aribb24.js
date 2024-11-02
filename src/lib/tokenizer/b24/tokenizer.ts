@@ -2,7 +2,7 @@ import { ByteStream } from "../../../util/bytestream";
 import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from "../../../util/error";
 import md5 from "../../../util/md5";
 import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, ARIBB24Token, Bell, Bitmap, BlackForeground, BlueForeground, BuiltinSoundReplay, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, ConcealmentMode, ConcealmentModeType, CyanForeground, Delete, DRCS, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControlHemming, OrnamentControlHollow, OrnamentControlNone, OrnamentControlShade, OrnamentControlType, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RasterColourCommand, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SingleConcealmentModeType, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, YellowForeground } from "../token";
-import { CaptionData } from "../../demuxer/b24/datagroup";
+import { CaptionData, DataUnit } from "../../demuxer/b24/datagroup";
 
 export const CONTROL_CODES = {
   NUL: 0x00,
@@ -335,8 +335,13 @@ export const processC1 = (stream: ByteStream): ARIBB24Token => {
 
 export default abstract class ARIBB24Tokenizer {
   public tokenize(data: CaptionData): ARIBB24Token[] {
+    return this.tokenizeDataUnits(data.units);
+  }
+
+  public tokenizeDataUnits(units: DataUnit[]) {
     const result: ARIBB24Token[] = [];
-    for (const unit of data.units) {
+
+    for (const unit of units) {
       switch (unit.tag) {
         case 'Statement':
           result.push(... this.tokenizeStatement(unit.data));

@@ -47,8 +47,8 @@ describe("ARIB STD-B24 Parser", () => {
     const option: ARIBB24ParserOption = { magnification: 1 };
     const parser = new ARIBB24Parser(initialState, option);
 
-    expect(parser.parseToken(Character.from('叱'))).toStrictEqual([
-      ARIBB24CharacterParsedToken.from(Character.from('叱'), initialStateMagnificated(initialState, option), { magnification: 1 }),
+    expect(parser.parseToken(Character.from('𠮟'))).toStrictEqual([
+      ARIBB24CharacterParsedToken.from(Character.from('𠮟'), initialStateMagnificated(initialState, option), { magnification: 1 }),
     ]);
   });
 

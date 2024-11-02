@@ -36,6 +36,7 @@
     "build": "vite build",
     "build:module": "vite build --config vite.config.module.mjs",
     "build:tsc": "tsc --project tsconfig.build.json",
+    "build:tsc:watch": "tsc --project tsconfig.build.json --watch",
     "build:watch": "vite build --watch",
     "build:all": "rimraf dist && tsc --project tsconfig.build.json && vite build && vite build --config vite.config.module.mjs",
     "test": "vitest",

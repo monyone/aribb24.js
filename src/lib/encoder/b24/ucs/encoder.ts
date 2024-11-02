@@ -72,14 +72,15 @@ export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
       ]).buffer;
 
       this.drcs_units.push(DRCSDataUnit.from(concat(header, drcs.binary), 2));
+      this.drcs_md5_to_code.set(hash, this.current_drcs_code);
       this.current_drcs_code++;
     }
 
     const code = this.drcs_md5_to_code.get(hash)!;
     if (drcs.combining === '') {
-      return Uint8Array.from([(code & 0xFF00) >> 8, (code & 0x00FF) >> 0]).buffer;
+      return this.encoder.encode(String.fromCodePoint(code)).buffer;
     } else {
-      return concat(Uint8Array.from([(code & 0xFF00) >> 8, (code & 0x00FF) >> 0]).buffer, this.encodeCharacter(Character.from(drcs.combining)));
+      return concat(this.encoder.encode(String.fromCodePoint(code)).buffer, this.encodeCharacter(Character.from(drcs.combining)));
     }
   }
 
