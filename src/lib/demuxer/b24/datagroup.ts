@@ -41,6 +41,7 @@ export type CaptionManagementLanguageEntry = {
   lang: number;
   iso_639_language_code: string;
   rollup: boolean;
+  format: number;
   TCS: (typeof CaptionManagementTCS)[keyof typeof CaptionManagementTCS];
 };
 
@@ -98,6 +99,7 @@ export default (data: ArrayBuffer, readSTM: boolean = false): CaptionData | null
         lang: language_tag,
         iso_639_language_code: ISO_639_language_code,
         TCS: TCS,
+        format: Format,
         rollup: rollup_mode !== 0b00,
       });
     }
