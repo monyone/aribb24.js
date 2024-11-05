@@ -36,8 +36,6 @@
     "build": "vite build",
     "build:module": "vite build --config vite.config.module.mjs",
     "build:tsc": "tsc",
-    "build:tsc:watch": "tsc --watch",
-    "build:watch": "vite build --watch",
     "build:all": "rimraf dist && tsc && vite build && vite build --config vite.config.module.mjs",
     "test": "vitest",
     "test:browser": "vitest --config vitest.browser.config.mjs",
