@@ -1,8 +1,8 @@
 import AVLTree from '../../../util/avl';
 
 import Feeder, { FeederOption, FeederDecodingData, FeederPresentationData, getTokenizeInformation, PartialFeederOption } from './feeder';
-import extractPES from '../../../lib/demuxer/b24/independent/extract';
-import extractDatagroup, { CaptionManagement } from '../../../lib/demuxer/b24/datagroup'
+import demuxPES from '../../../lib/demuxer/b24/independent';
+import demuxDatagroup, { CaptionManagement } from '../../../lib/demuxer/b24/datagroup'
 import { ClearScreen } from '../../../lib/tokenizer/token';
 import { initialState } from '../../../lib/parser/parser';
 import { toBrowserToken } from '../types';
@@ -155,11 +155,11 @@ export default abstract class DecodingFeeder implements Feeder {
   }
 
   protected feed(data: ArrayBuffer, pts: number, dts: number) {
-    const datagroup = extractPES(data);
+    const datagroup = demuxPES(data);
     if (datagroup == null) { return; }
     if (datagroup.tag !== this.option.recieve.type) { return; }
 
-    const caption = extractDatagroup(datagroup.data);
+    const caption = demuxDatagroup(datagroup.data);
     if (caption == null) { return ; }
 
     const lang = caption.tag === 'CaptionStatement' ? (caption.lang + 1) : 0;
