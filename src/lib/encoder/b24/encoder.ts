@@ -22,6 +22,8 @@ const generateCSI = (F: number, ... values: number[]): ArrayBuffer => {
 }
 
 export default abstract class ARIBB24Encoder {
+  protected readonly encodeTokenHandler = this.encodeToken.bind(this);
+
   public abstract encode(tokens: ARIBB24Token[]): DataUnit[];
 
   public encodeToken(token: ARIBB24Token): ArrayBuffer {

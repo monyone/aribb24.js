@@ -6,8 +6,6 @@ import { NotImplementedError } from "../../../..//util/error";
 import { DataUnit, DRCSDataUnit, StatementDataUnit } from "../../../demuxer/b24/datagroup";
 
 export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
-  private readonly encodeTokenHandler = this.encodeToken.bind(this);
-
   private current_drcs_code = 0xEC00;
   private drcs_units: DRCSDataUnit[] = [];
   private drcs_md5_to_code = new Map<string, number>();
