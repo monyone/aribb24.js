@@ -26,7 +26,7 @@ export type { ARIBB24JapaneseJIS8TokenizerOption } from './lib/tokenizer/b24/jis
 export { default as ARIBB24BrazilianJIS8Tokenizer } from './lib/tokenizer/b24/jis8/SBTVD';
 
 // Encoder
-export { default as ARIBB24UTF8Encoder } from './lib/encoder/b24/ucs/encoder';
+export { default as ARIBB24UTF8Encoder } from './lib/encoder/b24/ucs';
 export { default as ARIBB24JapaneseJIS8Encoder } from './lib/encoder/b24/jis8/ARIB';
 
 // Demuxer

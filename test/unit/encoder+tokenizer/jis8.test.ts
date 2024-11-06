@@ -63,6 +63,15 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
     ]);
   });
 
+  test('Keep Consistenty 2-bytes Additional KANJI', () => {
+    const encoder = new ARIBB24JapaneseJIS8Encoder();
+    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+
+    expect(tokenizer.tokenizeDataUnits(encoder.encode(generateCharacterTokens('㐂')))).toStrictEqual([
+      ... generateCharacterTokens('㐂')
+    ]);
+  });
+
   test('Keep Consistenty 2-bytes string and Katakana and ASCII', () => {
     const encoder = new ARIBB24JapaneseJIS8Encoder();
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
@@ -80,6 +89,33 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
       ... generateCharacterTokens('字幕テスト字幕です字幕テストです字幕ですテスト')
     ]);
   });
+
+  test('Keep Consistenty 2-bytes Additional Symbol', () => {
+    const encoder = new ARIBB24JapaneseJIS8Encoder();
+    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+
+    expect(tokenizer.tokenizeDataUnits(encoder.encode(generateCharacterTokens('🈀')))).toStrictEqual([
+      ... generateCharacterTokens('🈀')
+    ]);
+  });
+
+  test('Keep Consistenty 2-bytes Additional Symbol with Unicode', () => {
+    const encoder = new ARIBB24JapaneseJIS8Encoder();
+    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer({ usePUA: false });
+
+    expect(tokenizer.tokenizeDataUnits(encoder.encode(generateCharacterTokens('🄐')))).toStrictEqual([
+      ... generateCharacterTokens('🄐')
+    ]);
+  });
+
+  test('Keep Consistenty 2-bytes Additional Symbol with Private Area', () => {
+    const encoder = new ARIBB24JapaneseJIS8Encoder();
+    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer({ usePUA: true });
+
+    expect(tokenizer.tokenizeDataUnits(encoder.encode(generateCharacterTokens('')))).toStrictEqual([
+      ... generateCharacterTokens('')
+    ]);
+  })
 
   test('Keep Consistenty DRCS', () => {
     const encoder = new ARIBB24JapaneseJIS8Encoder();

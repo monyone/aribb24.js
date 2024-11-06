@@ -9,6 +9,7 @@ import { ESC_CODES } from "../../../../tokenizer/b24/jis8/tokenizer";
 import hiragana from "./hiragana";
 import ascii from "../ascii";
 import katakana from "./katakana";
+import symbol from "./symbol";
 
 export default class ARIBB24JapaneseJIS8Encoder extends ARIBB24Encoder {
   static KANJI = new Map<string, [number, number]>();
@@ -25,6 +26,9 @@ export default class ARIBB24JapaneseJIS8Encoder extends ARIBB24Encoder {
           ARIBB24JapaneseJIS8Encoder.KANJI.set(decoded, [ch1, ch2]);
         } catch (e) {}
       }
+    }
+    for (const [k, v] of symbol.entries()) {
+      ARIBB24JapaneseJIS8Encoder.KANJI.set(k, v);
     }
   }
 

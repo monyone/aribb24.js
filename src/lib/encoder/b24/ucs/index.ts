@@ -1,8 +1,8 @@
 import { ARIBB24Token, Bitmap, Character, DRCS, Mosaic } from "../../../tokenizer/token";
 import ARIBB24Encoder from "../encoder";
-import md5 from "../../../..//util/md5";
+import md5 from "../../../../util/md5";
 import concat from "../../../../util/concat";
-import { NotImplementedError } from "../../../..//util/error";
+import { NotImplementedError } from "../../../../util/error";
 import { DataUnit, DRCSDataUnit, StatementDataUnit } from "../../../demuxer/b24/datagroup";
 
 export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
