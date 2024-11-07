@@ -1,143 +1,44 @@
 import { describe, test, expect } from 'vitest';
-import ARIBB24JapaneseJIS8Tokenizer from '@/lib/tokenizer/b24/jis8/ARIB';
-import ARIBB24JapaneseJIS8Encoder from '@/lib/encoder/b24/jis8/ARIB';
+import ARIBB24BrazilianJIS8Tokenizer from '@/lib/tokenizer/b24/jis8/SBTVD';
+import ARIBB24BrazilianJIS8Encoder from '@/lib/encoder/b24/jis8/SBTVD';
 import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, BuiltinSoundReplay, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, CharacterSizeControlType, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, ConcealmentMode, ConcealmentModeType, CyanForeground, Delete, DRCS, FlashingControl, FlashingControlType, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControlHemming, OrnamentControlHollow, OrnamentControlNone, OrnamentControlShade, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, PatternPolarityControlType, RasterColourCommand, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, ReplacingConcealmentModeType, SetDisplayFormat, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SingleConcealmentModeType, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlModeType, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, WritingModeModificationType, YellowForeground } from '@/lib/tokenizer/token';
 
 const generateCharacterTokens = (str: string) => {
-  const segmenter = new Intl.Segmenter();
+  const segmenter = new Intl.Segmenter('por');
   return Array.from(segmenter.segment(str), ({ segment }) => segment).map((seg) => Character.from(seg));
 }
 
 describe("ARIB STD-B24 Encoder then Tokenizer", () => {
-  test('Keep Consistenty FULLWIDTH ASCII', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
-
-    expect(tokenizer.tokenizeDataUnits(encoder.encode(generateCharacterTokens('Ｔ')))).toStrictEqual([
-      ... generateCharacterTokens('Ｔ')
-    ]);
-  });
-
   test('Keep Consistenty HALFWIDTH ASCII', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode(generateCharacterTokens('b')))).toStrictEqual([
       ... generateCharacterTokens('ｂ')
     ]);
   });
 
-  test('Keep Consistenty HIRAGANA', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+  test('Keep Consistenty HALFWIDTH LATIN-EXTENSION', () => {
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeDataUnits(encoder.encode(generateCharacterTokens('あ')))).toStrictEqual([
-      ... generateCharacterTokens('あ')
+    expect(tokenizer.tokenizeDataUnits(encoder.encode(generateCharacterTokens('Ÿ')))).toStrictEqual([
+      ... generateCharacterTokens('Ÿ')
     ]);
   });
 
-  test('Keep Consistenty KATAKANA', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+  test('Keep Consistenty HALFWIDTH SPECIAL-CHARACTER', () => {
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeDataUnits(encoder.encode(generateCharacterTokens('ア')))).toStrictEqual([
-      ... generateCharacterTokens('ア')
-    ]);
-  });
-
-  test('Keep Consistenty HALF KATAKANA', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
-
-    expect(tokenizer.tokenizeDataUnits(encoder.encode(generateCharacterTokens('ｱ')))).toStrictEqual([
-      ... generateCharacterTokens('ア')
-    ]);
-  });
-
-  test('Keep Consistenty 2-bytes string', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
-
-    expect(tokenizer.tokenizeDataUnits(encoder.encode(generateCharacterTokens('字')))).toStrictEqual([
-      ... generateCharacterTokens('字')
-    ]);
-  });
-
-  test('Keep Consistenty 2-bytes Additional KANJI', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
-
-    expect(tokenizer.tokenizeDataUnits(encoder.encode(generateCharacterTokens('㐂')))).toStrictEqual([
-      ... generateCharacterTokens('㐂')
-    ]);
-  });
-
-  test('Keep Consistenty 2-bytes string and Katakana and ASCII', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
-
-    expect(tokenizer.tokenizeDataUnits(encoder.encode(generateCharacterTokens('字幕テスト字幕ＡＢＣ字幕テストＡＢＣ字幕テストＡＢＣ')))).toStrictEqual([
-      ... generateCharacterTokens('字幕テスト字幕ＡＢＣ字幕テストＡＢＣ字幕テストＡＢＣ')
-    ]);
-  });
-
-  test('Keep Consistenty 2-bytes string and Katakana and Hiragana', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
-
-    expect(tokenizer.tokenizeDataUnits(encoder.encode(generateCharacterTokens('字幕テスト字幕です字幕テストです字幕ですテスト')))).toStrictEqual([
-      ... generateCharacterTokens('字幕テスト字幕です字幕テストです字幕ですテスト')
-    ]);
-  });
-
-  test('Keep Consistenty 2-bytes Additional Symbol', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
-
-    expect(tokenizer.tokenizeDataUnits(encoder.encode(generateCharacterTokens('🈀')))).toStrictEqual([
-      ... generateCharacterTokens('🈀')
-    ]);
-  });
-
-  test('Keep Consistenty 2-bytes Additional Symbol with Unicode', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer({ usePUA: false });
-
-    expect(tokenizer.tokenizeDataUnits(encoder.encode(generateCharacterTokens('🄐')))).toStrictEqual([
-      ... generateCharacterTokens('🄐')
-    ]);
-  });
-
-  test('Keep Consistenty 2-bytes Additional Symbol with Private Area', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer({ usePUA: true });
-
-    expect(tokenizer.tokenizeDataUnits(encoder.encode(generateCharacterTokens('')))).toStrictEqual([
-      ... generateCharacterTokens('')
-    ]);
-  });
-
-  test('Keep Consistenty DRCS', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
-
-    expect(tokenizer.tokenizeDataUnits(encoder.encode([DRCS.from(36, 36, 2, new ArrayBuffer(324))]))).toStrictEqual([
-      DRCS.from(36, 36, 2, new ArrayBuffer(324))
-    ]);
-  });
-
-  test('Keep Consistenty DRCS with String', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
-
-    expect(tokenizer.tokenizeDataUnits(encoder.encode([... generateCharacterTokens('字幕テストＡＢＣ'), DRCS.from(36, 36, 2, new ArrayBuffer(324)), ... generateCharacterTokens('ＡＢＣ字幕テスト')]))).toStrictEqual([
-      ... generateCharacterTokens('字幕テストＡＢＣ'), DRCS.from(36, 36, 2, new ArrayBuffer(324)), ... generateCharacterTokens('ＡＢＣ字幕テスト')
+    expect(tokenizer.tokenizeDataUnits(encoder.encode(generateCharacterTokens('█')))).toStrictEqual([
+      ... generateCharacterTokens('█')
     ]);
   });
 
   test('Keep Consistenty NULL (NUL)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([Null.from()]))).toStrictEqual([
       Null.from()
@@ -145,8 +46,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty Bell (BEL)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([Bell.from()]))).toStrictEqual([
       Bell.from()
@@ -154,8 +55,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ActivePositionBackward (APB)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ActivePositionBackward.from()]))).toStrictEqual([
       ActivePositionBackward.from()
@@ -163,8 +64,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ActivePositionForward (APF)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ActivePositionForward.from()]))).toStrictEqual([
       ActivePositionForward.from()
@@ -172,8 +73,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ActivePositionDown (APD)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ActivePositionDown.from()]))).toStrictEqual([
       ActivePositionDown.from()
@@ -181,8 +82,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ActivePositionUp (APU)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ActivePositionUp.from()]))).toStrictEqual([
       ActivePositionUp.from()
@@ -190,8 +91,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ActivePositionUp (APU)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ActivePositionUp.from()]))).toStrictEqual([
       ActivePositionUp.from()
@@ -199,8 +100,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ClearScreen (CS)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ClearScreen.from()]))).toStrictEqual([
       ClearScreen.from()
@@ -208,8 +109,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ActivePositionReturn (APR)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ActivePositionReturn.from()]))).toStrictEqual([
       ActivePositionReturn.from()
@@ -217,8 +118,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ParameterizedActivePositionForward (PAPF)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ParameterizedActivePositionForward.from(3)]))).toStrictEqual([
       ParameterizedActivePositionForward.from(3)
@@ -226,8 +127,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty Cancel (CAN)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([Cancel.from()]))).toStrictEqual([
       Cancel.from()
@@ -235,8 +136,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ActivePositionSet (APS)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ActivePositionSet.from(21, 15)]))).toStrictEqual([
       ActivePositionSet.from(21, 15)
@@ -244,8 +145,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty RecordSeparator (RS)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([RecordSeparator.from()]))).toStrictEqual([
       RecordSeparator.from()
@@ -253,8 +154,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty UnitSeparator (US)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([UnitSeparator.from()]))).toStrictEqual([
       UnitSeparator.from()
@@ -262,8 +163,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty Space (SP)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([Space.from()]))).toStrictEqual([
       Space.from()
@@ -271,8 +172,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty Delete (DEL)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([Delete.from()]))).toStrictEqual([
       Delete.from()
@@ -280,8 +181,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty BlackForeground (BKF)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([BlackForeground.from()]))).toStrictEqual([
       BlackForeground.from()
@@ -289,8 +190,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty RedForeground (RDF)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([RedForeground.from()]))).toStrictEqual([
       RedForeground.from()
@@ -298,8 +199,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty GreenForeground (GRF)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([GreenForeground.from()]))).toStrictEqual([
       GreenForeground.from()
@@ -307,8 +208,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty YellowForeground (YLF)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([YellowForeground.from()]))).toStrictEqual([
       YellowForeground.from()
@@ -316,8 +217,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty BlueForeground (BLF)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([BlueForeground.from()]))).toStrictEqual([
       BlueForeground.from()
@@ -325,8 +226,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty MagentaForeground (MGF)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([MagentaForeground.from()]))).toStrictEqual([
       MagentaForeground.from()
@@ -334,8 +235,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty CyanForeground (CNF)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([CyanForeground.from()]))).toStrictEqual([
       CyanForeground.from()
@@ -343,8 +244,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty WhiteForeground (WHF)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([WhiteForeground.from()]))).toStrictEqual([
       WhiteForeground.from()
@@ -352,8 +253,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ColorControlForeground (COL)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ColorControlForeground.from(5)]))).toStrictEqual([
       ColorControlForeground.from(5)
@@ -361,8 +262,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ColorControlBackground (COL)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ColorControlBackground.from(6)]))).toStrictEqual([
       ColorControlBackground.from(6)
@@ -370,8 +271,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ColorControlHalfForeground (COL)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ColorControlHalfForeground.from(7)]))).toStrictEqual([
       ColorControlHalfForeground.from(7)
@@ -379,8 +280,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ColorControlHalfBackground (COL)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ColorControlHalfBackground.from(8)]))).toStrictEqual([
       ColorControlHalfBackground.from(8)
@@ -388,8 +289,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty PalletControl (COL)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([PalletControl.from(1)]))).toStrictEqual([
       PalletControl.from(1)
@@ -397,8 +298,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty Small Size (SSZ)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([SmallSize.from()]))).toStrictEqual([
       SmallSize.from()
@@ -406,8 +307,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty Middle Size (MSZ)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([MiddleSize.from()]))).toStrictEqual([
       MiddleSize.from()
@@ -415,8 +316,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty Normal Size (NSZ)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([NormalSize.from()]))).toStrictEqual([
       NormalSize.from()
@@ -424,8 +325,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty Tiny Size (SZX)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([CharacterSizeControl.from(CharacterSizeControlType.TINY)]))).toStrictEqual([
       CharacterSizeControl.from(CharacterSizeControlType.TINY)
@@ -433,8 +334,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty Double Height Size (SZX)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([CharacterSizeControl.from(CharacterSizeControlType.DOUBLE_HEIGHT)]))).toStrictEqual([
       CharacterSizeControl.from(CharacterSizeControlType.DOUBLE_HEIGHT)
@@ -442,8 +343,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty Double Width Size (SZX)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([CharacterSizeControl.from(CharacterSizeControlType.DOUBLE_WIDTH)]))).toStrictEqual([
       CharacterSizeControl.from(CharacterSizeControlType.DOUBLE_WIDTH)
@@ -451,8 +352,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty Double Height And Width Size (SZX)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([CharacterSizeControl.from(CharacterSizeControlType.DOUBLE_HEIGHT_AND_WIDTH)]))).toStrictEqual([
       CharacterSizeControl.from(CharacterSizeControlType.DOUBLE_HEIGHT_AND_WIDTH)
@@ -460,8 +361,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty Special1 Size (SZX)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([CharacterSizeControl.from(CharacterSizeControlType.SPECIAL_1)]))).toStrictEqual([
       CharacterSizeControl.from(CharacterSizeControlType.SPECIAL_1)
@@ -469,8 +370,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty Special 2 (SZX)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([CharacterSizeControl.from(CharacterSizeControlType.SPECIAL_2)]))).toStrictEqual([
       CharacterSizeControl.from(CharacterSizeControlType.SPECIAL_2)
@@ -478,8 +379,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty Flashing Normal (FLC)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([FlashingControl.from(FlashingControlType.NORMAL)]))).toStrictEqual([
       FlashingControl.from(FlashingControlType.NORMAL)
@@ -487,8 +388,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty Flashing Inverted (FLC)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([FlashingControl.from(FlashingControlType.INVERTED)]))).toStrictEqual([
       FlashingControl.from(FlashingControlType.INVERTED)
@@ -496,8 +397,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty Flashing Stop (FLC)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([FlashingControl.from(FlashingControlType.STOP)]))).toStrictEqual([
       FlashingControl.from(FlashingControlType.STOP)
@@ -505,8 +406,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty SingleConcealmentMode Start (CDC)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([SingleConcealmentMode.from(SingleConcealmentModeType.START)]))).toStrictEqual([
       SingleConcealmentMode.from(SingleConcealmentModeType.START)
@@ -514,8 +415,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ReplacingConcealmentMode Start (CDC)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ReplacingConcealmentMode.from(ReplacingConcealmentModeType.START)]))).toStrictEqual([
       ReplacingConcealmentMode.from(ReplacingConcealmentModeType.START)
@@ -523,8 +424,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ReplacingConcealmentMode First (CDC)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ReplacingConcealmentMode.from(ReplacingConcealmentModeType.FIRST)]))).toStrictEqual([
       ReplacingConcealmentMode.from(ReplacingConcealmentModeType.FIRST)
@@ -532,8 +433,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ReplacingConcealmentMode Second (CDC)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ReplacingConcealmentMode.from(ReplacingConcealmentModeType.SECOND)]))).toStrictEqual([
       ReplacingConcealmentMode.from(ReplacingConcealmentModeType.SECOND)
@@ -541,8 +442,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ReplacingConcealmentMode Third (CDC)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ReplacingConcealmentMode.from(ReplacingConcealmentModeType.THIRD)]))).toStrictEqual([
       ReplacingConcealmentMode.from(ReplacingConcealmentModeType.THIRD)
@@ -550,8 +451,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ReplacingConcealmentMode Fourth (CDC)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ReplacingConcealmentMode.from(ReplacingConcealmentModeType.FOURTH)]))).toStrictEqual([
       ReplacingConcealmentMode.from(ReplacingConcealmentModeType.FOURTH)
@@ -559,8 +460,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ReplacingConcealmentMode Fifth (CDC)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ReplacingConcealmentMode.from(ReplacingConcealmentModeType.FIFTH)]))).toStrictEqual([
       ReplacingConcealmentMode.from(ReplacingConcealmentModeType.FIFTH)
@@ -568,8 +469,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ReplacingConcealmentMode Sixth (CDC)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ReplacingConcealmentMode.from(ReplacingConcealmentModeType.SIXTH)]))).toStrictEqual([
       ReplacingConcealmentMode.from(ReplacingConcealmentModeType.SIXTH)
@@ -577,8 +478,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ReplacingConcealmentMode Seventh (CDC)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ReplacingConcealmentMode.from(ReplacingConcealmentModeType.SEVENTH)]))).toStrictEqual([
       ReplacingConcealmentMode.from(ReplacingConcealmentModeType.SEVENTH)
@@ -586,8 +487,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ReplacingConcealmentMode Eighth (CDC)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ReplacingConcealmentMode.from(ReplacingConcealmentModeType.EIGHTH)]))).toStrictEqual([
       ReplacingConcealmentMode.from(ReplacingConcealmentModeType.EIGHTH)
@@ -595,8 +496,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ReplacingConcealmentMode Ninth (CDC)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ReplacingConcealmentMode.from(ReplacingConcealmentModeType.NINTH)]))).toStrictEqual([
       ReplacingConcealmentMode.from(ReplacingConcealmentModeType.NINTH)
@@ -604,8 +505,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ReplacingConcealmentMode Tenth (CDC)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ReplacingConcealmentMode.from(ReplacingConcealmentModeType.TENTH)]))).toStrictEqual([
       ReplacingConcealmentMode.from(ReplacingConcealmentModeType.TENTH)
@@ -613,8 +514,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ConcealmentMode Stop (CDC)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ConcealmentMode.from(ConcealmentModeType.STOP)]))).toStrictEqual([
       ConcealmentMode.from(ConcealmentModeType.STOP)
@@ -622,8 +523,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty PatternPolarityControl Normal (POL)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([PatternPolarityControl.from(PatternPolarityControlType.NORMAL)]))).toStrictEqual([
       PatternPolarityControl.from(PatternPolarityControlType.NORMAL)
@@ -631,8 +532,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty PatternPolarityControl Inverted1 (POL)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([PatternPolarityControl.from(PatternPolarityControlType.INVERTED_1)]))).toStrictEqual([
       PatternPolarityControl.from(PatternPolarityControlType.INVERTED_1)
@@ -640,8 +541,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty PatternPolarityControl Inverted2 (POL)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([PatternPolarityControl.from(PatternPolarityControlType.INVERTED_2)]))).toStrictEqual([
       PatternPolarityControl.from(PatternPolarityControlType.INVERTED_2)
@@ -649,8 +550,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty WritingModeModification Both (WMM)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([WritingModeModification.from(WritingModeModificationType.BOTH)]))).toStrictEqual([
       WritingModeModification.from(WritingModeModificationType.BOTH)
@@ -658,8 +559,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty WritingModeModification Foreground (WMM)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([WritingModeModification.from(WritingModeModificationType.FOREGROUND)]))).toStrictEqual([
       WritingModeModification.from(WritingModeModificationType.FOREGROUND)
@@ -667,8 +568,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty WritingModeModification Background (WMM)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([WritingModeModification.from(WritingModeModificationType.BACKGROUND)]))).toStrictEqual([
       WritingModeModification.from(WritingModeModificationType.BACKGROUND)
@@ -676,8 +577,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty HilightingCharacterBlock (HLC)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([HilightingCharacterBlock.from(0x0F)]))).toStrictEqual([
       HilightingCharacterBlock.from(0x0F)
@@ -685,8 +586,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty RepeatCharacter (RPC)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([RepeatCharacter.from(0x0F)]))).toStrictEqual([
       RepeatCharacter.from(0x0F)
@@ -694,8 +595,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty StartLining (STL)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([StartLining.from()]))).toStrictEqual([
       StartLining.from()
@@ -703,8 +604,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty StopLining (SPL)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([StopLining.from()]))).toStrictEqual([
       StopLining.from()
@@ -712,8 +613,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty TimeControl Wait (TIME)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([TimeControlWait.from(4.3)]))).toStrictEqual([
       TimeControlWait.from(4.3)
@@ -721,8 +622,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty TimeControl Mode Free (TIME)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([TimeControlMode.from(TimeControlModeType.FREE)]))).toStrictEqual([
       TimeControlMode.from(TimeControlModeType.FREE)
@@ -730,8 +631,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty TimeControl Mode Real (TIME)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([TimeControlMode.from(TimeControlModeType.REAL)]))).toStrictEqual([
       TimeControlMode.from(TimeControlModeType.REAL)
@@ -739,8 +640,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty TimeControl Mode Offset (TIME)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([TimeControlMode.from(TimeControlModeType.OFFSET)]))).toStrictEqual([
       TimeControlMode.from(TimeControlModeType.OFFSET)
@@ -748,8 +649,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty TimeControl Mode Unique (TIME)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([TimeControlMode.from(TimeControlModeType.UNIQUE)]))).toStrictEqual([
       TimeControlMode.from(TimeControlModeType.UNIQUE)
@@ -757,8 +658,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty SetWritingFormat (SWF) 5 (1920x1080)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([SetWritingFormat.from(5)]))).toStrictEqual([
       SetWritingFormat.from(5)
@@ -766,8 +667,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty SetWritingFormat (SWF) 7 (960x540)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([SetWritingFormat.from(7)]))).toStrictEqual([
       SetWritingFormat.from(7)
@@ -775,8 +676,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty SetWritingFormat (SWF) 9 (720x480)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([SetWritingFormat.from(9)]))).toStrictEqual([
       SetWritingFormat.from(9)
@@ -784,8 +685,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty SetWritingFormat (SWF) 11 (1280x720)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([SetWritingFormat.from(11)]))).toStrictEqual([
       SetWritingFormat.from(11)
@@ -793,8 +694,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty SetDisplayFormat (SDF)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([SetDisplayFormat.from(720, 480)]))).toStrictEqual([
       SetDisplayFormat.from(720, 480)
@@ -802,8 +703,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty SetDisplayPosition (SDP)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([SetDisplayFormat.from(120, 40)]))).toStrictEqual([
       SetDisplayFormat.from(120, 40)
@@ -811,8 +712,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty SetDisplayPosition (SSM)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([CharacterCompositionDotDesignation.from(12, 24)]))).toStrictEqual([
       CharacterCompositionDotDesignation.from(12, 24)
@@ -820,8 +721,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty SetHorizontalSpacing (SHS)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([SetHorizontalSpacing.from(2)]))).toStrictEqual([
       SetHorizontalSpacing.from(2)
@@ -829,8 +730,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty SetVerticalSpacing (SVS)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([SetVerticalSpacing.from(12)]))).toStrictEqual([
       SetVerticalSpacing.from(12)
@@ -838,8 +739,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty ActiveCoordinatePositionSet (ACPS)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([ActiveCoordinatePositionSet.from(120, 240)]))).toStrictEqual([
       ActiveCoordinatePositionSet.from(120, 240)
@@ -847,8 +748,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty OrnamentControl None (ORN)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([OrnamentControlNone.from()]))).toStrictEqual([
       OrnamentControlNone.from()
@@ -856,8 +757,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty OrnamentControl Hemming (ORN)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([OrnamentControlHemming.from(1)]))).toStrictEqual([
       OrnamentControlHemming.from(1)
@@ -865,8 +766,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty OrnamentControl Shade (ORN)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([OrnamentControlShade.from(2)]))).toStrictEqual([
       OrnamentControlShade.from(2)
@@ -874,8 +775,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty OrnamentControl Hollow (ORN)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([OrnamentControlHollow.from()]))).toStrictEqual([
       OrnamentControlHollow.from()
@@ -883,8 +784,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty BuiltinSoundReplay (PRA)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([BuiltinSoundReplay.from(1)]))).toStrictEqual([
       BuiltinSoundReplay.from(1)
@@ -892,8 +793,8 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
   });
 
   test('Keep Consistenty RasterColourCommand (RCS)', () => {
-    const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
+    const encoder = new ARIBB24BrazilianJIS8Encoder();
+    const tokenizer = new ARIBB24BrazilianJIS8Tokenizer();
 
     expect(tokenizer.tokenizeDataUnits(encoder.encode([RasterColourCommand.from(2)]))).toStrictEqual([
       RasterColourCommand.from(2)

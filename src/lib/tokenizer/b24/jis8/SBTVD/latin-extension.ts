@@ -11,7 +11,7 @@ export default new Map([
   [0x2a, 'ª'],
   [0x2b, '«'],
   [0x2c, '¬'],
-  [0x2d, '­Ÿ'], // not SHY (differ Latin-1 Supplement(ISO/IEC 8859-1))
+  [0x2d, 'Ÿ'], // not SHY (differ Latin-1 Supplement(ISO/IEC 8859-1))
   [0x2e, '®'],
   [0x2f, '¯'],
   [0x30, '°'],
