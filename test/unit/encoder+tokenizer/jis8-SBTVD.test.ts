@@ -4,7 +4,7 @@ import ARIBB24BrazilianJIS8Encoder from '@/lib/encoder/b24/jis8/SBTVD';
 import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, BuiltinSoundReplay, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, CharacterSizeControlType, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, ConcealmentMode, ConcealmentModeType, CyanForeground, Delete, DRCS, FlashingControl, FlashingControlType, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControlHemming, OrnamentControlHollow, OrnamentControlNone, OrnamentControlShade, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, PatternPolarityControlType, RasterColourCommand, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, ReplacingConcealmentModeType, SetDisplayFormat, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SingleConcealmentModeType, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlModeType, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, WritingModeModificationType, YellowForeground } from '@/lib/tokenizer/token';
 
 const generateCharacterTokens = (str: string) => {
-  const segmenter = new Intl.Segmenter('por');
+  const segmenter = new Intl.Segmenter();
   return Array.from(segmenter.segment(str), ({ segment }) => segment).map((seg) => Character.from(seg));
 }
 
