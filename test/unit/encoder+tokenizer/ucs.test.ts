@@ -49,7 +49,7 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
     const encoder = new ARIBB24UTF8Encoder();
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
-    expect(tokenizer.tokenizeDataUnits(encoder.encode([ DRCS.from(36, 36, 2, new ArrayBuffer(324)) ]))).toStrictEqual([
+    expect(tokenizer.tokenizeDataUnits(encoder.encode([DRCS.from(36, 36, 2, new ArrayBuffer(324))]))).toStrictEqual([
       DRCS.from(36, 36, 2, new ArrayBuffer(324))
     ]);
   });
@@ -58,7 +58,7 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
     const encoder = new ARIBB24UTF8Encoder();
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
-    expect(tokenizer.tokenizeDataUnits(encoder.encode([ DRCS.from(36, 36, 2, new ArrayBuffer(324), '\u3099') ]))).toStrictEqual([
+    expect(tokenizer.tokenizeDataUnits(encoder.encode([DRCS.from(36, 36, 2, new ArrayBuffer(324), '\u3099')]))).toStrictEqual([
       DRCS.from(36, 36, 2, new ArrayBuffer(324), '\u3099')
     ]);
   });

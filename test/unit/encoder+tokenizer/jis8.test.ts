@@ -121,7 +121,7 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
     const encoder = new ARIBB24JapaneseJIS8Encoder();
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeDataUnits(encoder.encode([ DRCS.from(36, 36, 2, new ArrayBuffer(324)) ]))).toStrictEqual([
+    expect(tokenizer.tokenizeDataUnits(encoder.encode([DRCS.from(36, 36, 2, new ArrayBuffer(324))]))).toStrictEqual([
       DRCS.from(36, 36, 2, new ArrayBuffer(324))
     ]);
   });
@@ -130,7 +130,7 @@ describe("ARIB STD-B24 Encoder then Tokenizer", () => {
     const encoder = new ARIBB24JapaneseJIS8Encoder();
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeDataUnits(encoder.encode([ ... generateCharacterTokens('字幕テストＡＢＣ'), DRCS.from(36, 36, 2, new ArrayBuffer(324)), ... generateCharacterTokens('ＡＢＣ字幕テスト')]))).toStrictEqual([
+    expect(tokenizer.tokenizeDataUnits(encoder.encode([... generateCharacterTokens('字幕テストＡＢＣ'), DRCS.from(36, 36, 2, new ArrayBuffer(324)), ... generateCharacterTokens('ＡＢＣ字幕テスト')]))).toStrictEqual([
       ... generateCharacterTokens('字幕テストＡＢＣ'), DRCS.from(36, 36, 2, new ArrayBuffer(324)), ... generateCharacterTokens('ＡＢＣ字幕テスト')
     ]);
   });
