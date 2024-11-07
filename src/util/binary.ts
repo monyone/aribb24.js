@@ -34,3 +34,11 @@ export function base64ToUint8Array(base64: string): Uint8Array {
   for (let i = 0; i < binary.length; i++) { result[i] = binary.charCodeAt(i); }
   return result;
 }
+
+export function uint8ArrayToBase64(uint8: Uint8Array): string {
+  let result = '';
+  for (const elem of uint8) {
+    result += String.fromCharCode(elem);
+  }
+  return btoa(result);
+}
