@@ -8,7 +8,7 @@ export function binaryToPercentString(binary: Uint8Array, begin: number, end: nu
 
 export function binaryUTF8ToString(binary: Uint8Array, begin: number, end: number): string {
   if (TextDecoder) {
-    const decoder = new TextDecoder('utf-8');
+    const decoder = new TextDecoder('utf-8', { fatal: true });
     const array: Uint8Array = new Uint8Array(binary.slice(begin, end));
 
     return decoder.decode(array);
@@ -19,7 +19,7 @@ export function binaryUTF8ToString(binary: Uint8Array, begin: number, end: numbe
 
 export function binaryISO85591ToString(binary: Uint8Array, begin: number, end: number): string {
   if (TextDecoder) {
-    const decoder = new TextDecoder('iso-8859-1');
+    const decoder = new TextDecoder('iso-8859-1', { fatal: true });
     const array: Uint8Array = new Uint8Array(binary.slice(begin, end));
 
     return decoder.decode(array);

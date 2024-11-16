@@ -64,7 +64,7 @@ export type CaptionLanguageInformation = {
   language: string;
 };
 
-export default (data: ArrayBuffer, readSTM: boolean = false): CaptionData | null => {
+export default (data: ArrayBuffer, isB36: boolean = false): CaptionData | null => {
   const stream = new ByteStream(data);
 
   const data_group_id = (stream.readU8() & 0xFC) >> 2;
@@ -76,7 +76,7 @@ export default (data: ArrayBuffer, readSTM: boolean = false): CaptionData | null
 
   if (lang === 0) { // Caption Management
     const TMD = (stream.readU8() & 0xC0) >> 6;
-    if (TMD === 0b10) {
+    if (TMD === 0b10 || isB36) {
       const OTM = stream.read(5); // OTM (36 + 4)
     }
 
@@ -142,7 +142,7 @@ export default (data: ArrayBuffer, readSTM: boolean = false): CaptionData | null
     };
   } else { // Caption Data
     const TMD = (stream.readU8() & 0xC0) >> 6;
-    if (TMD === 0b01 || TMD === 0b10 || readSTM) {
+    if (TMD === 0b01 || TMD === 0b10 || isB36) {
       const STM = stream.read(5); // STM (36 + 4)
     }
 
@@ -174,7 +174,9 @@ export default (data: ArrayBuffer, readSTM: boolean = false): CaptionData | null
 
       offset += 5 + data_unit_size;
     }
-    const CRC16 = stream.readU16();
+    if (!isB36) {
+      const CRC16 = stream.readU16();
+    }
 
     return {
       tag: 'CaptionStatement',
