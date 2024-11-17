@@ -104,6 +104,15 @@ export default (data: ArrayBuffer, isB36: boolean = false): CaptionData | null =
       });
     }
 
+    if (isB36) {
+      return {
+        tag: 'CaptionManagement',
+        group,
+        languages,
+        units: []
+      };
+    }
+
     const data_unit_loop_length = stream.readU24();
     const units: DataUnit[] = [];
     let offset = 0;

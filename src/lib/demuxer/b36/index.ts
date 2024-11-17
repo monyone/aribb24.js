@@ -29,19 +29,19 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
   // Program Management Information
   {
     const LI = stream.readU32();
-    stream.read(Math.floor((LI + (block - 1)) / block) * block);
+    stream.read(Math.floor((4 + LI + (block - 1)) / block) * block - 4);
   }
 
   // Program Page Information
   const pages: ARIBB36PageData[] = [];
   while (!stream.isEmpty()) {
-    const LI = stream.readU24();
-    const buffer = stream.read(Math.floor((LI + 4 + (block - 1)) / block) * block - 4)
-    const data = new DataView(buffer.slice(0, 2 + LI));
+    const LI = stream.readU32();
+    const buffer = stream.read(Math.floor((4 + LI + (block - 1)) / block) * block - 4)
+    const data = new DataView(buffer.slice(0, LI));
 
     // Page Management Data
     let begin = 0;
-    const DL = data.getUint16(begin + 1);
+    const DL = data.getUint16(begin + 1, false);
     begin += 1 + 2;
     if (data.byteLength < (begin + DL)) { continue; }
     const pageNumber = String.fromCharCode(
@@ -50,10 +50,11 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
     );
 
     // Caption Management Data
-    begin += (1 + 2 + DL);
-    const DL1 = data.getUint16(begin + 1);
-    if (data.byteLength < (begin + 1 + (2 + DL1))) { continue; }
-    const management = datagroup(data.buffer.slice(begin + 1 + 2, begin + 1 + (2 + DL1)), true);
+    begin += DL;
+    const DL1 = data.getUint16(begin + 1, false);
+    begin += 1 + 2;
+    if (data.byteLength < (begin + DL1)) { continue; }
+    const management = datagroup(data.buffer.slice(begin, begin + DL1), true);
     if (management == null || management.tag !== 'CaptionManagement') { continue; }
 
     if (pageNumber === '000000') {
@@ -65,10 +66,11 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
     }
 
     // Caption Statement Data
-    begin += (1 + 2 + DL1);
-    const DL2 = data.getUint16(begin + 1);
-    if (data.byteLength < (begin + 1 + (2 + DL2))) { continue; }
-    const statement = datagroup(data.buffer.slice(begin + 1 + 2, begin + 1 + (2 + DL2)), true);
+    begin += DL1;
+    const DL2 = data.getUint16(begin + 1, false) << 8 | data.getUint8(begin + 3);
+    begin += 1 + 3;
+    if (data.byteLength < (begin + DL2)) { continue; }
+    const statement = datagroup(data.buffer.slice(begin, begin + DL2), true);
     if (statement == null || statement.tag !== 'CaptionStatement') { continue; }
 
     pages.push({
