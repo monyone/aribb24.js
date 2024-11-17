@@ -24,14 +24,25 @@ export default (b36: ARIBB36Data): ArrayBuffer => {
 
   // page information
   for (const page of b36.pages) {
-    const pageInformation = new ArrayBuffer(6);
+    const pageInformationBuilder = new ByteBuilder();
     {
-      const view = new DataView(pageInformation);
-      // page number
+      // pageNumber (ページナンバー/ページコード)
       for (let i = 0; i < 6; i++) {
-        view.setUint8(i, page.pageNumber.charCodeAt(i))
+        pageInformationBuilder.writeU8(page.pageNumber.charCodeAt(i))
+      }
+      // pageMaterialType (ページ素材種別)
+      pageInformationBuilder.writeU8(page.pageMaterialType);
+      // displayTimingType (送出タイミング種別)
+      for (let i = 0; i < 2; i++) {
+        pageInformationBuilder.writeU8(page.displayTimingType.charCodeAt(i))
+      }
+      // timingUnitType (タイミング単位指定)
+      for (let i = 0; i < 1; i++) {
+        pageInformationBuilder.writeU8(page.timingUnitType.charCodeAt(i))
       }
     }
+    const pageInformation = pageInformationBuilder.build();
+
     const management = muxDataGroup(page.management, true);
     const statement = page.tag !== 'ReservedPage' ? muxDataGroup(page.statement, true) : new ArrayBuffer(0);
     const length = (3 + pageInformation.byteLength) + (3 + management.byteLength) + (page.tag !== 'ReservedPage' ? 4 + statement.byteLength : 0);

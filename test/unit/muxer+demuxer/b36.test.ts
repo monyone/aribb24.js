@@ -37,6 +37,9 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
       pages: [{
         tag: 'ReservedPage',
         pageNumber: '000000',
+        pageMaterialType: 0,
+        displayTimingType: '  ',
+        timingUnitType: 'F',
         management,
       }]
     } satisfies ARIBB36Data;
@@ -71,10 +74,16 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
       pages: [{
         tag: 'ReservedPage',
         pageNumber: '000000',
+        pageMaterialType: 1,
+        displayTimingType: '  ',
+        timingUnitType: 'F',
         management,
       }, {
         tag: 'ActualPage',
         pageNumber: '000001',
+        pageMaterialType: 0,
+        displayTimingType: 'RT',
+        timingUnitType: 'F',
         management,
         statement
       }]

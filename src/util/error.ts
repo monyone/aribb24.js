@@ -12,6 +12,12 @@ export class NotImplementedError extends Error {
   }
 }
 
+export class ViolationStandardError extends Error {
+  constructor(message: string, option?: ErrorOptions) {
+    super(message, option);
+    this.name = this.constructor.name;
+  }
+}
 
 export class NotUsedDueToStandardError extends Error {
   constructor(message: string, option?: ErrorOptions) {
