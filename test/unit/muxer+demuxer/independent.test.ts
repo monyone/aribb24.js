@@ -3,7 +3,7 @@ import demux, { PES } from '@/lib/demuxer/b24/independent';
 
 import { describe, test, expect } from 'vitest';
 
-describe("ARIB STD-B24 Muxer IndepenentPES", () => {
+describe("ARIB STD-B24 Muxer Demuxer Consistenty for IndepedentPES", () => {
   test('Mux Caption', () => {
     const data: PES = {
       tag: 'Caption',

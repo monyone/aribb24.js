@@ -1,17 +1,20 @@
 import { ByteStream } from "../../../util/bytestream"
+import { NotUsedDueToStandardError } from "../../../util/error";
 import datagroup, { CaptionManagement, CaptionStatement } from "../b24/datagroup";
 
-
 export type ARIBB36PageData = {
-  pageNumber: Omit<string, '000000'>;
+  tag: 'ActualPage'
+  pageNumber: string;
   management: CaptionManagement;
   statement: CaptionStatement;
 } | {
-  pageNumber: '000000';
+  tag: 'ReservedPage'
+  pageNumber: string;
   management: CaptionManagement;
 };
 
 export type ARIBB36Data = {
+  label: 'DCAPTION' | 'BCAPTION' | 'MCAPTION';
   pages: ARIBB36PageData[]
 };
 
@@ -21,10 +24,11 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
   const stream = new ByteStream(b36);
 
   //
-  {
-    const captionDataLabel = decoder.decode(stream.read(8));
-    stream.read(block - 8);
+  const label = decoder.decode(stream.read(8));
+  if (!(label === 'DCAPTION' || label === 'BCAPTION' || label === 'MCAPTION')) {
+    throw new NotUsedDueToStandardError(`Unsupported CaptionDataLabel: ${label}`);
   }
+  stream.read(block - 8);
 
   // Program Management Information
   {
@@ -59,6 +63,7 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
 
     if (pageNumber === '000000') {
       pages.push({
+        tag: 'ReservedPage',
         pageNumber,
         management
       });
@@ -74,6 +79,7 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
     if (statement == null || statement.tag !== 'CaptionStatement') { continue; }
 
     pages.push({
+      tag: 'ActualPage',
       pageNumber,
       management,
       statement
@@ -81,6 +87,7 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
   }
 
   return {
+    label,
     pages
   };
 }

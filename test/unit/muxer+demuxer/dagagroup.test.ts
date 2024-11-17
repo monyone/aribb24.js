@@ -3,7 +3,7 @@ import demux, { CaptionData } from '@/lib/demuxer/b24/datagroup';
 
 import { describe, test, expect } from 'vitest';
 
-describe("ARIB STD-B24 Muxer DataUnit", () => {
+describe("ARIB STD-B24 Muxer Demuxer Consistenty for DataUnit", () => {
   test('Mux Statement With Empty Content with A Group', () => {
     const data: CaptionData = {
       tag: 'CaptionStatement',
