@@ -32,7 +32,7 @@ export type ARIBB36PageData = PageManagementInformation & ({
   statement: CaptionStatement;
 } | {
   tag: 'ReservedPage'
-  pageNumber: string;
+  pageNumber: '000000';
   management: CaptionManagement;
 });
 
