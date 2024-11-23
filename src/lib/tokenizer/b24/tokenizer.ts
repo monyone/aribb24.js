@@ -104,7 +104,7 @@ export const processC0 = (stream: ByteStream): ARIBB24Token => {
 }
 
 export const processC1 = (stream: ByteStream): ARIBB24Token => {
-  switch(stream.readU8()) {
+  switch (stream.readU8()) {
     case CONTROL_CODES.BKF: return BlackForeground.from();
     case CONTROL_CODES.RDF: return RedForeground.from();
     case CONTROL_CODES.GRF: return GreenForeground.from();
