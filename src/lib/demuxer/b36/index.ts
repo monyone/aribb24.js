@@ -4,10 +4,10 @@ import { timecodeToSecond } from "../../../util/timecode";
 import datagroup, { CaptionManagement, CaptionStatement } from "../b24/datagroup";
 
 export const PageMaterialType = {
-  CONTENTS_AND_CM: 0,
-  CONTENTS: 1,
-  CM: 2,
-  SOUND: 3,
+  CONTENTS_AND_CM: '0',
+  CONTENTS: '1',
+  CM: '2',
+  SOUND: '3',
 } as const;
 export const DisplayTimingType = {
   REALTIME: 'RT',
@@ -134,7 +134,7 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
       page.readU8(), page.readU8(), page.readU8()
     );
     // pageMaterialType (ページ素材種別)
-    const pageMaterialType = page.readU8();
+    const pageMaterialType = String.fromCharCode(page.readU8());
     switch (pageMaterialType) {
       case PageMaterialType.CONTENTS_AND_CM:
       case PageMaterialType.CONTENTS:

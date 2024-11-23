@@ -63,7 +63,7 @@ export default (b36: ARIBB36Data): ArrayBuffer => {
         pageInformationBuilder.writeU8(page.pageNumber.charCodeAt(i))
       }
       // pageMaterialType (ページ素材種別)
-      pageInformationBuilder.writeU8(page.pageMaterialType);
+      pageInformationBuilder.writeU8(page.pageMaterialType.charCodeAt(0));
       // displayTimingType (送出タイミング種別)
       for (let i = 0; i < 2; i++) {
         pageInformationBuilder.writeU8(page.displayTimingType.charCodeAt(i))

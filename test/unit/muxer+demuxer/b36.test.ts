@@ -36,7 +36,7 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
       pages: [{
         tag: 'ReservedPage',
         pageNumber: '000000',
-        pageMaterialType: 0,
+        pageMaterialType: '0',
         displayTimingType: '  ',
         timingUnitType: 'F',
         displayTiming: 0,
@@ -88,7 +88,7 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
       pages: [{
         tag: 'ReservedPage',
         pageNumber: '000000',
-        pageMaterialType: 1,
+        pageMaterialType: '1',
         displayTimingType: '  ',
         timingUnitType: 'F',
         displayTiming: 0,
@@ -110,7 +110,7 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
       }, {
         tag: 'ActualPage',
         pageNumber: '000001',
-        pageMaterialType: 0,
+        pageMaterialType: '0',
         displayTimingType: 'RT',
         timingUnitType: 'F',
         displayTiming: 1001,
@@ -135,7 +135,7 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
       }, {
         tag: 'ActualPage',
         pageNumber: '000001',
-        pageMaterialType: 0,
+        pageMaterialType: '0',
         displayTimingType: 'RT',
         timingUnitType: 'F',
         displayTiming: 2002,
