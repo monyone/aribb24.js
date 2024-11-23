@@ -141,7 +141,6 @@ export default (b36: ARIBB36Data): ArrayBuffer => {
         const MM = Math.floor((b36.initialTime - SS) / 60) % 60;
         const HH = Math.floor((b36.initialTime - SS - MM * 60) / 3600);
         const HHMMSSXX = `${HH.toString(10).padStart(2, '0')}${MM.toString(10).padStart(2, '0')}${SS.toString(10).padStart(2, '0')}${XX.toString(10).padStart(2, '0')}`;
-        console.log(HHMMSSXX)
         for (let i = 0; i < 8; i++) {
           programInformationBuilder.writeU8(HHMMSSXX.charCodeAt(i));
         }
@@ -164,7 +163,11 @@ export default (b36: ARIBB36Data): ArrayBuffer => {
       programInformationBuilder.writeU8((b36.compatible[i] ? '*' : ' ').charCodeAt(0));
     }
     // expireDate (有効期限)
-    {
+    if (b36.expireDate == null) {
+      for (let i = 0; i < 8; i++) {
+        programInformationBuilder.writeU8(' '.charCodeAt(0));
+      }
+    } else {
       const year = b36.expireDate[0].toString(10).padStart(4, '0');
       const month = b36.expireDate[1].toString(10).padStart(2, '0');
       const day = b36.expireDate[2].toString(10).padStart(2, '0');
@@ -183,7 +186,7 @@ export default (b36: ARIBB36Data): ArrayBuffer => {
       programInformationBuilder.write(Uint8Array.from(converted).buffer);
     }
     // creationDateTime (作成年月日時分)
-    {
+    if (b36.creationDateTime != null) {
       const year = b36.creationDateTime[0].toString(10).padStart(4, '0');
       const month = b36.creationDateTime[1].toString(10).padStart(2, '0');
       const day = b36.creationDateTime[2].toString(10).padStart(2, '0');
@@ -193,15 +196,23 @@ export default (b36: ARIBB36Data): ArrayBuffer => {
       for (let i = 0; i < 12; i++) {
         programInformationBuilder.writeU8(creationDateTime.charCodeAt(i));
       }
+    } else {
+      for (let i = 0; i < 12; i++) {
+        programInformationBuilder.writeU8(' '.charCodeAt(0));
+      }
     }
     // broadcastStartDate (放送日)
-    {
+    if (b36.broadcastStartDate != null) {
       const year = b36.broadcastStartDate[0].toString(10).padStart(4, '0');
       const month = b36.broadcastStartDate[1].toString(10).padStart(2, '0');
       const day = b36.broadcastStartDate[2].toString(10).padStart(2, '0');
       const broadcastStartDate = `${year}${month}${day}`;
       for (let i = 0; i < 8; i++) {
         programInformationBuilder.writeU8(broadcastStartDate.charCodeAt(i));
+      }
+    } else {
+      for (let i = 0; i < 8; i++) {
+        programInformationBuilder.writeU8(' '.charCodeAt(0));
       }
     }
     // broadcastEndDate (放送日)
@@ -307,10 +318,10 @@ export default (b36: ARIBB36Data): ArrayBuffer => {
           break;
         }
         case TimingUnitType.TIME: {
-          const XX = Math.ceil(b36.initialTime * 100) % 100;
-          const SS = Math.floor(b36.initialTime) % 60;
-          const MM = Math.floor((b36.initialTime - SS) / 60) % 60;
-          const HH = Math.floor((b36.initialTime - SS - MM * 60) / 3600);
+          const XX = Math.ceil(page.displayTiming * 100) % 100;
+          const SS = Math.floor(page.displayTiming) % 60;
+          const MM = Math.floor((page.displayTiming - SS) / 60) % 60;
+          const HH = Math.floor((page.displayTiming - SS - MM * 60) / 3600);
           const HHMMSSXX = `${HH.toString(10).padStart(2, '0')}${MM.toString(10).padStart(2, '0')}${SS.toString(10).padStart(2, '0')}${XX.toString(10).padStart(2, '0')}`;
           for (let i = 0; i < 8; i++) {
             pageInformationBuilder.writeU8(HHMMSSXX.charCodeAt(i));
@@ -335,10 +346,10 @@ export default (b36: ARIBB36Data): ArrayBuffer => {
             break;
           }
           case TimingUnitType.TIME: {
-            const XX = Math.ceil(b36.initialTime * 100) % 100;
-            const SS = Math.floor(b36.initialTime) % 60;
-            const MM = Math.floor((b36.initialTime - SS) / 60) % 60;
-            const HH = Math.floor((b36.initialTime - SS - MM * 60) / 3600);
+            const XX = Math.ceil(page.clearTiming * 100) % 100;
+            const SS = Math.floor(page.clearTiming) % 60;
+            const MM = Math.floor((page.clearTiming - SS) / 60) % 60;
+            const HH = Math.floor((page.clearTiming - SS - MM * 60) / 3600);
             const HHMMSSXX = `${HH.toString(10).padStart(2, '0')}${MM.toString(10).padStart(2, '0')}${SS.toString(10).padStart(2, '0')}${XX.toString(10).padStart(2, '0')}`;
             for (let i = 0; i < 8; i++) {
               pageInformationBuilder.writeU8(HHMMSSXX.charCodeAt(i));

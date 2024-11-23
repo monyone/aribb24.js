@@ -71,10 +71,10 @@ export type ProgramManagementInformation = {
   timeControlMode: (typeof TimeControlModeType)[keyof typeof TimeControlModeType];
   extensible: [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
   compatible: [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
-  expireDate: [number, number, number];
+  expireDate: [number, number, number] | null;
   author: string;
-  creationDateTime: [number, number, number, number, number];
-  broadcastStartDate: [number, number, number];
+  creationDateTime: [number, number, number, number, number] | null;
+  broadcastStartDate: [number, number, number] | null;
   broadcastEndDate: [number, number, number] | null;
   broadcastDaysOfWeek: [boolean, boolean, boolean, boolean, boolean, boolean, boolean];
   broadcastStartTime: [number, number, number] | null;
@@ -358,46 +358,50 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
     compatibleValue[7] === '*',
   ] as [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
   // expireDate (有効期限)
-  const expireDateYear = Number.parseInt(String.fromCharCode(
+  const expireDateValue = String.fromCharCode(
+    program.readU8(), program.readU8(), program.readU8(), program.readU8(),
     program.readU8(), program.readU8(), program.readU8(), program.readU8()
-  ), 10);
-  const expireDateMonth = Number.parseInt(String.fromCharCode(
-    program.readU8(), program.readU8()
-  ), 10);
-  const expireDateDay = Number.parseInt(String.fromCharCode(
-    program.readU8(), program.readU8()
-  ), 10);
-  const expireDate = [expireDateYear, expireDateMonth, expireDateDay] as [number, number, number];
+  );
+  const expireDate = expireDateValue !== '        '
+    ?
+      [
+        Number.parseInt(expireDateValue.slice(0, 4), 10),
+        Number.parseInt(expireDateValue.slice(4, 6), 10),
+        Number.parseInt(expireDateValue.slice(6, 8), 10),
+      ] as [number, number, number]
+    : null;
   // author (作成者/作成担当機関)
   const author = decoder.decode(program.read(20)).trim();
   // creationDateTime (作成年月日時分)
-  const creationDateTimeYear = Number.parseInt(String.fromCharCode(
-    program.readU8(), program.readU8(), program.readU8(), program.readU8()
-  ), 10);
-  const creationDateTimeMonth = Number.parseInt(String.fromCharCode(
+  const creationDateTimeValue = String.fromCharCode(
+    program.readU8(), program.readU8(), program.readU8(), program.readU8(),
+    program.readU8(), program.readU8(),
+    program.readU8(), program.readU8(),
+    program.readU8(), program.readU8(),
     program.readU8(), program.readU8()
-  ), 10);
-  const creationDateTimeDay = Number.parseInt(String.fromCharCode(
-    program.readU8(), program.readU8()
-  ), 10);
-  const creationDateTimeHour = Number.parseInt(String.fromCharCode(
-    program.readU8(), program.readU8()
-  ), 10);
-  const creationDateTimeMinute = Number.parseInt(String.fromCharCode(
-    program.readU8(), program.readU8()
-  ), 10);
-  const creationDateTime = [creationDateTimeYear, creationDateTimeMonth, creationDateTimeDay, creationDateTimeHour, creationDateTimeMinute]  as [number, number, number, number, number];
+  );
+  const creationDateTime = creationDateTimeValue !== '            '
+    ?
+      [
+        Number.parseInt(creationDateTimeValue.slice(0, 4), 10),
+        Number.parseInt(creationDateTimeValue.slice(4, 6), 10),
+        Number.parseInt(creationDateTimeValue.slice(6, 8), 10),
+        Number.parseInt(creationDateTimeValue.slice(8, 10), 10),
+        Number.parseInt(creationDateTimeValue.slice(10, 12), 10),
+      ] as [number, number, number, number, number]
+    : null;
   // broadcastStartDate (放送日)
-  const broadcastStartDateYear = Number.parseInt(String.fromCharCode(
+  const broadcastStartDateValue = String.fromCharCode(
+    program.readU8(), program.readU8(), program.readU8(), program.readU8(),
     program.readU8(), program.readU8(), program.readU8(), program.readU8()
-  ), 10);
-  const broadcastStartDateMonth = Number.parseInt(String.fromCharCode(
-    program.readU8(), program.readU8()
-  ), 10);
-  const broadcastStartDateDay = Number.parseInt(String.fromCharCode(
-    program.readU8(), program.readU8()
-  ), 10);
-  const broadcastStartDate = [broadcastStartDateYear, broadcastStartDateMonth, broadcastStartDateDay] as [number, number, number];
+  );
+  const broadcastStartDate = broadcastStartDateValue !== '        '
+    ? [
+        Number.parseInt(broadcastStartDateValue.slice(0, 4), 10),
+        Number.parseInt(broadcastStartDateValue.slice(4, 6), 10),
+        Number.parseInt(broadcastStartDateValue.slice(6, 8), 10),
+      ] as [number, number, number]
+    : null;
   // broadcastEndDate (放送日)
   const broadcastEndDateValue = String.fromCharCode(
     program.readU8(), program.readU8(), program.readU8(), program.readU8(),
@@ -529,7 +533,7 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
     const displayTimingSS = String.fromCharCode(page.readU8(), page.readU8());
     const displayTimingXX = String.fromCharCode(page.readU8(), page.readU8());
     page.readU8();
-    const displayTiming = pageNumber === '000000' ? 0 : timingUnitType === 'F'
+    const displayTiming = timingUnitType === 'F'
       ? timecodeToSecond(`${displayTimingHH}:${displayTimingMM}:${displayTimingSS};${displayTimingXX}`)
       : ((Number.parseInt(displayTimingHH, 10) * 60 + Number.parseInt(displayTimingMM, 10)) * 60 + Number.parseInt(displayTimingSS, 10)) + Number.parseInt(displayTimingXX, 10) / 100;
     // clearTiming (消去タイミング)
@@ -539,7 +543,7 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
     const clearTimingXX = String.fromCharCode(page.readU8(), page.readU8());
     const clearTimingALL = `${clearTimingHH}${clearTimingMM}${clearTimingSS}${clearTimingXX}`;
     page.readU8();
-    const clearTiming = pageNumber === '000000' ? 0 : clearTimingALL === '        ' ? Number.POSITIVE_INFINITY : timingUnitType === 'F'
+    const clearTiming = clearTimingALL === '        ' ? Number.POSITIVE_INFINITY : timingUnitType === 'F'
       ? timecodeToSecond(`${clearTimingHH}:${clearTimingMM}:${clearTimingSS};${clearTimingXX}`)
       : ((Number.parseInt(clearTimingHH, 10) * 60 + Number.parseInt(clearTimingMM, 10)) * 60 + Number.parseInt(clearTimingSS, 10)) + Number.parseInt(clearTimingXX, 10) / 100;
     // timeControlMode (TMD)
