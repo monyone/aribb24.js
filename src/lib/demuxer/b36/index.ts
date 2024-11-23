@@ -3,6 +3,92 @@ import { ViolationStandardError } from "../../../util/error";
 import { timecodeToSecond } from "../../../util/timecode";
 import datagroup, { CaptionManagement, CaptionStatement } from "../b24/datagroup";
 
+// Program/Page
+export const TimingUnitType = {
+  TIME: 'T',
+  FRAME: 'F',
+} as const;
+export const TimeControlModeType = {
+  FREE: 'FR',
+  REALTIME: 'RT',
+  OFFSETTIME: 'OF',
+} as const;
+
+// Program
+export const ProgramMaterialType = {
+  PROGRAM: '0',
+  CM: '1',
+  CONTENTS: '2',
+  SOUND: '3',
+} as const;
+export const RegistrationModeType = {
+  NEW: 'N',
+  RENEW: 'R',
+  ADDITION: 'A',
+  NOT_SPECIFIED: ' ',
+} as const;
+export const displayModeType = {
+  AUTO_ENABLED: '0',
+  AUTO_DISABLED: '1',
+  SELECT: '2',
+  SELECT_SPECIFIC: '3',
+} as const;
+export const ProgramType = {
+  INDEPENDENT: ' ',
+  COMPLEMENT: 'T',
+  CAPTION: 'C',
+} as const;
+export const RealtimeTimingType = {
+  CONTINUOUS_TIMECODE: 'TC',
+  UNCONTINUOUS_TIMECODE: 'TU',
+  LAPTIME: 'LT',
+  JST: 'JS',
+} as const;
+export const SyncronizationModeType = {
+  ASYNC: 'A',
+  PROGRAM_SYNC: 'P',
+  TIME_SYNC: 'T',
+} as const;
+
+export type ProgramManagementInformation = {
+  broadcasterIdentification: string;
+  materialNumber: string;
+  programTitle: string;
+  programSubtitle: string;
+  programMaterialType: (typeof ProgramMaterialType)[keyof typeof ProgramMaterialType];
+  registrationMode: (typeof RegistrationModeType)[keyof typeof RegistrationModeType];
+  languageCode: string;
+  displayMode: `${(typeof displayModeType)[keyof typeof displayModeType]}${(typeof displayModeType)[keyof typeof displayModeType]}`;
+  programType: (typeof ProgramType)[keyof typeof ProgramType];
+  sound: boolean;
+  totalPages: number;
+  totalBytes: number;
+  untime: boolean;
+  realtimeTimingType: (typeof RealtimeTimingType)[keyof typeof RealtimeTimingType];
+  timingUnitType: (typeof TimingUnitType)[keyof typeof TimingUnitType];
+  initialTime: number;
+  syncronizationMode: (typeof SyncronizationModeType)[keyof typeof SyncronizationModeType];
+  timeControlMode: (typeof TimeControlModeType)[keyof typeof TimeControlModeType];
+  extensible: [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
+  compatible: [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
+  expireDate: [number, number, number];
+  author: string;
+  creationDateTime: [number, number, number, number, number];
+  broadcastStartDate: [number, number, number];
+  broadcastEndDate: [number, number, number] | null;
+  broadcastDaysOfWeek: [boolean, boolean, boolean, boolean, boolean, boolean, boolean];
+  broadcastStartTime: [number, number, number] | null;
+  broadcastEndTime: [number, number, number] | null;
+  memo: string;
+  completed: boolean;
+} & ({
+  usersAreaUsed: false
+} | {
+  usersAreaUsed: true,
+  writingFormatConversionMode: number;
+  drcsConversionMode: number;
+});;
+
 export const PageMaterialType = {
   CONTENTS_AND_CM: '0',
   CONTENTS: '1',
@@ -14,15 +100,6 @@ export const DisplayTimingType = {
   DURATIONTIME: 'DT',
   UNTIME: 'UT',
   NOT_SPECIFIED: '  ',
-} as const;
-export const TimingUnitType = {
-  TIME: 'T',
-  FRAME: 'F',
-} as const;
-export const TimeControlModeType = {
-  FREE: 'FR',
-  REALTIME: 'RT',
-  OFFSETTIME: 'OF',
 } as const;
 export const FormatDensityType = {
   STANDARD: 'ST',
@@ -89,12 +166,12 @@ export type ARIBB36PageData = PageManagementInformation & ({
   management: CaptionManagement;
 });
 
-export type ARIBB36Data = {
+export type ARIBB36Data = ProgramManagementInformation & {
   label: 'DCAPTION' | 'BCAPTION' | 'MCAPTION';
   pages: ARIBB36PageData[]
 };
 
-const textDecoder = new TextDecoder('shift-jis');
+const textDecoder = new TextDecoder('shift-jis', { fatal: true });
 
 export default (b36: ArrayBuffer): ARIBB36Data => {
   const block = 256;
@@ -109,10 +186,292 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
   stream.read(block - 8);
 
   // Program Management Information
-  {
-    const LI = stream.readU32();
-    stream.read(Math.floor((4 + LI + (block - 1)) / block) * block - 4);
+  const LI = stream.readU32();
+  // Program Management Data (番組管理情報)
+  const program = new ByteStream(stream.read(Math.floor((4 + LI + (block - 1)) / block) * block - 4));
+  // broadcasterIdentification (制作局表示)
+  const broadcasterIdentification = decoder.decode(program.read(6)).trim();
+  // materialNumber (素材ナンバー)
+  const materialNumber = decoder.decode(program.read(27)).trim();
+  // programTitle (番組タイトル)
+  const programTitle = decoder.decode(program.read(40)).trim();
+  // programSubtitle (番組サブタイトル)
+  const programSubtitle = decoder.decode(program.read(40)).trim();
+  // programMaterialType (素材種別)
+  const programMaterialType = String.fromCharCode(program.readU8());
+  switch (programMaterialType) {
+    case ProgramMaterialType.PROGRAM:
+    case ProgramMaterialType.CM:
+    case ProgramMaterialType.CONTENTS:
+    case ProgramMaterialType.SOUND:
+      break;
+    default:
+      throw new ViolationStandardError(`Undefined programMaterialType: ${programMaterialType}`);
   }
+  // registrationType (登録モード)
+  const registrationMode = String.fromCharCode(program.readU8());
+  switch (registrationMode) {
+    case RegistrationModeType.NEW:
+    case RegistrationModeType.RENEW:
+    case RegistrationModeType.ADDITION:
+    case RegistrationModeType.NOT_SPECIFIED:
+      break;
+    default:
+      throw new ViolationStandardError(`Undefined registrationMode: ${registrationMode}`);
+  }
+  // languageCode (言語コード)
+  const languageCode = decoder.decode(program.read(3));
+  // displayMode (DMF受信表示)
+  const receptionDisplayMode = String.fromCharCode(program.readU8());
+  switch (receptionDisplayMode) {
+    case displayModeType.AUTO_ENABLED:
+    case displayModeType.AUTO_DISABLED:
+    case displayModeType.SELECT:
+    case displayModeType.SELECT_SPECIFIC:
+      break;
+    default:
+      throw new ViolationStandardError(`Undefined displayMode: ${receptionDisplayMode}`);
+  }
+  const recordingDisplayMode = String.fromCharCode(program.readU8());
+  switch (recordingDisplayMode) {
+    case displayModeType.AUTO_ENABLED:
+    case displayModeType.AUTO_DISABLED:
+    case displayModeType.SELECT:
+    case displayModeType.SELECT_SPECIFIC:
+      break;
+    default:
+      throw new ViolationStandardError(`Undefined displayMode: ${recordingDisplayMode}`);
+  }
+  const displayMode = `${receptionDisplayMode}${recordingDisplayMode}` as `${(typeof displayModeType)[keyof typeof displayModeType]}${(typeof displayModeType)[keyof typeof displayModeType]}`;
+  // programType (独立/補完/字幕)
+  const programType = String.fromCharCode(program.readU8());
+  switch (programType) {
+    case ProgramType.INDEPENDENT:
+    case ProgramType.COMPLEMENT:
+    case ProgramType.CAPTION:
+      break;
+    default:
+      throw new ViolationStandardError(`Undefined programType: ${programType}`);
+  }
+  // sound (音の有無)
+  const soundValue = String.fromCharCode(program.readU8());
+  if (soundValue !== '*' && soundValue !== ' ') {
+    throw new ViolationStandardError(`Undefined sound: ${soundValue}`);
+  }
+  const sound = soundValue === '*';
+  // totalPages (総ページ数)
+  const totalPages = Number.parseInt(String.fromCharCode(program.readU8(), program.readU8(), program.readU8(), program.readU8()), 10);
+  // totalBytes (番組データ量)
+  const totalBytes = Number.parseInt(String.fromCharCode(
+    program.readU8(), program.readU8(), program.readU8(), program.readU8(),
+    program.readU8(), program.readU8(), program.readU8(), program.readU8(),
+  ), 10);
+  // untime (アンタイムの有無)
+  const untimeValue = String.fromCharCode(program.readU8());
+  if (soundValue !== '*' && soundValue !== ' ') {
+    throw new ViolationStandardError(`Undefined sound: ${soundValue}`);
+  }
+  const untime = untimeValue === '*';
+  // realtimeTimingType (RTタイミング種別)
+  const realtimeTimingType = String.fromCharCode(program.readU8(), program.readU8());
+  switch (realtimeTimingType) {
+    case RealtimeTimingType.CONTINUOUS_TIMECODE:
+    case RealtimeTimingType.UNCONTINUOUS_TIMECODE:
+    case RealtimeTimingType.LAPTIME:
+    case RealtimeTimingType.JST:
+      break;
+    default:
+      throw new ViolationStandardError(`Undefined realtimeTimingType: ${realtimeTimingType}`);
+  }
+  // timingUnitType (タイミング単位指定)
+  const timingUnitType = String.fromCharCode(program.readU8());
+  switch (timingUnitType) {
+    case TimingUnitType.TIME:
+    case TimingUnitType.FRAME:
+      break;
+    default:
+      throw new ViolationStandardError(`Undefined TimingUnitType: ${timingUnitType}`);
+  }
+  // initialTime (イニシャルタイム)
+  const initialTimeHH = String.fromCharCode(program.readU8(), program.readU8());
+  const initialTimeMM = String.fromCharCode(program.readU8(), program.readU8());
+  const initialTimeSS = String.fromCharCode(program.readU8(), program.readU8());
+  const initialTimeXX = String.fromCharCode(program.readU8(), program.readU8());
+  program.readU8();
+  const initialTime = timingUnitType === 'F'
+    ? timecodeToSecond(`${initialTimeHH}:${initialTimeMM}:${initialTimeSS};${initialTimeXX}`)
+    : ((Number.parseInt(initialTimeHH, 10) * 60 + Number.parseInt(initialTimeMM, 10)) * 60 + Number.parseInt(initialTimeSS, 10)) + Number.parseInt(initialTimeXX, 10) / 100;
+  // syncronizationMode (同期モード)
+  const syncronizationMode = String.fromCharCode(program.readU8());
+  switch (syncronizationMode) {
+    case SyncronizationModeType.ASYNC:
+    case SyncronizationModeType.PROGRAM_SYNC:
+    case SyncronizationModeType.TIME_SYNC:
+      break;
+    default:
+      throw new ViolationStandardError(`Undefined syncronizationMode: ${syncronizationMode}`);
+  }
+  // timeControlMode (TMD)
+  const timeControlMode = String.fromCharCode(program.readU8(), program.readU8());
+  switch (timeControlMode) {
+    case TimeControlModeType.FREE:
+    case TimeControlModeType.REALTIME:
+    case TimeControlModeType.OFFSETTIME:
+      break;
+    default:
+      throw new ViolationStandardError(`Undefined timeControlMode: ${timeControlMode}`);
+  }
+  // extensible (拡張性)
+  const extensibleValue = String.fromCharCode(
+    program.readU8(), program.readU8(), program.readU8(), program.readU8(),
+    program.readU8(), program.readU8(), program.readU8(), program.readU8()
+  );
+  if (/[^* ]/.test(extensibleValue)) {
+    throw new ViolationStandardError(`Undefined extensible: ${extensibleValue}`);
+  }
+  const extensible = [
+    extensibleValue[0] === '*',
+    extensibleValue[1] === '*',
+    extensibleValue[2] === '*',
+    extensibleValue[3] === '*',
+    extensibleValue[4] === '*',
+    extensibleValue[5] === '*',
+    extensibleValue[6] === '*',
+    extensibleValue[7] === '*',
+  ] as [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
+  // compatible (対応可能映像)
+  const compatibleValue = String.fromCharCode(
+    program.readU8(), program.readU8(), program.readU8(), program.readU8(),
+    program.readU8(), program.readU8(), program.readU8(), program.readU8()
+  );
+  if (/[^* ]/.test(compatibleValue)) {
+    throw new ViolationStandardError(`Undefined extensible: ${compatibleValue}`);
+  }
+  const compatible = [
+    compatibleValue[0] === '*',
+    compatibleValue[1] === '*',
+    compatibleValue[2] === '*',
+    compatibleValue[3] === '*',
+    compatibleValue[4] === '*',
+    compatibleValue[5] === '*',
+    compatibleValue[6] === '*',
+    compatibleValue[7] === '*',
+  ] as [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
+  // expireDate (有効期限)
+  const expireDateYear = Number.parseInt(String.fromCharCode(
+    program.readU8(), program.readU8(), program.readU8(), program.readU8()
+  ), 10);
+  const expireDateMonth = Number.parseInt(String.fromCharCode(
+    program.readU8(), program.readU8()
+  ), 10);
+  const expireDateDay = Number.parseInt(String.fromCharCode(
+    program.readU8(), program.readU8()
+  ), 10);
+  const expireDate = [expireDateYear, expireDateMonth, expireDateDay] as [number, number, number];
+  // author (作成者/作成担当機関)
+  const author = decoder.decode(program.read(20)).trim();
+  // creationDateTime (作成年月日時分)
+  const creationDateTimeYear = Number.parseInt(String.fromCharCode(
+    program.readU8(), program.readU8(), program.readU8(), program.readU8()
+  ), 10);
+  const creationDateTimeMonth = Number.parseInt(String.fromCharCode(
+    program.readU8(), program.readU8()
+  ), 10);
+  const creationDateTimeDay = Number.parseInt(String.fromCharCode(
+    program.readU8(), program.readU8()
+  ), 10);
+  const creationDateTimeHour = Number.parseInt(String.fromCharCode(
+    program.readU8(), program.readU8()
+  ), 10);
+  const creationDateTimeMinute = Number.parseInt(String.fromCharCode(
+    program.readU8(), program.readU8()
+  ), 10);
+  const creationDateTime = [creationDateTimeYear, creationDateTimeMonth, creationDateTimeDay, creationDateTimeHour, creationDateTimeMinute]  as [number, number, number, number, number];
+  // broadcastStartDate (放送日)
+  const broadcastStartDateYear = Number.parseInt(String.fromCharCode(
+    program.readU8(), program.readU8(), program.readU8(), program.readU8()
+  ), 10);
+  const broadcastStartDateMonth = Number.parseInt(String.fromCharCode(
+    program.readU8(), program.readU8()
+  ), 10);
+  const broadcastStartDateDay = Number.parseInt(String.fromCharCode(
+    program.readU8(), program.readU8()
+  ), 10);
+  const broadcastStartDate = [broadcastStartDateYear, broadcastStartDateMonth, broadcastStartDateDay] as [number, number, number];
+  // broadcastEndDate (放送日)
+  const broadcastEndDateValue = String.fromCharCode(
+    program.readU8(), program.readU8(), program.readU8(), program.readU8(),
+    program.readU8(), program.readU8(), program.readU8(), program.readU8()
+  );
+  const broadcastEndDate = broadcastEndDateValue !== '        '
+    ? [
+        Number.parseInt(broadcastEndDateValue.slice(0, 4), 10),
+        Number.parseInt(broadcastEndDateValue.slice(4, 6), 10),
+        Number.parseInt(broadcastEndDateValue.slice(6, 8), 10),
+      ] as [number, number, number]
+    : null;
+  // broadcastDaysOfWeek (放送曜日)
+  const broadcastDaysOfWeekValue = String.fromCharCode(
+    program.readU8(), program.readU8(), program.readU8(), program.readU8(),
+    program.readU8(), program.readU8(), program.readU8()
+  );
+  if (/[^* ]/.test(broadcastDaysOfWeekValue)) {
+    throw new ViolationStandardError(`Undefined broadcastDaysOfWeek: ${broadcastDaysOfWeekValue}`);
+  }
+  const broadcastDaysOfWeek = [
+    broadcastDaysOfWeekValue[0] === '*',
+    broadcastDaysOfWeekValue[1] === '*',
+    broadcastDaysOfWeekValue[2] === '*',
+    broadcastDaysOfWeekValue[3] === '*',
+    broadcastDaysOfWeekValue[4] === '*',
+    broadcastDaysOfWeekValue[5] === '*',
+    broadcastDaysOfWeekValue[6] === '*',
+  ] as [boolean, boolean, boolean, boolean, boolean, boolean, boolean];
+  // broadcastStartTime (放送時間枠)
+  const broadcastStartTimeValue = String.fromCharCode(
+    program.readU8(), program.readU8(), program.readU8(),
+    program.readU8(), program.readU8(), program.readU8()
+  );
+  const broadcastStartTime = broadcastStartTimeValue !== '      '
+    ? [
+        Number.parseInt(broadcastStartTimeValue.slice(0, 2), 10),
+        Number.parseInt(broadcastStartTimeValue.slice(2, 4), 10),
+        Number.parseInt(broadcastStartTimeValue.slice(4, 6), 10),
+      ] as [number, number, number]
+    : null;
+  // broadcastEndTime (放送時間枠)
+  const broadcastStartEndValue = String.fromCharCode(
+    program.readU8(), program.readU8(), program.readU8(),
+    program.readU8(), program.readU8(), program.readU8()
+  );
+  const broadcastEndTime = broadcastStartEndValue !== '      '
+    ? [
+        Number.parseInt(broadcastStartEndValue.slice(0, 2), 10),
+        Number.parseInt(broadcastStartEndValue.slice(2, 4), 10),
+        Number.parseInt(broadcastStartEndValue.slice(4, 6), 10),
+      ] as [number, number, number]
+    : null;
+  // memo (メモ)
+  const memo = decoder.decode(program.read(60)).trim();
+  // reserved (予備)
+  program.read(45);
+  // completed (完成マーク)
+  const completedValue = String.fromCharCode(program.readU8());
+  if (completedValue !== '*' && completedValue !== ' ') {
+    throw new ViolationStandardError(`Undefined completed: ${completedValue}`);
+  }
+  const completed = completedValue === '*';
+  // usersAreaUsed (ユーザーズエリア識別)
+  const usersAreaUsedValue = String.fromCharCode(program.readU8());
+  if (usersAreaUsedValue !== '*' && usersAreaUsedValue !== ' ') {
+    throw new ViolationStandardError(`Undefined usersAreaUsed: ${usersAreaUsedValue}`);
+  }
+  const usersAreaUsed = usersAreaUsedValue === '*';
+  const usersArea = usersAreaUsed ? {
+    usersAreaUsed,
+    writingFormatConversionMode: program.readU8(),
+    drcsConversionMode: ((program.readU8() & 0xC0) >> 6)
+  } : { usersAreaUsed };
 
   // Program Page Information
   const pages: ARIBB36PageData[] = [];
@@ -121,7 +480,7 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
     const buffer = stream.read(Math.floor((4 + LI + (block - 1)) / block) * block - 4)
     const data = new DataView(buffer.slice(0, 4 + LI));
 
-    // Page Management Data (ページ管理データ)
+    // Page Management Data (ページ管理情報)
     let begin = 0;
     if (data.byteLength < (begin + 1 + 2)) { continue; }
     const DL = data.getUint16(begin + 1, false);
@@ -355,6 +714,37 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
 
   return {
     label,
+    broadcasterIdentification,
+    materialNumber,
+    programTitle,
+    programSubtitle,
+    programMaterialType,
+    registrationMode,
+    languageCode,
+    displayMode,
+    programType,
+    sound,
+    totalPages,
+    totalBytes,
+    untime,
+    realtimeTimingType,
+    timingUnitType,
+    initialTime,
+    syncronizationMode,
+    timeControlMode,
+    extensible,
+    compatible,
+    expireDate,
+    author,
+    creationDateTime,
+    broadcastStartDate,
+    broadcastEndDate,
+    broadcastDaysOfWeek,
+    broadcastStartTime,
+    broadcastEndTime,
+    memo,
+    completed,
+    ... usersArea,
     pages
   };
 }
