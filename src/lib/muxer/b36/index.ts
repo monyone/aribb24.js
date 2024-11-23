@@ -1,18 +1,20 @@
 import { ARIBB36Data, DisplayTimingType, TimingUnitType } from "../../demuxer/b36";
 import datagroup from "../../muxer/b36/datagroup";
 import { ByteBuilder } from "../../../util/bytebuilder";
-import { secondsToTimecode } from "../../../util/timecode";
+import { secondsToTimecode, secondToFrameCount } from "../../../util/timecode";
 import { ViolationStandardError } from "../../../util/error";
 
 const textDecoder = new TextDecoder('shift-jis', { fatal: true });
 const toShiftJIS = new Map<string, [number] | [number, number]>();
 // 1 bytes
-for (let i = 0x00; i <= 0x7E; i++) {
-  const array: [number] = [i];
-  const bytes = Uint8Array.from(array);
-  try {
-    toShiftJIS.set(textDecoder.decode(bytes), array);
-  } catch (e) {}
+for (const [begin, end] of [[0x00, 0x80], [0xA1, 0xDF]]) {
+  for (let i = begin; i < end; i++) {
+    const array: [number] = [i];
+    const bytes = Uint8Array.from(array);
+    try {
+      toShiftJIS.set(textDecoder.decode(bytes), array);
+    } catch (e) {}
+  }
 }
 // 2 bytes
 for (const [begin, end] of [[0x81, 0x9F], [0xE0, 0xEF]]) {
@@ -316,7 +318,7 @@ export default (b36: ARIBB36Data): ArrayBuffer => {
           break;
         }
         case TimingUnitType.TIME: {
-          const XX = Math.ceil(page.displayTiming * 100) % 100;
+          const XX = Math.round(page.displayTiming * 100) % 100;
           const SS = Math.floor(page.displayTiming) % 60;
           const MM = Math.floor((page.displayTiming - SS) / 60) % 60;
           const HH = Math.floor((page.displayTiming - SS - MM * 60) / 3600);
@@ -344,7 +346,7 @@ export default (b36: ARIBB36Data): ArrayBuffer => {
             break;
           }
           case TimingUnitType.TIME: {
-            const XX = Math.ceil(page.clearTiming * 100) % 100;
+            const XX = Math.round(page.clearTiming * 100) % 100;
             const SS = Math.floor(page.clearTiming) % 60;
             const MM = Math.floor((page.clearTiming - SS) / 60) % 60;
             const HH = Math.floor((page.clearTiming - SS - MM * 60) / 3600);
