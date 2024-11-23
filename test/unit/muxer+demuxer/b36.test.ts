@@ -4,7 +4,7 @@ import muxDatagroup from '@/lib/muxer/b24/datagroup';
 import ARIBB24JapaneseJIS8Encoder from '@/lib/encoder/b24/jis8/ARIB'
 import demux, { ARIBB36Data } from '@/lib/demuxer/b36'
 import { ClearScreen } from '@/lib/tokenizer/token';
-import { CaptionData } from '@/lib/demuxer/b24/datagroup';
+import { CaptionData, DisplayModeType, RollupModeType, TimeControlModeType } from '@/lib/demuxer/b24/datagroup';
 
 describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
   test('Empty STD-B36', () => {
@@ -50,12 +50,14 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
   test('Reserved Page only STD-B36', () => {
     const management = {
       tag: 'CaptionManagement',
+      timeControlMode: TimeControlModeType.FREE,
       group: 0,
       languages: [{
         lang: 0,
         iso_639_language_code: 'jpn',
         format: 7,
-        rollup: false,
+        displayMode: DisplayModeType.AUTO_ENABLED,
+        rollup: RollupModeType.RESERVED2,
         TCS: 0b00,
       }],
       units: [],
@@ -126,11 +128,13 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
     const management = {
       tag: 'CaptionManagement',
       group: 0,
+      timeControlMode: TimeControlModeType.FREE,
       languages: [{
         lang: 0,
+        displayMode: DisplayModeType.SELECT,
         iso_639_language_code: 'jpn',
         format: 7,
-        rollup: false,
+        rollup: 0b00,
         TCS: 0b00,
       }],
       units: [],
@@ -140,6 +144,7 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
     const statement = {
       tag: 'CaptionStatement',
       group: 0,
+      timeControlMode: TimeControlModeType.FREE,
       lang: 0,
       units: encoded,
     } satisfies CaptionData;

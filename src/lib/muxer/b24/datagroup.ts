@@ -1,7 +1,8 @@
+import { ByteBuilder } from "../../../util/bytebuilder";
 import concat from "../../../util/concat";
 import CRC16_CCITT from "../../../util/crc16-ccitt";
 import { UnreachableError } from "../../../util/error";
-import { CaptionData, DataUnit } from "../../demuxer/b24/datagroup";
+import { CaptionData, DataUnit, TimeControlModeType } from "../../demuxer/b24/datagroup";
 
 const data_unit_parameter = (unit: DataUnit) => {
   switch (unit.tag) {
@@ -17,66 +18,89 @@ const data_unit_parameter = (unit: DataUnit) => {
   }
 }
 
-export default (caption: CaptionData, isB36: boolean = false) => {
-  const data_unit_loop = concat(... caption.units.flatMap((unit) => {
-    return [
-      Uint8Array.from([
-        0x1F,
-        data_unit_parameter(unit),
-        (unit.data.byteLength & 0xFF0000) >> 16,
-        (unit.data.byteLength & 0x00FF00) >> 8,
-        (unit.data.byteLength & 0x0000FF) >> 0,
-      ]).buffer,
-      unit.data
-    ];
-  }));
+export default (caption: CaptionData) => {
+  const dataunitBuilder = new ByteBuilder();
+  for (const unit of caption.units) {
+    dataunitBuilder.writeU8(0x1F);
+    dataunitBuilder.writeU8(data_unit_parameter(unit));
+    dataunitBuilder.writeU24(unit.data.byteLength);
+    dataunitBuilder.write(unit.data);
+  }
+  const dataunit = dataunitBuilder.build();
 
   switch (caption.tag) {
     case 'CaptionManagement': {
-      const languages = concat(... caption.languages.map((language) => {
-        const buffer = new ArrayBuffer(1 + 3 + 1);
-        const view = new DataView(buffer);
-        view.setUint8(0, (language.lang << 5) | (0b0000));
-        view.setUint8(1, language.iso_639_language_code.charCodeAt(0));
-        view.setUint8(2, language.iso_639_language_code.charCodeAt(1));
-        view.setUint8(3, language.iso_639_language_code.charCodeAt(2));
-        view.setUint8(4, (language.format << 4) | (language.TCS << 2) | (language.rollup ? 1 : 0) << 0)
-        return buffer;
-      }));
-      const data_group_size = data_unit_loop.byteLength + 3 + 1 /* TMD */ + (isB36 ? 5 : 0) + 1 + languages.byteLength;
-      const buffer = new ArrayBuffer(3 + (2 + data_group_size) + (isB36 ? 0 : 2 /* CRC16*/));
-      const array = new Uint8Array(buffer);
-      const view = new DataView(buffer);
-      view.setUint8(0, (caption.group << 7) | (0 << 2));
-      view.setUint16(3, data_group_size, false);
-      // TODO: TMD only 0 is supported
-      view.setUint8(3 + 2 + 1 + (isB36 ? 5 : 0), caption.languages.length);
-      array.set(new Uint8Array(languages), 3 + 2 + 1 + (isB36 ? 5 : 0) + 1);
-      view.setUint8(3 + 2 + 1 + (isB36 ? 5 : 0) + 1 + languages.byteLength + 0, data_unit_loop.byteLength >> 16);
-      view.setUint16(3 + 2 + 1 + (isB36 ? 5 : 0) + 1 + languages.byteLength + 1, data_unit_loop.byteLength & 0xFFFF, false);
-      array.set(new Uint8Array(data_unit_loop), 3 + 2 + 2 + languages.byteLength + 3);
-      if (!isB36) {
-        const CRC16 = CRC16_CCITT(array, 0, array.byteLength - 2);
-        view.setUint16(array.byteLength - 2, CRC16, false);
+      const languagesBuilder = new ByteBuilder();
+      for (const language of caption.languages) {
+        languagesBuilder.writeU8((language.lang << 5) | (1 << 4) | (language.displayMode));
+        if (language.displayMode === 0b1100 || language.displayMode === 0b1101 || language.displayMode === 0b1110) {
+          languagesBuilder.writeU8(language.displayConditionDesignation);
+        }
+        languagesBuilder.writeU8(language.iso_639_language_code.charCodeAt(0));
+        languagesBuilder.writeU8(language.iso_639_language_code.charCodeAt(1));
+        languagesBuilder.writeU8(language.iso_639_language_code.charCodeAt(2));
+        languagesBuilder.writeU8((language.format << 4) | (language.TCS << 2) | (language.rollup));
       }
-      return buffer;
+      const languages = languagesBuilder.build();
+
+      const datagroupBuilder = new ByteBuilder();
+      datagroupBuilder.writeU8((caption.timeControlMode << 6) | 0b111111);
+      if (caption.timeControlMode === 0b10) {
+        const HH = (Math.floor(caption.offsetTime[0] / 10) << 4) | ((caption.offsetTime[0] % 10) << 0);
+        const MM = (Math.floor(caption.offsetTime[1] / 10) << 4) | ((caption.offsetTime[1] % 10) << 0);
+        const SS = (Math.floor(caption.offsetTime[2] / 10) << 4) | ((caption.offsetTime[2] % 10) << 0);
+        const sss1 = (Math.floor(caption.offsetTime[3] / 100) << 4) | ((Math.floor(caption.offsetTime[3] / 10) % 10) << 0);
+        const sss2 = (Math.floor(caption.offsetTime[3] % 10) << 4) | 0b1111;
+        datagroupBuilder.writeU8(HH);
+        datagroupBuilder.writeU8(MM);
+        datagroupBuilder.writeU8(SS);
+        datagroupBuilder.writeU8(sss1);
+        datagroupBuilder.writeU8(sss2);
+      }
+      datagroupBuilder.writeU8(caption.languages.length)
+      datagroupBuilder.write(languages);
+      datagroupBuilder.writeU24(dataunit.byteLength);
+      datagroupBuilder.write(dataunit);
+      const datagroup = datagroupBuilder.build();
+
+      const managementBuilder = new ByteBuilder();
+      managementBuilder.writeU8((caption.group << 7) | (0 << 2)); // data_group_id + data_group_version (0)
+      managementBuilder.writeU8(0); // data_group_link_number (0)
+      managementBuilder.writeU8(0); // last_data_group_link_number (0)
+      managementBuilder.writeU16(datagroup.byteLength);
+      managementBuilder.write(datagroup);
+      managementBuilder.writeU16(CRC16_CCITT(new Uint8Array(managementBuilder.build())));
+
+      return managementBuilder.build();
     }
     case 'CaptionStatement': {
-      const data_group_size = data_unit_loop.byteLength + 3 + 1 /* TMD */ + (isB36 ? 5 : 0);
-      const buffer = new ArrayBuffer(3 + (2 + data_group_size) + (isB36 ? 0 : 2 /* CRC16*/));
-      const array = new Uint8Array(buffer);
-      const view = new DataView(buffer);
-      view.setUint8(0, (caption.group << 7) | ((caption.lang + 1) << 2));
-      view.setUint16(3, data_group_size, false);
-      // TODO: TMD only 0b00 is supported
-      view.setUint8(3 + 2 + 1 + (isB36 ? 5 : 0), data_unit_loop.byteLength >> 16);
-      view.setUint16(3 + 2 + 1 + (isB36 ? 5 : 0) + 1, data_unit_loop.byteLength & 0xFFFF, false);
-      array.set(new Uint8Array(data_unit_loop), 3 + 2 + 1 + (isB36 ? 5 : 0) + 3);
-      if (!isB36) {
-        const CRC16 = CRC16_CCITT(array, 0, array.byteLength - 2);
-        view.setUint16(array.byteLength - 2, CRC16, false);
+      const datagroupBuilder = new ByteBuilder();
+      datagroupBuilder.writeU8((caption.timeControlMode << 6) | 0b111111);
+      if (caption.timeControlMode === TimeControlModeType.REALTIME || caption.timeControlMode === TimeControlModeType.OFFSETTIME) {
+        const HH = (Math.floor(caption.presentationStartTime[0] / 10) << 4) | ((caption.presentationStartTime[0] % 10) << 0);
+        const MM = (Math.floor(caption.presentationStartTime[1] / 10) << 4) | ((caption.presentationStartTime[1] % 10) << 0);
+        const SS = (Math.floor(caption.presentationStartTime[2] / 10) << 4) | ((caption.presentationStartTime[2] % 10) << 0);
+        const sss1 = (Math.floor(caption.presentationStartTime[2] / 100) << 4) | (((caption.presentationStartTime[2] / 10) % 10) << 0);
+        const sss2 = (Math.floor(caption.presentationStartTime[2] % 10) << 4) | 0b1111;
+        datagroupBuilder.writeU8(HH);
+        datagroupBuilder.writeU8(MM);
+        datagroupBuilder.writeU8(SS);
+        datagroupBuilder.writeU8(sss1);
+        datagroupBuilder.writeU8(sss2);
       }
-      return buffer;
+      datagroupBuilder.writeU24(dataunit.byteLength);
+      datagroupBuilder.write(dataunit);
+      const datagroup = datagroupBuilder.build();
+
+      const statementBuilder = new ByteBuilder();
+      statementBuilder.writeU8((caption.group << 7) | ((caption.lang + 1) << 2) | 0b00); // data_group_id + data_group_version (0)
+      statementBuilder.writeU8(0); // data_group_link_number (0)
+      statementBuilder.writeU8(0); // last_data_group_link_number (0)
+      statementBuilder.writeU16(datagroup.byteLength);
+      statementBuilder.write(datagroup);
+      statementBuilder.writeU16(CRC16_CCITT(new Uint8Array(statementBuilder.build())));
+
+      return statementBuilder.build();
     }
     default:
       const exhaustive: never = caption;

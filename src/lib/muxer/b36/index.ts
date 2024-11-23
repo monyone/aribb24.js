@@ -1,7 +1,5 @@
 import { ARIBB36Data, DisplayTimingType, TimingUnitType } from "../../demuxer/b36";
-import muxDataGroup from "../../muxer/b24/datagroup";
-import ARIBB24Encoder from "../../encoder/b24/encoder";
-import concat from "../../../util/concat";
+import datagroup from "../../muxer/b36/datagroup";
 import { ByteBuilder } from "../../../util/bytebuilder";
 import { secondsToTimecode } from "../../../util/timecode";
 import { ViolationStandardError } from "../../../util/error";
@@ -440,8 +438,8 @@ export default (b36: ARIBB36Data): ArrayBuffer => {
     // Build
     const pageInformation = pageInformationBuilder.build();
 
-    const management = muxDataGroup(page.management, true);
-    const statement = page.tag !== 'ReservedPage' ? muxDataGroup(page.statement, true) : new ArrayBuffer(0);
+    const management = datagroup(page.management);
+    const statement = page.tag !== 'ReservedPage' ? datagroup(page.statement) : new ArrayBuffer(0);
     const length = (3 + pageInformation.byteLength) + (3 + management.byteLength) + (page.tag !== 'ReservedPage' ? 4 + statement.byteLength : 0);
 
     builder.writeU32(length);

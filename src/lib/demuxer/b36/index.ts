@@ -1,7 +1,8 @@
 import { ByteStream } from "../../../util/bytestream"
 import { ViolationStandardError } from "../../../util/error";
 import { timecodeToSecond } from "../../../util/timecode";
-import datagroup, { CaptionManagement, CaptionStatement } from "../b24/datagroup";
+import { CaptionManagement, CaptionStatement } from "../b24/datagroup";
+import datagroup from "../b36/datagroup"
 
 // Program/Page
 export const TimingUnitType = {
@@ -683,7 +684,7 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
     const DL1 = data.getUint16(begin + 1, false);
     begin += 1 + 2;
     if (data.byteLength < (begin + DL1)) { continue; }
-    const management = datagroup(data.buffer.slice(begin, begin + DL1), true);
+    const management = datagroup(data.buffer.slice(begin, begin + DL1));
     if (management == null || management.tag !== 'CaptionManagement') { continue; }
 
     if (pageNumber === '000000') {
@@ -703,7 +704,7 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
     const DL2 = data.getUint16(begin + 1, false) << 8 | data.getUint8(begin + 3);
     begin += 1 + 3;
     if (data.byteLength < (begin + DL2)) { continue; }
-    const statement = datagroup(data.buffer.slice(begin, begin + DL2), true);
+    const statement = datagroup(data.buffer.slice(begin, begin + DL2));
     if (statement == null || statement.tag !== 'CaptionStatement') { continue; }
 
     pages.push({
