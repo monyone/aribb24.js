@@ -1,6 +1,7 @@
 import { UnexpectedFormatError } from "./error";
 
-const timecodeRegex = /^(\d\d):(\d\d):(\d\d);(\d\d)$/
+const timecodeRegex = /^(\d\d):(\d\d):(\d\d);(\d\d)$/;
+const EPS = 1e-5;
 
 export const timecodeToFramecount = (timecode: string): number => {
   const matched = timecode.match(timecodeRegex)
@@ -17,7 +18,7 @@ export const timecodeToFramecount = (timecode: string): number => {
 }
 
 export const secondToFrameCount = (second: number): number => {
-  return Math.floor(second * 30000 / 1001);
+  return Math.floor(second * 30000 / 1001 + EPS);
 }
 
 export const framecountToTimecode = (framecount: number): string => {
