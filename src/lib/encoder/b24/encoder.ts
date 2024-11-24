@@ -1,7 +1,7 @@
 import { ARIBB24Token, Bitmap, Character, DRCS, Mosaic, RedForeground } from "../../tokenizer/token";
 import { CONTROL_CODES, CSI_CODE } from "../../tokenizer/b24/tokenizer";
 import { UnreachableError } from "../../../util/error";
-import { DataUnit } from "../../demuxer/b24/datagroup";
+import { ARIBB24DataUnit } from "../../demuxer/b24/datagroup";
 
 const generateCSI = (F: number, ... values: number[]): ArrayBuffer => {
   const ops = [F];
@@ -24,7 +24,7 @@ const generateCSI = (F: number, ... values: number[]): ArrayBuffer => {
 export default abstract class ARIBB24Encoder {
   protected readonly encodeTokenHandler = this.encodeToken.bind(this);
 
-  public abstract encode(tokens: ARIBB24Token[]): DataUnit[];
+  public abstract encode(tokens: ARIBB24Token[]): ARIBB24DataUnit[];
 
   public encodeToken(token: ARIBB24Token): ArrayBuffer {
     switch (token.tag) {

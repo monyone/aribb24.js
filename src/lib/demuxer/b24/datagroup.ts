@@ -1,34 +1,34 @@
 import { ByteStream } from "../../../util/bytestream";
 
-export type StatementDataUnit = {
+export type ARIBB24StatementDataUnit = {
   tag: 'Statement';
   data: ArrayBuffer;
 }
-export const StatementDataUnit = {
-  from(data: ArrayBuffer): StatementDataUnit {
+export const ARIBB24StatementDataUnit = {
+  from(data: ArrayBuffer): ARIBB24StatementDataUnit {
     return { tag: 'Statement', data };
   }
 }
-export type DRCSDataUnit = {
+export type ARIBB24DRCSDataUnit = {
   tag: 'DRCS'
   data: ArrayBuffer;
   bytes: 1 | 2;
 }
-export const DRCSDataUnit = {
-  from(data: ArrayBuffer, bytes: 1 | 2): DRCSDataUnit {
+export const ARIBB24DRCSDataUnit = {
+  from(data: ArrayBuffer, bytes: 1 | 2): ARIBB24DRCSDataUnit {
     return { tag: 'DRCS', data, bytes };
   }
 }
-export type BitmapDataUnit = {
+export type ARIBB24BitmapDataUnit = {
   tag: 'Bitmap'
   data: ArrayBuffer;
 }
-export const BitmapDataUnit = {
-  from(data: ArrayBuffer): BitmapDataUnit {
+export const ARIBB24BitmapDataUnit = {
+  from(data: ArrayBuffer): ARIBB24BitmapDataUnit {
     return { tag: 'Bitmap', data };
   }
 }
-export type DataUnit = StatementDataUnit | DRCSDataUnit | BitmapDataUnit;
+export type ARIBB24DataUnit = ARIBB24StatementDataUnit | ARIBB24DRCSDataUnit | ARIBB24BitmapDataUnit;
 
 export const DisplayModeType = {
   AUTO_ENABLED: 0,
@@ -89,19 +89,19 @@ export type TimeControlModeAndPresentationStartTime = {
   presentationStartTime: [number, number, number, number];
 };
 
-export type CaptionManagement = {
+export type ARIBB24CaptionManagement = {
   tag: 'CaptionManagement';
   group: 0 | 1;
   languages: CaptionManagementLanguageEntry[],
-  units: DataUnit[];
+  units: ARIBB24DataUnit[];
 } & TimeControlModeAndOffsetTime;
-export type CaptionStatement = {
+export type ARIBB24CaptionStatement = {
   tag: 'CaptionStatement';
   group: 0 | 1;
   lang: number;
-  units: DataUnit[];
+  units: ARIBB24DataUnit[];
 } & TimeControlModeAndPresentationStartTime;
-export type CaptionData = CaptionManagement | CaptionStatement;
+export type ARIBB24CaptionData = ARIBB24CaptionManagement | ARIBB24CaptionStatement;
 
 export type CaptionLanguageInformation = {
   association: 'ARIB' | 'SBTVD' | 'UNKNOWN',
@@ -125,7 +125,7 @@ export const BCDtoHHMMSSsss = (stream: ByteStream): [number, number, number, num
   ];
 }
 
-export default (data: ArrayBuffer): CaptionData | null => {
+export default (data: ArrayBuffer): ARIBB24CaptionData | null => {
   const stream = new ByteStream(data);
 
   const data_group_id = (stream.readU8() & 0xFC) >> 2;
@@ -173,7 +173,7 @@ export default (data: ArrayBuffer): CaptionData | null => {
     }
 
     const data_unit_loop_length = stream.readU24();
-    const units: DataUnit[] = [];
+    const units: ARIBB24DataUnit[] = [];
     let offset = 0;
     while (offset < data_unit_loop_length) {
       const unit_separator = stream.readU8();
@@ -219,7 +219,7 @@ export default (data: ArrayBuffer): CaptionData | null => {
     }) satisfies TimeControlModeAndPresentationStartTime;
 
     const data_unit_loop_length = stream.readU24();
-    const units: DataUnit[] = [];
+    const units: ARIBB24DataUnit[] = [];
     let offset = 0;
     while (offset < data_unit_loop_length) {
       const unit_separator = stream.readU8();

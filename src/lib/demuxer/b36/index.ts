@@ -1,7 +1,7 @@
 import { ByteStream } from "../../../util/bytestream"
 import { ViolationStandardError } from "../../../util/error";
 import { timecodeToSecond } from "../../../util/timecode";
-import { CaptionManagement, CaptionStatement } from "../b24/datagroup";
+import { ARIBB24CaptionManagement, ARIBB24CaptionStatement } from "../b24/datagroup";
 import datagroup from "../b36/datagroup"
 
 // Program/Page
@@ -51,7 +51,7 @@ export const SyncronizationModeType = {
   TIME_SYNC: 'T',
 } as const;
 
-export type ProgramManagementInformation = {
+export type ARIBB36ProgramManagementInformation = {
   broadcasterIdentification: string;
   materialNumber: string;
   programTitle: string;
@@ -130,7 +130,7 @@ export const ScrollDirectionType = {
   VERTICAL: 'V',
 } as const;
 
-export type PageManagementInformation = {
+export type ARIBB36PageManagementInformation = {
   pageNumber: string;
   pageMaterialType: (typeof PageMaterialType)[keyof typeof PageMaterialType];
   displayTimingType: (typeof DisplayTimingType)[keyof typeof DisplayTimingType];
@@ -157,17 +157,17 @@ export type PageManagementInformation = {
   drcsConversionMode: number;
 });
 
-export type ARIBB36PageData = PageManagementInformation & ({
+export type ARIBB36PageData = ARIBB36PageManagementInformation & ({
   tag: 'ActualPage'
-  management: CaptionManagement;
-  statement: CaptionStatement;
+  management: ARIBB24CaptionManagement;
+  statement: ARIBB24CaptionStatement;
 } | {
   tag: 'ReservedPage'
   pageNumber: '000000';
-  management: CaptionManagement;
+  management: ARIBB24CaptionManagement;
 });
 
-export type ARIBB36Data = ProgramManagementInformation & {
+export type ARIBB36Data = ARIBB36ProgramManagementInformation & {
   label: 'DCAPTION' | 'BCAPTION' | 'MCAPTION';
   pages: ARIBB36PageData[]
 };

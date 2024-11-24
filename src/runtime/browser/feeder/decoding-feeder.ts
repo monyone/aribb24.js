@@ -2,7 +2,7 @@ import AVLTree from '../../../util/avl';
 
 import Feeder, { FeederOption, FeederDecodingData, FeederPresentationData, getTokenizeInformation, PartialFeederOption } from './feeder';
 import demuxPES from '../../../lib/demuxer/b24/independent';
-import demuxDatagroup, { CaptionManagement } from '../../../lib/demuxer/b24/datagroup'
+import demuxDatagroup, { ARIBB24CaptionManagement } from '../../../lib/demuxer/b24/datagroup'
 import { ClearScreen } from '../../../lib/tokenizer/token';
 import { initialState } from '../../../lib/parser/parser';
 import { toBrowserToken } from '../types';
@@ -40,7 +40,7 @@ const closeValueImageBitmap = (value: FeederPresentationData) => {
 export default abstract class DecodingFeeder implements Feeder {
   private option: FeederOption;
   private priviousTime: number | null = null;
-  private priviousManagementData: CaptionManagement | null = null;
+  private priviousManagementData: ARIBB24CaptionManagement | null = null;
   private desiredLang: number | null = null;
   private decoder: AVLTree<DecodingOrderedKey, FeederDecodingData, number> = new AVLTree<DecodingOrderedKey, FeederDecodingData, number>(compareKey, compareNumber, calcDecodingOrder);
   private decoderBuffer: FeederDecodingData[] = [];

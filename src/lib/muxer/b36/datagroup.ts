@@ -1,9 +1,9 @@
 import { ByteBuilder } from "../../../util/bytebuilder";
 import CRC16_CCITT from "../../../util/crc16-ccitt";
 import { UnreachableError, ViolationStandardError } from "../../../util/error";
-import { CaptionData, DataUnit, TimeControlModeType } from "../../demuxer/b24/datagroup";
+import { ARIBB24CaptionData, ARIBB24DataUnit, TimeControlModeType } from "../../demuxer/b24/datagroup";
 
-const data_unit_parameter = (unit: DataUnit) => {
+const data_unit_parameter = (unit: ARIBB24DataUnit) => {
   switch (unit.tag) {
     case 'Statement':
       return 0x20;
@@ -17,7 +17,7 @@ const data_unit_parameter = (unit: DataUnit) => {
   }
 }
 
-export default (caption: CaptionData) => {
+export default (caption: ARIBB24CaptionData) => {
   const dataunitBuilder = new ByteBuilder();
   for (const unit of caption.units) {
     dataunitBuilder.writeU8(0x1F);

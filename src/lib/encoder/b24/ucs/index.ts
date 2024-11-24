@@ -3,11 +3,11 @@ import ARIBB24Encoder from "../encoder";
 import md5 from "../../../../util/md5";
 import concat from "../../../../util/concat";
 import { NotImplementedError } from "../../../../util/error";
-import { DataUnit, DRCSDataUnit, StatementDataUnit } from "../../../demuxer/b24/datagroup";
+import { ARIBB24DataUnit, ARIBB24DRCSDataUnit, ARIBB24StatementDataUnit } from "../../../demuxer/b24/datagroup";
 
 export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
   private current_drcs_code = 0xEC00;
-  private drcs_units: DRCSDataUnit[] = [];
+  private drcs_units: ARIBB24DRCSDataUnit[] = [];
   private drcs_md5_to_code = new Map<string, number>();
 
   private encoder = new TextEncoder();
@@ -16,11 +16,11 @@ export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
     return this.encoder.encode(character).buffer;
   }
 
-  public encode(tokens: ARIBB24Token[]): DataUnit[] {
+  public encode(tokens: ARIBB24Token[]): ARIBB24DataUnit[] {
     const statement_binaries = concat(... tokens.map(this.encodeTokenHandler));
     return [
       ... this.drcs_units,
-      StatementDataUnit.from(statement_binaries),
+      ARIBB24StatementDataUnit.from(statement_binaries),
     ];
   }
 
@@ -69,7 +69,7 @@ export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
         drcs.width, // height
       ]).buffer;
 
-      this.drcs_units.push(DRCSDataUnit.from(concat(header, drcs.binary), 2));
+      this.drcs_units.push(ARIBB24DRCSDataUnit.from(concat(header, drcs.binary), 2));
       this.drcs_md5_to_code.set(hash, this.current_drcs_code);
       this.current_drcs_code++;
     }
