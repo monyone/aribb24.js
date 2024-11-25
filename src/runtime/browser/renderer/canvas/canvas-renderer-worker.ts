@@ -40,15 +40,18 @@ export default class CanvasWebWorkerRenderer extends CanvasRenderer {
   }
 
   public async getPresentationImageBitmap(): Promise<ImageBitmap | null> {
-    if (this.waitPromise != null) {
+    while (this.waitPromise != null) {
       await this.waitPromise;
-      this.waitPromise = null;
-      this.waitResolve = () => {};
+      if (this.waitPromise == null) { break; }
     }
 
     // Waiter
     this.waitPromise = new Promise((resolve) => {
-      this.waitResolve = resolve;
+      this.waitResolve = () => {
+        this.waitPromise = null;
+        this.waitResolve = () => {};
+        resolve();
+      };
     });
 
     this.worker.postMessage(FromWorkerToMainEventImageBitmap.from());
