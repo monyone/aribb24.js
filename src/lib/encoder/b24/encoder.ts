@@ -165,7 +165,6 @@ export default abstract class ARIBB24Encoder {
         const exhaustive: never = control;
         throw new UnreachableError(`Undefined Size Type in STD-B24 ARIB Caption (${exhaustive})`);
     }
-
   }
   public abstract encodeCharacter(character: ARIBB24CharacterToken): ArrayBuffer;
   public abstract encodeDRCS(drcs: ARIBB24DRCSToken): ArrayBuffer;
