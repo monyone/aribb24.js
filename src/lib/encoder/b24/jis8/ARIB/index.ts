@@ -50,7 +50,7 @@ export default class ARIBB24JapaneseJIS8Encoder extends ARIBB24Encoder {
     if (ARIBB24JapaneseJIS8Encoder.ASCII.has(character)) {
       switch (this.mode) {
         case 'MACRO0':
-          return Uint8Array.from([CONTROL_CODES.ESC, ESC_CODES.LS1R, ... ARIBB24JapaneseJIS8Encoder.ASCII.get(character)!.map((elem) => elem | 0x80)]).buffer;
+          return Uint8Array.from([ ... ARIBB24JapaneseJIS8Encoder.ASCII.get(character)!.map((elem) => elem | 0x80)]).buffer;
         case 'MACRO1':
           this.mode = 'MACRO0';
           return Uint8Array.from([CONTROL_CODES.SS3, 0x60 /* MACRO-0 */, CONTROL_CODES.ESC, ESC_CODES.LS1R, ... ARIBB24JapaneseJIS8Encoder.ASCII.get(character)!.map((elem) => elem | 0x80)]).buffer;
@@ -66,7 +66,7 @@ export default class ARIBB24JapaneseJIS8Encoder extends ARIBB24Encoder {
           this.mode = 'MACRO1';
           return Uint8Array.from([CONTROL_CODES.SS3, 0x61 /* MACRO1 */, CONTROL_CODES.ESC, ESC_CODES.LS1R, ... ARIBB24JapaneseJIS8Encoder.KATAKANA.get(character)!.map((elem) => elem | 0x80)]).buffer;
         case 'MACRO1':
-          return Uint8Array.from([CONTROL_CODES.ESC, ESC_CODES.LS1R, ... ARIBB24JapaneseJIS8Encoder.KATAKANA.get(character)!.map((elem) => elem | 0x80)]).buffer;
+          return Uint8Array.from([... ARIBB24JapaneseJIS8Encoder.KATAKANA.get(character)!.map((elem) => elem | 0x80)]).buffer;
         default:
           const exhaustive: never = this.mode;
           throw new UnreachableError(`Undefined mode in encoder (${exhaustive})`);
@@ -108,7 +108,7 @@ export default class ARIBB24JapaneseJIS8Encoder extends ARIBB24Encoder {
     }
 
     this.mode = 'MACRO0';
-    return Uint8Array.from([CONTROL_CODES.ESC, 0x24, 0x29, 0x20, 0x40, ... this.drcs_md5_to_code.get(hash)!.map((elem) => elem | 0x80), CONTROL_CODES.SS3, 0x60]);
+    return Uint8Array.from([CONTROL_CODES.ESC, 0x24, 0x29, 0x20, 0x40, ... this.drcs_md5_to_code.get(hash)!.map((elem) => elem | 0x80), CONTROL_CODES.SS3, 0x60, CONTROL_CODES.ESC, ESC_CODES.LS1R]);
   }
 
   public encodeBitmap(bitmap: ARIBB24BitmapToken): ArrayBuffer {
