@@ -5,7 +5,8 @@ import halfwidth from "../halfwidth";
 import namedcolor from "../../../namedcolor";
 import { UnreachableError } from "../../../../util/error";
 import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datagroup";
-import { shouldHalfWidth, shouldUseARIBFont } from "../quirk";
+import { shouldHalfWidth } from "../quirk";
+import useARIBFont from "../font";
 import { ARIBB24BitmapParsedToken, ARIBB24BrowserParser, ARIBB24BrowserToken } from "../../types";
 
 export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTMLCanvasElement | OffscreenCanvas, state: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionAssociationInformation, rendererOption: CanvasRendererOption): void => {
@@ -210,7 +211,7 @@ const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRend
   context.translate(center_x, center_y);
 
   // detect
-  const font = shouldUseARIBFont(character) ? rendererOption.font.arib : rendererOption.font.normal;
+  const font = useARIBFont(character) ? rendererOption.font.arib : rendererOption.font.normal;
   context.scale(magnification[0] * 1, ARIBB24Parser.scale(state)[1] * magnification[1]);
 
   // orn

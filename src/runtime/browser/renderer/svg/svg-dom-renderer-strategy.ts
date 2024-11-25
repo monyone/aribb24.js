@@ -6,6 +6,7 @@ import namedcolor from "../../../namedcolor";
 import { UnreachableError } from "../../../../util/error";
 import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datagroup";
 import { shouldHalfWidth } from "../quirk";
+import useARIBFont from "../font";
 import { SVGDOMRendererOption } from "./svg-dom-renderer-option";
 import { ARIBB24BrowserParser, ARIBB24BrowserToken } from "../../types";
 
@@ -23,7 +24,7 @@ export default (target: SVGSVGElement, state: ARIBB24ParserState, tokens: ARIBB2
     buffer.setAttribute('x', `${token.state.margin[0]}`);
     buffer.setAttribute('y', `${token.state.margin[1]}`);
     buffer.setAttribute('width', `${token.state.area[0]}`);
-    buffer.setAttribute('height', `${token.state.area[1]}`)
+    buffer.setAttribute('height', `${token.state.area[1]}`);
 
     switch (token.tag) {
       case 'Character': {
@@ -225,7 +226,7 @@ const retriveCharacterSVGTextElement = (token: ARIBB24CharacterParsedToken, info
   text.setAttribute('transform', `scale(${1} ${scale_y})`);
   text.setAttribute('transform-origin', `${center_x} ${center_y}`);
   text.setAttribute('font-size', `${state.fontsize[0]}`);
-  text.setAttribute('font-family', rendererOption.font.normal);
+  text.setAttribute('font-family', useARIBFont(character) ? rendererOption.font.arib : rendererOption.font.normal);
   text.setAttribute('dominant-baseline', 'central');
   text.setAttribute('text-anchor', 'middle');
   text.setAttribute('fill', foreground);
