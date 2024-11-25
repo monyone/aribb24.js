@@ -4,11 +4,11 @@ import { page } from '@vitest/browser/context'
 import { CanvasMainThreadRenderer } from '@/index';
 import aribInitialState from '@/lib/parser/state/ARIB';
 import { CaptionLanguageInformation } from '@/lib/demuxer/b24/datagroup';
-import { ActivePositionReturn, Character, ColorControlBackground, PalletControl, WhiteForeground } from '@/lib/tokenizer/token';
+import { ARIBB24ActivePositionReturnToken, ARIBB24CharacterToken, ARIBB24ColorControlBackgroundToken, ARIBB24PalletControlToken, ARIBB24WhiteForegroundToken } from '@/lib/tokenizer/token';
 
 const generateCharacter = (str: string) => {
   const segmenter = new Intl.Segmenter();
-  return Array.from(segmenter.segment(str), ({ segment }) => segment).map((seg) => Character.from(seg));
+  return Array.from(segmenter.segment(str), ({ segment }) => segment).map((seg) => ARIBB24CharacterToken.from(seg));
 }
 
 describe('ARIB B24 Canvas Renderer', () => {
@@ -35,12 +35,12 @@ describe('ARIB B24 Canvas Renderer', () => {
     renderer.onContainerResize(width, height);
 
     renderer.render(aribInitialState, [
-      PalletControl.from(4),
-      ColorControlBackground.from(1),
-      PalletControl.from(0),
-      WhiteForeground.from(),
+      ARIBB24PalletControlToken.from(4),
+      ARIBB24ColorControlBackgroundToken.from(1),
+      ARIBB24PalletControlToken.from(0),
+      ARIBB24WhiteForegroundToken.from(),
       ... generateCharacter('ARIB'),
-      ActivePositionReturn.from(),
+      ARIBB24ActivePositionReturnToken.from(),
       ... generateCharacter('CAPTION'),
     ], info);
 
