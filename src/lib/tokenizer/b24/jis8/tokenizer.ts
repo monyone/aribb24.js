@@ -1,7 +1,7 @@
 import { ByteStream } from "../../../../util/bytestream";
 
 import type { ARIBB24Token } from '../../token';
-import { DRCS, Character } from "../../token";
+import { ARIBB24DRCSToken, ARIBB24CharacterToken } from "../../token";
 import ARIBB24Tokenizer, { CONTROL_CODES, CSI_CODE, processC0, processC1 } from "../tokenizer";
 import { UnreachableError } from "../../../../util/error";
 
@@ -28,7 +28,7 @@ export type DRCSDictEntry = {
   type: (typeof DictEntryType.DRCS),
   code: number;
   bytes: number;
-  dict: Map<number, DRCS>
+  dict: Map<number, ARIBB24DRCSToken>
 };
 export type MacroDictEntry = {
   type: (typeof DictEntryType.MACRO),
@@ -76,13 +76,13 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
             if (dict.has(code)) {
               const ch = dict.get(code)!;
               const non_spacing = this.non_spacing.has(ch);
-              result.push(Character.from(ch, non_spacing));
+              result.push(ARIBB24CharacterToken.from(ch, non_spacing));
             }
             break;
           case 'DRCS':
             if (dict.has(code)) {
               const { width, height, depth, binary } = dict.get(code)!;
-              result.push(DRCS.from(width, height, depth, binary));
+              result.push(ARIBB24DRCSToken.from(width, height, depth, binary));
             }
             break;
           case 'MACRO':
@@ -107,13 +107,13 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
             if (dict.has(code)) {
               const ch = dict.get(code)!;
               const non_spacing = this.non_spacing.has(ch);
-              result.push(Character.from(ch, non_spacing));
+              result.push(ARIBB24CharacterToken.from(ch, non_spacing));
             }
             break;
           case 'DRCS':
             if (dict.has(code)) {
               const { width, height, depth, binary } = dict.get(code)!;
-              result.push(DRCS.from(width, height, depth, binary));
+              result.push(ARIBB24DRCSToken.from(width, height, depth, binary));
             }
             break;
           case 'MACRO':
@@ -154,13 +154,13 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
               if (dict.has(code)) {
                 const ch = dict.get(code)!;
                 const non_spacing = this.non_spacing.has(ch);
-                result.push(Character.from(ch, non_spacing));
+                result.push(ARIBB24CharacterToken.from(ch, non_spacing));
               }
               break;
             case 'DRCS':
               if (dict.has(code)) {
                 const { width, height, depth, binary } = dict.get(code)!;
-                result.push(DRCS.from(width, height, depth, binary));
+                result.push(ARIBB24DRCSToken.from(width, height, depth, binary));
               }
               break;
             case 'MACRO':
@@ -239,13 +239,13 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
               if (dict.has(code)) {
                 const ch = dict.get(code)!;
                 const non_spacing = this.non_spacing.has(ch);
-                result.push(Character.from(ch, non_spacing));
+                result.push(ARIBB24CharacterToken.from(ch, non_spacing));
               }
               break;
             case 'DRCS':
               if (dict.has(code)) {
                 const { width, height, depth, binary } = dict.get(code)!;
-                result.push(DRCS.from(width, height, depth, binary));
+                result.push(ARIBB24DRCSToken.from(width, height, depth, binary));
               }
               break;
             case 'MACRO':
@@ -302,7 +302,7 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
             const entry = Object.values(this.drcs_dicts).find((value) => value.code === index);
             if (entry == null || entry.type !== 'DRCS') { continue };
 
-            entry.dict.set(ch, DRCS.from(width, height, bits, binary));
+            entry.dict.set(ch, ARIBB24DRCSToken.from(width, height, bits, binary));
           } else {
             const index = 0x40;
             const ch = CharacterCode & 0x7F7F;
@@ -310,7 +310,7 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
             const entry = Object.values(this.drcs_dicts).find((value) => value.code === index);
             if (entry == null || entry.type !== 'DRCS') { continue };
 
-            entry.dict.set(ch, DRCS.from(width, height, bits, binary));
+            entry.dict.set(ch, ARIBB24DRCSToken.from(width, height, bits, binary));
           }
 
           begin += 4 + length

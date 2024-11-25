@@ -1,4 +1,4 @@
-import { ARIBB24Token, Character, CharacterSizeControlType, ClearScreen, DRCS, FlashingControlType, OrnamentControlType } from "../tokenizer/token";
+import { ARIBB24Token, ARIBB24CharacterToken, ARIBB24CharacterSizeControlType, ARIBB24ClearScreenToken, ARIBB24DRCSToken, ARIBB24FlashingControlType, ARIBB24OrnamentControlType } from "../tokenizer/token";
 import { UnreachableError } from "../../util/error";
 
 export const CHARACTER_SIZE = {
@@ -46,7 +46,7 @@ export type ARIBB24ParserState = {
   underline: boolean;
   highlight: number;
   ornament: number | null;
-  flashing: (typeof FlashingControlType)[keyof typeof FlashingControlType];
+  flashing: (typeof ARIBB24FlashingControlType)[keyof typeof ARIBB24FlashingControlType];
   // time
   elapsed_time: number;
 };
@@ -85,7 +85,7 @@ export const initialState: Readonly<ARIBB24ParserState> = {
   underline: false,
   highlight: 0,
   ornament: null,
-  flashing: FlashingControlType.STOP,
+  flashing: ARIBB24FlashingControlType.STOP,
   // time
   elapsed_time: 0,
 } as const;
@@ -109,11 +109,11 @@ export const ARIBB24ClearScreenParsedToken = {
     };
   }
 }
-export type ARIBB24CharacterParsedToken = ARIBB24CommonParsedToken & Omit<Character, 'tag'> & {
+export type ARIBB24CharacterParsedToken = ARIBB24CommonParsedToken & Omit<ARIBB24CharacterToken, 'tag'> & {
   tag: 'Character'
 };
 export const ARIBB24CharacterParsedToken = {
-  from({ character, non_spacing }: Omit<Character, 'tag'>, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24CharacterParsedToken {
+  from({ character, non_spacing }: Omit<ARIBB24CharacterToken, 'tag'>, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24CharacterParsedToken {
     return {
       tag: 'Character',
       state: structuredClone(state),
@@ -123,11 +123,11 @@ export const ARIBB24CharacterParsedToken = {
     };
   }
 }
-export type ARIBB24DRCSPrasedToken = ARIBB24CommonParsedToken & Omit<DRCS, 'tag' | 'combining'> & {
+export type ARIBB24DRCSPrasedToken = ARIBB24CommonParsedToken & Omit<ARIBB24DRCSToken, 'tag' | 'combining'> & {
   tag: 'DRCS';
 };
 export const ARIBB24DRCSPrasedToken = {
-  from({ width, height, depth, binary }: Omit<DRCS, 'tag' | 'combining'>, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24DRCSPrasedToken {
+  from({ width, height, depth, binary }: Omit<ARIBB24DRCSToken, 'tag' | 'combining'>, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24DRCSPrasedToken {
     return {
       tag: 'DRCS',
       state: structuredClone(state),
@@ -248,14 +248,14 @@ export class ARIBB24Parser {
       case 'DRCS':
         const result = [
           ARIBB24DRCSPrasedToken.from(token, this.state, this.option),
-          ... (token.combining === '' ? [] : [ARIBB24CharacterParsedToken.from(Character.from('　' + token.combining, true), this.state, this.option)]),
+          ... (token.combining === '' ? [] : [ARIBB24CharacterParsedToken.from(ARIBB24CharacterToken.from('　' + token.combining, true), this.state, this.option)]),
           ... this.non_spacings
         ];
         this.non_spacings = [];
         this.move_relative_pos(1, 0);
         return result;
       case 'Space': {
-        const result = [ARIBB24CharacterParsedToken.from(Character.from('　'), this.state, this.option), ... this.non_spacings];
+        const result = [ARIBB24CharacterParsedToken.from(ARIBB24CharacterToken.from('　'), this.state, this.option), ... this.non_spacings];
         this.non_spacings = [];
         this.move_relative_pos(1, 0);
         return result;
@@ -337,22 +337,22 @@ export class ARIBB24Parser {
         break;
       case 'CharacterSizeControl':
         switch (token.type) {
-          case CharacterSizeControlType.TINY:
+          case ARIBB24CharacterSizeControlType.TINY:
             this.state.size = CHARACTER_SIZE.Tiny;
             break;
-          case CharacterSizeControlType.DOUBLE_HEIGHT:
+          case ARIBB24CharacterSizeControlType.DOUBLE_HEIGHT:
             this.state.size = CHARACTER_SIZE.DoubleHeight;
             break;
-          case CharacterSizeControlType.DOUBLE_WIDTH:
+          case ARIBB24CharacterSizeControlType.DOUBLE_WIDTH:
             this.state.size = CHARACTER_SIZE.DoubleWidth;
             break;
-          case CharacterSizeControlType.DOUBLE_HEIGHT_AND_WIDTH:
+          case ARIBB24CharacterSizeControlType.DOUBLE_HEIGHT_AND_WIDTH:
             this.state.size = CHARACTER_SIZE.DoubleHeightAndWidth;
             break;
-          case CharacterSizeControlType.SPECIAL_1:
+          case ARIBB24CharacterSizeControlType.SPECIAL_1:
             this.state.size = CHARACTER_SIZE.Special1;
             break;
-          case CharacterSizeControlType.SPECIAL_2:
+          case ARIBB24CharacterSizeControlType.SPECIAL_2:
             this.state.size = CHARACTER_SIZE.Special2;
             break;
           default:

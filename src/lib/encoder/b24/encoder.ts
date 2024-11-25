@@ -1,4 +1,4 @@
-import { ARIBB24Token, Bitmap, Character, DRCS, Mosaic, RedForeground } from "../../tokenizer/token";
+import { ARIBB24Token, ARIBB24BitmapToken, ARIBB24CharacterToken, ARIBB24DRCSToken, ARIBB24MosaicToken, ARIBB24RedForegroundToken } from "../../tokenizer/token";
 import { CONTROL_CODES, CSI_CODE } from "../../tokenizer/b24/tokenizer";
 import { UnreachableError } from "../../../util/error";
 import { ARIBB24DataUnit } from "../../demuxer/b24/datagroup";
@@ -41,7 +41,7 @@ export default abstract class ARIBB24Encoder {
     }
   }
 
-  public encodeControl(control: Exclude<ARIBB24Token, Character | DRCS | Bitmap | Mosaic>): ArrayBuffer {
+  public encodeControl(control: Exclude<ARIBB24Token, ARIBB24CharacterToken | ARIBB24DRCSToken | ARIBB24BitmapToken | ARIBB24MosaicToken>): ArrayBuffer {
     switch (control.tag) {
       // C0
       case 'Null':
@@ -167,8 +167,8 @@ export default abstract class ARIBB24Encoder {
     }
 
   }
-  public abstract encodeCharacter(character: Character): ArrayBuffer;
-  public abstract encodeDRCS(drcs: DRCS): ArrayBuffer;
-  public abstract encodeBitmap(bitmap: Bitmap): ArrayBuffer;
-  public abstract encodeMosaic(mozaic: Mosaic): ArrayBuffer;
+  public abstract encodeCharacter(character: ARIBB24CharacterToken): ArrayBuffer;
+  public abstract encodeDRCS(drcs: ARIBB24DRCSToken): ArrayBuffer;
+  public abstract encodeBitmap(bitmap: ARIBB24BitmapToken): ArrayBuffer;
+  public abstract encodeMosaic(mozaic: ARIBB24MosaicToken): ArrayBuffer;
 }

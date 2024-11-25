@@ -1,4 +1,4 @@
-import { ARIBB24Token, Bitmap, Character, DRCS, Mosaic } from "../../../tokenizer/token";
+import { ARIBB24Token, ARIBB24BitmapToken, ARIBB24CharacterToken, ARIBB24DRCSToken, ARIBB24MosaicToken } from "../../../tokenizer/token";
 import ARIBB24Encoder from "../encoder";
 import md5 from "../../../../util/md5";
 import concat from "../../../../util/concat";
@@ -12,7 +12,7 @@ export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
 
   private encoder = new TextEncoder();
 
-  public encodeCharacter({ character }: Character): ArrayBuffer {
+  public encodeCharacter({ character }: ARIBB24CharacterToken): ArrayBuffer {
     return this.encoder.encode(character).buffer;
   }
 
@@ -24,7 +24,7 @@ export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
     ];
   }
 
-  public encodeControl(control: Exclude<ARIBB24Token, Character | DRCS | Bitmap | Mosaic>): ArrayBuffer {
+  public encodeControl(control: Exclude<ARIBB24Token, ARIBB24CharacterToken | ARIBB24DRCSToken | ARIBB24BitmapToken | ARIBB24MosaicToken>): ArrayBuffer {
     switch (control.tag) {
       // C0
       case 'Null':
@@ -49,7 +49,7 @@ export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
     }
   }
 
-  public encodeDRCS(drcs: DRCS): ArrayBuffer {
+  public encodeDRCS(drcs: ARIBB24DRCSToken): ArrayBuffer {
     const hash = md5(drcs.binary);
 
     if (!this.drcs_md5_to_code.has(hash)) {
@@ -78,15 +78,15 @@ export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
     if (drcs.combining === '') {
       return this.encoder.encode(String.fromCodePoint(code)).buffer;
     } else {
-      return concat(this.encoder.encode(String.fromCodePoint(code)).buffer, this.encodeCharacter(Character.from(drcs.combining)));
+      return concat(this.encoder.encode(String.fromCodePoint(code)).buffer, this.encodeCharacter(ARIBB24CharacterToken.from(drcs.combining)));
     }
   }
 
-  public encodeBitmap(bitmap: Bitmap): ArrayBuffer {
+  public encodeBitmap(bitmap: ARIBB24BitmapToken): ArrayBuffer {
     throw new NotImplementedError('Bitmap is Not Implemented');
   }
 
-  public encodeMosaic(mozaic: Mosaic): ArrayBuffer {
+  public encodeMosaic(mozaic: ARIBB24MosaicToken): ArrayBuffer {
     throw new NotImplementedError('Mozaic Character is Not Implemented');
   }
 }

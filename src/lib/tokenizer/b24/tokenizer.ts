@@ -1,7 +1,7 @@
 import { ByteStream } from "../../../util/bytestream";
 import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from "../../../util/error";
 import md5 from "../../../util/md5";
-import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, ARIBB24Token, Bell, Bitmap, BlackForeground, BlueForeground, BuiltinSoundReplay, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, ConcealmentMode, ConcealmentModeType, CyanForeground, Delete, DRCS, FlashingControl, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControlHemming, OrnamentControlHollow, OrnamentControlNone, OrnamentControlShade, OrnamentControlType, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, RasterColourCommand, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SingleConcealmentModeType, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, YellowForeground } from "../token";
+import { ARIBB24ActiveCoordinatePositionSetToken, ARIBB24ActivePositionBackwardToken, ARIBB24ActivePositionDownToken, ARIBB24ActivePositionForwardToken, ARIBB24ActivePositionReturnToken, ARIBB24ActivePositionSetToken, ARIBB24ActivePositionUpToken, ARIBB24Token, ARIBB24BellToken, ARIBB24BitmapToken, ARIBB24BlackForegroundToken, ARIBB24BlueForegroundToken, ARIBB24BuiltinSoundReplayToken, ARIBB24CancelToken, ARIBB24CharacterToken, ARIBB24CharacterCompositionDotDesignationToken, ARIBB24CharacterSizeControlToken, ARIBB24ClearScreenToken, ARIBB24ColorControlBackgroundToken, ARIBB24ColorControlForegroundToken, ARIBB24ColorControlHalfBackgroundToken, ARIBB24ColorControlHalfForegroundToken, ARIBB24ConcealmentModeToken, ARIBB24ConcealmentModeType, ARIBB24CyanForegroundToken, ARIBB24DeleteToken, ARIBB24DRCSToken, ARIBB24FlashingControlToken, ARIBB24GreenForegroundToken, ARIBB24HilightingCharacterBlockToken, ARIBB24MagentaForegroundToken, ARIBB24MiddleSizeToken, ARIBB24NormalSizeToken, ARIBB24NullToken, ARIBB24OrnamentControlHemmingToken, ARIBB24OrnamentControlHollowToken, ARIBB24OrnamentControlNoneToken, ARIBB24OrnamentControlShadeToken, ARIBB24OrnamentControlType, ARIBB24PalletControlToken, ARIBB24ParameterizedActivePositionForwardToken, ARIBB24PatternPolarityControlToken, ARIBB24RasterColourCommandToken, ARIBB24RecordSeparatorToken, ARIBB24RedForegroundToken, ARIBB24RepeatCharacterToken, ARIBB24ReplacingConcealmentModeToken, ARIBB24SetDisplayFormatToken, ARIBB24SetDisplayPositionToken, ARIBB24SetHorizontalSpacingToken, ARIBB24SetVerticalSpacingToken, ARIBB24SetWritingFormatToken, ARIBB24SingleConcealmentModeToken, ARIBB24SingleConcealmentModeType, ARIBB24SmallSizeToken, ARIBB24SpaceToken, ARIBB24StartLiningToken, ARIBB24StopLiningToken, ARIBB24TimeControlModeToken, ARIBB24TimeControlWaitToken, ARIBB24UnitSeparatorToken, ARIBB24WhiteForegroundToken, ARIBB24WritingModeModificationToken, ARIBB24YellowForegroundToken } from "../token";
 import { ARIBB24CaptionData, ARIBB24DataUnit } from "../../demuxer/b24/datagroup";
 
 export const CONTROL_CODES = {
@@ -80,42 +80,42 @@ export const CSI_CODE = {
 
 export const processC0 = (stream: ByteStream): ARIBB24Token => {
   switch (stream.readU8()) {
-    case CONTROL_CODES.NUL: return Null.from();
-    case CONTROL_CODES.BEL: return Bell.from();
-    case CONTROL_CODES.APB: return ActivePositionBackward.from();
-    case CONTROL_CODES.APF: return ActivePositionForward.from();
-    case CONTROL_CODES.APD: return ActivePositionDown.from();
-    case CONTROL_CODES.APU: return ActivePositionUp.from();
-    case CONTROL_CODES.CS: return ClearScreen.from();
-    case CONTROL_CODES.APR: return ActivePositionReturn.from();
-    case CONTROL_CODES.PAPF: return ParameterizedActivePositionForward.from(stream.readU8() & 0x3F);
-    case CONTROL_CODES.CAN: return Cancel.from();
+    case CONTROL_CODES.NUL: return ARIBB24NullToken.from();
+    case CONTROL_CODES.BEL: return ARIBB24BellToken.from();
+    case CONTROL_CODES.APB: return ARIBB24ActivePositionBackwardToken.from();
+    case CONTROL_CODES.APF: return ARIBB24ActivePositionForwardToken.from();
+    case CONTROL_CODES.APD: return ARIBB24ActivePositionDownToken.from();
+    case CONTROL_CODES.APU: return ARIBB24ActivePositionUpToken.from();
+    case CONTROL_CODES.CS: return ARIBB24ClearScreenToken.from();
+    case CONTROL_CODES.APR: return ARIBB24ActivePositionReturnToken.from();
+    case CONTROL_CODES.PAPF: return ARIBB24ParameterizedActivePositionForwardToken.from(stream.readU8() & 0x3F);
+    case CONTROL_CODES.CAN: return ARIBB24CancelToken.from();
     case CONTROL_CODES.APS: {
       const y = stream.readU8() & 0x3F;
       const x = stream.readU8() & 0x3F;
-      return ActivePositionSet.from(x, y);
+      return ARIBB24ActivePositionSetToken.from(x, y);
     }
-    case CONTROL_CODES.RS: return RecordSeparator.from();
-    case CONTROL_CODES.US: return UnitSeparator.from();
-    case CONTROL_CODES.SP: return Space.from();
-    case CONTROL_CODES.DEL: return Delete.from();
+    case CONTROL_CODES.RS: return ARIBB24RecordSeparatorToken.from();
+    case CONTROL_CODES.US: return ARIBB24UnitSeparatorToken.from();
+    case CONTROL_CODES.SP: return ARIBB24SpaceToken.from();
+    case CONTROL_CODES.DEL: return ARIBB24DeleteToken.from();
     default: throw new UnreachableError('Undefined C0');
   }
 }
 
 export const processC1 = (stream: ByteStream): ARIBB24Token => {
   switch (stream.readU8()) {
-    case CONTROL_CODES.BKF: return BlackForeground.from();
-    case CONTROL_CODES.RDF: return RedForeground.from();
-    case CONTROL_CODES.GRF: return GreenForeground.from();
-    case CONTROL_CODES.YLF: return YellowForeground.from();
-    case CONTROL_CODES.BLF: return BlueForeground.from();
-    case CONTROL_CODES.MGF: return MagentaForeground.from();
-    case CONTROL_CODES.CNF: return CyanForeground.from();
-    case CONTROL_CODES.WHF: return WhiteForeground.from();
-    case CONTROL_CODES.SSZ: return SmallSize.from();
-    case CONTROL_CODES.MSZ: return MiddleSize.from();
-    case CONTROL_CODES.NSZ: return NormalSize.from();
+    case CONTROL_CODES.BKF: return ARIBB24BlackForegroundToken.from();
+    case CONTROL_CODES.RDF: return ARIBB24RedForegroundToken.from();
+    case CONTROL_CODES.GRF: return ARIBB24GreenForegroundToken.from();
+    case CONTROL_CODES.YLF: return ARIBB24YellowForegroundToken.from();
+    case CONTROL_CODES.BLF: return ARIBB24BlueForegroundToken.from();
+    case CONTROL_CODES.MGF: return ARIBB24MagentaForegroundToken.from();
+    case CONTROL_CODES.CNF: return ARIBB24CyanForegroundToken.from();
+    case CONTROL_CODES.WHF: return ARIBB24WhiteForegroundToken.from();
+    case CONTROL_CODES.SSZ: return ARIBB24SmallSizeToken.from();
+    case CONTROL_CODES.MSZ: return ARIBB24MiddleSizeToken.from();
+    case CONTROL_CODES.NSZ: return ARIBB24NormalSizeToken.from();
     case CONTROL_CODES.SZX: {
       const P1 = stream.readU8();
       switch (P1) {
@@ -125,7 +125,7 @@ export const processC1 = (stream: ByteStream): ARIBB24Token => {
         case 0x45: // Double Height And Width
         case 0x6B: // Special 1
         case 0x64: // Special 2
-          return CharacterSizeControl.from(P1);
+          return ARIBB24CharacterSizeControlToken.from(P1);
       }
 
       throw new UnreachableError('Undefined SZX');
@@ -134,11 +134,11 @@ export const processC1 = (stream: ByteStream): ARIBB24Token => {
       const P1 = stream.readU8();
       const color = P1 & 0x0F;
       switch (P1 & 0x70) {
-        case 0x20: return PalletControl.from(stream.readU8() & 0x0F);
-        case 0x40: return ColorControlForeground.from(color);
-        case 0x50: return ColorControlBackground.from(color);
-        case 0x60: return ColorControlHalfForeground.from(color);
-        case 0x70: return ColorControlHalfBackground.from(color);
+        case 0x20: return ARIBB24PalletControlToken.from(stream.readU8() & 0x0F);
+        case 0x40: return ARIBB24ColorControlForegroundToken.from(color);
+        case 0x50: return ARIBB24ColorControlBackgroundToken.from(color);
+        case 0x60: return ARIBB24ColorControlHalfForegroundToken.from(color);
+        case 0x70: return ARIBB24ColorControlHalfBackgroundToken.from(color);
       }
 
       throw new UnreachableError('Undefined COL');
@@ -149,7 +149,7 @@ export const processC1 = (stream: ByteStream): ARIBB24Token => {
         case 0x40: // NORMAL
         case 0x47: // INVERTED
         case 0x4F: // STOP
-          return FlashingControl.from(P1);
+          return ARIBB24FlashingControlToken.from(P1);
       }
 
       throw new UnreachableError('Undefined FLC');
@@ -170,12 +170,12 @@ export const processC1 = (stream: ByteStream): ARIBB24Token => {
           case 0x48: // 8th
           case 0x49: // 9th
           case 0x4a: // 10th
-            return ReplacingConcealmentMode.from(P2);
+            return ARIBB24ReplacingConcealmentModeToken.from(P2);
         }
-      } else if (P1 === SingleConcealmentModeType.START) {
-        return SingleConcealmentMode.from(P1);
-      } else if (P1 === ConcealmentModeType.STOP) {
-        return ConcealmentMode.from(P1);
+      } else if (P1 === ARIBB24SingleConcealmentModeType.START) {
+        return ARIBB24SingleConcealmentModeToken.from(P1);
+      } else if (P1 === ARIBB24ConcealmentModeType.STOP) {
+        return ARIBB24ConcealmentModeToken.from(P1);
       }
 
       throw new UnreachableError('Undefined CDC');
@@ -186,7 +186,7 @@ export const processC1 = (stream: ByteStream): ARIBB24Token => {
         case 0x40:
         case 0x41:
         case 0x42:
-          return PatternPolarityControl.from(P1);
+          return ARIBB24PatternPolarityControlToken.from(P1);
       }
 
       throw new UnreachableError('Undefined POL');
@@ -197,7 +197,7 @@ export const processC1 = (stream: ByteStream): ARIBB24Token => {
         case 0x40: // both
         case 0x44: // foreground
         case 0x45: // background
-          return WritingModeModification.from(P1);
+          return ARIBB24WritingModeModificationToken.from(P1);
       }
 
       throw new UnreachableError('Undefined WMM');
@@ -207,17 +207,17 @@ export const processC1 = (stream: ByteStream): ARIBB24Token => {
     }
     case CONTROL_CODES.HLC: {
       const P1 = stream.readU8() & 0x0F;
-      return HilightingCharacterBlock.from(P1);
+      return ARIBB24HilightingCharacterBlockToken.from(P1);
     }
     case CONTROL_CODES.RPC: {
       const P1 = stream.readU8() & 0x3F;
-      return RepeatCharacter.from(P1);
+      return ARIBB24RepeatCharacterToken.from(P1);
     }
     case CONTROL_CODES.SPL: {
-      return StopLining.from();
+      return ARIBB24StopLiningToken.from();
     }
     case CONTROL_CODES.STL: {
-      return StartLining.from();
+      return ARIBB24StartLiningToken.from();
     }
     case CONTROL_CODES.CSI: {
       const values: number[] = [0];
@@ -240,17 +240,17 @@ export const processC1 = (stream: ByteStream): ARIBB24Token => {
         case CSI_CODE.GSM:
           throw new NotImplementedError(`GSM is Not Implemented!`);
         case CSI_CODE.SWF:
-          return SetWritingFormat.from(values[0]);
+          return ARIBB24SetWritingFormatToken.from(values[0]);
         case CSI_CODE.CCC:
           throw new NotImplementedError(`CCC is Not Implemented!`);
         case CSI_CODE.SDF:
-          return SetDisplayFormat.from(values[0], values[1]);
+          return ARIBB24SetDisplayFormatToken.from(values[0], values[1]);
         case CSI_CODE.SSM:
-          return CharacterCompositionDotDesignation.from(values[0], values[1]);
+          return ARIBB24CharacterCompositionDotDesignationToken.from(values[0], values[1]);
         case CSI_CODE.SHS:
-          return SetHorizontalSpacing.from(values[0]);
+          return ARIBB24SetHorizontalSpacingToken.from(values[0]);
         case CSI_CODE.SVS:
-          return SetVerticalSpacing.from(values[0]);
+          return ARIBB24SetVerticalSpacingToken.from(values[0]);
         case CSI_CODE.PLD:
           throw new NotImplementedError(`PLD is Not Implemented!`);
         case CSI_CODE.PLU:
@@ -260,21 +260,21 @@ export const processC1 = (stream: ByteStream): ARIBB24Token => {
         case CSI_CODE.SRC:
           throw new NotImplementedError(`SRC is Not Implemented!`);
         case CSI_CODE.SDP:
-          return SetDisplayPosition.from(values[0], values[1]);
+          return ARIBB24SetDisplayPositionToken.from(values[0], values[1]);
         case CSI_CODE.ACPS:
-          return ActiveCoordinatePositionSet.from(values[0], values[1]);
+          return ARIBB24ActiveCoordinatePositionSetToken.from(values[0], values[1]);
         case CSI_CODE.TCC:
           throw new NotImplementedError(`TCC is Not Implemented!`);
         case CSI_CODE.ORN:
           switch (values[0]) {
-            case OrnamentControlType.NONE:
-              return OrnamentControlNone.from();
-            case OrnamentControlType.HEMMING:
-              return OrnamentControlHemming.from(values[1]);
-            case OrnamentControlType.SHADE:
-              return OrnamentControlShade.from(values[1]);
-            case OrnamentControlType.HOLLOW:
-              return OrnamentControlHollow.from();
+            case ARIBB24OrnamentControlType.NONE:
+              return ARIBB24OrnamentControlNoneToken.from();
+            case ARIBB24OrnamentControlType.HEMMING:
+              return ARIBB24OrnamentControlHemmingToken.from(values[1]);
+            case ARIBB24OrnamentControlType.SHADE:
+              return ARIBB24OrnamentControlShadeToken.from(values[1]);
+            case ARIBB24OrnamentControlType.HOLLOW:
+              return ARIBB24OrnamentControlHollowToken.from();
           }
 
           throw new UnreachableError('Undefined ORN');
@@ -287,13 +287,13 @@ export const processC1 = (stream: ByteStream): ARIBB24Token => {
         case CSI_CODE.SCR:
           throw new NotImplementedError(`SCR is Not Implemented!`);
         case CSI_CODE.PRA:
-          return BuiltinSoundReplay.from(values[0]);
+          return ARIBB24BuiltinSoundReplayToken.from(values[0]);
         case CSI_CODE.ACS:
           throw new NotImplementedError(`ACS is Not Implemented!`);
         case CSI_CODE.UED:
           throw new NotImplementedError(`UED is Not Implemented!`);
         case CSI_CODE.RCS:
-          return RasterColourCommand.from(values[0]);
+          return ARIBB24RasterColourCommandToken.from(values[0]);
         case CSI_CODE.SCS:
           throw new NotImplementedError(`SCS is Not Implemented!`);
         default:
@@ -305,7 +305,7 @@ export const processC1 = (stream: ByteStream): ARIBB24Token => {
       switch (P1) {
         case 0x20: {
           const time = (stream.readU8() & 0x3F) / 10;
-          return TimeControlWait.from(time);
+          return ARIBB24TimeControlWaitToken.from(time);
         }
         case 0x28: {
           const P2 = stream.readU8();
@@ -314,7 +314,7 @@ export const processC1 = (stream: ByteStream): ARIBB24Token => {
             case 0x41: // REAL
             case 0x42: // OFFSET
             case 0x43: // UNIQUE
-              return TimeControlMode.from(P2);
+              return ARIBB24TimeControlModeToken.from(P2);
           }
 
           throw new UnreachableError('Undefined TIME');
@@ -379,7 +379,7 @@ export default abstract class ARIBB24Tokenizer {
     const pngHeaderSize = 8 /* PNG signature */ + 4 /* size */ + 4 /* 'IHDR' */ + 13 /* IHDR */ + 4 /* CRC32 */;
     if (begin + pngHeaderSize > uint8.byteLength) { return []; }
 
-    return [Bitmap.from(x_position, y_position, flcColors, arraybuffer.slice(begin)) ];
+    return [ARIBB24BitmapToken.from(x_position, y_position, flcColors, arraybuffer.slice(begin)) ];
   }
 }
 
@@ -389,7 +389,7 @@ export const replaceDRCS = (tokens: ARIBB24Token[], replace: Map<string, string>
     const hash = md5(token.binary);
 
     if (replace.has(hash.toLowerCase()) || replace.has(hash.toUpperCase())) {
-      return Character.from(replace.get(hash)! + token.combining);
+      return ARIBB24CharacterToken.from(replace.get(hash)! + token.combining);
     } else {
       return token;
     }

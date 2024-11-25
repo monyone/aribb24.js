@@ -1,4 +1,4 @@
-import { DRCS } from "../../../token";
+import { ARIBB24DRCSToken } from "../../../token";
 import ascii from "../ascii";
 import ARIBB24JIS8Tokenizer from "../tokenizer";
 import latinExtension from "./latin-extension";

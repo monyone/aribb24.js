@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import ARIBB24UTF8Tokenizer from '@/lib/tokenizer/b24/ucs/tokenizer';
-import { ActiveCoordinatePositionSet, ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, BuiltinSoundReplay, Cancel, Character, CharacterCompositionDotDesignation, CharacterSizeControl, CharacterSizeControlType, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, ConcealmentMode, ConcealmentModeType, CyanForeground, Delete, DRCS, FlashingControl, FlashingControlType, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, OrnamentControlHemming, OrnamentControlHollow, OrnamentControlNone, OrnamentControlShade, OrnamentControlType, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, PatternPolarityControlType, RasterColourCommand, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, ReplacingConcealmentModeType, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SingleConcealmentMode, SingleConcealmentModeType, SmallSize, Space, StartLining, StopLining, TimeControlMode, TimeControlModeType, TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, WritingModeModificationType, YellowForeground } from '@/lib/tokenizer/token';
+import { ARIBB24ActivePositionBackwardToken, ARIBB24ActivePositionDownToken, ARIBB24ActivePositionForwardToken, ARIBB24ActivePositionReturnToken, ARIBB24ActivePositionSetToken, ARIBB24ActivePositionUpToken, ARIBB24BellToken, ARIBB24BlackForegroundToken, ARIBB24BlueForegroundToken, ARIBB24CancelToken, ARIBB24CharacterSizeControlToken, ARIBB24CharacterSizeControlType, ARIBB24CharacterToken, ARIBB24ClearScreenToken, ARIBB24ColorControlBackgroundToken, ARIBB24ColorControlForegroundToken, ARIBB24ColorControlHalfBackgroundToken, ARIBB24ColorControlHalfForegroundToken, ARIBB24ConcealmentModeToken, ARIBB24ConcealmentModeType, ARIBB24CyanForegroundToken, ARIBB24DeleteToken, ARIBB24DRCSToken, ARIBB24FlashingControlToken, ARIBB24FlashingControlType, ARIBB24GreenForegroundToken, ARIBB24HilightingCharacterBlockToken, ARIBB24MagentaForegroundToken, ARIBB24MiddleSizeToken, ARIBB24NormalSizeToken, ARIBB24NullToken, ARIBB24PalletControlToken, ARIBB24ParameterizedActivePositionForwardToken, ARIBB24PatternPolarityControlToken, ARIBB24PatternPolarityControlType, ARIBB24RecordSeparatorToken, ARIBB24RedForegroundToken, ARIBB24RepeatCharacterToken, ARIBB24ReplacingConcealmentModeToken, ARIBB24ReplacingConcealmentModeType, ARIBB24SingleConcealmentModeToken, ARIBB24SingleConcealmentModeType, ARIBB24SmallSizeToken, ARIBB24SpaceToken, ARIBB24StartLiningToken, ARIBB24StopLiningToken, ARIBB24TimeControlModeToken, ARIBB24TimeControlWaitToken, ARIBB24UnitSeparatorToken, ARIBB24WhiteForegroundToken, ARIBB24WritingModeModificationToken, ARIBB24WritingModeModificationType, ARIBB24YellowForegroundToken, ARIBB24TimeControlModeType, ARIBB24SetWritingFormatToken, ARIBB24SetDisplayFormatToken, ARIBB24CharacterCompositionDotDesignationToken, ARIBB24SetHorizontalSpacingToken, ARIBB24SetVerticalSpacingToken, ARIBB24SetDisplayPositionToken, ARIBB24ActiveCoordinatePositionSetToken, ARIBB24OrnamentControlNoneToken, ARIBB24OrnamentControlHemmingToken, ARIBB24OrnamentControlShadeToken, ARIBB24OrnamentControlHollowToken, ARIBB24BuiltinSoundReplayToken, ARIBB24RasterColourCommandToken } from '@/lib/tokenizer/token';
 import { CONTROL_CODES, CSI_CODE, replaceDRCS } from '@/lib/tokenizer/b24/tokenizer';
 import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from '@/util/error';
 import md5 from '@/util/md5';
@@ -68,7 +68,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary('a'))).toStrictEqual([
-      Character.from('a'),
+      ARIBB24CharacterToken.from('a'),
     ]);
   });
 
@@ -76,7 +76,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary('あ'))).toStrictEqual([
-      Character.from('あ'),
+      ARIBB24CharacterToken.from('あ'),
     ]);
   });
 
@@ -84,7 +84,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary('𠮟'))).toStrictEqual([
-      Character.from('𠮟'),
+      ARIBB24CharacterToken.from('𠮟'),
     ]);
   });
 
@@ -92,7 +92,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary('👨‍👩'))).toStrictEqual([
-      Character.from('👨‍👩'),
+      ARIBB24CharacterToken.from('👨‍👩'),
     ]);
   });
 
@@ -107,7 +107,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     tokenizer.processDRCS(2, generateDRCSUnit(0xec00, width, height, colors, binary));
 
     expect(tokenizer.tokenizeStatement(generateBinary('\uec00'))).toStrictEqual([
-      DRCS.from(36, 36, 2, Uint8Array.from(binary).buffer)
+      ARIBB24DRCSToken.from(36, 36, 2, Uint8Array.from(binary).buffer)
     ]);
   });
 
@@ -122,7 +122,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     tokenizer.processDRCS(2, generateDRCSUnit(0xec00, width, height, colors, binary));
 
     expect(tokenizer.tokenizeStatement(generateBinary('\uec00', '\u3099'))).toStrictEqual([
-      DRCS.from(36, 36, 2, Uint8Array.from(binary).buffer, '\u3099')
+      ARIBB24DRCSToken.from(36, 36, 2, Uint8Array.from(binary).buffer, '\u3099')
     ]);
   });
 
@@ -138,7 +138,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     tokenizer.processDRCS(2, generateDRCSUnit(0xec00, width, height, colors, binary));
 
     expect(replaceDRCS(tokenizer.tokenizeStatement(generateBinary('\uec00', '\u3099')), replace)).toStrictEqual([
-      Character.from('〓\u3099')
+      ARIBB24CharacterToken.from('〓\u3099')
     ]);
   });
 
@@ -176,7 +176,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.NUL))).toStrictEqual([
-      Null.from()
+      ARIBB24NullToken.from()
     ]);
   });
 
@@ -184,7 +184,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary('\0'))).toStrictEqual([
-      Null.from()
+      ARIBB24NullToken.from()
     ]);
   });
 
@@ -192,7 +192,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.BEL))).toStrictEqual([
-      Bell.from()
+      ARIBB24BellToken.from()
     ]);
   });
 
@@ -200,7 +200,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.APB))).toStrictEqual([
-      ActivePositionBackward.from()
+      ARIBB24ActivePositionBackwardToken.from()
     ]);
   });
 
@@ -208,7 +208,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.APF))).toStrictEqual([
-      ActivePositionForward.from()
+      ARIBB24ActivePositionForwardToken.from()
     ]);
   });
 
@@ -216,7 +216,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.APD))).toStrictEqual([
-      ActivePositionDown.from()
+      ARIBB24ActivePositionDownToken.from()
     ]);
   });
 
@@ -224,7 +224,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary('\n'))).toStrictEqual([
-      ActivePositionDown.from()
+      ARIBB24ActivePositionDownToken.from()
     ]);
   });
 
@@ -232,7 +232,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.APU))).toStrictEqual([
-      ActivePositionUp.from()
+      ARIBB24ActivePositionUpToken.from()
     ]);
   });
 
@@ -240,7 +240,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.CS))).toStrictEqual([
-      ClearScreen.from()
+      ARIBB24ClearScreenToken.from()
     ]);
   });
 
@@ -248,7 +248,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary('\f'))).toStrictEqual([
-      ClearScreen.from()
+      ARIBB24ClearScreenToken.from()
     ]);
   });
 
@@ -256,7 +256,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.APR))).toStrictEqual([
-      ActivePositionReturn.from()
+      ARIBB24ActivePositionReturnToken.from()
     ]);
   });
 
@@ -264,7 +264,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary('\r'))).toStrictEqual([
-      ActivePositionReturn.from()
+      ARIBB24ActivePositionReturnToken.from()
     ]);
   });
 
@@ -272,7 +272,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.PAPF, 5))).toStrictEqual([
-      ParameterizedActivePositionForward.from(5)
+      ARIBB24ParameterizedActivePositionForwardToken.from(5)
     ]);
   });
 
@@ -280,7 +280,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.CAN))).toStrictEqual([
-      Cancel.from()
+      ARIBB24CancelToken.from()
     ]);
   });
 
@@ -288,7 +288,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.APS, 1, 3))).toStrictEqual([
-      ActivePositionSet.from(3, 1)
+      ARIBB24ActivePositionSetToken.from(3, 1)
     ]);
   });
 
@@ -296,7 +296,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.RS))).toStrictEqual([
-      RecordSeparator.from()
+      ARIBB24RecordSeparatorToken.from()
     ]);
   });
 
@@ -304,7 +304,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.US))).toStrictEqual([
-      UnitSeparator.from()
+      ARIBB24UnitSeparatorToken.from()
     ]);
   });
 
@@ -312,7 +312,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.SP))).toStrictEqual([
-      Space.from()
+      ARIBB24SpaceToken.from()
     ]);
   });
 
@@ -320,7 +320,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(CONTROL_CODES.DEL))).toStrictEqual([
-      Delete.from()
+      ARIBB24DeleteToken.from()
     ]);
   });
 
@@ -328,7 +328,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.BKF))).toStrictEqual([
-      BlackForeground.from()
+      ARIBB24BlackForegroundToken.from()
     ]);
   });
 
@@ -336,7 +336,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.RDF))).toStrictEqual([
-      RedForeground.from()
+      ARIBB24RedForegroundToken.from()
     ]);
   });
 
@@ -344,7 +344,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.GRF))).toStrictEqual([
-      GreenForeground.from()
+      ARIBB24GreenForegroundToken.from()
     ]);
   });
 
@@ -352,7 +352,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.YLF))).toStrictEqual([
-      YellowForeground.from()
+      ARIBB24YellowForegroundToken.from()
     ]);
   });
 
@@ -360,7 +360,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.BLF))).toStrictEqual([
-      BlueForeground.from()
+      ARIBB24BlueForegroundToken.from()
     ]);
   });
 
@@ -368,7 +368,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.MGF))).toStrictEqual([
-      MagentaForeground.from()
+      ARIBB24MagentaForegroundToken.from()
     ]);
   });
 
@@ -376,7 +376,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CNF))).toStrictEqual([
-      CyanForeground.from()
+      ARIBB24CyanForegroundToken.from()
     ]);
   });
 
@@ -384,7 +384,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.WHF))).toStrictEqual([
-      WhiteForeground.from()
+      ARIBB24WhiteForegroundToken.from()
     ]);
   });
 
@@ -392,7 +392,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.SSZ))).toStrictEqual([
-      SmallSize.from()
+      ARIBB24SmallSizeToken.from()
     ]);
   });
 
@@ -400,7 +400,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.MSZ))).toStrictEqual([
-      MiddleSize.from()
+      ARIBB24MiddleSizeToken.from()
     ]);
   });
 
@@ -408,7 +408,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.NSZ))).toStrictEqual([
-      NormalSize.from()
+      ARIBB24NormalSizeToken.from()
     ]);
   });
 
@@ -416,7 +416,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.SZX, 0x60))).toStrictEqual([
-      CharacterSizeControl.from(CharacterSizeControlType.TINY)
+      ARIBB24CharacterSizeControlToken.from(ARIBB24CharacterSizeControlType.TINY)
     ]);
   });
 
@@ -424,7 +424,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.SZX, 0x41))).toStrictEqual([
-      CharacterSizeControl.from(CharacterSizeControlType.DOUBLE_HEIGHT)
+      ARIBB24CharacterSizeControlToken.from(ARIBB24CharacterSizeControlType.DOUBLE_HEIGHT)
     ]);
   });
 
@@ -432,7 +432,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.SZX, 0x44))).toStrictEqual([
-      CharacterSizeControl.from(CharacterSizeControlType.DOUBLE_WIDTH)
+      ARIBB24CharacterSizeControlToken.from(ARIBB24CharacterSizeControlType.DOUBLE_WIDTH)
     ]);
   });
 
@@ -440,7 +440,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.SZX, 0x45))).toStrictEqual([
-      CharacterSizeControl.from(CharacterSizeControlType.DOUBLE_HEIGHT_AND_WIDTH)
+      ARIBB24CharacterSizeControlToken.from(ARIBB24CharacterSizeControlType.DOUBLE_HEIGHT_AND_WIDTH)
     ]);
   });
 
@@ -448,7 +448,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.SZX, 0x6b))).toStrictEqual([
-      CharacterSizeControl.from(CharacterSizeControlType.SPECIAL_1)
+      ARIBB24CharacterSizeControlToken.from(ARIBB24CharacterSizeControlType.SPECIAL_1)
     ]);
   });
 
@@ -456,7 +456,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.SZX, 0x64))).toStrictEqual([
-      CharacterSizeControl.from(CharacterSizeControlType.SPECIAL_2)
+      ARIBB24CharacterSizeControlToken.from(ARIBB24CharacterSizeControlType.SPECIAL_2)
     ]);
   });
 
@@ -465,7 +465,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
 
     // SBDTV used transparent space
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.COL, 0x48))).toStrictEqual([
-      ColorControlForeground.from(8)
+      ARIBB24ColorControlForegroundToken.from(8)
     ]);
   });
 
@@ -474,7 +474,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
 
     // SBDTV used black background
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.COL, 0x50))).toStrictEqual([
-      ColorControlBackground.from(0)
+      ARIBB24ColorControlBackgroundToken.from(0)
     ]);
   });
 
@@ -482,7 +482,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.COL, 0x61))).toStrictEqual([
-      ColorControlHalfForeground.from(1)
+      ARIBB24ColorControlHalfForegroundToken.from(1)
     ]);
   });
 
@@ -490,7 +490,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.COL, 0x72))).toStrictEqual([
-      ColorControlHalfBackground.from(2)
+      ARIBB24ColorControlHalfBackgroundToken.from(2)
     ]);
   });
 
@@ -498,7 +498,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.COL, 0x20, 0x45))).toStrictEqual([
-      PalletControl.from(5)
+      ARIBB24PalletControlToken.from(5)
     ]);
   });
 
@@ -506,7 +506,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.FLC, 0x40))).toStrictEqual([
-      FlashingControl.from(FlashingControlType.NORMAL)
+      ARIBB24FlashingControlToken.from(ARIBB24FlashingControlType.NORMAL)
     ]);
   });
 
@@ -514,7 +514,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.FLC, 0x47))).toStrictEqual([
-      FlashingControl.from(FlashingControlType.INVERTED)
+      ARIBB24FlashingControlToken.from(ARIBB24FlashingControlType.INVERTED)
     ]);
   });
 
@@ -522,7 +522,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.FLC, 0x4F))).toStrictEqual([
-      FlashingControl.from(FlashingControlType.STOP)
+      ARIBB24FlashingControlToken.from(ARIBB24FlashingControlType.STOP)
     ]);
   });
 
@@ -530,7 +530,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x40))).toStrictEqual([
-      SingleConcealmentMode.from(SingleConcealmentModeType.START)
+      ARIBB24SingleConcealmentModeToken.from(ARIBB24SingleConcealmentModeType.START)
     ]);
   });
 
@@ -538,7 +538,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x40))).toStrictEqual([
-      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.START)
+      ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.START)
     ]);
   });
 
@@ -546,7 +546,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x41))).toStrictEqual([
-      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.FIRST)
+      ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.FIRST)
     ]);
   });
 
@@ -554,7 +554,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x42))).toStrictEqual([
-      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.SECOND)
+      ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.SECOND)
     ]);
   });
 
@@ -562,7 +562,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x43))).toStrictEqual([
-      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.THIRD)
+      ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.THIRD)
     ]);
   });
 
@@ -570,7 +570,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x44))).toStrictEqual([
-      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.FOURTH)
+      ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.FOURTH)
     ]);
   });
 
@@ -578,7 +578,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x45))).toStrictEqual([
-      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.FIFTH)
+      ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.FIFTH)
     ]);
   });
 
@@ -586,7 +586,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x46))).toStrictEqual([
-      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.SIXTH)
+      ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.SIXTH)
     ]);
   });
 
@@ -594,7 +594,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x47))).toStrictEqual([
-      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.SEVENTH)
+      ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.SEVENTH)
     ]);
   });
 
@@ -602,7 +602,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x48))).toStrictEqual([
-      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.EIGHTH)
+      ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.EIGHTH)
     ]);
   });
 
@@ -610,7 +610,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x49))).toStrictEqual([
-      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.NINTH)
+      ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.NINTH)
     ]);
   });
 
@@ -618,7 +618,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x20, 0x4A))).toStrictEqual([
-      ReplacingConcealmentMode.from(ReplacingConcealmentModeType.TENTH)
+      ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.TENTH)
     ]);
   });
 
@@ -626,7 +626,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.CDC, 0x4F))).toStrictEqual([
-      ConcealmentMode.from(ConcealmentModeType.STOP)
+      ARIBB24ConcealmentModeToken.from(ARIBB24ConcealmentModeType.STOP)
     ]);
   });
 
@@ -634,7 +634,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.POL, 0x40))).toStrictEqual([
-      PatternPolarityControl.from(PatternPolarityControlType.NORMAL)
+      ARIBB24PatternPolarityControlToken.from(ARIBB24PatternPolarityControlType.NORMAL)
     ]);
   });
 
@@ -642,7 +642,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.POL, 0x41))).toStrictEqual([
-      PatternPolarityControl.from(PatternPolarityControlType.INVERTED_1)
+      ARIBB24PatternPolarityControlToken.from(ARIBB24PatternPolarityControlType.INVERTED_1)
     ]);
   });
 
@@ -650,7 +650,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.POL, 0x42))).toStrictEqual([
-      PatternPolarityControl.from(PatternPolarityControlType.INVERTED_2)
+      ARIBB24PatternPolarityControlToken.from(ARIBB24PatternPolarityControlType.INVERTED_2)
     ]);
   });
 
@@ -658,7 +658,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.WMM, 0x40))).toStrictEqual([
-      WritingModeModification.from(WritingModeModificationType.BOTH)
+      ARIBB24WritingModeModificationToken.from(ARIBB24WritingModeModificationType.BOTH)
     ]);
   });
 
@@ -666,7 +666,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.WMM, 0x44))).toStrictEqual([
-      WritingModeModification.from(WritingModeModificationType.FOREGROUND)
+      ARIBB24WritingModeModificationToken.from(ARIBB24WritingModeModificationType.FOREGROUND)
     ]);
   });
 
@@ -674,7 +674,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.WMM, 0x45))).toStrictEqual([
-      WritingModeModification.from(WritingModeModificationType.BACKGROUND)
+      ARIBB24WritingModeModificationToken.from(ARIBB24WritingModeModificationType.BACKGROUND)
     ]);
   });
 
@@ -688,7 +688,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.HLC, 0x4F))).toStrictEqual([
-      HilightingCharacterBlock.from(0x0F)
+      ARIBB24HilightingCharacterBlockToken.from(0x0F)
     ]);
   });
 
@@ -696,7 +696,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.RPC, 0x7F))).toStrictEqual([
-      RepeatCharacter.from(0x3F)
+      ARIBB24RepeatCharacterToken.from(0x3F)
     ]);
   });
 
@@ -704,7 +704,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.SPL))).toStrictEqual([
-      StopLining.from()
+      ARIBB24StopLiningToken.from()
     ]);
   });
 
@@ -712,7 +712,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.STL))).toStrictEqual([
-      StartLining.from()
+      ARIBB24StartLiningToken.from()
     ]);
   });
 
@@ -720,7 +720,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.TIME, 0x20, 0x7F))).toStrictEqual([
-      TimeControlWait.from(0x3F / 10)
+      ARIBB24TimeControlWaitToken.from(0x3F / 10)
     ]);
   });
 
@@ -728,7 +728,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.TIME, 0x28, 0x40))).toStrictEqual([
-      TimeControlMode.from(TimeControlModeType.FREE)
+      ARIBB24TimeControlModeToken.from(ARIBB24TimeControlModeType.FREE)
     ]);
   });
 
@@ -736,7 +736,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.TIME, 0x28, 0x41))).toStrictEqual([
-      TimeControlMode.from(TimeControlModeType.REAL)
+      ARIBB24TimeControlModeToken.from(ARIBB24TimeControlModeType.REAL)
     ]);
   });
 
@@ -744,7 +744,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.TIME, 0x28, 0x42))).toStrictEqual([
-      TimeControlMode.from(TimeControlModeType.OFFSET)
+      ARIBB24TimeControlModeToken.from(ARIBB24TimeControlModeType.OFFSET)
     ]);
   });
 
@@ -752,7 +752,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, CONTROL_CODES.TIME, 0x28, 0x43))).toStrictEqual([
-      TimeControlMode.from(TimeControlModeType.UNIQUE)
+      ARIBB24TimeControlModeToken.from(ARIBB24TimeControlModeType.UNIQUE)
     ]);
   });
 
@@ -772,7 +772,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.SWF, 7)))).toStrictEqual([
-      SetWritingFormat.from(7)
+      ARIBB24SetWritingFormatToken.from(7)
     ]);
   });
 
@@ -786,7 +786,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.SDF, 680, 480)))).toStrictEqual([
-      SetDisplayFormat.from(680, 480),
+      ARIBB24SetDisplayFormatToken.from(680, 480),
     ]);
   });
 
@@ -794,7 +794,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.SSM, 24, 24)))).toStrictEqual([
-      CharacterCompositionDotDesignation.from(24, 24),
+      ARIBB24CharacterCompositionDotDesignationToken.from(24, 24),
     ]);
   });
 
@@ -802,7 +802,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.SHS, 1)))).toStrictEqual([
-      SetHorizontalSpacing.from(1)
+      ARIBB24SetHorizontalSpacingToken.from(1)
     ]);
   });
 
@@ -810,7 +810,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.SVS, 1)))).toStrictEqual([
-      SetVerticalSpacing.from(1)
+      ARIBB24SetVerticalSpacingToken.from(1)
     ]);
   });
 
@@ -842,7 +842,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.SDP, 100, 100)))).toStrictEqual([
-      SetDisplayPosition.from(100, 100)
+      ARIBB24SetDisplayPositionToken.from(100, 100)
     ]);
   });
 
@@ -850,7 +850,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.ACPS, 700, 400)))).toStrictEqual([
-      ActiveCoordinatePositionSet.from(700, 400)
+      ARIBB24ActiveCoordinatePositionSetToken.from(700, 400)
     ]);
   });
 
@@ -864,7 +864,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.ORN, 0)))).toStrictEqual([
-      OrnamentControlNone.from(),
+      ARIBB24OrnamentControlNoneToken.from(),
     ]);
   });
 
@@ -872,7 +872,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.ORN, 1, 0x7F)))).toStrictEqual([
-      OrnamentControlHemming.from(0x7F),
+      ARIBB24OrnamentControlHemmingToken.from(0x7F),
     ]);
   });
 
@@ -880,7 +880,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.ORN, 2, 0x7F)))).toStrictEqual([
-      OrnamentControlShade.from(0x7F)
+      ARIBB24OrnamentControlShadeToken.from(0x7F)
     ]);
   });
 
@@ -888,7 +888,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.ORN, 3)))).toStrictEqual([
-      OrnamentControlHollow.from()
+      ARIBB24OrnamentControlHollowToken.from()
     ]);
   });
 
@@ -914,7 +914,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.PRA, 0)))).toStrictEqual([
-      BuiltinSoundReplay.from(0),
+      ARIBB24BuiltinSoundReplayToken.from(0),
     ]);
   });
 
@@ -934,7 +934,7 @@ describe("ARIB STD-B24 UCS Tokenizer", () => {
     const tokenizer = new ARIBB24UTF8Tokenizer();
 
     expect(tokenizer.tokenizeStatement(generateBinary(0xC2, ... generateCSI(CSI_CODE.RCS, 0)))).toStrictEqual([
-      RasterColourCommand.from(0),
+      ARIBB24RasterColourCommandToken.from(0),
     ]);
   });
 

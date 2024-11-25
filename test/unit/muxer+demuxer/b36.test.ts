@@ -3,8 +3,8 @@ import mux from '@/lib/muxer/b36'
 import muxDatagroup from '@/lib/muxer/b24/datagroup';
 import ARIBB24JapaneseJIS8Encoder from '@/lib/encoder/b24/jis8/ARIB'
 import demux, { ARIBB36Data } from '@/lib/demuxer/b36'
-import { ClearScreen } from '@/lib/tokenizer/token';
-import { CaptionData, DisplayModeType, RollupModeType, TimeControlModeType } from '@/lib/demuxer/b24/datagroup';
+import { ARIBB24ClearScreenToken } from '@/lib/tokenizer/token';
+import { ARIBB24CaptionData, DisplayModeType, RollupModeType, TimeControlModeType } from '@/lib/demuxer/b24/datagroup';
 
 describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
   test('Empty STD-B36', () => {
@@ -61,7 +61,7 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
         TCS: 0b00,
       }],
       units: [],
-    } satisfies CaptionData;
+    } satisfies ARIBB24CaptionData;
 
     const data = {
       label: 'DCAPTION',
@@ -138,16 +138,16 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
         TCS: 0b00,
       }],
       units: [],
-    } satisfies CaptionData;
+    } satisfies ARIBB24CaptionData;
     const encoder = new ARIBB24JapaneseJIS8Encoder();
-    const encoded = encoder.encode([ClearScreen.from()]);
+    const encoded = encoder.encode([ARIBB24ClearScreenToken.from()]);
     const statement = {
       tag: 'CaptionStatement',
       group: 0,
       timeControlMode: TimeControlModeType.FREE,
       lang: 0,
       units: encoded,
-    } satisfies CaptionData;
+    } satisfies ARIBB24CaptionData;
 
     const data = {
       label: 'DCAPTION',

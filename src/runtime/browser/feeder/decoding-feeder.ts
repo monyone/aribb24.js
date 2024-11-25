@@ -3,7 +3,7 @@ import AVLTree from '../../../util/avl';
 import Feeder, { FeederOption, FeederDecodingData, FeederPresentationData, getTokenizeInformation, PartialFeederOption } from './feeder';
 import demuxPES from '../../../lib/demuxer/b24/independent';
 import demuxDatagroup, { ARIBB24CaptionManagement } from '../../../lib/demuxer/b24/datagroup'
-import { ClearScreen } from '../../../lib/tokenizer/token';
+import { ARIBB24ClearScreenToken } from '../../../lib/tokenizer/token';
 import { initialState } from '../../../lib/parser/parser';
 import { toBrowserToken } from '../types';
 import colortable from '../../colortable';
@@ -111,7 +111,7 @@ export default abstract class DecodingFeeder implements Feeder {
               association: 'UNKNOWN',
               language: 'und',
             },
-            data: [ClearScreen.from()]
+            data: [ARIBB24ClearScreenToken.from()]
           });
           continue;
         }

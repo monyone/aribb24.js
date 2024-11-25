@@ -1,11 +1,11 @@
 import { ByteStream } from "../../../../util/bytestream";
 
-import { ARIBB24Token, DRCS } from '../../token';
-import { Character } from "../../token";
+import { ARIBB24Token, ARIBB24DRCSToken } from '../../token';
+import { ARIBB24CharacterToken } from "../../token";
 import ARIBB24Tokenizer, { CONTROL_CODES, processC0, processC1 } from "../tokenizer";
 import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from "../../../../util/error";
 
-type DRCSData = Omit<DRCS, 'tag' | 'combining'>;
+type DRCSData = Omit<ARIBB24DRCSToken, 'tag' | 'combining'>;
 const DRCSData = {
   from(width: number, height: number, depth: number, binary: ArrayBuffer): DRCSData {
     return {
@@ -53,9 +53,9 @@ export default class ARIBB24UTF8Tokenizer extends ARIBB24Tokenizer {
           const [value ,... rest] = Array.from(ch);
           if (this.drcs.has(value)) {
             const { width, height, depth, binary} = this.drcs.get(value)!;
-            result.push(DRCS.from(width, height, depth, binary, rest.join('')));
+            result.push(ARIBB24DRCSToken.from(width, height, depth, binary, rest.join('')));
           } else {
-            result.push(Character.from(ch));
+            result.push(ARIBB24CharacterToken.from(ch));
           }
         }
 

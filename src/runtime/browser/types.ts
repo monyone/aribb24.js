@@ -1,5 +1,5 @@
 import CRC32 from "../../util/crc32";
-import { ARIBB24Token, Bitmap } from "../../lib/tokenizer/token";
+import { ARIBB24Token, ARIBB24BitmapToken } from "../../lib/tokenizer/token";
 import { replaceDRCS as tokenizerReplaceDRCS } from "../../lib/tokenizer/b24/tokenizer";
 import { ARIBB24CommonParsedToken, ARIBB24ParsedToken, ARIBB24Parser, ARIBB24ParserOption, ARIBB24ParserState } from "../../lib/parser/parser";
 
@@ -15,7 +15,7 @@ export type DecodedBitmap = {
   flashing_bitmap?: ImageBitmap;
 };
 export const DecodedBitmap = {
-  async from(bitmap: Bitmap, pallet: string[]): Promise<DecodedBitmap> {
+  async from(bitmap: ARIBB24BitmapToken, pallet: string[]): Promise<DecodedBitmap> {
     const uint8 = new Uint8Array(bitmap.binary);
     const flcColors = new Set(bitmap.flc_colors);
 
@@ -103,7 +103,7 @@ export const DecodedBitmap = {
   }
 };
 
-export type ARIBB24BrowserToken = Exclude<ARIBB24Token, Bitmap> | DecodedBitmap;
+export type ARIBB24BrowserToken = Exclude<ARIBB24Token, ARIBB24BitmapToken> | DecodedBitmap;
 
 export type ARIBB24BitmapParsedToken = ARIBB24CommonParsedToken & Omit<DecodedBitmap, 'tag'> & {
   tag: 'Bitmap';

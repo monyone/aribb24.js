@@ -19,7 +19,7 @@ export type { TextRendererOption } from './runtime/browser/renderer/text/text-re
 export { default as TextRenderer } from './runtime/browser/renderer/text/text-renderer';
 
 // Tokenizer
-export type { ARIBB24Token } from './lib/tokenizer/token';
+export type * from './lib/tokenizer/token';
 export type { default as ARIBB24Tokenizer, replaceDRCS } from './lib/tokenizer/b24/tokenizer';
 export { default as ARIBB24JIS8Tokenizer } from './lib/tokenizer/b24/jis8/tokenizer';
 export { default as ARIBB24JapaneseJIS8Tokenizer } from './lib/tokenizer/b24/jis8/ARIB';

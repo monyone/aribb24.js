@@ -1,6 +1,6 @@
 import { ARIBB24Parser, ARIBB24CharacterParsedToken, ARIBB24ParserOption, ARIBB24ParserState, initialState, CHARACTER_SIZE, ARIBB24ClearScreenParsedToken, ARIBB24DRCSPrasedToken } from '@/lib/parser/parser';
 import { replaceDRCS } from '@/lib/tokenizer/b24/tokenizer';
-import { ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, BlackForeground, BlueForeground, Character, CharacterCompositionDotDesignation, CharacterSizeControl, CharacterSizeControlType, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, CyanForeground, DRCS, FlashingControl, FlashingControlType, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, OrnamentControlHemming, OrnamentControlNone, PalletControl, RedForeground, SetDisplayFormat, SetDisplayPosition, SetHorizontalSpacing, SetVerticalSpacing, SetWritingFormat, SmallSize, Space, StartLining, StopLining, TimeControlWait, WhiteForeground, YellowForeground } from '@/lib/tokenizer/token';
+import { ARIBB24ActivePositionForwardToken, ARIBB24ActivePositionSetToken, ARIBB24CharacterCompositionDotDesignationToken, ARIBB24CharacterToken, ARIBB24ClearScreenToken, ARIBB24ColorControlBackgroundToken, ARIBB24FlashingControlToken, ARIBB24FlashingControlType, ARIBB24MiddleSizeToken, ARIBB24NormalSizeToken, ARIBB24PalletControlToken, ARIBB24SetDisplayFormatToken, ARIBB24SetDisplayPositionToken, ARIBB24SetHorizontalSpacingToken, ARIBB24SetVerticalSpacingToken, ARIBB24SetWritingFormatToken, ARIBB24WhiteForegroundToken } from '@/lib/tokenizer/token';
 import md5 from '@/util/md5';
 import { describe, test, expect } from 'vitest';
 
@@ -24,25 +24,25 @@ describe("ARIB STD-B24 Parser", () => {
     const parser = new ARIBB24Parser(initialState, option);
 
     const tokens = [
-      ClearScreen.from(),
-      SetWritingFormat.from(7),
-      SetDisplayFormat.from(840, 480),
-      SetDisplayPosition.from(58, 29),
-      SetHorizontalSpacing.from(4),
-      SetVerticalSpacing.from(24),
-      CharacterCompositionDotDesignation.from(36, 36),
-      MiddleSize.from(),
-      ActivePositionSet.from(17, 7),
-      WhiteForeground.from(),
-      PalletControl.from(4),
-      ColorControlBackground.from(1),
-      Character.from('('),
-      NormalSize.from(),
-      Character.from('テ'),
-      Character.from('ス'),
-      Character.from('ト'),
-      MiddleSize.from(),
-      Character.from(')')
+      ARIBB24ClearScreenToken.from(),
+      ARIBB24SetWritingFormatToken.from(7),
+      ARIBB24SetDisplayFormatToken.from(840, 480),
+      ARIBB24SetDisplayPositionToken.from(58, 29),
+      ARIBB24SetHorizontalSpacingToken.from(4),
+      ARIBB24SetVerticalSpacingToken.from(24),
+      ARIBB24CharacterCompositionDotDesignationToken.from(36, 36),
+      ARIBB24MiddleSizeToken.from(),
+      ARIBB24ActivePositionSetToken.from(17, 7),
+      ARIBB24WhiteForegroundToken.from(),
+      ARIBB24PalletControlToken.from(4),
+      ARIBB24ColorControlBackgroundToken.from(1),
+      ARIBB24CharacterToken.from('('),
+      ARIBB24NormalSizeToken.from(),
+      ARIBB24CharacterToken.from('テ'),
+      ARIBB24CharacterToken.from('ス'),
+      ARIBB24CharacterToken.from('ト'),
+      ARIBB24MiddleSizeToken.from(),
+      ARIBB24CharacterToken.from(')')
     ];
 
     const expectedState = {
@@ -57,7 +57,7 @@ describe("ARIB STD-B24 Parser", () => {
     expect(parser.parse(tokens)).toStrictEqual([
       ARIBB24ClearScreenParsedToken.from(0, initialStateMagnificated(initialState, option), { magnification: 2 }),
       ARIBB24CharacterParsedToken.from(
-        Character.from('('), {
+        ARIBB24CharacterToken.from('('), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
           size: CHARACTER_SIZE.Middle,
@@ -68,7 +68,7 @@ describe("ARIB STD-B24 Parser", () => {
         }, { magnification: option.magnification }
       ),
       ARIBB24CharacterParsedToken.from(
-        Character.from('テ'), {
+        ARIBB24CharacterToken.from('テ'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
           size: CHARACTER_SIZE.Normal,
@@ -79,7 +79,7 @@ describe("ARIB STD-B24 Parser", () => {
         }, { magnification: option.magnification }
       ),
       ARIBB24CharacterParsedToken.from(
-        Character.from('ス'), {
+        ARIBB24CharacterToken.from('ス'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
           size: CHARACTER_SIZE.Normal,
@@ -90,7 +90,7 @@ describe("ARIB STD-B24 Parser", () => {
         }, { magnification: option.magnification }
       ),
       ARIBB24CharacterParsedToken.from(
-        Character.from('ト'), {
+        ARIBB24CharacterToken.from('ト'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
           size: CHARACTER_SIZE.Normal,
@@ -101,7 +101,7 @@ describe("ARIB STD-B24 Parser", () => {
         }, { magnification: option.magnification }
       ),
       ARIBB24CharacterParsedToken.from(
-        Character.from(')'), {
+        ARIBB24CharacterToken.from(')'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
           size: CHARACTER_SIZE.Middle,
@@ -119,32 +119,32 @@ describe("ARIB STD-B24 Parser", () => {
     const parser = new ARIBB24Parser(initialState, option);
 
     const tokens = [
-      ClearScreen.from(),
-      SetWritingFormat.from(7),
-      SetDisplayFormat.from(840, 480),
-      SetDisplayPosition.from(58, 29),
-      SetHorizontalSpacing.from(4),
-      SetVerticalSpacing.from(24),
-      CharacterCompositionDotDesignation.from(36, 36),
-      MiddleSize.from(),
-      ActivePositionSet.from(4, 7),
-      WhiteForeground.from(),
-      PalletControl.from(4),
-      ColorControlBackground.from(1),
-      FlashingControl.from(FlashingControlType.NORMAL),
-      Character.from('['),
-      NormalSize.from(),
-      Character.from('携'),
-      Character.from('帯'),
-      MiddleSize.from(),
-      Character.from(']'),
-      FlashingControl.from(FlashingControlType.STOP),
-      ActivePositionForward.from(),
-      NormalSize.from(),
-      Character.from('ブ'),
-      Character.from('ル'),
-      Character.from('ブ'),
-      Character.from('ル'),
+      ARIBB24ClearScreenToken.from(),
+      ARIBB24SetWritingFormatToken.from(7),
+      ARIBB24SetDisplayFormatToken.from(840, 480),
+      ARIBB24SetDisplayPositionToken.from(58, 29),
+      ARIBB24SetHorizontalSpacingToken.from(4),
+      ARIBB24SetVerticalSpacingToken.from(24),
+      ARIBB24CharacterCompositionDotDesignationToken.from(36, 36),
+      ARIBB24MiddleSizeToken.from(),
+      ARIBB24ActivePositionSetToken.from(4, 7),
+      ARIBB24WhiteForegroundToken.from(),
+      ARIBB24PalletControlToken.from(4),
+      ARIBB24ColorControlBackgroundToken.from(1),
+      ARIBB24FlashingControlToken.from(ARIBB24FlashingControlType.NORMAL),
+      ARIBB24CharacterToken.from('['),
+      ARIBB24NormalSizeToken.from(),
+      ARIBB24CharacterToken.from('携'),
+      ARIBB24CharacterToken.from('帯'),
+      ARIBB24MiddleSizeToken.from(),
+      ARIBB24CharacterToken.from(']'),
+      ARIBB24FlashingControlToken.from(ARIBB24FlashingControlType.STOP),
+      ARIBB24ActivePositionForwardToken.from(),
+      ARIBB24NormalSizeToken.from(),
+      ARIBB24CharacterToken.from('ブ'),
+      ARIBB24CharacterToken.from('ル'),
+      ARIBB24CharacterToken.from('ブ'),
+      ARIBB24CharacterToken.from('ル'),
     ];
 
     const expectedState = {
@@ -159,7 +159,7 @@ describe("ARIB STD-B24 Parser", () => {
     expect(parser.parse(tokens)).toStrictEqual([
       ARIBB24ClearScreenParsedToken.from(0, initialStateMagnificated(initialState, option), { magnification: 2 }),
       ARIBB24CharacterParsedToken.from(
-        Character.from('['), {
+        ARIBB24CharacterToken.from('['), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
           size: CHARACTER_SIZE.Middle,
@@ -167,11 +167,11 @@ describe("ARIB STD-B24 Parser", () => {
           pallet: 4,
           foreground: 7,
           background: 65,
-          flashing: FlashingControlType.NORMAL,
+          flashing: ARIBB24FlashingControlType.NORMAL,
         }, { magnification: option.magnification }
       ),
       ARIBB24CharacterParsedToken.from(
-        Character.from('携'), {
+        ARIBB24CharacterToken.from('携'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
           size: CHARACTER_SIZE.Normal,
@@ -179,11 +179,11 @@ describe("ARIB STD-B24 Parser", () => {
           pallet: 4,
           foreground: 7,
           background: 65,
-          flashing: FlashingControlType.NORMAL,
+          flashing: ARIBB24FlashingControlType.NORMAL,
         }, { magnification: option.magnification }
       ),
       ARIBB24CharacterParsedToken.from(
-        Character.from('帯'), {
+        ARIBB24CharacterToken.from('帯'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
           size: CHARACTER_SIZE.Normal,
@@ -191,11 +191,11 @@ describe("ARIB STD-B24 Parser", () => {
           pallet: 4,
           foreground: 7,
           background: 65,
-          flashing: FlashingControlType.NORMAL,
+          flashing: ARIBB24FlashingControlType.NORMAL,
         }, { magnification: option.magnification }
       ),
       ARIBB24CharacterParsedToken.from(
-        Character.from(']'), {
+        ARIBB24CharacterToken.from(']'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
           size: CHARACTER_SIZE.Middle,
@@ -203,11 +203,11 @@ describe("ARIB STD-B24 Parser", () => {
           pallet: 4,
           foreground: 7,
           background: 65,
-          flashing: FlashingControlType.NORMAL,
+          flashing: ARIBB24FlashingControlType.NORMAL,
         }, { magnification: option.magnification }
       ),
       ARIBB24CharacterParsedToken.from(
-        Character.from('ブ'), {
+        ARIBB24CharacterToken.from('ブ'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
           size: CHARACTER_SIZE.Normal,
@@ -215,11 +215,11 @@ describe("ARIB STD-B24 Parser", () => {
           pallet: 4,
           foreground: 7,
           background: 65,
-          flashing: FlashingControlType.STOP,
+          flashing: ARIBB24FlashingControlType.STOP,
         }, { magnification: option.magnification }
       ),
       ARIBB24CharacterParsedToken.from(
-        Character.from('ル'), {
+        ARIBB24CharacterToken.from('ル'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
           size: CHARACTER_SIZE.Normal,
@@ -227,11 +227,11 @@ describe("ARIB STD-B24 Parser", () => {
           pallet: 4,
           foreground: 7,
           background: 65,
-          flashing: FlashingControlType.STOP,
+          flashing: ARIBB24FlashingControlType.STOP,
         }, { magnification: option.magnification }
       ),
       ARIBB24CharacterParsedToken.from(
-        Character.from('ブ'), {
+        ARIBB24CharacterToken.from('ブ'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
           size: CHARACTER_SIZE.Normal,
@@ -239,11 +239,11 @@ describe("ARIB STD-B24 Parser", () => {
           pallet: 4,
           foreground: 7,
           background: 65,
-          flashing: FlashingControlType.STOP,
+          flashing: ARIBB24FlashingControlType.STOP,
         }, { magnification: option.magnification }
       ),
       ARIBB24CharacterParsedToken.from(
-        Character.from('ル'), {
+        ARIBB24CharacterToken.from('ル'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
           size: CHARACTER_SIZE.Normal,
@@ -251,7 +251,7 @@ describe("ARIB STD-B24 Parser", () => {
           pallet: 4,
           foreground: 7,
           background: 65,
-          flashing: FlashingControlType.STOP,
+          flashing: ARIBB24FlashingControlType.STOP,
         }, { magnification: option.magnification }
       ),
     ])

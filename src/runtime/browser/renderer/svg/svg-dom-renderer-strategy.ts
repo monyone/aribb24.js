@@ -1,5 +1,5 @@
 import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARIBB24ParserState } from "../../../../lib/parser/parser";
-import { FlashingControlType } from "../../../../lib/tokenizer/token";
+import { ARIBB24FlashingControlType } from "../../../../lib/tokenizer/token";
 import colortable from "../../../colortable";
 import halfwidth from "../halfwidth";
 import namedcolor from "../../../namedcolor";
@@ -175,13 +175,13 @@ const retriveFlashingAnimateElement = (token: ARIBB24CharacterParsedToken | ARIB
   const { state } = token;
 
   switch (state.flashing) {
-    case FlashingControlType.STOP:
+    case ARIBB24FlashingControlType.STOP:
       return null;
-    case FlashingControlType.NORMAL:
-    case FlashingControlType.INVERTED: {
+    case ARIBB24FlashingControlType.NORMAL:
+    case ARIBB24FlashingControlType.INVERTED: {
       const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
       animate.setAttribute('attributeName', 'opacity');
-      animate.setAttribute('values', state.flashing === FlashingControlType.NORMAL ? '1;0' : '0;1');
+      animate.setAttribute('values', state.flashing === ARIBB24FlashingControlType.NORMAL ? '1;0' : '0;1');
       animate.setAttribute('dur', '1s');
       animate.setAttribute('calcMode', 'discrete');
       animate.setAttribute('repeatCount', 'indefinite');
