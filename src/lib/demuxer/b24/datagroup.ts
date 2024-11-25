@@ -103,7 +103,7 @@ export type ARIBB24CaptionStatement = {
 } & TimeControlModeAndPresentationStartTime;
 export type ARIBB24CaptionData = ARIBB24CaptionManagement | ARIBB24CaptionStatement;
 
-export type CaptionLanguageInformation = {
+export type CaptionAssociationInformation = {
   association: 'ARIB' | 'SBTVD' | 'UNKNOWN',
   language: string;
 };

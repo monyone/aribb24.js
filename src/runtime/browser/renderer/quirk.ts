@@ -1,5 +1,5 @@
 import { CHARACTER_SIZE } from "../../../lib/parser/parser";
-import { CaptionLanguageInformation } from "../../../lib/demuxer/b24/datagroup";
+import { CaptionAssociationInformation } from "../../../lib/demuxer/b24/datagroup";
 
 import symbol_pua from "../../../lib/tokenizer/b24/jis8/ARIB/symbol-pua";
 import symbol_unicode from "../../../lib/tokenizer/b24/jis8/ARIB/symbol-unicode";
@@ -48,7 +48,7 @@ export const shouldUseARIBFont = (character: string): boolean => {
   return true;
 }
 
-export const shouldHalfWidth = (size: (typeof CHARACTER_SIZE)[keyof typeof CHARACTER_SIZE], info: CaptionLanguageInformation): boolean => {
+export const shouldHalfWidth = (size: (typeof CHARACTER_SIZE)[keyof typeof CHARACTER_SIZE], info: CaptionAssociationInformation): boolean => {
   if (info.association === 'SBTVD') {
     return size === CHARACTER_SIZE.Small || size === CHARACTER_SIZE.Middle;
   }
@@ -56,17 +56,17 @@ export const shouldHalfWidth = (size: (typeof CHARACTER_SIZE)[keyof typeof CHARA
   return size === CHARACTER_SIZE.Middle;
 }
 
-export const shouldRemoveTransparentSpace = (info: CaptionLanguageInformation) => {
+export const shouldRemoveTransparentSpace = (info: CaptionAssociationInformation) => {
   if (info.association === 'SBTVD') { return true; }
   return false;
 }
 
-export const shouldNotAssumeUseClearScreen = (info: CaptionLanguageInformation) => {
+export const shouldNotAssumeUseClearScreen = (info: CaptionAssociationInformation) => {
   if (info.association === 'SBTVD') { return true; }
   return false;
 }
 
-export const shouldIgnoreSmallAsRuby = (size: (typeof CHARACTER_SIZE)[keyof typeof CHARACTER_SIZE], info: CaptionLanguageInformation): boolean => {
+export const shouldIgnoreSmallAsRuby = (size: (typeof CHARACTER_SIZE)[keyof typeof CHARACTER_SIZE], info: CaptionAssociationInformation): boolean => {
   // ARIB Caption in Japanese use SSZ to ruby
   if (info.association !== 'ARIB') { return false; }
   if (info.language !== 'jpn') { return false; }

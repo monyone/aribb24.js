@@ -4,12 +4,12 @@ import colortable from "../../../colortable";
 import halfwidth from "../halfwidth";
 import namedcolor from "../../../namedcolor";
 import { UnreachableError } from "../../../../util/error";
-import { CaptionLanguageInformation } from "../../../../lib/demuxer/b24/datagroup";
+import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datagroup";
 import { shouldHalfWidth } from "../quirk";
 import { SVGDOMRendererOption } from "./svg-dom-renderer-option";
 import { ARIBB24BrowserParser, ARIBB24BrowserToken } from "../../types";
 
-export default (target: SVGSVGElement, state: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): void => {
+export default (target: SVGSVGElement, state: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionAssociationInformation, rendererOption: SVGDOMRendererOption): void => {
   const parser = new ARIBB24BrowserParser(state);
 
   const buffer: SVGSVGElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -133,7 +133,7 @@ export default (target: SVGSVGElement, state: ARIBB24ParserState, tokens: ARIBB2
   }
 }
 
-const retriveDecorationSVGPathElement = (token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): SVGPathElement => {
+const retriveDecorationSVGPathElement = (token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, info: CaptionAssociationInformation, rendererOption: SVGDOMRendererOption): SVGPathElement => {
   const { state, option } = token;
 
   const foreground = rendererOption.color.foreground ?? colortable[state.foreground];
@@ -171,7 +171,7 @@ const retriveDecorationSVGPathElement = (token: ARIBB24CharacterParsedToken | AR
   return elem;
 }
 
-const retriveFlashingAnimateElement = (token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): SVGAnimateElement | null => {
+const retriveFlashingAnimateElement = (token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, info: CaptionAssociationInformation, rendererOption: SVGDOMRendererOption): SVGAnimateElement | null => {
   const { state } = token;
 
   switch (state.flashing) {
@@ -193,7 +193,7 @@ const retriveFlashingAnimateElement = (token: ARIBB24CharacterParsedToken | ARIB
   }
 }
 
-const retriveBackroundPathString = (token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): [string, String] => {
+const retriveBackroundPathString = (token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, info: CaptionAssociationInformation, rendererOption: SVGDOMRendererOption): [string, String] => {
   const { state } = token;
   const color = rendererOption.color.background ?? colortable[state.background];
   const origin_x = Math.floor((state.position[0] + 0) +                           0);
@@ -202,7 +202,7 @@ const retriveBackroundPathString = (token: ARIBB24CharacterParsedToken | ARIBB24
   return [color, `M ${origin_x} ${origin_y} h ${ARIBB24Parser.box(state)[0]} v ${ARIBB24Parser.box(state)[1]} H ${origin_x} Z`];
 }
 
-const retriveCharacterSVGTextElement = (token: ARIBB24CharacterParsedToken, info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): SVGTextElement => {
+const retriveCharacterSVGTextElement = (token: ARIBB24CharacterParsedToken, info: CaptionAssociationInformation, rendererOption: SVGDOMRendererOption): SVGTextElement => {
   const { state, option, character: key } = token;
 
   const should_halfwidth = shouldHalfWidth(state.size, info);
@@ -239,7 +239,7 @@ const retriveCharacterSVGTextElement = (token: ARIBB24CharacterParsedToken, info
   return text;
 }
 
-const retriveDRCSSVGPathElement = (token: ARIBB24DRCSPrasedToken, info: CaptionLanguageInformation, rendererOption: SVGDOMRendererOption): [SVGPathElement, SVGPathElement] => {
+const retriveDRCSSVGPathElement = (token: ARIBB24DRCSPrasedToken, info: CaptionAssociationInformation, rendererOption: SVGDOMRendererOption): [SVGPathElement, SVGPathElement] => {
   const { state, option, width, height, depth, binary } = token;
   const uint8 = new Uint8Array(binary);
 

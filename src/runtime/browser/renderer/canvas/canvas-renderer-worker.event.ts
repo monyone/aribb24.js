@@ -1,5 +1,5 @@
 import { ARIBB24ParserState } from "../../../../lib/parser/parser";
-import { CaptionLanguageInformation } from "../../../../lib/demuxer/b24/datagroup";
+import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datagroup";
 import { ARIBB24Token } from "../../../../lib/tokenizer/token";
 import { ARIBB24BrowserToken } from "../../types";
 import { CanvasRendererOption } from "./canvas-renderer-option";
@@ -56,11 +56,11 @@ export type FromMainToWorkerEventRender = {
   type: 'render';
   state: ARIBB24ParserState,
   tokens: ARIBB24BrowserToken[],
-  info: CaptionLanguageInformation,
+  info: CaptionAssociationInformation,
   option: CanvasRendererOption,
 };
 export const FromMainToWorkerEventRender = {
-  from (state: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionLanguageInformation, option: CanvasRendererOption): FromMainToWorkerEventRender {
+  from (state: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionAssociationInformation, option: CanvasRendererOption): FromMainToWorkerEventRender {
     return {
       type: 'render',
       state,

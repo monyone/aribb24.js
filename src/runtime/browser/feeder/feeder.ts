@@ -1,7 +1,7 @@
 import { ARIBB24ParserState } from "../../../lib/parser/parser";
 import aribInitialState from "../../../lib/parser/state/ARIB";
 import sbtvdInitialState from "../../../lib/parser/state/SBTVD"
-import datagroup, { CaptionLanguageInformation } from "../../../lib/demuxer/b24/datagroup";
+import datagroup, { CaptionAssociationInformation } from "../../../lib/demuxer/b24/datagroup";
 import ARIBB24JapaneseJIS8Tokenizer from "../../../lib/tokenizer/b24/jis8/ARIB/index";
 import ARIBB24BrazilianJIS8Tokenizer from "../../../lib/tokenizer/b24/jis8/SBTVD/index";
 import ARIBB24Tokenizer from "../../../lib/tokenizer/b24/tokenizer";
@@ -58,7 +58,7 @@ export const FeederOption = {
   }
 }
 
-export const getTokenizeInformation = (language: string, TCS: number, option: FeederOption): [CaptionLanguageInformation['association'], ARIBB24Tokenizer, ARIBB24ParserState] | null => {
+export const getTokenizeInformation = (language: string, TCS: number, option: FeederOption): [CaptionAssociationInformation['association'], ARIBB24Tokenizer, ARIBB24ParserState] | null => {
   if (TCS === 1) {
     return ['ARIB', new ARIBB24UTF8Tokenizer(), aribInitialState];
   } else if (TCS !== 0) {
@@ -91,7 +91,7 @@ export type FeederPresentationData = {
   pts: number;
   duration: number;
   state: ARIBB24ParserState;
-  info: CaptionLanguageInformation,
+  info: CaptionAssociationInformation,
   data: ARIBB24BrowserToken[];
 };
 

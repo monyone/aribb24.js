@@ -1,9 +1,9 @@
 import { ARIBB24ParserState } from "../../../lib/parser/parser";
-import { CaptionLanguageInformation } from "../../../lib/demuxer/b24/datagroup";
+import { CaptionAssociationInformation } from "../../../lib/demuxer/b24/datagroup";
 import { ARIBB24BrowserToken } from "../types";
 
 export default interface Renderer {
-  render(initialState: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionLanguageInformation): void;
+  render(initialState: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionAssociationInformation): void;
   clear(): void;
   hide(): void;
   show(): void;

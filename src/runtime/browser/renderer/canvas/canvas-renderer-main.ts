@@ -1,7 +1,7 @@
 import { ARIBB24ParserState } from "../../../../lib/parser/parser";
 import CanvasRenderer from "./canvas-renderer";
 import render from "./canvas-renderer-strategy"
-import { CaptionLanguageInformation } from "../../../../lib/demuxer/b24/datagroup";
+import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datagroup";
 import { ARIBB24BrowserToken, replaceDRCS } from "../../types";
 import { PartialCanvasRendererOption } from "./canvas-renderer-option";
 
@@ -38,7 +38,7 @@ export default class CanvasMainThreadRenderer extends CanvasRenderer {
     }
   }
 
-  public render(initialState: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionLanguageInformation): void {
+  public render(initialState: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionAssociationInformation): void {
     render(this.canvas, this.buffer, initialState, replaceDRCS(tokens, this.option.replace.drcs), info, this.option);
   }
 

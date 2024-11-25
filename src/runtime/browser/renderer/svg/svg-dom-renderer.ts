@@ -1,5 +1,5 @@
 import { ARIBB24ParserState } from "../../../../lib/parser/parser";
-import { CaptionLanguageInformation } from "../../../../lib/demuxer/b24/datagroup";
+import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datagroup";
 import { ARIBB24BrowserToken, replaceDRCS } from "../../types";
 import { shouldNotAssumeUseClearScreen } from "../quirk";
 import Renderer from "../renderer";
@@ -37,7 +37,7 @@ export default class SVGDOMRenderer implements Renderer {
   public show(): void {
     this.svg.style.visibility = 'visible';
   }
-  public render(initialState: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionLanguageInformation): void {
+  public render(initialState: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionAssociationInformation): void {
     if (shouldNotAssumeUseClearScreen(info)) { this.clear(); }
 
     render(this.svg, initialState, replaceDRCS(tokens, this.option.replace.drcs), info, this.option);

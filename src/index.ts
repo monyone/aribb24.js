@@ -32,7 +32,7 @@ export { default as ARIBB24JapaneseJIS8Encoder } from './lib/encoder/b24/jis8/AR
 
 // Demuxer
 export { default as demuxDatagroup } from './lib/demuxer/b24/datagroup';
-export type { ARIBB24DataUnit, ARIBB24CaptionData, ARIBB24CaptionStatement, ARIBB24CaptionManagement } from './lib/demuxer/b24/datagroup';
+export type { CaptionAssociationInformation, ARIBB24DataUnit, ARIBB24CaptionData, ARIBB24CaptionStatement, ARIBB24CaptionManagement } from './lib/demuxer/b24/datagroup';
 export { default as demuxIndependentPES } from './lib/demuxer/b24/independent';
 export type { ARIBB36Data, ARIBB36ProgramManagementInformation, ARIBB36PageManagementInformation } from './lib/demuxer/b36';
 export { default as demuxB36 } from './lib/demuxer/b36';

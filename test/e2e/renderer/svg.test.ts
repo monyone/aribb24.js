@@ -3,7 +3,7 @@ import { page } from '@vitest/browser/context'
 
 import { SVGDOMRenderer } from '@/index';
 import aribInitialState from '@/lib/parser/state/ARIB';
-import { CaptionLanguageInformation } from '@/lib/demuxer/b24/datagroup';
+import { CaptionAssociationInformation } from '@/lib/demuxer/b24/datagroup';
 import {ARIBB24ActivePositionForwardToken, ARIBB24ActivePositionSetToken, ARIBB24CharacterCompositionDotDesignationToken, ARIBB24CharacterToken, ARIBB24ClearScreenToken, ARIBB24ColorControlBackgroundToken, ARIBB24FlashingControlToken, ARIBB24FlashingControlType, ARIBB24MiddleSizeToken, ARIBB24NormalSizeToken, ARIBB24PalletControlToken, ARIBB24SetDisplayFormatToken, ARIBB24SetDisplayPositionToken, ARIBB24SetHorizontalSpacingToken, ARIBB24SetVerticalSpacingToken, ARIBB24SetWritingFormatToken, ARIBB24WhiteForegroundToken } from '@/lib/tokenizer/token';
 
 const generateCharacter = (str: string) => {
@@ -14,7 +14,7 @@ const generateCharacter = (str: string) => {
 describe('ARIB B24 Canvas Renderer', () => {
   test('Flashing Rendering', async () => {
     const width = 960, height = 540;
-    const info: CaptionLanguageInformation = {
+    const info: CaptionAssociationInformation = {
       association: 'ARIB',
       language: 'und',
     };

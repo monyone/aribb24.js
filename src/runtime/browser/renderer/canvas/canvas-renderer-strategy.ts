@@ -4,11 +4,11 @@ import colortable from "../../../colortable";
 import halfwidth from "../halfwidth";
 import namedcolor from "../../../namedcolor";
 import { UnreachableError } from "../../../../util/error";
-import { CaptionLanguageInformation } from "../../../../lib/demuxer/b24/datagroup";
+import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datagroup";
 import { shouldHalfWidth, shouldUseARIBFont } from "../quirk";
 import { ARIBB24BitmapParsedToken, ARIBB24BrowserParser, ARIBB24BrowserToken } from "../../types";
 
-export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTMLCanvasElement | OffscreenCanvas, state: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionLanguageInformation, rendererOption: CanvasRendererOption): void => {
+export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTMLCanvasElement | OffscreenCanvas, state: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionAssociationInformation, rendererOption: CanvasRendererOption): void => {
   // render background
   let magnification: [number, number] = [1, 1];
   {
@@ -86,7 +86,7 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
   }
 }
 
-const clear = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionLanguageInformation, rendererOption: CanvasRendererOption): void => {
+const clear = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: CanvasRendererOption): void => {
   const { state } = token;
 
   // clear
@@ -98,7 +98,7 @@ const clear = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingConte
   );
 }
 
-const renderBackground = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionLanguageInformation,rendererOption: CanvasRendererOption): void => {
+const renderBackground = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionAssociationInformation,rendererOption: CanvasRendererOption): void => {
   const { state } = token;
 
   // background
@@ -111,7 +111,7 @@ const renderBackground = (context: CanvasRenderingContext2D | OffscreenCanvasRen
   );
 }
 
-const renderHighlight = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionLanguageInformation,rendererOption: CanvasRendererOption): void => {
+const renderHighlight = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionAssociationInformation,rendererOption: CanvasRendererOption): void => {
   const { state, option } = token;
 
   const x = (state.margin[0] + (state.position[0] + 0) +                           0) * magnification[0];
@@ -136,7 +136,7 @@ const renderHighlight = (context: CanvasRenderingContext2D | OffscreenCanvasRend
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-const renderUnderline = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionLanguageInformation, rendererOption: CanvasRendererOption): void => {
+const renderUnderline = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: CanvasRendererOption): void => {
   const { state, option } = token;
 
   if (!state.underline) { return; }
@@ -152,7 +152,7 @@ const renderUnderline = (context: CanvasRenderingContext2D | OffscreenCanvasRend
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken, magnification: [number, number], info: CaptionLanguageInformation, rendererOption: CanvasRendererOption): void => {
+const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: CanvasRendererOption): void => {
   const { state, option, character: key, non_spacing } = token;
   const should_halfwidth = shouldHalfWidth(state.size, info);
   const replace_halfwidth = rendererOption.replace.half  && should_halfwidth;
@@ -282,7 +282,7 @@ const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasR
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionLanguageInformation, rendererOption: CanvasRendererOption): void => {
+const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: CanvasRendererOption): void => {
   const { state } = token;
   // clear
   clear(context, token, magnification, info, rendererOption);
@@ -300,7 +300,7 @@ const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRendering
   renderDRCSInternal(context, token, magnification, foreground, orn);
 }
 
-const renderBitmap = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24BitmapParsedToken, magnification: [number, number], info: CaptionLanguageInformation, rendererOption: CanvasRendererOption): void => {
+const renderBitmap = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24BitmapParsedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: CanvasRendererOption): void => {
   const { x_position, y_position, width, height } = token;
 
   context.drawImage(token.normal_bitmap, x_position * magnification[0], y_position * magnification[1], width* magnification[0], height * magnification[1]);

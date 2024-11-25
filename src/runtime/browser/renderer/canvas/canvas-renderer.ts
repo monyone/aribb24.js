@@ -1,5 +1,5 @@
 import { ARIBB24ParserState } from "../../../../lib/parser/parser";
-import { CaptionLanguageInformation } from "../../../../lib/demuxer/b24/datagroup";
+import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datagroup";
 import { ARIBB24BrowserToken } from "../../types";
 import Renderer from "../renderer";
 import { CanvasRendererOption, PartialCanvasRendererOption } from "./canvas-renderer-option";
@@ -28,7 +28,7 @@ export default abstract class CanvasRenderer implements Renderer {
   public show(): void {
     this.canvas.style.visibility = 'visible';
   }
-  public abstract render(initialState: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionLanguageInformation): void;
+  public abstract render(initialState: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionAssociationInformation): void;
 
   public onAttach(element: HTMLElement): void {
     element.appendChild(this.canvas);
