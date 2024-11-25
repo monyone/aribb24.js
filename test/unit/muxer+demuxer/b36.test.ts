@@ -42,7 +42,7 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
       completed: true,
       usersAreaUsed: false,
       pages: []
-    } satisfies ARIBB36Data;
+    } as const satisfies ARIBB36Data;
 
     expect(demux(mux(data))).toStrictEqual(data);
   });
@@ -119,7 +119,7 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
         usersAreaUsed: false,
         management,
       }]
-    } satisfies ARIBB36Data;
+    } as const satisfies ARIBB36Data;
 
     expect(demux(mux(data))).toStrictEqual(data);
   });
@@ -253,7 +253,7 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
         management,
         statement
       }]
-    } satisfies ARIBB36Data;
+    } as const satisfies ARIBB36Data;
 
     expect(demux(mux(data))).toStrictEqual(data);
   });

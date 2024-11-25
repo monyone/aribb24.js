@@ -19,7 +19,7 @@ const initialStateMagnificated = (state: typeof initialState, option: ARIBB24Par
 
 describe("ARIB STD-B24 Parser", () => {
   test('Parse With Magnification', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     expect(parser.currentState()).toStrictEqual(initialStateMagnificated(initialState, option));
@@ -100,7 +100,7 @@ describe("ARIB STD-B24 Parser", () => {
     }
     const replace = new Map([[md5(Uint8Array.from(binary).buffer), '〓']]);
 
-    const option: ARIBB24ParserOption = { magnification: 1 };
+    const option = { magnification: 1 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     expect(parser.parse(replaceDRCS([ARIBB24DRCSToken.from(width, height, depth, Uint8Array.from(binary).buffer, '\u3099')], replace))).toStrictEqual([
@@ -109,7 +109,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse SetWritingFormat (SWF) 5 (1920x1080)', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option = { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24SetWritingFormatToken.from(5));
@@ -121,7 +121,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse SetWritingFormat (SWF) 7 (960x540)', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24SetWritingFormatToken.from(7));
@@ -133,7 +133,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse SetWritingFormat (SWF) 9 (720x480)', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24SetWritingFormatToken.from(9));
@@ -145,7 +145,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse SetWritingFormat (SWF) 11 (1280x720)', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24SetWritingFormatToken.from(11));
@@ -157,7 +157,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse SetDisplayFormat (SDF)', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24SetDisplayFormatToken.from(720, 480));
@@ -169,7 +169,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse SetDisplayPosition (SDP)', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24SetDisplayPositionToken.from(120, 60));
@@ -181,7 +181,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse CharacterCompositionDotDesignation (SSM)', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24CharacterCompositionDotDesignationToken.from(24, 24));
@@ -193,7 +193,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse SetHorizontalSpacing (SHS)', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24SetHorizontalSpacingToken.from(2));
@@ -205,7 +205,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse SetVerticalSpacing (SVS)', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24SetVerticalSpacingToken.from(6));
@@ -217,7 +217,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ActivePositionBackward (APB) with Initial Position', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24ActivePositionBackwardToken.from());
@@ -229,7 +229,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ActivePositionBackward (APB) with Custom Position', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser({ ... initialState, position: [480, 60] }, option);
 
     parser.parseToken(ARIBB24ActivePositionBackwardToken.from());
@@ -241,7 +241,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ActivePositionForward (APF) with Initial Position', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24ActivePositionForwardToken.from());
@@ -253,7 +253,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ActivePositionForward (APF) with Custom Position', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser({ ... initialState, position: [380, 89] }, option);
 
     parser.parseToken(ARIBB24ActivePositionForwardToken.from());
@@ -265,7 +265,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ActivePositionDown (APD) with Initial Position', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24ActivePositionDownToken.from());
@@ -277,7 +277,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ActivePositionDown (APD) with Custon Position', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser({ ... initialState, position: [180, 199] }, option);
 
     parser.parseToken(ARIBB24ActivePositionDownToken.from());
@@ -289,7 +289,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ActivePositionUp (APU) with Initial Position', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24ActivePositionUpToken.from());
@@ -301,7 +301,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ActivePositionUp (APU) with Custon Position', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser({ ... initialState, position: [390, 499] }, option);
 
     parser.parseToken(ARIBB24ActivePositionUpToken.from());
@@ -313,7 +313,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ActivePositionReturn (APR) with Initial Position', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24ActivePositionReturnToken.from());
@@ -325,7 +325,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ActivePositionReturn (APR) with Custom Position', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser({ ... initialState, position: [120, 299] }, option);
 
     parser.parseToken(ARIBB24ActivePositionReturnToken.from());
@@ -337,7 +337,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ActivePositionSet (APS) with Initial State', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24ActivePositionSetToken.from(4, 4));
@@ -349,7 +349,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ActivePositionSet (APS) with Custom Position', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser({ ... initialState, position: [120, 299] }, option);
 
     parser.parseToken(ARIBB24ActivePositionSetToken.from(3, 5));
@@ -361,7 +361,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ActivePositionSet (APS) with Custom CharacterCompositionDotDesignation (SSM)', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24CharacterCompositionDotDesignationToken.from(24, 24)),
@@ -375,7 +375,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ActivePositionSet (APS) with Custom SetHorizontalSpacing (SHS)', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24SetHorizontalSpacingToken.from(2)),
@@ -389,7 +389,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ActivePositionSet (APS) with Custom SetHorizontalSpacing (SVS)', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24SetVerticalSpacingToken.from(8)),
@@ -403,7 +403,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ActivePositionSet (APS) with SmallSize', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24SmallSizeToken.from()),
@@ -417,7 +417,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ActivePositionSet (APS) with MiddleSize', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24MiddleSizeToken.from()),
@@ -431,7 +431,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ActivePositionSet (APS) with NormalSize', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24NormalSizeToken.from()),
@@ -445,7 +445,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse SmallSize', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24SmallSizeToken.from());
@@ -457,7 +457,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse MiddleSize', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24MiddleSizeToken.from());
@@ -469,7 +469,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse NormalSize', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24NormalSizeToken.from());
@@ -481,7 +481,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse CharacterSizeControl (SZX) Tiny', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24CharacterSizeControlToken.from(ARIBB24CharacterSizeControlType.TINY));
@@ -493,7 +493,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse CharacterSizeControl (SZX) Double Height', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24CharacterSizeControlToken.from(ARIBB24CharacterSizeControlType.DOUBLE_HEIGHT));
@@ -505,7 +505,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse CharacterSizeControl (SZX) Double Width', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24CharacterSizeControlToken.from(ARIBB24CharacterSizeControlType.DOUBLE_WIDTH));
@@ -517,7 +517,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse CharacterSizeControl (SZX) Double Height and Width', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24CharacterSizeControlToken.from(ARIBB24CharacterSizeControlType.DOUBLE_HEIGHT_AND_WIDTH));
@@ -529,7 +529,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse CharacterSizeControl (SZX) Special 1', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24CharacterSizeControlToken.from(ARIBB24CharacterSizeControlType.SPECIAL_1));
@@ -541,7 +541,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse CharacterSizeControl (SZX) Special 2', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24CharacterSizeControlToken.from(ARIBB24CharacterSizeControlType.SPECIAL_2));
@@ -553,7 +553,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse PalletControl', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24PalletControlToken.from(7));
@@ -565,7 +565,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse BlackForeground (BKF) with Initial Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24BlackForegroundToken.from());
@@ -577,7 +577,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse BlackForeground (BKF) with Custon Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24PalletControlToken.from(2));
@@ -591,7 +591,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse RedForeground (RDF) with Initial Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24RedForegroundToken.from());
@@ -603,7 +603,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse RedForeground (RDF) with Custon Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24PalletControlToken.from(1));
@@ -617,7 +617,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse GreenForeground (GRF) with Initial Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24GreenForegroundToken.from());
@@ -629,7 +629,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse GreenForeground (GRF) with Custon Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24PalletControlToken.from(3));
@@ -643,7 +643,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse YellowForeground (YLF) with Initial Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24YellowForegroundToken.from());
@@ -655,7 +655,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse YellowForeground (YLE) with Custon Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24PalletControlToken.from(4));
@@ -669,7 +669,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse BlueForeground (BLF) with Initial Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24BlueForegroundToken.from());
@@ -681,7 +681,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse BlueForeground (BLF) with Custon Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24PalletControlToken.from(5));
@@ -695,7 +695,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse MagentaForeground (MGF) with Initial Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24MagentaForegroundToken.from());
@@ -707,7 +707,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse MagentaForeground (MGF) with Custon Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24PalletControlToken.from(6));
@@ -721,7 +721,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse CyanForeground (CYF) with Initial Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24CyanForegroundToken.from());
@@ -733,7 +733,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse CyanForeground (CYF) with Custon Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24PalletControlToken.from(7));
@@ -747,7 +747,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse WhiteForeground (WHF) with Initial Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24WhiteForegroundToken.from());
@@ -759,7 +759,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse WhiteForeground (WHF) with Custon Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24PalletControlToken.from(3));
@@ -773,7 +773,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ColorControlForeground with Initial Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24ColorControlForegroundToken.from(8));
@@ -785,7 +785,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ColorControlForeground with Custom Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24PalletControlToken.from(1));
@@ -799,7 +799,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ColorControlHalfForeground with Initial Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24ColorControlHalfForegroundToken.from(10));
@@ -811,7 +811,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ColorControlHalfForeground with Custom Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24PalletControlToken.from(2));
@@ -825,7 +825,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ColorControlHalfBackground with Initial Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24ColorControlHalfBackgroundToken.from(12));
@@ -837,7 +837,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ColorControlHalfBackground with Custom Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24PalletControlToken.from(3));
@@ -851,7 +851,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ColorControlBackground with Initial Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24ColorControlBackgroundToken.from(14));
@@ -863,7 +863,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ColorControlBackground with Custom Pallet', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24PalletControlToken.from(4));
@@ -877,7 +877,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse StartLining', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24StartLiningToken.from());
@@ -889,7 +889,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse StopLining', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24StopLiningToken.from());
@@ -901,7 +901,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse HilightingCharacterBlock Highlights None', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24HilightingCharacterBlockToken.from(0x00));
@@ -913,7 +913,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse HilightingCharacterBlock Highlights ALL', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24HilightingCharacterBlockToken.from(0x0F));
@@ -925,7 +925,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse OrnamentControlNone None ornament', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24OrnamentControlNoneToken.from());
@@ -937,7 +937,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse OrnamentControl Hemming Black', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24OrnamentControlHemmingToken.from(0));
@@ -949,7 +949,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse FlashingControl STOP', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24FlashingControlToken.from(ARIBB24FlashingControlType.STOP));
@@ -961,7 +961,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse FlashingControl NORMAL', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24FlashingControlToken.from(ARIBB24FlashingControlType.NORMAL));
@@ -973,7 +973,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse FlashingControl INVERTED', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24FlashingControlToken.from(ARIBB24FlashingControlType.INVERTED));
@@ -985,7 +985,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse TimeControlWait', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24TimeControlWaitToken.from(10));
@@ -998,7 +998,7 @@ describe("ARIB STD-B24 Parser", () => {
 
 
   test('Parse Multiple TimeControlWait', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24TimeControlWaitToken.from(15));
@@ -1011,7 +1011,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ClearScreen with Initial State', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     const tokens = parser.parseToken(ARIBB24ClearScreenToken.from());
@@ -1023,7 +1023,7 @@ describe("ARIB STD-B24 Parser", () => {
   });
 
   test('Parse ClearScreen with Time Elapsed', () => {
-    const option: ARIBB24ParserOption = { magnification: 2 };
+    const option= { magnification: 2 } as const satisfies ARIBB24ParserOption;
     const parser = new ARIBB24Parser(initialState, option);
 
     parser.parseToken(ARIBB24TimeControlWaitToken.from(5));

@@ -5,18 +5,18 @@ import { describe, test, expect } from 'vitest';
 
 describe("ARIB STD-B24 Muxer Demuxer Consistenty for IndepedentPES", () => {
   test('Mux Caption', () => {
-    const data: PES = {
+    const data = {
       tag: 'Caption',
       data: new ArrayBuffer(1),
-    };
+    } as const satisfies PES;
     expect(demux(mux(data))).toStrictEqual(data);
   });
 
   test('Mux Superimpose', () => {
-    const data: PES = {
+    const data = {
       tag: 'Superimpose',
       data: new ArrayBuffer(1),
-    };
+    } as const satisfies PES;
     expect(demux(mux(data))).toStrictEqual(data);
   });
 });

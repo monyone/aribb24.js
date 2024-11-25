@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import ARIBB24UTF8Tokenizer from '@/lib/tokenizer/b24/ucs/tokenizer';
-import { ActivePositionBackward, ActivePositionDown, ActivePositionForward, ActivePositionReturn, ActivePositionSet, ActivePositionUp, Bell, BlackForeground, BlueForeground, Cancel, Character, CharacterSizeControl, CharacterSizeControlType, ClearScreen, ColorControlBackground, ColorControlForeground, ColorControlHalfBackground, ColorControlHalfForeground, ConcealmentMode, ConcealmentModeType, CyanForeground, Delete, FlashingControl, FlashingControlType, GreenForeground, HilightingCharacterBlock, MagentaForeground, MiddleSize, NormalSize, Null, PalletControl, ParameterizedActivePositionForward, PatternPolarityControl, PatternPolarityControlType, RecordSeparator, RedForeground, RepeatCharacter, ReplacingConcealmentMode, ReplacingConcealmentModeType, SingleConcealmentMode, SingleConcealmentModeType, SmallSize, Space, StartLining, StopLining, TimeControlMode, ARIBB24TimeControlModeType TimeControlWait, UnitSeparator, WhiteForeground, WritingModeModification, WritingModeModificationType, YellowForeground } from '@/lib/tokenizer/token';
+import { ARIBB24ActivePositionDownToken, ARIBB24ActivePositionReturnToken, ARIBB24CharacterToken, ARIBB24SpaceToken } from '@/lib/tokenizer/token';
 import { CONTROL_CODES } from '@/lib/tokenizer/b24/tokenizer';
 import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from '@/util/error';
 
@@ -24,7 +24,7 @@ const generateBinary = (... operation: (number | string)[]): ArrayBuffer => {
 
 const generateCharacterTokens = (str: string) => {
   const segmenter = new Intl.Segmenter();
-  return Array.from(segmenter.segment(str), ({ segment }) => segment).map((seg) => Character.from(seg));
+  return Array.from(segmenter.segment(str), ({ segment }) => segment).map((seg) => ARIBB24CharacterToken.from(seg));
 }
 
 describe("ARIB STD-B24 UCS", () => {
@@ -33,9 +33,9 @@ describe("ARIB STD-B24 UCS", () => {
 
     expect(tokenizer.tokenizeStatement(generateBinary('This is Test'))).toStrictEqual([
       ... generateCharacterTokens('This'),
-      Space.from(),
+      ARIBB24SpaceToken.from(),
       ... generateCharacterTokens('is'),
-      Space.from(),
+      ARIBB24SpaceToken.from(),
       ... generateCharacterTokens('Test'),
     ]);
   });
@@ -45,9 +45,9 @@ describe("ARIB STD-B24 UCS", () => {
 
     expect(tokenizer.tokenizeStatement(generateBinary('new\rline\nwith'))).toStrictEqual([
       ... generateCharacterTokens('new'),
-      ActivePositionReturn.from(),
+      ARIBB24ActivePositionReturnToken.from(),
       ... generateCharacterTokens('line'),
-      ActivePositionDown.from(),
+      ARIBB24ActivePositionDownToken.from(),
       ... generateCharacterTokens('with'),
     ]);
   });

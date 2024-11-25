@@ -1,44 +1,44 @@
 import mux from '@/lib/muxer/b24/datagroup';
-import demux, { CaptionData, RollupModeType, TimeControlModeType } from '@/lib/demuxer/b24/datagroup';
+import demux, { ARIBB24CaptionData, RollupModeType, TimeControlModeType } from '@/lib/demuxer/b24/datagroup';
 
 import { describe, test, expect } from 'vitest';
 
 describe("ARIB STD-B24 Muxer Demuxer Consistenty for DataUnit", () => {
   test('Mux Statement With Empty Content with A Group', () => {
-    const data: CaptionData = {
+    const data = {
       tag: 'CaptionStatement',
       group: 0,
       lang: 0,
       timeControlMode: TimeControlModeType.FREE,
       units: [],
-    };
+    } as const satisfies ARIBB24CaptionData;
     expect(demux(mux(data))).toStrictEqual(data);
   });
 
   test('Mux Statement With Empty Content with B Group', () => {
-    const data: CaptionData = {
+    const data = {
       tag: 'CaptionStatement',
       group: 1,
       lang: 0,
       timeControlMode: TimeControlModeType.FREE,
       units: [],
-    };
+    } as const satisfies ARIBB24CaptionData;
     expect(demux(mux(data))).toStrictEqual(data);
   });
 
   test('Mux Statement With Empty Content with secondary language', () => {
-    const data: CaptionData = {
+    const data = {
       tag: 'CaptionStatement',
       group: 0,
       lang: 1,
       timeControlMode: TimeControlModeType.FREE,
       units: [],
-    };
+    } as const satisfies ARIBB24CaptionData;
     expect(demux(mux(data))).toStrictEqual(data);
   });
 
   test('Mux Statement With Statement Content', () => {
-    const data: CaptionData = {
+    const data = {
       tag: 'CaptionStatement',
       group: 0,
       lang: 1,
@@ -47,12 +47,12 @@ describe("ARIB STD-B24 Muxer Demuxer Consistenty for DataUnit", () => {
         tag: 'Statement',
         data: new ArrayBuffer(0)
       }],
-    };
+    } as const satisfies ARIBB24CaptionData;
     expect(demux(mux(data))).toStrictEqual(data);
   });
 
   test('Mux Statement With DRCS Content', () => {
-    const data: CaptionData = {
+    const data = {
       tag: 'CaptionStatement',
       group: 0,
       lang: 1,
@@ -62,12 +62,12 @@ describe("ARIB STD-B24 Muxer Demuxer Consistenty for DataUnit", () => {
         bytes: 1,
         data: new ArrayBuffer(1)
       }],
-    };
+    } as const satisfies ARIBB24CaptionData;
     expect(demux(mux(data))).toStrictEqual(data);
   });
 
   test('Mux Statement With DRCS Content', () => {
-    const data: CaptionData = {
+    const data = {
       tag: 'CaptionStatement',
       group: 0,
       lang: 1,
@@ -77,12 +77,12 @@ describe("ARIB STD-B24 Muxer Demuxer Consistenty for DataUnit", () => {
         bytes: 2,
         data: new ArrayBuffer(2)
       }],
-    };
+    } as const satisfies ARIBB24CaptionData;
     expect(demux(mux(data))).toStrictEqual(data);
   });
 
   test('Mux Statement With Bitmap Content', () => {
-    const data: CaptionData = {
+    const data = {
       tag: 'CaptionStatement',
       group: 0,
       lang: 1,
@@ -91,12 +91,12 @@ describe("ARIB STD-B24 Muxer Demuxer Consistenty for DataUnit", () => {
         tag: 'Bitmap',
         data: new ArrayBuffer(3)
       }],
-    };
+    } as const satisfies ARIBB24CaptionData;
     expect(demux(mux(data))).toStrictEqual(data);
   });
 
   test('Mux Statement With Multiple Content', () => {
-    const data: CaptionData = {
+    const data = {
       tag: 'CaptionStatement',
       group: 0,
       lang: 1,
@@ -112,34 +112,34 @@ describe("ARIB STD-B24 Muxer Demuxer Consistenty for DataUnit", () => {
         tag: 'Bitmap',
         data: new ArrayBuffer(6)
       }],
-    };
+    } as const satisfies ARIBB24CaptionData;
     expect(demux(mux(data))).toStrictEqual(data);
   });
 
   test('Mux Management With Empty Content with A Group', () => {
-    const data: CaptionData = {
+    const data = {
       tag: 'CaptionManagement',
       group: 0,
       timeControlMode: TimeControlModeType.FREE,
       languages: [],
       units: [],
-    };
+    } as const satisfies ARIBB24CaptionData;
     expect(demux(mux(data))).toStrictEqual(data);
   });
 
   test('Mux Management With Empty Content with B Group', () => {
-    const data: CaptionData = {
+    const data = {
       tag: 'CaptionManagement',
       group: 1,
       timeControlMode: TimeControlModeType.FREE,
       languages: [],
       units: [],
-    };
+    } as const satisfies ARIBB24CaptionData;
     expect(demux(mux(data))).toStrictEqual(data);
   });
 
   test('Mux Management With Empty Content with Single Language', () => {
-    const data: CaptionData = {
+    const data = {
       tag: 'CaptionManagement',
       group: 0,
       timeControlMode: TimeControlModeType.FREE,
@@ -152,12 +152,12 @@ describe("ARIB STD-B24 Muxer Demuxer Consistenty for DataUnit", () => {
         TCS: 0b00,
       }],
       units: [],
-    };
+    } as const satisfies ARIBB24CaptionData;
     expect(demux(mux(data))).toStrictEqual(data);
   });
 
   test('Mux Management With Empty Content with Multiple Language', () => {
-    const data: CaptionData = {
+    const data = {
       tag: 'CaptionManagement',
       group: 0,
       timeControlMode: TimeControlModeType.OFFSETTIME,
@@ -186,7 +186,7 @@ describe("ARIB STD-B24 Muxer Demuxer Consistenty for DataUnit", () => {
         TCS: 0b01,
       }],
       units: [],
-    };
+    } as const satisfies ARIBB24CaptionData;
     expect(demux(mux(data))).toStrictEqual(data);
   });
 });
