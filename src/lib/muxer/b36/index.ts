@@ -56,7 +56,8 @@ export default (b36: ARIBB36Data): ArrayBuffer => {
       const codes = Array.from(b36.broadcasterIdentification);
       const isInvalid = codes.some((code) => !toShiftJIS.has(code));
       if (isInvalid) { throw new ViolationStandardError('broadcasterIdentification cannot convert to shift-jis'); }
-      const converted = codes.flatMap((code) => toShiftJIS.get(code)!).slice(0, 6);
+      const converted = codes.flatMap((code) => toShiftJIS.get(code)!)
+      if (converted.length > 6) { throw new ViolationStandardError('broadcasterIdentification byteLength exceeded'); }
       while (converted.length < 6) { converted.push(' '.charCodeAt(0)); }
       programInformationBuilder.write(Uint8Array.from(converted).buffer);
     }
@@ -65,7 +66,8 @@ export default (b36: ARIBB36Data): ArrayBuffer => {
       const codes = Array.from(b36.materialNumber);
       const isInvalid = codes.some((code) => !toShiftJIS.has(code));
       if (isInvalid) { throw new ViolationStandardError('materialNumber cannot convert to shift-jis'); }
-      const converted = codes.flatMap((code) => toShiftJIS.get(code)!).slice(0, 27);
+      const converted = codes.flatMap((code) => toShiftJIS.get(code)!);
+      if (converted.length > 27) { throw new ViolationStandardError('materialNumber byteLength exceeded'); }
       while (converted.length < 27) { converted.push(' '.charCodeAt(0)); }
       programInformationBuilder.write(Uint8Array.from(converted).buffer);
     }
@@ -74,7 +76,8 @@ export default (b36: ARIBB36Data): ArrayBuffer => {
       const codes = Array.from(b36.programTitle);
       const isInvalid = codes.some((code) => !toShiftJIS.has(code));
       if (isInvalid) { throw new ViolationStandardError('programTitle cannot convert to shift-jis'); }
-      const converted = codes.flatMap((code) => toShiftJIS.get(code)!).slice(0, 40);
+      const converted = codes.flatMap((code) => toShiftJIS.get(code)!);
+      if (converted.length > 40) { throw new ViolationStandardError('programTitle byteLength exceeded'); }
       while (converted.length < 40) { converted.push(' '.charCodeAt(0)); }
       programInformationBuilder.write(Uint8Array.from(converted).buffer);
     }
@@ -83,7 +86,8 @@ export default (b36: ARIBB36Data): ArrayBuffer => {
       const codes = Array.from(b36.programSubtitle);
       const isInvalid = codes.some((code) => !toShiftJIS.has(code));
       if (isInvalid) { throw new ViolationStandardError('programSubtitle cannot convert to shift-jis'); }
-      const converted = codes.flatMap((code) => toShiftJIS.get(code)!).slice(0, 40);
+      const converted = codes.flatMap((code) => toShiftJIS.get(code)!);
+      if (converted.length > 40) { throw new ViolationStandardError('programSubtitle byteLength exceeded'); }
       while (converted.length < 40) { converted.push(' '.charCodeAt(0)); }
       programInformationBuilder.write(Uint8Array.from(converted).buffer);
     }
@@ -92,6 +96,8 @@ export default (b36: ARIBB36Data): ArrayBuffer => {
     // registrationType (登録モード)
     programInformationBuilder.writeU8(b36.registrationMode.charCodeAt(0))
     // languageCode (言語コード)
+    if (b36.languageCode.length !== 3) { throw new ViolationStandardError('languageCode length must be 3'); }
+    if (/[^a-z]/.test(b36.languageCode)) { throw new ViolationStandardError('languageCode length must lowercase'); }
     for (let i = 0; i < 3; i++) {
       programInformationBuilder.writeU8(b36.languageCode.charCodeAt(i))
     }
@@ -180,8 +186,9 @@ export default (b36: ARIBB36Data): ArrayBuffer => {
     {
       const codes = Array.from(b36.author);
       const isInvalid = codes.some((code) => !toShiftJIS.has(code));
-      if (isInvalid) { throw new ViolationStandardError('memo cannot convert to shift-jis'); }
-      const converted = codes.flatMap((code) => toShiftJIS.get(code)!).slice(0, 20);
+      if (isInvalid) { throw new ViolationStandardError('author cannot convert to shift-jis'); }
+      const converted = codes.flatMap((code) => toShiftJIS.get(code)!);
+      if (converted.length > 20) { throw new ViolationStandardError('author byteLength exceeded'); }
       while (converted.length < 20) { converted.push(' '.charCodeAt(0)); }
       programInformationBuilder.write(Uint8Array.from(converted).buffer);
     }
@@ -266,7 +273,8 @@ export default (b36: ARIBB36Data): ArrayBuffer => {
       const codes = Array.from(b36.memo);
       const isInvalid = codes.some((code) => !toShiftJIS.has(code));
       if (isInvalid) { throw new ViolationStandardError('memo cannot convert to shift-jis'); }
-      const converted = codes.flatMap((code) => toShiftJIS.get(code)!).slice(0, 60);
+      const converted = codes.flatMap((code) => toShiftJIS.get(code)!);
+      if (converted.length > 60) { throw new ViolationStandardError('memo byteLength exceeded'); }
       while (converted.length < 60) { converted.push(' '.charCodeAt(0)); }
       programInformationBuilder.write(Uint8Array.from(converted).buffer);
     }
@@ -420,7 +428,8 @@ export default (b36: ARIBB36Data): ArrayBuffer => {
         const codes = Array.from(page.memo);
         const isInvalid = codes.some((code) => !toShiftJIS.has(code));
         if (isInvalid) { throw new ViolationStandardError('memo cannot convert to shift-jis'); }
-        const converted = codes.flatMap((code) => toShiftJIS.get(code)!).slice(0, 20);
+        const converted = codes.flatMap((code) => toShiftJIS.get(code)!);
+        if (converted.length > 20) { throw new ViolationStandardError('memo byteLength exceeded'); }
         while (converted.length < 20) { converted.push(' '.charCodeAt(0)); }
         pageInformationBuilder.write(Uint8Array.from(converted).buffer);
       }
