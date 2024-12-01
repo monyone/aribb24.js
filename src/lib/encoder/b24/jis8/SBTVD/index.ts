@@ -2,7 +2,7 @@ import { ARIBB24Token, ARIBB24BitmapToken, ARIBB24CharacterToken, ARIBB24DRCSTok
 import ARIBB24Encoder from "../../encoder";
 import md5 from "../../../../../util/md5";
 import concat from "../../../../../util/concat";
-import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from "../../../../../util/error";
+import { NotImplementedError, NotUsedDueToOperationGuidelineError, NotUsedDueToStandardError, UnreachableError } from "../../../../../util/error";
 import { ARIBB24DataUnit, ARIBB24DRCSDataUnit, ARIBB24StatementDataUnit } from "../../../../demuxer/b24/datagroup";
 import { CONTROL_CODES } from "../../../../tokenizer/b24/tokenizer";
 import { ESC_CODES } from "../../../../tokenizer/b24/jis8/tokenizer";
@@ -12,7 +12,6 @@ import special_characters from "./special-characters";
 
 
 export default class ARIBB24BrazilianJIS8Encoder extends ARIBB24Encoder {
-  static KANJI = new Map<string, [number, number]>();
   static ASCII = structuredClone(ascii);
   static LATIN_EXTENSION = structuredClone(latin_extension);
   static SPECIAL_CHARACTERS = structuredClone(special_characters);
@@ -42,35 +41,7 @@ export default class ARIBB24BrazilianJIS8Encoder extends ARIBB24Encoder {
   }
 
   public encodeDRCS(drcs: ARIBB24DRCSToken): ArrayBuffer {
-    const hash = md5(drcs.binary);
-
-    if (!this.drcs_md5_to_code.has(hash)) {
-      if (this.current_drcs_code[0] === 0x7F && this.current_drcs_code[1] === 0x7F) {
-        // too many DRCS replace 〓
-        return Uint8Array.from(ARIBB24BrazilianJIS8Encoder.KANJI.get('〓')!).buffer;
-      }
-
-      const header = Uint8Array.from([
-        1, // Number Of Code
-        this.current_drcs_code[0], // Character Code
-        this.current_drcs_code[1], // Character Code
-        1, // Number Of Font
-        0, // mode
-        (2 ** drcs.depth) - 2, // color - 2
-        drcs.width, // width,
-        drcs.width, // height
-      ]).buffer;
-
-      this.drcs_units.push(ARIBB24DRCSDataUnit.from(concat(header, drcs.binary), 2));
-      this.drcs_md5_to_code.set(hash, structuredClone(this.current_drcs_code));
-      this.current_drcs_code[1]++;
-      if (this.current_drcs_code[1] > 0x7F) {
-        this.current_drcs_code[0]++;
-        this.current_drcs_code[1] = 0;
-      }
-    }
-
-    return Uint8Array.from([CONTROL_CODES.ESC, 0x24, 0x29, 0x20, 0x40, CONTROL_CODES.LS1, ... this.drcs_md5_to_code.get(hash)!, CONTROL_CODES.LS0]);
+    throw new NotImplementedError('DRCS is Not Implemented');
   }
 
   public encodeBitmap(bitmap: ARIBB24BitmapToken): ArrayBuffer {
