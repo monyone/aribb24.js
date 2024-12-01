@@ -64,32 +64,7 @@ export const DecodedBitmap = {
     await normalImage.decode();
     const normal_bitmap = await createImageBitmap(normalImage);
 
-    if (flcColors.size > 0) {
-      for (let i = 0; i < pallet.length; i++) {
-        const color = pallet[i];
-        const A = Number.parseInt(color.substring(7, 9), 16);
-        pngData[trnsOffset + 8 + i] = !flcColors.has(i) ? 0 : A;
-      }
-      pngDataView.setInt32(plteOffset + plteSize - 4, CRC32(pngData, plteOffset + 4, plteOffset + 8 + plteDataSize), false);
-      pngDataView.setInt32(trnsOffset + trnsSize - 4, CRC32(pngData, trnsOffset + 4, trnsOffset + 8 + trnsDataSize), false);
-
-      const flashingImage = new Image(width, height);
-      flashingImage.src = 'data:image/png;base64,' + btoa(String.fromCharCode(...pngData));
-      await flashingImage.decode();
-      const flashing_bitmap = await createImageBitmap(flashingImage);
-
-      return {
-        tag: 'Bitmap',
-        x_position: bitmap.x_position,
-        y_position: bitmap.y_position,
-        width,
-        height,
-        normal_dataurl: normalImage.src,
-        normal_bitmap,
-        flashing_dataurl: flashingImage.src,
-        flashing_bitmap,
-      };
-    } else {
+    if (flcColors.size === 0) {
       return {
         tag: 'Bitmap',
         x_position: bitmap.x_position,
@@ -100,6 +75,32 @@ export const DecodedBitmap = {
         normal_bitmap
       };
     }
+
+    // Flashing
+    for (let i = 0; i < pallet.length; i++) {
+      const color = pallet[i];
+      const A = Number.parseInt(color.substring(7, 9), 16);
+      pngData[trnsOffset + 8 + i] = !flcColors.has(i) ? 0 : A;
+    }
+    pngDataView.setInt32(plteOffset + plteSize - 4, CRC32(pngData, plteOffset + 4, plteOffset + 8 + plteDataSize), false);
+    pngDataView.setInt32(trnsOffset + trnsSize - 4, CRC32(pngData, trnsOffset + 4, trnsOffset + 8 + trnsDataSize), false);
+
+    const flashingImage = new Image(width, height);
+    flashingImage.src = 'data:image/png;base64,' + btoa(String.fromCharCode(...pngData));
+    await flashingImage.decode();
+    const flashing_bitmap = await createImageBitmap(flashingImage);
+
+    return {
+      tag: 'Bitmap',
+      x_position: bitmap.x_position,
+      y_position: bitmap.y_position,
+      width,
+      height,
+      normal_dataurl: normalImage.src,
+      normal_bitmap,
+      flashing_dataurl: flashingImage.src,
+      flashing_bitmap,
+    };
   }
 };
 
@@ -128,13 +129,11 @@ export const ARIBB24BitmapParsedToken = {
 
 export type ARIBB24BrowserParsedToken = ARIBB24ParsedToken | ARIBB24BitmapParsedToken;
 
-export const toBrowserToken = async (tokens: ARIBB24Token[], pallet: string[], decode = true): Promise<ARIBB24BrowserToken[]> => {
+export const toBrowserTokenWithBitmap = async (tokens: ARIBB24Token[], pallet: string[]): Promise<ARIBB24BrowserToken[]> => {
   let result: ARIBB24BrowserToken[] = [];
   for (const token of tokens) {
     if (token.tag !== 'Bitmap') {
       result.push(token);
-      continue;
-    } else if (!decode) {
       continue;
     }
 
@@ -142,6 +141,10 @@ export const toBrowserToken = async (tokens: ARIBB24Token[], pallet: string[], d
   }
 
   return result;
+}
+
+export const toBrowserTokenWithoutBitmap = (tokens: ARIBB24Token[]): ARIBB24BrowserToken[] => {
+  return tokens.filter((token) => token.tag !== 'Bitmap');
 }
 
 export class ARIBB24BrowserParser {

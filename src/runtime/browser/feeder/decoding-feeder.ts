@@ -5,7 +5,7 @@ import demuxPES from '../../../lib/demuxer/b24/independent';
 import demuxDatagroup, { ARIBB24CaptionManagement } from '../../../lib/demuxer/b24/datagroup'
 import { ARIBB24ClearScreenToken } from '../../../lib/tokenizer/token';
 import { initialState } from '../../../lib/parser/parser';
-import { toBrowserToken } from '../types';
+import { toBrowserTokenWithBitmap } from '../types';
 import colortable from '../../colortable';
 
 type DecodingOrderedKey = {
@@ -127,7 +127,7 @@ export default abstract class DecodingFeeder implements Feeder {
         if (specification == null) { continue; }
 
         const [association, tokenizer, state] = specification;
-        const tokenized = await toBrowserToken(tokenizer.tokenize(caption), colortable);
+        const tokenized = await toBrowserTokenWithBitmap(tokenizer.tokenize(caption), colortable);
 
         let duration = Number.POSITIVE_INFINITY;
         let elapse = 0;
