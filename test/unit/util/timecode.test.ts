@@ -15,6 +15,12 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
   });
 
   test('Drop Timecode and Framecount roundtrip', () => {
+    expect(framecountToTimecode(timecodeToFramecount('00:00:00;29'))).toStrictEqual('00:00:00;29');
+    expect(framecountToTimecode(timecodeToFramecount('00:01:00;02'))).toStrictEqual('00:01:00;02');
+    expect(framecountToTimecode(timecodeToFramecount('00:01:00;29'))).toStrictEqual('00:01:00;29');
+    expect(framecountToTimecode(timecodeToFramecount('00:02:00;02'))).toStrictEqual('00:02:00;02');
+    expect(framecountToTimecode(timecodeToFramecount('00:02:00;29'))).toStrictEqual('00:02:00;29');
+    expect(framecountToTimecode(timecodeToFramecount('00:03:00;02'))).toStrictEqual('00:03:00;02');
     expect(framecountToTimecode(timecodeToFramecount('10:00:00;00'))).toStrictEqual('10:00:00;00');
     expect(framecountToTimecode(timecodeToFramecount('00:10:00;00'))).toStrictEqual('00:10:00;00');
     expect(framecountToTimecode(timecodeToFramecount('00:00:10;00'))).toStrictEqual('00:00:10;00');
@@ -26,10 +32,17 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
     expect(framecountToTimecode(timecodeToFramecount('00:01:59;29'))).toStrictEqual('00:01:59;29');
     expect(framecountToTimecode(timecodeToFramecount('00:11:59;29'))).toStrictEqual('00:11:59;29');
     expect(framecountToTimecode(timecodeToFramecount('02:22:59;29'))).toStrictEqual('02:22:59;29');
+    expect(framecountToTimecode(timecodeToFramecount('14:12:00;02'))).toStrictEqual('14:12:00;02');
     expect(framecountToTimecode(timecodeToFramecount('23:59:59;29'))).toStrictEqual('23:59:59;29');
   });
 
   test('Drop Timecode and Second roundtrip', () => {
+    expect(secondsToTimecode(timecodeToSecond('00:00:00;29'))).toStrictEqual('00:00:00;29');
+    expect(secondsToTimecode(timecodeToSecond('00:01:00;02'))).toStrictEqual('00:01:00;02');
+    expect(secondsToTimecode(timecodeToSecond('00:01:00;29'))).toStrictEqual('00:01:00;29');
+    expect(secondsToTimecode(timecodeToSecond('00:02:00;02'))).toStrictEqual('00:02:00;02');
+    expect(secondsToTimecode(timecodeToSecond('00:02:00;29'))).toStrictEqual('00:02:00;29');
+    expect(secondsToTimecode(timecodeToSecond('00:03:00;02'))).toStrictEqual('00:03:00;02');
     expect(secondsToTimecode(timecodeToSecond('10:00:00;00'))).toStrictEqual('10:00:00;00');
     expect(secondsToTimecode(timecodeToSecond('00:10:00;00'))).toStrictEqual('00:10:00;00');
     expect(secondsToTimecode(timecodeToSecond('00:00:10;00'))).toStrictEqual('00:00:10;00');
@@ -41,6 +54,7 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
     expect(secondsToTimecode(timecodeToSecond('00:01:59;29'))).toStrictEqual('00:01:59;29');
     expect(secondsToTimecode(timecodeToSecond('00:11:59;29'))).toStrictEqual('00:11:59;29');
     expect(secondsToTimecode(timecodeToSecond('02:22:59;29'))).toStrictEqual('02:22:59;29');
+    expect(secondsToTimecode(timecodeToSecond('14:12:00;02'))).toStrictEqual('14:12:00;02');
     expect(secondsToTimecode(timecodeToSecond('23:59:59;29'))).toStrictEqual('23:59:59;29');
   });
 
