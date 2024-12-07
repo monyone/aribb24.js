@@ -1,4 +1,4 @@
-import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARIBB24ParserState, CHARACTER_SIZE } from "../../../../lib/parser/parser";
+import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARIBB24ParserState } from "../../../../lib/parser/parser";
 import { CanvasRendererOption } from "./canvas-renderer-option";
 import colortable from "../../../colortable";
 import halfwidth from "../halfwidth";

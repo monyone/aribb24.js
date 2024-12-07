@@ -1,4 +1,4 @@
-import { ARIBB24Parser, ARIBB24CharacterParsedToken, ARIBB24ParserOption, ARIBB24ParserState, initialState, CHARACTER_SIZE, ARIBB24ClearScreenParsedToken, ARIBB24DRCSPrasedToken } from '@/lib/parser/parser';
+import { ARIBB24Parser, ARIBB24CharacterParsedToken, ARIBB24ParserOption, ARIBB24ParserState, initialState, ARIBB24_CHARACTER_SIZE, ARIBB24ClearScreenParsedToken, ARIBB24DRCSPrasedToken } from '@/lib/parser/parser';
 import { replaceDRCS } from '@/lib/tokenizer/b24/tokenizer';
 import { ARIBB24ActivePositionForwardToken, ARIBB24ActivePositionSetToken, ARIBB24CharacterCompositionDotDesignationToken, ARIBB24CharacterToken, ARIBB24ClearScreenToken, ARIBB24ColorControlBackgroundToken, ARIBB24FlashingControlToken, ARIBB24FlashingControlType, ARIBB24MiddleSizeToken, ARIBB24NormalSizeToken, ARIBB24PalletControlToken, ARIBB24SetDisplayFormatToken, ARIBB24SetDisplayPositionToken, ARIBB24SetHorizontalSpacingToken, ARIBB24SetVerticalSpacingToken, ARIBB24SetWritingFormatToken, ARIBB24WhiteForegroundToken } from '@/lib/tokenizer/token';
 import md5 from '@/util/md5';
@@ -60,7 +60,7 @@ describe("ARIB STD-B24 Parser", () => {
         ARIBB24CharacterToken.from('('), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
-          size: CHARACTER_SIZE.Middle,
+          size: ARIBB24_CHARACTER_SIZE.Middle,
           position: [340 * option.magnification, 479 * option.magnification],
           pallet: 4,
           foreground: 7,
@@ -71,7 +71,7 @@ describe("ARIB STD-B24 Parser", () => {
         ARIBB24CharacterToken.from('テ'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
-          size: CHARACTER_SIZE.Normal,
+          size: ARIBB24_CHARACTER_SIZE.Normal,
           position: [360 * option.magnification, 479 * option.magnification],
           pallet: 4,
           foreground: 7,
@@ -82,7 +82,7 @@ describe("ARIB STD-B24 Parser", () => {
         ARIBB24CharacterToken.from('ス'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
-          size: CHARACTER_SIZE.Normal,
+          size: ARIBB24_CHARACTER_SIZE.Normal,
           position: [400 * option.magnification, 479 * option.magnification],
           pallet: 4,
           foreground: 7,
@@ -93,7 +93,7 @@ describe("ARIB STD-B24 Parser", () => {
         ARIBB24CharacterToken.from('ト'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
-          size: CHARACTER_SIZE.Normal,
+          size: ARIBB24_CHARACTER_SIZE.Normal,
           position: [440 * option.magnification, 479 * option.magnification],
           pallet: 4,
           foreground: 7,
@@ -104,7 +104,7 @@ describe("ARIB STD-B24 Parser", () => {
         ARIBB24CharacterToken.from(')'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
-          size: CHARACTER_SIZE.Middle,
+          size: ARIBB24_CHARACTER_SIZE.Middle,
           position: [480 * option.magnification, 479 * option.magnification],
           pallet: 4,
           foreground: 7,
@@ -162,7 +162,7 @@ describe("ARIB STD-B24 Parser", () => {
         ARIBB24CharacterToken.from('['), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
-          size: CHARACTER_SIZE.Middle,
+          size: ARIBB24_CHARACTER_SIZE.Middle,
           position: [80 * option.magnification, 479 * option.magnification],
           pallet: 4,
           foreground: 7,
@@ -174,7 +174,7 @@ describe("ARIB STD-B24 Parser", () => {
         ARIBB24CharacterToken.from('携'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
-          size: CHARACTER_SIZE.Normal,
+          size: ARIBB24_CHARACTER_SIZE.Normal,
           position: [100 * option.magnification, 479 * option.magnification],
           pallet: 4,
           foreground: 7,
@@ -186,7 +186,7 @@ describe("ARIB STD-B24 Parser", () => {
         ARIBB24CharacterToken.from('帯'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
-          size: CHARACTER_SIZE.Normal,
+          size: ARIBB24_CHARACTER_SIZE.Normal,
           position: [140 * option.magnification, 479 * option.magnification],
           pallet: 4,
           foreground: 7,
@@ -198,7 +198,7 @@ describe("ARIB STD-B24 Parser", () => {
         ARIBB24CharacterToken.from(']'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
-          size: CHARACTER_SIZE.Middle,
+          size: ARIBB24_CHARACTER_SIZE.Middle,
           position: [180 * option.magnification, 479 * option.magnification],
           pallet: 4,
           foreground: 7,
@@ -210,7 +210,7 @@ describe("ARIB STD-B24 Parser", () => {
         ARIBB24CharacterToken.from('ブ'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
-          size: CHARACTER_SIZE.Normal,
+          size: ARIBB24_CHARACTER_SIZE.Normal,
           position: [220 * option.magnification, 479 * option.magnification],
           pallet: 4,
           foreground: 7,
@@ -222,7 +222,7 @@ describe("ARIB STD-B24 Parser", () => {
         ARIBB24CharacterToken.from('ル'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
-          size: CHARACTER_SIZE.Normal,
+          size: ARIBB24_CHARACTER_SIZE.Normal,
           position: [260 * option.magnification, 479 * option.magnification],
           pallet: 4,
           foreground: 7,
@@ -234,7 +234,7 @@ describe("ARIB STD-B24 Parser", () => {
         ARIBB24CharacterToken.from('ブ'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
-          size: CHARACTER_SIZE.Normal,
+          size: ARIBB24_CHARACTER_SIZE.Normal,
           position: [300 * option.magnification, 479 * option.magnification],
           pallet: 4,
           foreground: 7,
@@ -246,7 +246,7 @@ describe("ARIB STD-B24 Parser", () => {
         ARIBB24CharacterToken.from('ル'), {
           ... initialStateMagnificated(initialState, option),
           ... expectedState,
-          size: CHARACTER_SIZE.Normal,
+          size: ARIBB24_CHARACTER_SIZE.Normal,
           position: [340 * option.magnification, 479 * option.magnification],
           pallet: 4,
           foreground: 7,

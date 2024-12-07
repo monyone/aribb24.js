@@ -1,7 +1,7 @@
 import { ARIBB24Token, ARIBB24CharacterToken, ARIBB24CharacterSizeControlType, ARIBB24ClearScreenToken, ARIBB24DRCSToken, ARIBB24FlashingControlType, ARIBB24OrnamentControlType } from "../tokenizer/token";
 import { UnreachableError } from "../../util/error";
 
-export const CHARACTER_SIZE = {
+export const ARIBB24_CHARACTER_SIZE = {
   Small: 'Small',
   Middle: 'Middle',
   Normal: 'Normal',
@@ -13,16 +13,16 @@ export const CHARACTER_SIZE = {
   Special2: 'Special2',
 } as const;
 
-const CHARACTER_SIZE_MAP = new Map<(typeof CHARACTER_SIZE)[keyof typeof CHARACTER_SIZE], [number, number]>([
-  [CHARACTER_SIZE.Small, [0.5, 0.5]],
-  [CHARACTER_SIZE.Middle, [0.5, 1]],
-  [CHARACTER_SIZE.Normal, [1, 1]],
-  [CHARACTER_SIZE.Tiny, [1/4, 1/6]],
-  [CHARACTER_SIZE.DoubleHeight, [1, 2]],
-  [CHARACTER_SIZE.DoubleWidth, [2, 1]],
-  [CHARACTER_SIZE.DoubleHeightAndWidth, [2, 2]],
-  [CHARACTER_SIZE.Special1, [Number.NaN, Number.NaN]], // TODO
-  [CHARACTER_SIZE.Special2, [Number.NaN, Number.NaN]], // TODO
+const ARIBB24_CHARACTER_SIZE_MAP = new Map<(typeof ARIBB24_CHARACTER_SIZE)[keyof typeof ARIBB24_CHARACTER_SIZE], [number, number]>([
+  [ARIBB24_CHARACTER_SIZE.Small, [0.5, 0.5]],
+  [ARIBB24_CHARACTER_SIZE.Middle, [0.5, 1]],
+  [ARIBB24_CHARACTER_SIZE.Normal, [1, 1]],
+  [ARIBB24_CHARACTER_SIZE.Tiny, [1/4, 1/6]],
+  [ARIBB24_CHARACTER_SIZE.DoubleHeight, [1, 2]],
+  [ARIBB24_CHARACTER_SIZE.DoubleWidth, [2, 1]],
+  [ARIBB24_CHARACTER_SIZE.DoubleHeightAndWidth, [2, 2]],
+  [ARIBB24_CHARACTER_SIZE.Special1, [Number.NaN, Number.NaN]], // TODO
+  [ARIBB24_CHARACTER_SIZE.Special2, [Number.NaN, Number.NaN]], // TODO
 ]);
 
 export type ARIBB24ParserState = {
@@ -35,7 +35,7 @@ export type ARIBB24ParserState = {
   vspace: number;
   // render
   position: [number, number],
-  size: (typeof CHARACTER_SIZE)[keyof typeof CHARACTER_SIZE];
+  size: (typeof ARIBB24_CHARACTER_SIZE)[keyof typeof ARIBB24_CHARACTER_SIZE];
   // color
   pallet: number;
   foreground: number;
@@ -74,7 +74,7 @@ export const initialState: Readonly<ARIBB24ParserState> = {
   // pos
   position: [0, 59],
   // size
-  size: CHARACTER_SIZE.Normal,
+  size: ARIBB24_CHARACTER_SIZE.Normal,
   // color
   pallet: 0,
   foreground: 7,
@@ -161,18 +161,18 @@ export class ARIBB24Parser {
 
   public static box(state: ARIBB24ParserState): [number, number] {
     return [
-      Math.floor((state.fontsize[0] + state.hspace) * CHARACTER_SIZE_MAP.get(state.size)![0]),
-      Math.floor((state.fontsize[1] + state.vspace) * CHARACTER_SIZE_MAP.get(state.size)![1])
+      Math.floor((state.fontsize[0] + state.hspace) * ARIBB24_CHARACTER_SIZE_MAP.get(state.size)![0]),
+      Math.floor((state.fontsize[1] + state.vspace) * ARIBB24_CHARACTER_SIZE_MAP.get(state.size)![1])
     ];
   }
   public static offset(state: ARIBB24ParserState): [number, number] {
     return [
-      Math.floor(state.hspace * CHARACTER_SIZE_MAP.get(state.size)![0] / 2),
-      Math.floor(state.vspace * CHARACTER_SIZE_MAP.get(state.size)![1] / 2)
+      Math.floor(state.hspace * ARIBB24_CHARACTER_SIZE_MAP.get(state.size)![0] / 2),
+      Math.floor(state.vspace * ARIBB24_CHARACTER_SIZE_MAP.get(state.size)![1] / 2)
     ];
   }
   public static scale(state: ARIBB24ParserState): [number, number] {
-    return CHARACTER_SIZE_MAP.get(state.size)!;
+    return ARIBB24_CHARACTER_SIZE_MAP.get(state.size)!;
   }
 
   private move_absolute_dot(x: number, y: number) {
@@ -327,33 +327,33 @@ export class ARIBB24Parser {
         break;
       // size
       case 'SmallSize':
-        this.state.size = CHARACTER_SIZE.Small;
+        this.state.size = ARIBB24_CHARACTER_SIZE.Small;
         break;
       case 'MiddleSize':
-        this.state.size = CHARACTER_SIZE.Middle;
+        this.state.size = ARIBB24_CHARACTER_SIZE.Middle;
         break;
       case 'NormalSize':
-        this.state.size = CHARACTER_SIZE.Normal;
+        this.state.size = ARIBB24_CHARACTER_SIZE.Normal;
         break;
       case 'CharacterSizeControl':
         switch (token.type) {
           case ARIBB24CharacterSizeControlType.TINY:
-            this.state.size = CHARACTER_SIZE.Tiny;
+            this.state.size = ARIBB24_CHARACTER_SIZE.Tiny;
             break;
           case ARIBB24CharacterSizeControlType.DOUBLE_HEIGHT:
-            this.state.size = CHARACTER_SIZE.DoubleHeight;
+            this.state.size = ARIBB24_CHARACTER_SIZE.DoubleHeight;
             break;
           case ARIBB24CharacterSizeControlType.DOUBLE_WIDTH:
-            this.state.size = CHARACTER_SIZE.DoubleWidth;
+            this.state.size = ARIBB24_CHARACTER_SIZE.DoubleWidth;
             break;
           case ARIBB24CharacterSizeControlType.DOUBLE_HEIGHT_AND_WIDTH:
-            this.state.size = CHARACTER_SIZE.DoubleHeightAndWidth;
+            this.state.size = ARIBB24_CHARACTER_SIZE.DoubleHeightAndWidth;
             break;
           case ARIBB24CharacterSizeControlType.SPECIAL_1:
-            this.state.size = CHARACTER_SIZE.Special1;
+            this.state.size = ARIBB24_CHARACTER_SIZE.Special1;
             break;
           case ARIBB24CharacterSizeControlType.SPECIAL_2:
-            this.state.size = CHARACTER_SIZE.Special2;
+            this.state.size = ARIBB24_CHARACTER_SIZE.Special2;
             break;
           default:
             const exhaustive: never = token;
