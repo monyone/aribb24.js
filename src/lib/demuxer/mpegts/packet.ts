@@ -62,7 +62,7 @@ export const pcr = (packet: Uint8Array): number | null => {
   return pcr_base;
 }
 
-export default class MPEGTransformStream extends TransformStream<Uint8Array, Uint8Array> {
+export default class MPEGTransportStream extends TransformStream<Uint8Array, Uint8Array> {
   constructor(writableStrategy?: QueuingStrategy<Uint8Array>, readableStrategy?: QueuingStrategy<Uint8Array>) {
     let accendant = new Uint8Array();
     super({

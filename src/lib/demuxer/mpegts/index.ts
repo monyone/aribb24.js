@@ -1,6 +1,6 @@
 import demuxDatagroup, { ARIBB24CaptionData } from "../b24/datagroup";
 import demuxIndependentPES from "../b24/independent";
-import MPEGTransformStream, { pid as getPID, TIMESTAMP_ROLLOVER } from "./packet";
+import MPEGTransportStream, { pid as getPID, TIMESTAMP_ROLLOVER } from "./packet";
 import parsePAT from "./pat";
 import parsePMT from "./pmt";
 import PacketizedElementaryStreamDemuxer, { DTS, PES_header_length, PES_HEADER_SIZE, PTS } from "./pes";
@@ -17,10 +17,10 @@ export type ARIBB24MPEGDemuxOption = {
   serviceId: number | null;
   offset: 'VIDEO' | 'AUDIO' | 'BOTH' | 'NONE';
   type: 'Caption' | 'Superimpose';
-}
+};
 
 export default async function* (readable: ReadableStream<Uint8Array>, option?: Partial<ARIBB24MPEGDemuxOption>): AsyncIterable<ARIBB24MPEGTSData> {
-  const packets = readable.pipeThrough(new MPEGTransformStream());
+  const packets = readable.pipeThrough(new MPEGTransportStream());
   const demuxerPAT = new SectionDemuxer();
   const demuxerPMT = new SectionDemuxer();
   const demuxerCaption = new PacketizedElementaryStreamDemuxer();
