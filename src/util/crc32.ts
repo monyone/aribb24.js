@@ -1,4 +1,4 @@
-export default function CRC32(buffer: Uint8Array, begin: number, end: number) {
+export default function CRC32(buffer: Uint8Array, begin: number = 0, end: number = buffer.byteLength) {
   let crc = -1;
   for (let i = begin; i < end; i++) {
     crc ^= buffer[i];
