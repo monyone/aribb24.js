@@ -59,6 +59,7 @@ export type {
 } from './lib/parser/parser';
 export { default as ARIBB24JapaneseInitialParserState } from './lib/parser/state/ARIB';
 export { default as ARIBB24BrazilianInitialParserState } from './lib/parser/state/ARIB';
+export { default as regionerForARIBB24ParsedToken } from './lib/parser/regioner'
 
 // Utils
 export { EOFError, NotImplementedError, UnreachableError } from './util/error';
