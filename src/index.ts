@@ -21,6 +21,9 @@ export { default as SVGDOMRenderer } from './runtime/browser/renderer/svg/svg-do
 // Text
 export type { TextRendererOption } from './runtime/browser/renderer/text/text-renderer-option';
 export { default as TextRenderer } from './runtime/browser/renderer/text/text-renderer';
+// HTML
+export type { HTMLFragmentRendererOption } from './runtime/browser/renderer/html/html-fragment-renderer-option';
+export { default as HTMLFragmentRenderer } from './runtime/browser/renderer/html/html-fragment-renderer';
 
 // Tokenizer
 export type * from './lib/tokenizer/token';

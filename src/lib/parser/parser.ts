@@ -13,7 +13,7 @@ export const ARIBB24_CHARACTER_SIZE = {
   Special2: 'Special2',
 } as const;
 
-const ARIBB24_CHARACTER_SIZE_MAP = new Map<(typeof ARIBB24_CHARACTER_SIZE)[keyof typeof ARIBB24_CHARACTER_SIZE], [number, number]>([
+export const ARIBB24_CHARACTER_SIZE_MAP = new Map<(typeof ARIBB24_CHARACTER_SIZE)[keyof typeof ARIBB24_CHARACTER_SIZE], [number, number]>([
   [ARIBB24_CHARACTER_SIZE.Small, [0.5, 0.5]],
   [ARIBB24_CHARACTER_SIZE.Middle, [0.5, 1]],
   [ARIBB24_CHARACTER_SIZE.Normal, [1, 1]],

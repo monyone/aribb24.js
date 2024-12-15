@@ -2,6 +2,7 @@ import CRC32 from "../../util/crc32";
 import { ARIBB24Token, ARIBB24BitmapToken } from "../../lib/tokenizer/token";
 import { replaceDRCS as tokenizerReplaceDRCS } from "../../lib/tokenizer/b24/tokenizer";
 import { ARIBB24CommonParsedToken, ARIBB24ParsedToken, ARIBB24Parser, ARIBB24ParserOption, ARIBB24ParserState } from "../../lib/parser/parser";
+import regioner, { ARIBB24Region } from "../../lib/parser/regioner";
 
 export type DecodedBitmap = {
   tag: 'Bitmap';
@@ -166,4 +167,13 @@ export class ARIBB24BrowserParser {
 
 export const replaceDRCS = (tokens: ARIBB24BrowserToken[], replace: Map<string, string>): ARIBB24BrowserToken[] => {
   return tokenizerReplaceDRCS(tokens as ARIBB24Token[], replace) as ARIBB24BrowserToken[];
-}
+};
+
+export const makeRegions = (tokens: ARIBB24BrowserParsedToken[]): ARIBB24Region[] => {
+  return regioner(tokens.filter((token) => {
+    if (token.tag !== 'Bitmap') { return true; }
+    token.normal_bitmap.close();
+    token.flashing_bitmap?.close();
+    return false;
+  }) as ARIBB24ParsedToken[]);
+};
