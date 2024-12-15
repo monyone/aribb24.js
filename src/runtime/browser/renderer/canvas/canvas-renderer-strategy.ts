@@ -13,8 +13,22 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
     if (context == null) { return; }
 
     const parser = new ARIBB24BrowserParser(state);
-    const magnification = parser.getmagnification();
     for (const token of parser.parse(tokens)) {
+      const plane_width = token.state.plane[0];
+      const plane_height = token.state.plane[1];
+
+      const x = target != null ? Math.ceil(target.width / plane_width) : 1;
+      const y = target != null ? Math.ceil(target.height / plane_height) : 1;
+      const width = x * plane_width;
+      const height = y * plane_height;
+      magnification = [x, y];
+
+      if (buffer.width !== width || buffer.height !== height) {
+        buffer.width = width;
+        buffer.height = height;
+        context.clearRect(0, 0, buffer.width, buffer.height);
+      }
+
       switch (token.tag) {
         case 'Character': {
           renderCharacter(context, token, magnification, info, rendererOption);
@@ -69,10 +83,10 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
   }
 }
 
-const renderBitmap = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24BitmapParsedToken, magnification: number, info: CaptionAssociationInformation, rendererOption: CanvasRendererOption): void => {
+const renderBitmap = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24BitmapParsedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: CanvasRendererOption): void => {
   const { x_position, y_position, width, height } = token;
 
-  context.drawImage(token.normal_bitmap, x_position * magnification, y_position * magnification, width* magnification, height * magnification);
+  context.drawImage(token.normal_bitmap, x_position * magnification[0], y_position * magnification[1], width* magnification[0], height * magnification[1]);
   token.normal_bitmap.close();
   token.flashing_bitmap?.close();
 }

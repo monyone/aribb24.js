@@ -9,7 +9,7 @@ import { shouldHalfWidth } from "../../browser/renderer/quirk";
 import useARIBFont from "../../browser/renderer/font";
 import { ARIBB24BitmapParsedToken } from "../../browser/types";
 
-export default (buffer: HTMLCanvasElement | OffscreenCanvas, magnification: number, tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
+export default (buffer: HTMLCanvasElement | OffscreenCanvas, magnification: [number, number], tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
   const context = buffer.getContext('2d') as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D; // Type Issue
   if (context == null) { return; }
 
@@ -36,38 +36,38 @@ export default (buffer: HTMLCanvasElement | OffscreenCanvas, magnification: numb
   }
 }
 
-export const clear = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: number, info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
+export const clear = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
   const { state } = token;
 
   // clear
   context.clearRect(
-    (state.margin[0] + (state.position[0] + 0)  -                          0) * magnification,
-    (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1]) * magnification,
-    ARIBB24Parser.box(state)[0] * magnification,
-    ARIBB24Parser.box(state)[1] * magnification
+    (state.margin[0] + (state.position[0] + 0)  -                          0) * magnification[0],
+    (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1]) * magnification[1],
+    ARIBB24Parser.box(state)[0] * magnification[0],
+    ARIBB24Parser.box(state)[1] * magnification[1]
   );
 }
 
-export const renderBackground = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: number, info: CaptionAssociationInformation,rendererOption: RendererOption): void => {
+export const renderBackground = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionAssociationInformation,rendererOption: RendererOption): void => {
   const { state } = token;
 
   // background
   context.fillStyle = rendererOption.color.background ?? colortable[state.background];
   context.fillRect(
-    (state.margin[0] + (state.position[0] + 0)  -                          0) * magnification,
-    (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1]) * magnification,
-    ARIBB24Parser.box(state)[0] * magnification,
-    ARIBB24Parser.box(state)[1] * magnification
+    (state.margin[0] + (state.position[0] + 0)  -                          0) * magnification[0],
+    (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1]) * magnification[1],
+    ARIBB24Parser.box(state)[0] * magnification[0],
+    ARIBB24Parser.box(state)[1] * magnification[1],
   );
 }
 
-export const renderHighlight = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: number, info: CaptionAssociationInformation,rendererOption: RendererOption): void => {
+export const renderHighlight = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionAssociationInformation,rendererOption: RendererOption): void => {
   const { state, option } = token;
 
-  const x = (state.margin[0] + (state.position[0] + 0) +                           0) * magnification;
-  const y = (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1]) * magnification;
+  const x = (state.margin[0] + (state.position[0] + 0) +                           0) * magnification[0];
+  const y = (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1]) * magnification[1];
   context.translate(x, y);
-  context.scale(magnification, magnification);
+  context.scale(magnification[0], magnification[1]);
   context.fillStyle = rendererOption.color.foreground ?? colortable[state.foreground];
 
   if ((state.highlight & 0b0001) !== 0) { // bottom
@@ -86,15 +86,15 @@ export const renderHighlight = (context: CanvasRenderingContext2D | OffscreenCan
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-export const renderUnderline = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: number, info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
+export const renderUnderline = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
   const { state, option } = token;
 
   if (!state.underline) { return; }
 
-  const x = (state.margin[0] + (state.position[0] + 0) +                           0) * magnification;
-  const y = (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1]) * magnification;
+  const x = (state.margin[0] + (state.position[0] + 0) +                           0) * magnification[0];
+  const y = (state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1]) * magnification[1];
   context.translate(x, y);
-  context.scale(magnification, magnification);
+  context.scale(magnification[0], magnification[1]);
   context.fillStyle = rendererOption.color.foreground ?? colortable[state.foreground];
 
   context.fillRect(0, ARIBB24Parser.box(state)[1] - 1 * option.magnification, ARIBB24Parser.box(state)[0], 1 * option.magnification);
@@ -102,7 +102,7 @@ export const renderUnderline = (context: CanvasRenderingContext2D | OffscreenCan
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-export const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken, magnification: number, info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
+export const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
   const { state, option, character: key, non_spacing } = token;
   const should_halfwidth = shouldHalfWidth(state.size, info);
   const replace_halfwidth = rendererOption.replace.half  && should_halfwidth;
@@ -125,8 +125,8 @@ export const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCan
 
   // if embedded glyph, use
   if (rendererOption.replace.glyph.has(character)) {
-    const start_x = Math.floor((state.margin[0] + (state.position[0] + 0) +                           0 + ARIBB24Parser.offset(state)[0]) * magnification);
-    const start_y = Math.floor((state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1] + ARIBB24Parser.offset(state)[1]) * magnification);
+    const start_x = Math.floor((state.margin[0] + (state.position[0] + 0) +                           0 + ARIBB24Parser.offset(state)[0]) * magnification[0]);
+    const start_y = Math.floor((state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1] + ARIBB24Parser.offset(state)[1]) * magnification[1]);
     context.translate(start_x, start_y);
 
     const { viewBox, path } = rendererOption.replace.glyph.get(character)!
@@ -155,13 +155,13 @@ export const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCan
   }
 
   // move
-  const center_x = Math.floor((state.margin[0] + (state.position[0] + 0) + ARIBB24Parser.box(state)[0] / 2) * magnification);
-  const center_y = Math.floor((state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1] / 2) * magnification);
+  const center_x = Math.floor((state.margin[0] + (state.position[0] + 0) + ARIBB24Parser.box(state)[0] / 2) * magnification[0]);
+  const center_y = Math.floor((state.margin[1] + (state.position[1] + 1) - ARIBB24Parser.box(state)[1] / 2) * magnification[1]);
   context.translate(center_x, center_y);
 
   // detect
   const font = useARIBFont(character) ? rendererOption.font.arib : rendererOption.font.normal;
-  context.scale(magnification * 1, ARIBB24Parser.scale(state)[1] * magnification);
+  context.scale(magnification[0] * 1, ARIBB24Parser.scale(state)[1] * magnification[1]);
 
   // orn
   if (orn !== null && orn !== foreground) {
@@ -184,14 +184,14 @@ export const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCan
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSPrasedToken, magnification: number, foreground: string, orn: string | null): void => {
+const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSPrasedToken, magnification: [number, number], foreground: string, orn: string | null): void => {
   const { state, option, width, height, depth, binary } = token;
   const uint8 = new Uint8Array(binary);
 
-  const start_x = (state.margin[0] + state.position[0] + (0 -                           0 + ARIBB24Parser.offset(state)[0])) * magnification;
-  const start_y = (state.margin[1] + state.position[1] + (1 - ARIBB24Parser.box(state)[1] + ARIBB24Parser.offset(state)[1])) * magnification;
+  const start_x = (state.margin[0] + state.position[0] + (0 -                           0 + ARIBB24Parser.offset(state)[0])) * magnification[0];
+  const start_y = (state.margin[1] + state.position[1] + (1 - ARIBB24Parser.box(state)[1] + ARIBB24Parser.offset(state)[1])) * magnification[1];
   context.translate(start_x, start_y);
-  context.scale(option.magnification * magnification, option.magnification * magnification);
+  context.scale(option.magnification * magnification[0], option.magnification * magnification[1]);
 
   if (orn != null) {
     context.strokeStyle = orn;
@@ -232,7 +232,7 @@ const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasR
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-export const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSPrasedToken, magnification: number, info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
+export const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
   const { state } = token;
   // clear
   clear(context, token, magnification, info, rendererOption);
@@ -250,10 +250,10 @@ export const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRe
   renderDRCSInternal(context, token, magnification, foreground, orn);
 }
 
-const renderBitmap = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24BitmapParsedToken, magnification: number, info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
+const renderBitmap = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24BitmapParsedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
   const { x_position, y_position, width, height } = token;
 
-  context.drawImage(token.normal_bitmap, x_position * magnification, y_position * magnification, width* magnification, height * magnification);
+  context.drawImage(token.normal_bitmap, x_position * magnification[0], y_position * magnification[1], width* magnification[0], height * magnification[1]);
   token.normal_bitmap.close();
   token.flashing_bitmap?.close();
 }

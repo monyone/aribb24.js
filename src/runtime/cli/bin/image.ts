@@ -22,15 +22,20 @@ const draw = (tokens: ARIBB24ParsedToken[], magnification: number, plane: [numbe
     dx = Math.max(dx, token.state.margin[0] + token.state.position[0] + ARIBB24Parser.box(token.state)[0]);
     dy = Math.max(dy, token.state.margin[1] + token.state.position[1]);
   }
-  const width = dx - sx;
-  const height = dy - sy;
-  if (width == Number.NEGATIVE_INFINITY || height === Number.NEGATIVE_INFINITY) {
+  const offset = [sx, sy];
+  const area = [dx - sx, dy - sy];
+  if (area[0] == Number.NEGATIVE_INFINITY || area[1] === Number.NEGATIVE_INFINITY) {
     return null;
   }
 
   const canvas = source.createCanvas(plane[0], plane[1]);
-  canvasRendererStrategy(canvas as unknown as OffscreenCanvas, magnification, tokens, { association: 'ARIB', language: 'und'}, RendererOption.from({ font: { normal: 'IPAPGothic' }}));
-  const png = canvas.encodeSync('png');
+  canvasRendererStrategy(canvas as unknown as OffscreenCanvas, [1, 1], tokens, { association: 'ARIB', language: 'und'}, RendererOption.from({ font: { normal: 'IPAPGothic' }}));
+
+  const screen = source.createCanvas(area[0], area[1]);
+  const context = screen.getContext('2d');
+  context.drawImage(canvas, offset[0], offset[1], area[0], area[1], 0, 0, area[0], area[1]);
+
+  const png = screen.encodeSync('png');
   return png;
 }
 
@@ -49,7 +54,7 @@ const draw = (tokens: ARIBB24ParsedToken[], magnification: number, plane: [numbe
       if (caption.data.tag !== 'CaptionStatement') { continue; }
 
       const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
-      const parser = new ARIBB24Parser(initialState, { magnification: 1 });
+      const parser = new ARIBB24Parser(initialState, { magnification: 2 });
 
       const png = draw(parser.parse(tokenizer.tokenize(caption.data)), parser.getMagnification(), parser.currentState().plane, napi)
       if (png == null) { continue; }
