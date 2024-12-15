@@ -67,7 +67,14 @@ const makeTokenToHTML = (token: ARIBB24RegionerToken, info: CaptionAssociationIn
       return svg;
     }
     case 'Script':
-      return document.createElement('span');
+      const elem = document.createElement('div');
+      elem.style.display = 'inline-flex';
+      elem.style.fontSize = '0.5em';
+      elem.style.flexDirection = 'column';
+      elem.style.verticalAlign = 'top';
+      elem.appendChild(makeTokenToHTML(token.sup, info, option));
+      elem.appendChild(makeTokenToHTML(token.sub, info, option));
+      return elem;
   }
 }
 

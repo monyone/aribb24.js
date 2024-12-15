@@ -122,7 +122,8 @@ export default (tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformatio
         const sup_token = sup.spans.at(0)?.text.at(0) ?? null;
         if (sup_token == null || sup_token.tag === 'Script') { continue; }
 
-        for (let sub_index = sup_index + 1; sub_index < regions.length; sub_index++) {
+        for (let sub_index = 0; sub_index < regions.length; sub_index++) {
+          if (sub_index === sup_index) { continue; }
           const sub = regions[sub_index];
           if (sub.size !== ARIBB24_CHARACTER_SIZE.Small) { continue; }
           const sub_x = sub.position[0];
@@ -130,13 +131,13 @@ export default (tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformatio
           if (r_ex !== sub_x || r_dy !== sub_y) { continue; }
           const sub_token = sub.spans.at(0)?.text.at(0) ?? null;
           if (sub_token == null || sub_token.tag === 'Script') { continue; }
-          if (ARIBB24Parser.box(sup_token.state)[0] !== ARIBB24Parser.box(sup_token.state)[0]) { continue; }
+          if (ARIBB24Parser.box(sup_token.state)[0] !== ARIBB24Parser.box(sub_token.state)[0]) { continue; }
 
           region.area[0] += ARIBB24Parser.box(sup_token.state)[0];
           // assume sup/sub is Normal
           region.spans.push(ARIBB24NormalSpan.from([ARIBB24ScriptParsedToken.from(sup_token, sub_token)]));
-          regions.splice(sub_index, 1);
-          regions.splice(sup_index, 1);
+          regions.splice(Math.max(sup_index, sub_index), 1);
+          regions.splice(Math.min(sup_index, sub_index), 1);
           update = true;
           break LOOP;
         }
