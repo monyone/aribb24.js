@@ -119,8 +119,6 @@ export default (tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformatio
         const sup_x = sup.position[0];
         const sup_y = sup.position[1];
         if (r_ex !== sup_x || r_uy !== sup_y) { continue; }
-        const sup_token = sup.spans.at(0)?.text.at(0) ?? null;
-        if (sup_token == null || sup_token.tag === 'Script') { continue; }
 
         for (let sub_index = 0; sub_index < regions.length; sub_index++) {
           if (sub_index === sup_index) { continue; }
@@ -129,13 +127,18 @@ export default (tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformatio
           const sub_x = sub.position[0];
           const sub_y = sub.position[1] + sub.area[1];
           if (r_ex !== sub_x || r_dy !== sub_y) { continue; }
-          const sub_token = sub.spans.at(0)?.text.at(0) ?? null;
-          if (sub_token == null || sub_token.tag === 'Script') { continue; }
-          if (ARIBB24Parser.box(sup_token.state)[0] !== ARIBB24Parser.box(sub_token.state)[0]) { continue; }
 
-          region.area[0] += ARIBB24Parser.box(sup_token.state)[0];
-          // assume sup/sub is Normal
-          region.spans.push(ARIBB24NormalSpan.from([ARIBB24ScriptParsedToken.from(sup_token, sub_token)]));
+          region.area[0] += Math.min(sup.area[0], sub.area[0]);
+          const length = Math.min(sup.spans[0].text.length, sub.spans[0].text.length);
+          const tokens = [];
+          for (let i = 0; i < length; i++) {
+            let sup_token = sup.spans.at(0)?.text.at(i) ?? null;
+            let sub_token = sub.spans.at(0)?.text.at(i) ?? null;
+            if (sup_token == null || sup_token.tag == 'Script') { continue; }
+            if (sub_token == null || sub_token.tag == 'Script') { continue; }
+            tokens.push(ARIBB24ScriptParsedToken.from(sup_token, sub_token));
+          }
+          region.spans.push(ARIBB24NormalSpan.from(tokens));
           regions.splice(Math.max(sup_index, sub_index), 1);
           regions.splice(Math.min(sup_index, sub_index), 1);
           update = true;
