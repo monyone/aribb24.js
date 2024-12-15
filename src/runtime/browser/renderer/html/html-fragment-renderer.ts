@@ -18,6 +18,9 @@ const makeTokenToHTML = (token: ARIBB24RegionerToken, info: CaptionAssociationIn
       if (option.color.foreground) {
         elem.style.color = colortable[token.state.foreground];
       }
+      if (option.color.stroke) {
+        elem.style.webkitTextStroke = '0.03em black';
+      }
       elem.textContent = (shouldHalfWidth(token.state.size, info) && halftext.get(token.character)) || token.character;
       return elem;
     }
@@ -43,6 +46,15 @@ const makeTokenToHTML = (token: ARIBB24RegionerToken, info: CaptionAssociationIn
         }
       }
       const fill_path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      if (option.color.stroke) {
+        const stroke_path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        stroke_path.setAttribute('d', path);
+        stroke_path.setAttribute('stroke', 'black');
+        stroke_path.setAttribute('fill', 'transparent');
+        stroke_path.setAttribute('stroke-width', '2');
+        stroke_path.setAttribute('stroke-linejoin', 'round');
+        svg.appendChild(stroke_path);
+      }
       fill_path.setAttribute('shape-rendering', 'crispEdges');
       fill_path.setAttribute('d', path);
       fill_path.setAttribute('stroke', 'transparent');
@@ -67,8 +79,8 @@ export default class HTMLFragmentRenderer implements Renderer {
     this.option = HTMLFragmentRendererOption.from(option);
     // Setup HTML
     this.element = document.createElement('div');
-    if (this.option.color.background) {
-      this.element.style.backgroundColor = this.option.color.background;
+    if (this.option.color.background && false) {
+      //this.element.style.backgroundColor = this.option.color.background;
     }
   }
 

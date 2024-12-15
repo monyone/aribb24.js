@@ -6,6 +6,7 @@ export type HTMLFragmentRendererOption = RendererOption & {
   },
   color: {
     foreground: boolean,
+    stroke: boolean,
     background: string | null,
   }
 };
@@ -20,6 +21,7 @@ export const HTMLFragmentRendererOption = {
       color: {
         foreground: true,
         background: null,
+        stroke: false,
         ... option?.color,
       }
     };
