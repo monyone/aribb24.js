@@ -102,6 +102,9 @@ export default class HTMLFragmentRenderer implements Renderer {
     for (const region of makeRegions(parser.parse(replaceDRCS(tokens, this.option.replace.drcs)))) {
       const div = document.createElement('div');
       div.style.display = 'inline-block';
+      if (region.highlight) {
+        div.style.border = '1px solid white';
+      }
 
       for (const span of region.spans) {
         const elem = document.createElement('div');
