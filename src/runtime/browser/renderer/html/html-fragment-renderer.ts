@@ -1,7 +1,7 @@
 import { ARIBB24_CHARACTER_SIZE_MAP, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARIBB24ParserState } from "../../../../lib/parser/parser";
 import { NotImplementedError, UnreachableError } from "../../../../util/error";
 import Renderer from "../renderer";
-import { HTMLFragmentRendererOption } from "./html-fragment-renderer-option";
+import { HTMLFragmentRendererOption, PartialHTMLFragmentRendererOption } from "./html-fragment-renderer-option";
 import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datagroup";
 import { shouldHalfWidth, shouldNotAssumeUseClearScreen } from "../quirk";
 import { ARIBB24BrowserParser, ARIBB24BrowserToken, makeRegions, replaceDRCS } from "../../types";
@@ -75,7 +75,7 @@ export default class HTMLFragmentRenderer implements Renderer {
   private option: HTMLFragmentRendererOption;
   private element: HTMLDivElement;
 
-  public constructor(option?: Partial<HTMLFragmentRendererOption>) {
+  public constructor(option?: PartialHTMLFragmentRendererOption) {
     this.option = HTMLFragmentRendererOption.from(option);
     // Setup HTML
     this.element = document.createElement('div');

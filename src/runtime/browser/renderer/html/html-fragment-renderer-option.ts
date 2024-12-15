@@ -1,18 +1,28 @@
 import { RendererOption } from "../renderer-option";
 
-export type HTMLFragmentRendererOption = RendererOption & {
-  replace: {
-    drcs: Map<string, string>,
-  },
-  color: {
-    foreground: boolean,
-    stroke: boolean,
-    background: string | null,
-  }
+
+type HTMLFragmentRendererReplaceOption = {
+  drcs: Map<string, string>;
 };
 
+type HTMLFragmentRendererColorOption = {
+  foreground: boolean,
+  stroke: boolean,
+  background: string | null,
+}
+
+export type HTMLFragmentRendererOption = RendererOption & {
+  replace: HTMLFragmentRendererReplaceOption;
+  color: HTMLFragmentRendererColorOption;
+};
+
+export type PartialHTMLFragmentRendererOption = Partial<RendererOption & {
+  replace: Partial<HTMLFragmentRendererReplaceOption>;
+  color: Partial<HTMLFragmentRendererColorOption>;
+}>;
+
 export const HTMLFragmentRendererOption = {
-  from (option?: Partial<HTMLFragmentRendererOption>): HTMLFragmentRendererOption {
+  from (option?: PartialHTMLFragmentRendererOption): HTMLFragmentRendererOption {
     return {
       replace: {
         drcs: new Map<string, string>(),
