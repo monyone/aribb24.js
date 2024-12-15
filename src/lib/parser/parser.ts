@@ -232,6 +232,10 @@ export class ARIBB24Parser {
     return structuredClone(this.option);
   }
 
+  public getMagnification(): number {
+    return this.option.magnification;
+  }
+
   public parseToken(token: ARIBB24Token): ARIBB24ParsedToken[] {
     switch (token.tag) {
       // character

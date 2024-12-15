@@ -1,8 +1,8 @@
 import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARIBB24ParserState } from "../../../../lib/parser/parser";
 import { ARIBB24FlashingControlType } from "../../../../lib/tokenizer/token";
-import colortable from "../../../colortable";
+import colortable from "../../../common/colortable";
 import halfwidth from "../halfwidth";
-import namedcolor from "../../../namedcolor";
+import namedcolor from "../../../common/namedcolor";
 import { UnreachableError } from "../../../../util/error";
 import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datagroup";
 import { shouldHalfWidth } from "../quirk";

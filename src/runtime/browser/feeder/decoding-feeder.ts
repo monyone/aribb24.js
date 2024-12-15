@@ -6,7 +6,7 @@ import demuxDatagroup, { ARIBB24CaptionManagement } from '../../../lib/demuxer/b
 import { ARIBB24ClearScreenToken } from '../../../lib/tokenizer/token';
 import { initialState } from '../../../lib/parser/parser';
 import { toBrowserTokenWithBitmap } from '../types';
-import colortable from '../../colortable';
+import colortable from '../../common/colortable';
 
 type DecodingOrderedKey = {
   dts: number;

@@ -11,5 +11,9 @@ export default defineConfig({
       fileName: 'aribb24',
       formats: ['es', 'cjs', 'umd'],
     },
+
+    rollupOptions: {
+      external: ['@napi-rs/canvas', 'node:fs'],
+    },
   },
 })

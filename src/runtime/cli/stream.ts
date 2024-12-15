@@ -24,11 +24,11 @@ const nodeReadableStreamFS = async (path: string): Promise<ReadableStream<Uint8A
   }
 
   // @ts-ignore
-  const node = await import('fs');
+  const node = await import('node:fs');
   return (ReadableStream as any).from(node.createReadStream(path));
 }
 
-export const readableStream = (path: string): Promise<ReadableStream<Uint8Array>> => {
+export const readableStream = async (path: string): Promise<ReadableStream<Uint8Array>> => {
   if ((globalThis as any).Deno) {
     return denoReadableStreamFS(path);
   } else if ((globalThis as any).Bun) {

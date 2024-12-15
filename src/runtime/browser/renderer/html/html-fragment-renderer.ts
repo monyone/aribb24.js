@@ -6,7 +6,7 @@ import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datag
 import { shouldHalfWidth, shouldNotAssumeUseClearScreen } from "../quirk";
 import { ARIBB24BrowserParser, ARIBB24BrowserToken, makeRegions, replaceDRCS } from "../../types";
 import { ARIBB24RegionerToken } from "../../../../lib/parser/regioner";
-import colortable from "../../../colortable";
+import colortable from "../../../common/colortable";
 import halftext from "../halftext";
 
 const makeTokenToHTML = (token: ARIBB24RegionerToken, info: CaptionAssociationInformation, option: HTMLFragmentRendererOption) => {

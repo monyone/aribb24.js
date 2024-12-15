@@ -222,6 +222,72 @@
     outvariant "^1.4.3"
     strict-event-emitter "^0.5.1"
 
+"@napi-rs/canvas-android-arm64@0.1.65":
+  version "0.1.65"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-android-arm64/-/canvas-android-arm64-0.1.65.tgz#b42f2a2f67cb32ad6669e53561987d58384e791f"
+  integrity sha512-ZYwqFYEKcT5Zr8lbiaJNJj/poLaeK2TncolY914r+gD2TJNeP7ZqvE7A2SX/1C9MB4E3DQEwm3YhL3WEf0x3MQ==
+
+"@napi-rs/canvas-darwin-arm64@0.1.65":
+  version "0.1.65"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-darwin-arm64/-/canvas-darwin-arm64-0.1.65.tgz#8b1a8c2495816f640c1c0299e717de722b961608"
+  integrity sha512-Pg1pfiJEyDIsX+V0QaJPRWvXbw5zmWAk3bivFCvt/5pwZb37/sT6E/RqPHT9NnqpDyKW6SriwY9ypjljysUA1Q==
+
+"@napi-rs/canvas-darwin-x64@0.1.65":
+  version "0.1.65"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-darwin-x64/-/canvas-darwin-x64-0.1.65.tgz#c34da0605c6220ec4e42bbf4dd2ae594c19a4048"
+  integrity sha512-3Tr+/HjdJN7Z/VKIcsxV2DvDIibZCExgfYTgljCkUSFuoI7iNkOE6Dc1Q6j212EB9PeO8KmfrViBqHYT6IwWkA==
+
+"@napi-rs/canvas-linux-arm-gnueabihf@0.1.65":
+  version "0.1.65"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-linux-arm-gnueabihf/-/canvas-linux-arm-gnueabihf-0.1.65.tgz#83b618fe762190bbbfdb66e636f6de0ea940c0ec"
+  integrity sha512-3KP+dYObH7CVkZMZWwk1WX9jRjL+EKdQtD43H8MOI+illf+dwqLlecdQ4d9bQRIxELKJ8dyPWY4fOp/Ngufrdg==
+
+"@napi-rs/canvas-linux-arm64-gnu@0.1.65":
+  version "0.1.65"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-linux-arm64-gnu/-/canvas-linux-arm64-gnu-0.1.65.tgz#b267573eea3209c76d69c69f8fd040407720167d"
+  integrity sha512-Ka3StKz7Dq7kjTF3nNJCq43UN/VlANS7qGE3dWkn1d+tQNsCRy/wRmyt1TUFzIjRqcTFMQNRbgYq84+53UBA0A==
+
+"@napi-rs/canvas-linux-arm64-musl@0.1.65":
+  version "0.1.65"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-linux-arm64-musl/-/canvas-linux-arm64-musl-0.1.65.tgz#36896b8166f6e8752c0142c6114cb64cf235a649"
+  integrity sha512-O4xMASm2JrmqYoiDyxVWi+z5C14H+oVEag2rZ5iIA67dhWqYZB+iO7wCFpBYRj31JPBR29FOsu6X9zL+DwBFdw==
+
+"@napi-rs/canvas-linux-riscv64-gnu@0.1.65":
+  version "0.1.65"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-linux-riscv64-gnu/-/canvas-linux-riscv64-gnu-0.1.65.tgz#ab5059fae49769ccf726e8ded103f15e0a39e16c"
+  integrity sha512-dblWDaA59ZU8bPbkfM+riSke7sFbNZ70LEevUdI5rgiFEUzYUQlU34gSBzemTACj5rCWt1BYeu0GfkLSjNMBSw==
+
+"@napi-rs/canvas-linux-x64-gnu@0.1.65":
+  version "0.1.65"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-linux-x64-gnu/-/canvas-linux-x64-gnu-0.1.65.tgz#767b023c9d7d9d09be06afdfe37ed0549b5b7a6c"
+  integrity sha512-wsp+atutw13OJXGU3DDkdngtBDoEg01IuK5xMe0L6VFPV8maGkh17CXze078OD5QJOc6kFyw3DDscMLOPF8+oA==
+
+"@napi-rs/canvas-linux-x64-musl@0.1.65":
+  version "0.1.65"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-linux-x64-musl/-/canvas-linux-x64-musl-0.1.65.tgz#9551edca5b5f0e7abfe7d5fea97b1ce25aeed4ca"
+  integrity sha512-odX+nN+IozWzhdj31INcHz3Iy9+EckNw+VqsZcaUxZOTu7/3FmktRNI6aC1qe5minZNv1m05YOS1FVf7fvmjlA==
+
+"@napi-rs/canvas-win32-x64-msvc@0.1.65":
+  version "0.1.65"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-win32-x64-msvc/-/canvas-win32-x64-msvc-0.1.65.tgz#86b9209267a20df2c0044b650feb9abc8c85be3d"
+  integrity sha512-RZQX3luWnlNWgdMnLMQ1hyfQraeAn9lnxWWVCHuUM4tAWEV8UDdeb7cMwmJW7eyt8kAosmjeHt3cylQMHOxGFg==
+
+"@napi-rs/canvas@^0.1.65":
+  version "0.1.65"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas/-/canvas-0.1.65.tgz#ef97a41b83aa03ae37862e789d124ec80eaf5b33"
+  integrity sha512-YcFhXQcp+b2d38zFOJNbpyPHnIL7KAEkhJQ+UeeKI5IpE9B8Cpf/M6RiHPQXSsSqnYbrfFylnW49dyh2oeSblQ==
+  optionalDependencies:
+    "@napi-rs/canvas-android-arm64" "0.1.65"
+    "@napi-rs/canvas-darwin-arm64" "0.1.65"
+    "@napi-rs/canvas-darwin-x64" "0.1.65"
+    "@napi-rs/canvas-linux-arm-gnueabihf" "0.1.65"
+    "@napi-rs/canvas-linux-arm64-gnu" "0.1.65"
+    "@napi-rs/canvas-linux-arm64-musl" "0.1.65"
+    "@napi-rs/canvas-linux-riscv64-gnu" "0.1.65"
+    "@napi-rs/canvas-linux-x64-gnu" "0.1.65"
+    "@napi-rs/canvas-linux-x64-musl" "0.1.65"
+    "@napi-rs/canvas-win32-x64-msvc" "0.1.65"
+
 "@open-draft/deferred-promise@^2.2.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@open-draft/deferred-promise/-/deferred-promise-2.2.0.tgz#4a822d10f6f0e316be4d67b4d4f8c9a124b073bd"
@@ -1019,7 +1085,16 @@ strict-event-emitter@^0.5.1:
   resolved "https://registry.yarnpkg.com/strict-event-emitter/-/strict-event-emitter-0.5.1.tgz#1602ece81c51574ca39c6815e09f1a3e8550bd93"
   integrity sha512-vMgjE/GGEPEFnhFub6pa4FmJBRBVOLpIII2hvCZ8Kzb7K0hlHo7mQv6xYrBvCL2LtAIBwFUK8wvuJgTVSQ5MFQ==
 
-"string-width-cjs@npm:string-width@^4.2.0", string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
+"string-width-cjs@npm:string-width@^4.2.0":
+  version "4.2.3"
+  resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
+  integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
+  dependencies:
+    emoji-regex "^8.0.0"
+    is-fullwidth-code-point "^3.0.0"
+    strip-ansi "^6.0.1"
+
+string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
@@ -1037,7 +1112,14 @@ string-width@^5.0.1, string-width@^5.1.2:
     emoji-regex "^9.2.2"
     strip-ansi "^7.0.1"
 
-"strip-ansi-cjs@npm:strip-ansi@^6.0.1", strip-ansi@^6.0.0, strip-ansi@^6.0.1:
+"strip-ansi-cjs@npm:strip-ansi@^6.0.1":
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
+  integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
+  dependencies:
+    ansi-regex "^5.0.1"
+
+strip-ansi@^6.0.0, strip-ansi@^6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
   integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
@@ -1108,10 +1190,10 @@ type-fest@^4.26.1:
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-4.26.1.tgz#a4a17fa314f976dd3e6d6675ef6c775c16d7955e"
   integrity sha512-yOGpmOAL7CkKe/91I5O3gPICmJNLJ1G4zFYVAsRHg7M64biSnPtRj0WNQt++bRkjYOqjWXrhnUw1utzmVErAdg==
 
-typescript@^5.6.3:
-  version "5.6.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.6.3.tgz#5f3449e31c9d94febb17de03cc081dd56d81db5b"
-  integrity sha512-hjcS1mhfuyi4WW8IWtjP7brDrG2cuDZukyrYrSauoXGNgx0S7zceP07adYkJycEr56BOUTNPzbInooiN3fn1qw==
+typescript@^5.7.2:
+  version "5.7.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.7.2.tgz#3169cf8c4c8a828cde53ba9ecb3d2b1d5dd67be6"
+  integrity sha512-i5t66RHxDvVN40HfDd1PsEThGNnlMCMT3jMUuoh9/0TaqWevNontacunWyN02LA9/fIbEWlcHZcgTKb9QoaLfg==
 
 universalify@^0.2.0:
   version "0.2.0"
@@ -1188,7 +1270,7 @@ why-is-node-running@^2.3.0:
     siginfo "^2.0.0"
     stackback "0.0.2"
 
-"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0", wrap-ansi@^7.0.0:
+"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0":
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
   integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
@@ -1201,6 +1283,15 @@ wrap-ansi@^6.2.0:
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-6.2.0.tgz#e9393ba07102e6c91a3b221478f0257cd2856e53"
   integrity sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==
+  dependencies:
+    ansi-styles "^4.0.0"
+    string-width "^4.1.0"
+    strip-ansi "^6.0.0"
+
+wrap-ansi@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
+  integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
   dependencies:
     ansi-styles "^4.0.0"
     string-width "^4.1.0"

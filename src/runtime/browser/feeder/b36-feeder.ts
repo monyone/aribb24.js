@@ -1,6 +1,6 @@
 import { ARIBB24CaptionManagement, ARIBB24CaptionStatement } from "../../../lib/demuxer/b24/datagroup";
 import demuxB36 from "../../../lib/demuxer/b36";
-import colortable from "../../colortable";
+import colortable from "../../common/colortable";
 import { toBrowserTokenWithoutBitmap } from "../types";
 import Feeder, { FeederOption, FeederPresentationData, getTokenizeInformation, PartialFeederOption } from "./feeder";
 
