@@ -53,7 +53,7 @@ const charsize_normalize = (size: (typeof ARIBB24_CHARACTER_SIZE)[keyof typeof A
   return size === 'Middle' ? 'Normal' : size;
 };
 
-export default (tokens: ARIBB24ParsedToken[]): ARIBB24Region[] => {
+export default (tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformation): ARIBB24Region[] => {
   const characters = tokens.filter((token) => token.tag === 'Character' || token.tag === 'DRCS').toSorted((token1, token2) => {
     if (token1.state.position[1] !== token2.state.position[1]) {
       return Math.sign(token1.state.position[1] - token1.state.position[1]);
@@ -100,6 +100,9 @@ export default (tokens: ARIBB24ParsedToken[]): ARIBB24Region[] => {
       i--;
     }
   }
+
+  if (info.association !== 'ARIB') { return regions; }
+  // ARIB represent SuperScript/SubScript/Ruby
 
   // SuperScript/SubScript
   while (true) {

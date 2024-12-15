@@ -111,7 +111,7 @@ export default class HTMLFragmentRenderer implements Renderer {
     const parser = new ARIBB24BrowserParser(initialState);
     const fragment = new DocumentFragment();
 
-    for (const region of makeRegions(parser.parse(replaceDRCS(tokens, this.option.replace.drcs)))) {
+    for (const region of makeRegions(parser.parse(replaceDRCS(tokens, this.option.replace.drcs)), info)) {
       const div = document.createElement('div');
       div.style.display = 'inline-block';
       if (region.highlight) {
