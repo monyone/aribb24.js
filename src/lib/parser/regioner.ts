@@ -233,5 +233,6 @@ export default (tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformatio
     if (!update) { break; }
   }
 
-  return regions;
+  // remove other SSM for convinience
+  return regions.filter((region) => region.size !== ARIBB24_CHARACTER_SIZE.Small);
 }
