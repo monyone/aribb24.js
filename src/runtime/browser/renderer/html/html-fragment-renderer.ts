@@ -1,4 +1,4 @@
-import { ARIBB24_CHARACTER_SIZE_MAP, ARIBB24ParserState } from "../../../../lib/parser/parser";
+import { ARIBB24_CHARACTER_SIZE_MAP, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARIBB24ParserState } from "../../../../lib/parser/parser";
 import { NotImplementedError, UnreachableError } from "../../../../util/error";
 import Renderer from "../renderer";
 import { HTMLFragmentRendererOption } from "./html-fragment-renderer-option";
@@ -99,6 +99,7 @@ const makeTokenToHTML = (token: ARIBB24RegionerToken, info: CaptionAssociationIn
     case 'Character': {
       const elem = document.createElement('div');
       elem.style.display = 'inline-block';
+      elem.style.whiteSpace = 'pre';
       if (option.color.foreground) {
         elem.style.color = colortable[token.state.foreground];
       }
@@ -107,6 +108,35 @@ const makeTokenToHTML = (token: ARIBB24RegionerToken, info: CaptionAssociationIn
     }
     case 'DRCS': {
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      const { state, width, height, depth, binary } = token;
+      const uint8 = new Uint8Array(binary);
+      const foreground = colortable[state.foreground];
+      let path = '';
+      for (let dy = 0; dy < height; dy++) {
+        for (let dx = 0; dx < width; dx++) {
+          let value = 0;
+          for(let d = 0; d < depth; d++){
+            const byte = Math.floor(((((dy * width) + dx) * depth) + d) / 8);
+            const index = 7 - (((((dy * width) + dx) * depth) + d) % 8);
+            value *= 2;
+            value += ((uint8[byte] & (1 << index)) >> index);
+          }
+
+          if (value === 0) { continue; }
+
+          path += (path === '' ? '' : ' ') + `M ${dx} ${dy} h 1 v 1 H ${dx} Z`;
+        }
+      }
+      const fill_path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      fill_path.setAttribute('shape-rendering', 'crispEdges');
+      fill_path.setAttribute('d', path);
+      fill_path.setAttribute('stroke', 'transparent');
+      fill_path.setAttribute('fill', foreground);
+      svg.appendChild(fill_path);
+
+      svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      svg.style.width = '1em';
+      svg.style.verticalAlign = 'middle';
       return svg;
     }
     case 'Script':
@@ -117,7 +147,6 @@ const makeTokenToHTML = (token: ARIBB24RegionerToken, info: CaptionAssociationIn
 export default class HTMLFragmentRenderer implements Renderer {
   private option: HTMLFragmentRendererOption;
   private element: HTMLDivElement;
-  private fragment: DocumentFragment = new DocumentFragment();
 
   public constructor(option?: Partial<HTMLFragmentRendererOption>) {
     this.option = HTMLFragmentRendererOption.from(option);
@@ -157,11 +186,11 @@ export default class HTMLFragmentRenderer implements Renderer {
 
     for (const region of makeRegions(parser.parse(replaceDRCS(tokens, this.option.replace.drcs)))) {
       const div = document.createElement('div');
-      div.style.display = 'inline-flex';
+      div.style.display = 'inline-block';
 
       for (const span of region.spans) {
         const elem = document.createElement('div');
-        elem.style.display = 'inline-flex';
+        elem.style.display = 'inline-block';
         switch (span.tag) {
           case 'Normal':
             for (const token of span.text) {
