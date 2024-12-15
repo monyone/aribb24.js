@@ -7,92 +7,7 @@ import { shouldHalfWidth, shouldNotAssumeUseClearScreen } from "../quirk";
 import { ARIBB24BrowserParser, ARIBB24BrowserToken, makeRegions, replaceDRCS } from "../../types";
 import { ARIBB24RegionerToken } from "../../../../lib/parser/regioner";
 import colortable from "../../../colortable";
-import halfwidth from "../halfwidth";
-
-const half = structuredClone(halfwidth);
-half.set('ア', 'ｱ');
-half.set('イ', 'ｲ');
-half.set('ウ', 'ｳ');
-half.set('エ', 'ｴ');
-half.set('オ', 'ｵ');
-half.set('カ', 'ｶ');
-half.set('キ', 'ｷ');
-half.set('ク', 'ｸ');
-half.set('ケ', 'ｹ');
-half.set('コ', 'ｺ');
-half.set('サ', 'ｻ');
-half.set('シ', 'ｼ');
-half.set('ス', 'ｽ');
-half.set('セ', 'ｾ');
-half.set('ソ', 'ｿ');
-half.set('タ', 'ﾀ');
-half.set('チ', 'ﾁ');
-half.set('ツ', 'ﾂ');
-half.set('テ', 'ﾃ');
-half.set('ト', 'ﾄ');
-half.set('ナ', 'ﾅ');
-half.set('ニ', 'ﾆ');
-half.set('ヌ', 'ﾇ');
-half.set('ネ', 'ﾈ');
-half.set('ノ', 'ﾉ');
-half.set('ハ', 'ﾊ');
-half.set('ヒ', 'ﾋ');
-half.set('フ', 'ﾌ');
-half.set('ヘ', 'ﾍ');
-half.set('ホ', 'ﾎ');
-half.set('マ', 'ﾏ');
-half.set('ミ', 'ﾐ');
-half.set('ム', 'ﾑ');
-half.set('メ', 'ﾒ');
-half.set('モ', 'ﾓ');
-half.set('ヤ', 'ﾔ');
-half.set('ユ', 'ﾕ');
-half.set('ヨ', 'ﾖ');
-half.set('ラ', 'ﾗ');
-half.set('リ', 'ﾘ');
-half.set('ル', 'ﾙ');
-half.set('レ', 'ﾚ');
-half.set('ロ', 'ﾛ');
-half.set('ワ', 'ﾜ');
-half.set('ヲ', 'ｦ');
-half.set('ン', 'ﾝ');
-half.set('ヴ', 'ｳﾞ');
-half.set('ガ', 'ｶﾞ');
-half.set('ギ', 'ｷﾞ');
-half.set('グ', 'ｸﾞ');
-half.set('ゲ', 'ｹﾞ');
-half.set('ゴ', 'ｺﾞ');
-half.set('ザ', 'ｻﾞ');
-half.set('ジ', 'ｼﾞ');
-half.set('ズ', 'ｽﾞ');
-half.set('ゼ', 'ｾﾞ');
-half.set('ゾ', 'ｿﾞ');
-half.set('ダ', 'ﾀﾞ');
-half.set('ヂ', 'ﾁﾞ');
-half.set('ヅ', 'ﾂﾞ');
-half.set('デ', 'ﾃﾞ');
-half.set('ド', 'ﾄﾞ');
-half.set('バ', 'ﾊﾞ');
-half.set('ビ', 'ﾋﾞ');
-half.set('ブ', 'ﾌﾞ');
-half.set('ベ', 'ﾍﾞ');
-half.set('ボ', 'ﾎﾞ');
-half.set('パ', 'ﾊﾟ');
-half.set('ピ', 'ﾋﾟ');
-half.set('プ', 'ﾌﾟ');
-half.set('ペ', 'ﾍﾟ');
-half.set('ポ', 'ﾎﾟ');
-half.set('ァ', 'ｧ');
-half.set('ィ', 'ｨ');
-half.set('ゥ', 'ｩ');
-half.set('ェ', 'ｪ');
-half.set('ォ', 'ｫ');
-half.set('ャ', 'ｬ');
-half.set('ュ', 'ｭ');
-half.set('ョ', 'ｮ'),
-half.set('ッ', 'ｯ');
-half.set('◌゙', ' ﾞ');
-half.set('◌゚', ' ﾟ');
+import halftext from "../halftext";
 
 const makeTokenToHTML = (token: ARIBB24RegionerToken, info: CaptionAssociationInformation, option: HTMLFragmentRendererOption) => {
   switch (token.tag) {
@@ -103,7 +18,7 @@ const makeTokenToHTML = (token: ARIBB24RegionerToken, info: CaptionAssociationIn
       if (option.color.foreground) {
         elem.style.color = colortable[token.state.foreground];
       }
-      elem.textContent = (shouldHalfWidth(token.state.size, info) && half.get(token.character)) || token.character;
+      elem.textContent = (shouldHalfWidth(token.state.size, info) && halftext.get(token.character)) || token.character;
       return elem;
     }
     case 'DRCS': {
