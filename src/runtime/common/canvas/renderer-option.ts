@@ -2,7 +2,7 @@ import { PathElement } from "../additional-symbols-glyph";
 
 type RendererFontOption = {
   normal: string;
-  arib: string;
+  arib?: string;
 };
 
 type RendererReplaceOption = {
@@ -41,7 +41,6 @@ export const RendererOption = {
     return {
       font: {
         normal: "'Hiragino Maru Gothic Pro', 'BIZ UDGothic', 'Yu Gothic Medium', sans-serif",
-        arib: "'Hiragino Maru Gothic Pro', 'BIZ UDGothic', 'Yu Gothic Medium', sans-serif",
         ... option?.font,
       },
       replace: {

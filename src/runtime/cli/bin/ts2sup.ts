@@ -13,10 +13,10 @@ import colortable from '../../common/colortable';
 import concat from '../../../util/concat';
 import { args, ArgsOption, parseArgs } from '../args';
 
-const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], plane: [number, number], source: typeof import('@napi-rs/canvas')): ArrayBuffer => {
+const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], plane: [number, number], option: RendererOption, source: typeof import('@napi-rs/canvas')): ArrayBuffer => {
   let sx = Number.POSITIVE_INFINITY, sy = Number.POSITIVE_INFINITY, dx = 0, dy = 0;
   let elapsed_time = 0;
-  const codes = new Set<string>(['#00000000']);
+  const codes = new Set<string>(['#00000000', '#000000FF']);
   for (const token of tokens) {
     if (token.tag === 'ClearScreen') {
       elapsed_time = token.time;
@@ -45,7 +45,7 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], plane:
   }) satisfies [number, number, number, number][];
 
   const canvas = source.createCanvas(plane[0], plane[1]);
-  render(canvas as unknown as OffscreenCanvas, [1, 1], tokens, { association: 'ARIB', language: 'und' }, RendererOption.from({ font: { normal: 'IPAPGothic' }}));
+  render(canvas as unknown as OffscreenCanvas, [1, 1], tokens, { association: 'ARIB', language: 'und' }, option);
 
   const screen = source.createCanvas(area[0], area[1]);
   const context = screen.getContext('2d');
@@ -76,6 +76,24 @@ const cmdline = ([
     action: 'default'
   },
   {
+    long: '--stroke',
+    short: '-s',
+    help: 'Specify forced stroke',
+    action: 'store_true',
+  },
+  {
+    long: '--background',
+    short: '-b',
+    help: 'Specify background color',
+    action: 'default',
+  },
+  {
+    long: '--font',
+    short: '-f',
+    help: 'Specify font',
+    action: 'default',
+  },
+  {
     long: '--help',
     short: '-h',
     help: 'Show help message',
@@ -87,6 +105,9 @@ const cmdline = ([
   const cmd = parseArgs(args(), cmdline, 'ts2sup', 'MPEG-TS ARIB Caption (Profile A) to SUP (HDMV-PGS)');
   const input = cmd['input'] ?? '-';
   const output = cmd['output'] ?? '-';
+  const stroke = cmd['stroke'] ? 'black' : null;
+  const background = cmd['background'] ?? null;
+  const font = cmd['font'] ?? "'Hiragino Maru Gothic Pro', 'BIZ UDGothic', 'Yu Gothic Medium', 'IPAGothic', sans-serif";
 
   const napi = await import('@napi-rs/canvas').catch(() => {
     console.error('Please install @napi-rs/canvas');
@@ -101,8 +122,12 @@ const cmdline = ([
 
       const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
       const parser = new ARIBB24Parser(initialState, { magnification: 2 });
+      const option = RendererOption.from({
+        font: { normal: font },
+        color: { stroke: stroke, background: background }
+      });
 
-      sup.push(generate(caption.pts, caption.dts, parser.parse(tokenizer.tokenize(caption.data)), parser.currentState().plane, napi));
+      sup.push(generate(caption.pts, caption.dts, parser.parse(tokenizer.tokenize(caption.data)), parser.currentState().plane, option, napi));
     }
   }
   writeFS(output, concat(... sup));

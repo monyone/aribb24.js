@@ -3,7 +3,7 @@ import { RendererOption } from "../renderer-option";
 
 type SVGDOMRendererFontOption = {
   normal: string;
-  arib: string;
+  arib?: string;
 };
 
 type SVGDOMRendererReplaceOption = {

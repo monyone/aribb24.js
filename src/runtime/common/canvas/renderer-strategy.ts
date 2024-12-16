@@ -160,7 +160,7 @@ export const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCan
   context.translate(center_x, center_y);
 
   // detect
-  const font = useARIBFont(character) ? rendererOption.font.arib : rendererOption.font.normal;
+  const font = useARIBFont(character) ? rendererOption.font.arib ?? rendererOption.font.normal : rendererOption.font.normal;
   context.scale(magnification[0] * 1, ARIBB24Parser.scale(state)[1] * magnification[1]);
 
   // orn
