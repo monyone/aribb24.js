@@ -17,6 +17,9 @@
       "require": "./dist/cjs/index.js"
     }
   },
+  "bin": {
+    "ts2sup": "./dist/cjs/runtime/cli/bin/ts2sup.js"
+  },
   "author": "monyone <monyone.teihen@gmail.com>",
   "description": "an alternative implementation for b24.js",
   "keywords": [

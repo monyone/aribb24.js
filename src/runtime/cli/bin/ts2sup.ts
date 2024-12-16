@@ -13,7 +13,7 @@ import colortable from '../../common/colortable';
 import concat from '../../../util/concat';
 import { args, ArgsOption, parseArgs } from '../args';
 
-const draw = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], plane: [number, number], source: typeof import('@napi-rs/canvas')): ArrayBuffer => {
+const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], plane: [number, number], source: typeof import('@napi-rs/canvas')): ArrayBuffer => {
   let sx = Number.POSITIVE_INFINITY, sy = Number.POSITIVE_INFINITY, dx = 0, dy = 0;
   let elapsed_time = 0;
   const codes = new Set<string>(['#00000000']);
@@ -102,7 +102,7 @@ const cmdline = ([
       const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
       const parser = new ARIBB24Parser(initialState, { magnification: 2 });
 
-      sup.push(draw(caption.pts, caption.dts, parser.parse(tokenizer.tokenize(caption.data)), parser.currentState().plane, napi));
+      sup.push(generate(caption.pts, caption.dts, parser.parse(tokenizer.tokenize(caption.data)), parser.currentState().plane, napi));
     }
   }
   writeFS(output, concat(... sup));

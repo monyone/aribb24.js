@@ -164,10 +164,6 @@ export class ARIBB24BrowserParser {
   public parse(tokens: ARIBB24BrowserToken[]): ARIBB24BrowserParsedToken[] {
     return tokens.flatMap(this.parseBitmapOrInherit.bind(this));
   }
-
-  public getmagnification(): number {
-    return this.praser.getMagnification();
-  }
 }
 
 export const replaceDRCS = (tokens: ARIBB24BrowserToken[], replace: Map<string, string>): ARIBB24BrowserToken[] => {
