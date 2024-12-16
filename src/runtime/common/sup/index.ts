@@ -343,7 +343,7 @@ export const ObjectDefinitionSegment = {
 export type EndSegment = {};
 export const EndSegment = {
   into(): ArrayBuffer {
-    return new ArrayBuffer()
+    return new ArrayBuffer(0);
   }
 }
 

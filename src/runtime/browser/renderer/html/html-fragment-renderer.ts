@@ -1,4 +1,4 @@
-import { ARIBB24_CHARACTER_SIZE_MAP, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARIBB24ParserState } from "../../../../lib/parser/parser";
+import { ARIBB24_CHARACTER_SIZE_MAP, ARIBB24DRCSParsedToken, ARIBB24Parser, ARIBB24ParserState } from "../../../../lib/parser/parser";
 import { NotImplementedError, UnreachableError } from "../../../../util/error";
 import Renderer from "../renderer";
 import { HTMLFragmentRendererOption, PartialHTMLFragmentRendererOption } from "./html-fragment-renderer-option";

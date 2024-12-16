@@ -1,4 +1,4 @@
-import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24Parser, ARIBB24ParserState } from "../../../../lib/parser/parser";
+import { ARIBB24CharacterParsedToken, ARIBB24DRCSParsedToken, ARIBB24Parser, ARIBB24ParserState } from "../../../../lib/parser/parser";
 import { ARIBB24FlashingControlType } from "../../../../lib/tokenizer/token";
 import colortable from "../../../common/colortable";
 import halfwidth from "../halfwidth";
@@ -134,7 +134,7 @@ export default (target: SVGSVGElement, state: ARIBB24ParserState, tokens: ARIBB2
   }
 }
 
-const retriveDecorationSVGPathElement = (token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, info: CaptionAssociationInformation, rendererOption: SVGDOMRendererOption): SVGPathElement => {
+const retriveDecorationSVGPathElement = (token: ARIBB24CharacterParsedToken | ARIBB24DRCSParsedToken, info: CaptionAssociationInformation, rendererOption: SVGDOMRendererOption): SVGPathElement => {
   const { state, option } = token;
 
   const foreground = rendererOption.color.foreground ?? colortable[state.foreground];
@@ -171,7 +171,7 @@ const retriveDecorationSVGPathElement = (token: ARIBB24CharacterParsedToken | AR
   return elem;
 }
 
-const retriveFlashingAnimateElement = (token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, info: CaptionAssociationInformation, rendererOption: SVGDOMRendererOption): SVGAnimateElement | null => {
+const retriveFlashingAnimateElement = (token: ARIBB24CharacterParsedToken | ARIBB24DRCSParsedToken, info: CaptionAssociationInformation, rendererOption: SVGDOMRendererOption): SVGAnimateElement | null => {
   const { state } = token;
 
   switch (state.flashing) {
@@ -193,7 +193,7 @@ const retriveFlashingAnimateElement = (token: ARIBB24CharacterParsedToken | ARIB
   }
 }
 
-const retriveBackroundPathString = (token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, info: CaptionAssociationInformation, rendererOption: SVGDOMRendererOption): [string, String] => {
+const retriveBackroundPathString = (token: ARIBB24CharacterParsedToken | ARIBB24DRCSParsedToken, info: CaptionAssociationInformation, rendererOption: SVGDOMRendererOption): [string, String] => {
   const { state } = token;
   const color = rendererOption.color.background ?? colortable[state.background];
   const origin_x = Math.floor((state.position[0] + 0) +                           0);
@@ -239,7 +239,7 @@ const retriveCharacterSVGTextElement = (token: ARIBB24CharacterParsedToken, info
   return text;
 }
 
-const retriveDRCSSVGPathElement = (token: ARIBB24DRCSPrasedToken, info: CaptionAssociationInformation, rendererOption: SVGDOMRendererOption): [SVGPathElement, SVGPathElement] => {
+const retriveDRCSSVGPathElement = (token: ARIBB24DRCSParsedToken, info: CaptionAssociationInformation, rendererOption: SVGDOMRendererOption): [SVGPathElement, SVGPathElement] => {
   const { state, option, width, height, depth, binary } = token;
   const uint8 = new Uint8Array(binary);
 

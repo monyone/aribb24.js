@@ -1,15 +1,15 @@
 import { UnreachableError } from "../../util/error";
 import { CaptionAssociationInformation } from "../demuxer/b24/datagroup";
-import { ARIBB24_CHARACTER_SIZE, ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24ParsedToken, ARIBB24Parser } from "./parser";
+import { ARIBB24_CHARACTER_SIZE, ARIBB24CharacterParsedToken, ARIBB24DRCSParsedToken, ARIBB24ParsedToken, ARIBB24Parser } from "./parser";
 
 
 export type ARIBB24ScriptParsedToken = {
   tag: 'Script';
-  sup: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken;
-  sub: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken;
+  sup: ARIBB24CharacterParsedToken | ARIBB24DRCSParsedToken;
+  sub: ARIBB24CharacterParsedToken | ARIBB24DRCSParsedToken;
 }
 export const ARIBB24ScriptParsedToken = {
-  from(sup: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, sub: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken): ARIBB24ScriptParsedToken {
+  from(sup: ARIBB24CharacterParsedToken | ARIBB24DRCSParsedToken, sub: ARIBB24CharacterParsedToken | ARIBB24DRCSParsedToken): ARIBB24ScriptParsedToken {
     return {
       tag: 'Script',
       sup,
@@ -17,7 +17,7 @@ export const ARIBB24ScriptParsedToken = {
     };
   }
 }
-export type ARIBB24RegionerToken = ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken | ARIBB24ScriptParsedToken;
+export type ARIBB24RegionerToken = ARIBB24CharacterParsedToken | ARIBB24DRCSParsedToken | ARIBB24ScriptParsedToken;
 
 export type ARIBB24NormalSpan = {
   tag: 'Normal';

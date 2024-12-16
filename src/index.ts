@@ -57,7 +57,7 @@ export type {
   ARIBB24ParsedToken,
   ARIBB24ClearScreenParsedToken,
   ARIBB24CharacterParsedToken,
-  ARIBB24DRCSPrasedToken,
+  ARIBB24DRCSParsedToken as ARIBB24DRCSPrasedToken,
   ARIBB24ParserState,
 } from './lib/parser/parser';
 export { default as ARIBB24JapaneseInitialParserState } from './lib/parser/state/ARIB';

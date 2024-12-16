@@ -1,4 +1,4 @@
-import { ARIBB24CharacterParsedToken, ARIBB24DRCSPrasedToken, ARIBB24ParsedToken, ARIBB24Parser } from "../../../lib/parser/parser";
+import { ARIBB24CharacterParsedToken, ARIBB24DRCSParsedToken, ARIBB24ParsedToken, ARIBB24Parser } from "../../../lib/parser/parser";
 import { RendererOption } from "./renderer-option";
 import colortable from "../colortable";
 import halfwidth from "../../browser/renderer/halfwidth";
@@ -36,7 +36,7 @@ export default (buffer: HTMLCanvasElement | OffscreenCanvas, magnification: [num
   }
 }
 
-export const clear = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
+export const clear = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSParsedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
   const { state } = token;
 
   // clear
@@ -48,7 +48,7 @@ export const clear = (context: CanvasRenderingContext2D | OffscreenCanvasRenderi
   );
 }
 
-export const renderBackground = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionAssociationInformation,rendererOption: RendererOption): void => {
+export const renderBackground = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSParsedToken, magnification: [number, number], info: CaptionAssociationInformation,rendererOption: RendererOption): void => {
   const { state } = token;
 
   // background
@@ -61,7 +61,7 @@ export const renderBackground = (context: CanvasRenderingContext2D | OffscreenCa
   );
 }
 
-export const renderHighlight = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionAssociationInformation,rendererOption: RendererOption): void => {
+export const renderHighlight = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSParsedToken, magnification: [number, number], info: CaptionAssociationInformation,rendererOption: RendererOption): void => {
   const { state, option } = token;
 
   const x = (state.margin[0] + (state.position[0] + 0) +                           0) * magnification[0];
@@ -86,7 +86,7 @@ export const renderHighlight = (context: CanvasRenderingContext2D | OffscreenCan
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-export const renderUnderline = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
+export const renderUnderline = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken | ARIBB24DRCSParsedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
   const { state, option } = token;
 
   if (!state.underline) { return; }
@@ -184,7 +184,7 @@ export const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCan
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSPrasedToken, magnification: [number, number], foreground: string, orn: string | null): void => {
+const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSParsedToken, magnification: [number, number], foreground: string, orn: string | null): void => {
   const { state, option, width, height, depth, binary } = token;
   const uint8 = new Uint8Array(binary);
 
@@ -232,7 +232,7 @@ const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasR
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-export const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSPrasedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
+export const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSParsedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
   const { state } = token;
   // clear
   clear(context, token, magnification, info, rendererOption);
