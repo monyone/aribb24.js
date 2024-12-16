@@ -11,6 +11,7 @@ import { RendererOption } from '../../common/canvas/renderer-option';
 import { makeEmptySup, makeImageDataSup } from '../../common/sup'
 import colortable from '../../common/colortable';
 import concat from '../../../util/concat';
+import { args, ArgsOption, parseArgs } from '../args';
 
 const draw = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], plane: [number, number], source: typeof import('@napi-rs/canvas')): ArrayBuffer => {
   let sx = Number.POSITIVE_INFINITY, sy = Number.POSITIVE_INFINITY, dx = 0, dy = 0;
@@ -61,17 +62,40 @@ const draw = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], plane: [nu
   }
 }
 
+const cmdline = ([
+  {
+    long: '--input',
+    short: '-i',
+    help: 'Specify Input File (.ts)',
+    action: 'default',
+  },
+  {
+    long: '--output',
+    short: '-o',
+    help: 'Specify Output File (.sup)',
+    action: 'default'
+  },
+  {
+    long: '--help',
+    short: '-h',
+    help: 'Show help message',
+    action: 'help',
+  }
+]) satisfies ArgsOption[];
+
 (async () => {
+  const cmd = parseArgs(args(), cmdline, 'ts2sup', 'MPEG-TS ARIB Caption (Profile A) to SUP (HDMV-PGS)');
+  const input = cmd['input'] ?? '-';
+  const output = cmd['output'] ?? '-';
+
   const napi = await import('@napi-rs/canvas').catch(() => {
     console.error('Please install @napi-rs/canvas');
     return exit(-1);
   });
 
-  const process = (globalThis as any).process;
-  const filepath = process.argv[2];
   const sup = [];
   {
-    for await (const caption of read(await readableStream(filepath))) {
+    for await (const caption of read(await readableStream(input))) {
       if (caption.tag !== 'Caption') { continue; }
       if (caption.data.tag !== 'CaptionStatement') { continue; }
 
@@ -81,5 +105,5 @@ const draw = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], plane: [nu
       sup.push(draw(caption.pts, caption.dts, parser.parse(tokenizer.tokenize(caption.data)), parser.currentState().plane, napi));
     }
   }
-  writeFS('test.sup', concat(... sup));
+  writeFS(output, concat(... sup));
 })();

@@ -12,9 +12,8 @@ const nodeWriteFS = async (path: string, data: ArrayBuffer): Promise<void> => {
   const Buffer = (globalThis as any).Buffer;
   const process = (globalThis as any).process;
   if (path === '-') {
-    process.stdout.write(data);
+    process.stdout.write(Buffer.from(data));
   } else {
-    // @ts-ignore
     const fs = await import('node:fs');
     fs.writeFileSync(path, Buffer.from(data));
   }
