@@ -167,8 +167,8 @@ export const WindowDefinition = {
   into(wd: WindowDefinition): ArrayBuffer {
     const builder = new ByteBuilder();
     builder.writeU8(wd.windowId);
-    builder.writeU8(wd.windowHorizontalPosition);
-    builder.writeU8(wd.windowVerticalPosition);
+    builder.writeU16(wd.windowHorizontalPosition);
+    builder.writeU16(wd.windowVerticalPosition);
     builder.writeU16(wd.windowWidth);
     builder.writeU16(wd.windowHeight);
     return builder.build();
@@ -192,7 +192,7 @@ export const WindowDefinitionSegment = {
       windows,
     };
   },
-  info(wds: WindowDefinitionSegment): ArrayBuffer {
+  into(wds: WindowDefinitionSegment): ArrayBuffer {
     const builder = new ByteBuilder();
     builder.writeU8(wds.numberOfWindow);
     for (const window of wds.windows) {
@@ -227,7 +227,7 @@ export const PaletteEntry = {
   },
   into(palette: PaletteEntry): ArrayBuffer {
     const builder = new ByteBuilder();
-    builder.writeU16(palette.paletteEntryID);
+    builder.writeU8(palette.paletteEntryID);
     builder.writeU8(palette.luminance);
     builder.writeU8(palette.colorDifferenceRed);
     builder.writeU8(palette.colorDifferenceBlue);
@@ -323,7 +323,7 @@ export const ObjectDefinitionSegment = {
       throw new UnexpectedFormatError('lastInSequenceFlag Invalid')
     }
   },
-  info(ods: ObjectDefinitionSegment): ArrayBuffer {
+  into(ods: ObjectDefinitionSegment): ArrayBuffer {
     const builder = new ByteBuilder();
     builder.writeU16(ods.objectId);
     builder.writeU8(ods.objectVersionNumber);
@@ -347,8 +347,7 @@ export const EndSegment = {
   }
 }
 
-
-const encodeSegment = (type: (typeof SegmentType)[keyof typeof SegmentType], data: ArrayBuffer) => {
+export const encodeSegment = (type: (typeof SegmentType)[keyof typeof SegmentType], data: ArrayBuffer): ArrayBuffer => {
   const builder = new ByteBuilder();
   const length = data.byteLength;
   if (length >= 2 ** 16) { throw new Error('Exceeded Segment Length'); }
@@ -356,13 +355,22 @@ const encodeSegment = (type: (typeof SegmentType)[keyof typeof SegmentType], dat
   builder.writeU8(type);
   builder.writeU16(length);
   builder.write(data);
+  return builder.build();
 }
 
-export const encodeSupFormat = (pts: number, dts: number, data: ArrayBuffer) => {
+export const encodeSupFormat = (pts: number, dts: number, data: ArrayBuffer): ArrayBuffer => {
   const builder = new ByteBuilder();
   builder.writeU16(0x5047); // magic
   builder.writeU32(pts);
   builder.writeU32(dts);
   builder.write(data);
   return builder.build();
+}
+
+export const ycbcr = (r: number, g: number, b: number): [number, number, number] => {
+  return [
+    Math.max(0, Math.min(255, Math.round(0.299     * r + 0.587    * g + 0.114    * b))),
+    Math.max(-128, Math.min(127, Math.round(-0.168736 * r - 0.331264 * g + 0.5      * b))) + 128,
+    Math.max(-128, Math.min(127, Math.round(0.5       * r - 0.418688 * g - 0.081312 * b))) + 128,
+  ];
 }

@@ -4,7 +4,7 @@ import { ControllerOption } from "./controller-option";
 import EventEmitter from "./eventemitter";
 import { Event, EventType, BuiltinSound } from "./events";
 
-export default class PGSController {
+export default class Controller {
   // Option
   private option: ControllerOption;
   // Video
