@@ -43,6 +43,7 @@
   },
   "devDependencies": {
     "@napi-rs/canvas": "^0.1.65",
+    "@types/node": "^20.14.8",
     "@vitest/browser": "^2.1.4",
     "playwright": "^1.48.2",
     "rimraf": "^6.0.1",

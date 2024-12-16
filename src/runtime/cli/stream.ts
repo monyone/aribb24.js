@@ -23,7 +23,6 @@ const nodeReadableStreamFS = async (path: string): Promise<ReadableStream<Uint8A
     return (ReadableStream as any).from((globalThis as any).process.stdin);
   }
 
-  // @ts-ignore
   const node = await import('node:fs');
   return (ReadableStream as any).from(node.createReadStream(path));
 }

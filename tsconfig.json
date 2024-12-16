@@ -22,6 +22,12 @@
     "strict": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["./src/**/*.ts"],
+  "include": [
+    "./src/lib/**/*.ts",
+    "./src/runtime/browser/**/*.ts",
+    "./src/runtime/common/**/*.ts",
+    "./src/util/**/*.ts",
+    "./src/index.ts"
+  ],
   "exclude": ["./dist/**/*.ts"]
 }
