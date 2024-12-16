@@ -27,8 +27,34 @@ export const makeImageDataSup = (pts: number, dts: number, image: ImageData, pal
     }
   }
   const builder = new ByteBuilder();
-  for (const index of indexed) {
-    builder.writeU8(index + 1);
+  for (let i = 0; i < indexed.length; ) {
+    const paletteId = indexed[i] + 1;
+    let run = 0;
+    while (i + run < indexed.length) {
+      if (indexed[i] !== indexed[i + run]) { break; }
+      run++;
+    }
+    i += run;
+
+    while (run > 0) {
+      if (run === 1) {
+        builder.writeU8(paletteId);
+        break;
+      } else if (run <= 0x3F) {
+        builder.writeU8(0);
+        builder.writeU8(0x80 | run); // color flag
+        builder.writeU8(paletteId);
+        break;
+      } else {
+        const max = (0x3F * 2 ** 8) - 1;
+        const curr = Math.min(max, run);
+        builder.writeU8(0);
+        builder.writeU8(0x80 | 0x40 | Math.floor(curr / (2 ** 8))); // color + length flag
+        builder.writeU8(Math.floor(curr % (2 ** 8))) // length
+        builder.writeU8(paletteId);
+        run -= curr;
+      }
+    }
   }
   const rle = builder.build();
   const objects: ArrayBuffer[] = [];
@@ -119,7 +145,7 @@ export const makeEmptySup = (pts: number, dts: number, plane: [number, number]):
     compositionState: CompositionState.EpochStart,
     paletteUpdateFlag: true,
     paletteId: 0,
-    numberOfCompositionObject: 1,
+    numberOfCompositionObject: 0,
     compositionObjects: [],
   } satisfies PresentationCompositionSegment;
 
