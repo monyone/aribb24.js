@@ -12,10 +12,10 @@ import { makeEmptySup, makeImageDataSup } from '../../common/sup'
 import colortable from '../../common/colortable';
 import concat from '../../../util/concat';
 import { args, ArgsOption, parseArgs } from '../args';
-import { ARIBB24CaptionManagement } from '../../../lib/demuxer/b24/datagroup';
+import { ARIBB24CaptionManagement, CaptionAssociationInformation } from '../../../lib/demuxer/b24/datagroup';
 import { getTokenizeInformation } from '../info';
 
-const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], plane: [number, number], option: RendererOption, source: typeof import('@napi-rs/canvas')): ArrayBuffer => {
+const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformation, plane: [number, number], option: RendererOption, source: typeof import('@napi-rs/canvas')): ArrayBuffer => {
   let sx = Number.POSITIVE_INFINITY, sy = Number.POSITIVE_INFINITY, dx = 0, dy = 0;
   let elapsed_time = 0;
   const foreground_codes = new Set<string>();
@@ -94,7 +94,7 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], plane:
   }
 
   const canvas = source.createCanvas(plane[0], plane[1]);
-  render(canvas as unknown as OffscreenCanvas, [1, 1], tokens, { association: 'ARIB', language: 'und' }, option);
+  render(canvas as unknown as OffscreenCanvas, [1, 1], tokens, info, option);
 
   const screen = source.createCanvas(area[0], area[1]);
   const context = screen.getContext('2d');
@@ -195,14 +195,18 @@ const cmdline = ([
 
         const specification = getTokenizeInformation(entry.iso_639_language_code, entry.TCS, 'UNKNOWN');
         if (specification == null) { continue; }
-        const [_, tokenizer, state] = specification;
+        const [association, tokenizer, state] = specification;
         const parser = new ARIBB24Parser(state, { magnification: 2 });
         const option = RendererOption.from({
           font: { normal: font },
           color: { stroke: stroke, background: background }
         });
+        const info = {
+          association,
+          language: entry.iso_639_language_code,
+        };
 
-        sup.push(generate(independent.pts, independent.dts, parser.parse(tokenizer.tokenize(independent.data)), parser.currentState().plane, option, napi));
+        sup.push(generate(independent.pts, independent.dts, parser.parse(tokenizer.tokenize(independent.data)), info, parser.currentState().plane, option, napi));
       }
     }
   }
