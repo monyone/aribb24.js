@@ -12,6 +12,8 @@ import { makeEmptySup, makeImageDataSup } from '../../common/sup'
 import colortable from '../../common/colortable';
 import concat from '../../../util/concat';
 import { args, ArgsOption, parseArgs } from '../args';
+import { ARIBB24CaptionManagement } from '../../../lib/demuxer/b24/datagroup';
+import { getTokenizeInformation } from '../info';
 
 const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], plane: [number, number], option: RendererOption, source: typeof import('@napi-rs/canvas')): ArrayBuffer => {
   let sx = Number.POSITIVE_INFINITY, sy = Number.POSITIVE_INFINITY, dx = 0, dy = 0;
@@ -141,6 +143,12 @@ const cmdline = ([
     action: 'default',
   },
   {
+    long: '--language',
+    short: '-l',
+    help: 'Specify language',
+    action: 'default',
+  },
+  {
     long: '--help',
     short: '-h',
     help: 'Show help message',
@@ -155,6 +163,7 @@ const cmdline = ([
   const stroke = cmd['stroke'] ? 'black' : null;
   const background = cmd['background'] ?? null;
   const font = cmd['font'] ?? "'Hiragino Maru Gothic Pro', 'BIZ UDGothic', 'Yu Gothic Medium', 'IPAGothic', sans-serif";
+  const language = Number.isNaN(Number.parseInt(cmd['language'])) ? (cmd['language'] ?? 0) : Number.parseInt(cmd['language']);
 
   const napi = await import('@napi-rs/canvas').catch(() => {
     console.error('Please install @napi-rs/canvas');
@@ -163,18 +172,38 @@ const cmdline = ([
 
   const sup = [];
   {
+    let management: ARIBB24CaptionManagement | null = null;
+    let desired: number | null = null;
     for await (const caption of read(await readableStream(input))) {
       if (caption.tag !== 'Caption') { continue; }
-      if (caption.data.tag !== 'CaptionStatement') { continue; }
 
-      const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
-      const parser = new ARIBB24Parser(initialState, { magnification: 2 });
-      const option = RendererOption.from({
-        font: { normal: font },
-        color: { stroke: stroke, background: background }
-      });
+      const data = caption.data;
+      if (data.tag === 'CaptionManagement') {
+        if (typeof(language) === 'number') {
+          desired = language;
+        } else {
+          const lang = [... data.languages].sort(({ lang: fst }, { lang: snd}) => fst - snd).filter(({ iso_639_language_code }) => iso_639_language_code === language);
+          desired = lang?.[0]?.lang ?? null;
+        }
+        management = data;
+      } else if (management == null) {
+        continue;
+      } else {
+        const entry = management.languages.find((entry) => entry.lang === data.lang);
+        if (entry == null) { continue; }
+        if (desired !== data.lang) { continue; }
 
-      sup.push(generate(caption.pts, caption.dts, parser.parse(tokenizer.tokenize(caption.data)), parser.currentState().plane, option, napi));
+        const specification = getTokenizeInformation(entry.iso_639_language_code, entry.TCS, 'UNKNOWN');
+        if (specification == null) { continue; }
+        const [_, tokenizer, state] = specification;
+        const parser = new ARIBB24Parser(state, { magnification: 2 });
+        const option = RendererOption.from({
+          font: { normal: font },
+          color: { stroke: stroke, background: background }
+        });
+
+        sup.push(generate(caption.pts, caption.dts, parser.parse(tokenizer.tokenize(caption.data)), parser.currentState().plane, option, napi));
+      }
     }
   }
   writeFS(output, concat(... sup));
