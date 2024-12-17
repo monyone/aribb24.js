@@ -6,7 +6,7 @@ import namedcolor from "../../../common/namedcolor";
 import { UnreachableError } from "../../../../util/error";
 import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datagroup";
 import { shouldHalfWidth } from "../quirk";
-import useARIBFont from "../font";
+import useARIBFont from "../../../common/font";
 import { SVGDOMRendererOption } from "./svg-dom-renderer-option";
 import { ARIBB24BrowserParser, ARIBB24BrowserToken } from "../../types";
 

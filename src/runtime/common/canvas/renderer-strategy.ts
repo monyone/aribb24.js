@@ -5,8 +5,8 @@ import halfwidth from "../../browser/renderer/halfwidth";
 import namedcolor from "../namedcolor";
 import { UnreachableError } from "../../../util/error";
 import { CaptionAssociationInformation } from "../../../lib/demuxer/b24/datagroup";
-import { shouldHalfWidth } from "../../browser/renderer/quirk";
-import useARIBFont from "../../browser/renderer/font";
+import { shouldHalfWidth } from "../quirk";
+import useARIBFont from "../font";
 import { ARIBB24BitmapParsedToken } from "../../browser/types";
 
 export default (buffer: HTMLCanvasElement | OffscreenCanvas, magnification: [number, number], tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {

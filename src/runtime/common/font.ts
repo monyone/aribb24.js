@@ -1,5 +1,5 @@
-import symbol_pua from "../../../lib/tokenizer/b24/jis8/ARIB/symbol-pua";
-import symbol_unicode from "../../../lib/tokenizer/b24/jis8/ARIB/symbol-unicode";
+import symbol_pua from "../../lib/tokenizer/b24/jis8/ARIB/symbol-pua";
+import symbol_unicode from "../../lib/tokenizer/b24/jis8/ARIB/symbol-unicode";
 
 const arib_symbols = new Set<string>([]);
 for (let ch1 = 0x7a; ch1 < 0x7f; ch1++) {
