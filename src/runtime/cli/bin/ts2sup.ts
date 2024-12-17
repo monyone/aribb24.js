@@ -10,6 +10,7 @@ import render from '../../common/canvas/renderer-strategy';
 import { RendererOption } from '../../common/canvas/renderer-option';
 import { makeEmptySup, makeImageDataSup } from '../../common/sup'
 import colortable from '../../common/colortable';
+import namedcolor from '../../common/namedcolor';
 import concat from '../../../util/concat';
 import { args, ArgsOption, parseArgs } from '../args';
 import { ARIBB24CaptionManagement, CaptionAssociationInformation } from '../../../lib/demuxer/b24/datagroup';
@@ -29,7 +30,7 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], info: 
     sy = Math.min(sy, token.state.margin[1] + token.state.position[1] - ARIBB24Parser.box(token.state)[1]);
     dx = Math.max(dx, token.state.margin[0] + token.state.position[0] + ARIBB24Parser.box(token.state)[0]);
     dy = Math.max(dy, token.state.margin[1] + token.state.position[1]);
-    background_codes.add(colortable[token.state.background]);
+    background_codes.add(option.color.background ? namedcolor.get(option.color.background) ?? option.color.background : colortable[token.state.background]);
     foreground_codes.add(colortable[token.state.foreground]);
   }
   const offset = [sx, sy] satisfies [number, number];
@@ -57,7 +58,7 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], info: 
 
   const palette = [[0, 0, 0, 0], ... foreground_palette, ... background_palette] satisfies [number, number, number, number][];
   for (const [fr, fg, fb, _] of foreground_palette) { palette.push([fr, fg, fb, 0]); }
-  const gradations = Math.min(16, Math.floor((256 - palette.length) / (2 + (background_palette.length + 2) * (foreground_palette.length))));
+  const gradations = Math.min(16, Math.floor((256 - palette.length) / (2 + (background_palette.length + 2) * (foreground_palette.length + 3))));
 
   for (const [fr, fg, fb, fa] of foreground_palette) {
     for (const [br, bg, bb, ba] of [... background_palette, [fr, fg, fb, 0], [0, 0, 0, 0]]) {
