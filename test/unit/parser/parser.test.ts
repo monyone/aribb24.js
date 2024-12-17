@@ -1,4 +1,4 @@
-import { ARIBB24Parser, ARIBB24CharacterParsedToken, ARIBB24ParserOption, ARIBB24ParserState, initialState, ARIBB24_CHARACTER_SIZE, ARIBB24ClearScreenParsedToken, ARIBB24DRCSPrasedToken } from '@/lib//parser/parser';
+import { ARIBB24Parser, ARIBB24CharacterParsedToken, ARIBB24ParserOption, ARIBB24ParserState, initialState, ARIBB24_CHARACTER_SIZE, ARIBB24ClearScreenParsedToken, ARIBB24DRCSParsedToken } from '@/lib//parser/parser';
 import { replaceDRCS } from '@/lib/tokenizer/b24/tokenizer';
 import { ARIBB24ActivePositionBackwardToken, ARIBB24ActivePositionDownToken, ARIBB24ActivePositionForwardToken, ARIBB24ActivePositionReturnToken, ARIBB24ActivePositionSetToken, ARIBB24ActivePositionUpToken, ARIBB24BlackForegroundToken, ARIBB24BlueForegroundToken, ARIBB24CharacterCompositionDotDesignationToken, ARIBB24CharacterSizeControlToken, ARIBB24CharacterSizeControlType, ARIBB24CharacterToken, ARIBB24ClearScreenToken, ARIBB24ColorControlBackgroundToken, ARIBB24ColorControlForegroundToken, ARIBB24ColorControlHalfBackgroundToken, ARIBB24ColorControlHalfForegroundToken, ARIBB24CyanForegroundToken, ARIBB24DRCSToken, ARIBB24FlashingControlToken, ARIBB24FlashingControlType, ARIBB24GreenForegroundToken, ARIBB24HilightingCharacterBlockToken, ARIBB24MagentaForegroundToken, ARIBB24MiddleSizeToken, ARIBB24NormalSizeToken, ARIBB24OrnamentControlHemmingToken, ARIBB24OrnamentControlNoneToken, ARIBB24PalletControlToken, ARIBB24RedForegroundToken, ARIBB24SetDisplayFormatToken, ARIBB24SetDisplayPositionToken, ARIBB24SetHorizontalSpacingToken, ARIBB24SetVerticalSpacingToken, ARIBB24SetWritingFormatToken, ARIBB24SmallSizeToken, ARIBB24StartLiningToken, ARIBB24StopLiningToken, ARIBB24TimeControlWaitToken, ARIBB24WhiteForegroundToken, ARIBB24YellowForegroundToken } from '@/lib/tokenizer/token';
 import md5 from '@/util/md5';
@@ -72,7 +72,7 @@ describe("ARIB STD-B24 Parser", () => {
     const parser = new ARIBB24Parser(initialState, option);
 
     expect(parser.parseToken(ARIBB24DRCSToken.from(width, height, depth, Uint8Array.from(binary).buffer))).toStrictEqual([
-      ARIBB24DRCSPrasedToken.from(ARIBB24DRCSToken.from(width, height, depth, Uint8Array.from(binary).buffer), initialStateMagnificated(initialState, option), { magnification: 1 }),
+      ARIBB24DRCSParsedToken.from(ARIBB24DRCSToken.from(width, height, depth, Uint8Array.from(binary).buffer), initialStateMagnificated(initialState, option), { magnification: 1 }),
     ]);
   });
 
@@ -87,7 +87,7 @@ describe("ARIB STD-B24 Parser", () => {
     const parser = new ARIBB24Parser(initialState, option);
 
     expect(parser.parseToken(ARIBB24DRCSToken.from(width, height, depth, Uint8Array.from(binary).buffer, '\u3099'))).toStrictEqual([
-      ARIBB24DRCSPrasedToken.from(ARIBB24DRCSToken.from(width, height, depth, Uint8Array.from(binary).buffer), initialStateMagnificated(initialState, option), { magnification: 1 }),
+      ARIBB24DRCSParsedToken.from(ARIBB24DRCSToken.from(width, height, depth, Uint8Array.from(binary).buffer), initialStateMagnificated(initialState, option), { magnification: 1 }),
       ARIBB24CharacterParsedToken.from(ARIBB24CharacterToken.from('　\u3099', true), initialStateMagnificated(initialState, option), { magnification: 1 }),
     ]);
   });

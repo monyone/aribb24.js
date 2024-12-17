@@ -1,4 +1,4 @@
-import { ARIBB24Parser, ARIBB24CharacterParsedToken, ARIBB24ParserOption, ARIBB24ParserState, initialState, ARIBB24_CHARACTER_SIZE, ARIBB24ClearScreenParsedToken, ARIBB24DRCSPrasedToken } from '@/lib/parser/parser';
+import { ARIBB24Parser, ARIBB24CharacterParsedToken, ARIBB24ParserOption, ARIBB24ParserState, initialState, ARIBB24_CHARACTER_SIZE, ARIBB24ClearScreenParsedToken, ARIBB24DRCSParsedToken } from '@/lib/parser/parser';
 import { replaceDRCS } from '@/lib/tokenizer/b24/tokenizer';
 import { ARIBB24ActivePositionForwardToken, ARIBB24ActivePositionSetToken, ARIBB24CharacterCompositionDotDesignationToken, ARIBB24CharacterToken, ARIBB24ClearScreenToken, ARIBB24ColorControlBackgroundToken, ARIBB24FlashingControlToken, ARIBB24FlashingControlType, ARIBB24MiddleSizeToken, ARIBB24NormalSizeToken, ARIBB24PalletControlToken, ARIBB24SetDisplayFormatToken, ARIBB24SetDisplayPositionToken, ARIBB24SetHorizontalSpacingToken, ARIBB24SetVerticalSpacingToken, ARIBB24SetWritingFormatToken, ARIBB24WhiteForegroundToken } from '@/lib/tokenizer/token';
 import md5 from '@/util/md5';
