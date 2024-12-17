@@ -50,7 +50,7 @@ export default class SectionDemuxer {
       } else {
         const section = new Uint8Array(this.accendant.byteLength + (next - begin));
         section.set(this.accendant, 0);
-        section.set(section, this.accendant.byteLength);
+        section.set(packet.slice(begin, next), this.accendant.byteLength);
         this.accendant = new Uint8Array();
         yield section
         begin = next;
