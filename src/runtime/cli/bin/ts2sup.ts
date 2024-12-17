@@ -57,7 +57,7 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], info: 
 
   const palette = [[0, 0, 0, 0], ... foreground_palette, ... background_palette] satisfies [number, number, number, number][];
   for (const [fr, fg, fb, _] of foreground_palette) { palette.push([fr, fg, fb, 0]); }
-  const gradations = Math.min(16, (256 - palette.length) / (2 + (background_palette.length + 2) * (foreground_palette.length)));
+  const gradations = Math.min(16, Math.floor((256 - palette.length) / (2 + (background_palette.length + 2) * (foreground_palette.length))));
 
   for (const [fr, fg, fb, fa] of foreground_palette) {
     for (const [br, bg, bb, ba] of [... background_palette, [fr, fg, fb, 0], [0, 0, 0, 0]]) {
