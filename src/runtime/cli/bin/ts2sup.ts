@@ -16,7 +16,8 @@ import { args, ArgsOption, parseArgs } from '../args';
 const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], plane: [number, number], option: RendererOption, source: typeof import('@napi-rs/canvas')): ArrayBuffer => {
   let sx = Number.POSITIVE_INFINITY, sy = Number.POSITIVE_INFINITY, dx = 0, dy = 0;
   let elapsed_time = 0;
-  const codes = new Set<string>(['#00000000', '#000000FF']);
+  const foreground_codes = new Set<string>();
+  const background_codes = new Set<string>(['#000000FF']);
   for (const token of tokens) {
     if (token.tag === 'ClearScreen') {
       elapsed_time = token.time;
@@ -26,8 +27,8 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], plane:
     sy = Math.min(sy, token.state.margin[1] + token.state.position[1] - ARIBB24Parser.box(token.state)[1]);
     dx = Math.max(dx, token.state.margin[0] + token.state.position[0] + ARIBB24Parser.box(token.state)[0]);
     dy = Math.max(dy, token.state.margin[1] + token.state.position[1]);
-    codes.add(colortable[token.state.background]);
-    codes.add(colortable[token.state.foreground]);
+    background_codes.add(colortable[token.state.background]);
+    foreground_codes.add(colortable[token.state.foreground]);
   }
   const offset = [sx, sy] satisfies [number, number];
   const area = [dx - sx, dy - sy] satisfies [number, number];
@@ -35,7 +36,7 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], plane:
     return makeEmptySup(pts, dts, plane);
   }
 
-  const palette = Array.from(codes).map((code) => {
+  const background_palette = Array.from(background_codes).map((code) => {
     return [
       Number.parseInt(code.slice(1, 3), 16),
       Number.parseInt(code.slice(3, 5), 16),
@@ -43,6 +44,52 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], plane:
       Number.parseInt(code.slice(7, 9), 16),
     ];
   }) satisfies [number, number, number, number][];
+  const foreground_palette = Array.from(foreground_codes).map((code) => {
+    return [
+      Number.parseInt(code.slice(1, 3), 16),
+      Number.parseInt(code.slice(3, 5), 16),
+      Number.parseInt(code.slice(5, 7), 16),
+      Number.parseInt(code.slice(7, 9), 16),
+    ];
+  }) satisfies [number, number, number, number][];
+
+  const palette = [[0, 0, 0, 0], ... foreground_palette, ... background_palette] satisfies [number, number, number, number][];
+  for (const [fr, fg, fb, _] of foreground_palette) { palette.push([fr, fg, fb, 0]); }
+  const gradations = Math.min(16, (256 - palette.length) / (2 + (background_palette.length + 2) * (foreground_palette.length)));
+
+  for (const [fr, fg, fb, fa] of foreground_palette) {
+    for (const [br, bg, bb, ba] of [... background_palette, [fr, fg, fb, 0], [0, 0, 0, 0]]) {
+      for (let gradation = 1; gradation < gradations - 1; gradation++) {
+        const r = Math.floor(fr + (br - fr) * gradation / gradations);
+        const g = Math.floor(fg + (bg - fg) * gradation / gradations);
+        const b = Math.floor(fb + (bb - fb) * gradation / gradations);
+        const a = Math.floor(fa + (ba - fa) * gradation / gradations);
+        palette.push([r, g, b, a]);
+      }
+    }
+  }
+  {
+    const [fr, fg, fb, fa] = [0, 0, 0, 255];
+    const [br, bg, bb, ba] = [0, 0, 0, 128];
+    for (let gradation = 1; gradation < gradations - 1; gradation++) {
+      const r = Math.floor(fr + (br - fr) * gradation / gradations);
+      const g = Math.floor(fg + (bg - fg) * gradation / gradations);
+      const b = Math.floor(fb + (bb - fb) * gradation / gradations);
+      const a = Math.floor(fa + (ba - fa) * gradation / gradations);
+      palette.push([r, g, b, a]);
+    }
+  }
+  {
+    const [fr, fg, fb, fa] = [0, 0, 0, 128];
+    const [br, bg, bb, ba] = [0, 0, 0, 0];
+    for (let gradation = 1; gradation < gradations - 1; gradation++) {
+      const r = Math.floor(fr + (br - fr) * gradation / gradations);
+      const g = Math.floor(fg + (bg - fg) * gradation / gradations);
+      const b = Math.floor(fb + (bb - fb) * gradation / gradations);
+      const a = Math.floor(fa + (ba - fa) * gradation / gradations);
+      palette.push([r, g, b, a]);
+    }
+  }
 
   const canvas = source.createCanvas(plane[0], plane[1]);
   render(canvas as unknown as OffscreenCanvas, [1, 1], tokens, { association: 'ARIB', language: 'und' }, option);
