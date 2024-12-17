@@ -174,24 +174,24 @@ const cmdline = ([
   {
     let management: ARIBB24CaptionManagement | null = null;
     let desired: number | null = null;
-    for await (const caption of read(await readableStream(input))) {
-      if (caption.tag !== 'Caption') { continue; }
+    for await (const independent of read(await readableStream(input))) {
+      if (independent.tag !== 'Caption') { continue; }
 
-      const data = caption.data;
-      if (data.tag === 'CaptionManagement') {
+      const caption = independent.data;
+      if (caption.tag === 'CaptionManagement') {
         if (typeof(language) === 'number') {
           desired = language;
         } else {
-          const lang = [... data.languages].sort(({ lang: fst }, { lang: snd}) => fst - snd).filter(({ iso_639_language_code }) => iso_639_language_code === language);
+          const lang = [... caption.languages].sort(({ lang: fst }, { lang: snd}) => fst - snd).filter(({ iso_639_language_code }) => iso_639_language_code === language);
           desired = lang?.[0]?.lang ?? null;
         }
-        management = data;
+        management = caption;
       } else if (management == null) {
         continue;
       } else {
-        const entry = management.languages.find((entry) => entry.lang === data.lang);
+        const entry = management.languages.find((entry) => entry.lang === caption.lang);
         if (entry == null) { continue; }
-        if (desired !== data.lang) { continue; }
+        if (desired !== caption.lang) { continue; }
 
         const specification = getTokenizeInformation(entry.iso_639_language_code, entry.TCS, 'UNKNOWN');
         if (specification == null) { continue; }
@@ -202,7 +202,7 @@ const cmdline = ([
           color: { stroke: stroke, background: background }
         });
 
-        sup.push(generate(caption.pts, caption.dts, parser.parse(tokenizer.tokenize(caption.data)), parser.currentState().plane, option, napi));
+        sup.push(generate(independent.pts, independent.dts, parser.parse(tokenizer.tokenize(independent.data)), parser.currentState().plane, option, napi));
       }
     }
   }
