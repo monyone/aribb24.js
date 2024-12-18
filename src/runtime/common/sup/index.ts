@@ -3,7 +3,7 @@ import { encodeSupFormat, ycbcr } from "../../../lib/muxer/pgs";
 import { ByteBuilder } from "../../../util/bytebuilder";
 import concat from "../../../util/concat";
 
-export const makeImageDataSup = (pts: number, dts: number, image: ImageData, palette: [number, number, number, number][], plane: [number, number], offset: [number, number], area: [number, number]): ArrayBuffer => {
+export const makeImageDataSup = (pts: number, dts: number, image: ImageData, palette: [number, number, number, number][], cache: Map<number, number>, plane: [number, number], offset: [number, number], area: [number, number]): ArrayBuffer => {
   const indexed = [];
   for (let y = 0; y < area[1]; y++) {
     for (let x = 0; x < area[0]; x++) {
@@ -12,6 +12,11 @@ export const makeImageDataSup = (pts: number, dts: number, image: ImageData, pal
       const g = image.data[index + 1];
       const b = image.data[index + 2];
       const a = image.data[index + 3];
+      const hash = (r * (2 ** 24)) + (g * (2 ** 16)) + (b * (2 ** 8)) + a;
+      if (cache.has(hash)) {
+        indexed.push(cache.get(hash)!);
+        continue;
+      }
 
       let nearest_value = Number.POSITIVE_INFINITY;
       let nearest_index = -1;

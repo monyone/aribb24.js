@@ -58,7 +58,7 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], info: 
 
   const palette = [[0, 0, 0, 0], ... foreground_palette, ... background_palette] satisfies [number, number, number, number][];
   for (const [fr, fg, fb, _] of foreground_palette) { palette.push([fr, fg, fb, 0]); }
-  const gradations = Math.min(16, Math.floor((256 - palette.length) / (2 + (background_palette.length + 2) * (foreground_palette.length))));
+  const gradations = Math.min(12, Math.floor((256 - palette.length) / (2 + (background_palette.length + 2) * (foreground_palette.length))));
 
   for (const [fr, fg, fb, fa] of foreground_palette) {
     for (const [br, bg, bb, ba] of [... background_palette, [fr, fg, fb, 0], [0, 0, 0, 0]]) {
@@ -94,6 +94,16 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], info: 
     }
   }
 
+  const cache = new Map<number, number>();
+  for (const [r, g, b, a] of [[0, 0, 0, 0], ... foreground_palette, ... background_palette]) {
+    const hash = (r * (2 ** 24)) + (g * (2 ** 16)) + (b * (2 ** 8)) + a;
+    const index = palette.findIndex(([pr, pg, pb, pa]) => {
+      return pr === r && pg === g && pb === b && pa === a;
+    });
+    if (index < 0) { continue; }
+    cache.set(hash, index);
+  }
+
   const canvas = source.createCanvas(plane[0], plane[1]);
   render(canvas as unknown as OffscreenCanvas, [1, 1], tokens, info, option);
 
@@ -104,11 +114,11 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], info: 
 
   if (elapsed_time !== 0) {
     return concat(
-      makeImageDataSup(pts, dts, image, palette, plane, offset, area),
+      makeImageDataSup(pts, dts, image, palette, cache, plane, offset, area),
       makeEmptySup(pts + elapsed_time, dts + elapsed_time, plane)
     );
   } else {
-    return makeImageDataSup(pts, dts, image, palette, plane, offset, area);
+    return makeImageDataSup(pts, dts, image, palette, cache, plane, offset, area);
   }
 }
 
