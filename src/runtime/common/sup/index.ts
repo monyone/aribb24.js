@@ -31,7 +31,7 @@ export const makeImageDataSup = (pts: number, dts: number, image: ImageData, pal
       indexed.push(nearest_index);
     }
   }
-  const builder = new ByteBuilder();
+  const rle: number[] = []
   for (let i = 0; i < indexed.length; ) {
     const paletteId = indexed[i] + 1;
     let run = 0;
@@ -43,29 +43,29 @@ export const makeImageDataSup = (pts: number, dts: number, image: ImageData, pal
 
     while (run > 0) {
       if (run === 1) {
-        builder.writeU8(paletteId);
+        rle.push(paletteId);
         break;
       } else if (run <= 0x3F) {
-        builder.writeU8(0);
-        builder.writeU8(0x80 | run); // color flag
-        builder.writeU8(paletteId);
+        rle.push(0);
+        rle.push(0x80 | run); // color flag
+        rle.push(paletteId);
         break;
       } else {
         const max = (0x3F * 2 ** 8) - 1;
         const curr = Math.min(max, run);
-        builder.writeU8(0);
-        builder.writeU8(0x80 | 0x40 | Math.floor(curr / (2 ** 8))); // color + length flag
-        builder.writeU8(Math.floor(curr % (2 ** 8))) // length
-        builder.writeU8(paletteId);
+        rle.push(0);
+        rle.push(0x80 | 0x40 | Math.floor(curr / (2 ** 8))); // color + length flag
+        rle.push(Math.floor(curr % (2 ** 8))) // length
+        rle.push(paletteId);
         run -= curr;
       }
     }
   }
-  const rle = builder.build();
+  const object = Uint8Array.from(rle).buffer;
   const objects: ArrayBuffer[] = [];
-  for (let i = 0, data = 0; data < rle.byteLength; i++) {
+  for (let i = 0, data = 0; data < object.byteLength; i++) {
     const max = (2 ** 16 - 1) - (i === 0 ? 4 + 7 : 4);
-    const slice = rle.slice(data, data + max);
+    const slice = object.slice(data, data + max);
     objects.push(slice);
     data = data + max;
   }
@@ -117,7 +117,7 @@ export const makeImageDataSup = (pts: number, dts: number, image: ImageData, pal
         objectId: 0,
         objectVersionNumber: 0,
         lastInSequenceFlag: objects.length === 1 ? SequenceFlag.FirstAndLastInSequence : SequenceFlag.FirstInSequence,
-        objectDataLength: rle.byteLength + 4,
+        objectDataLength: object.byteLength + 4,
         width: area[0],
         height: area[1],
         objectData: object,
