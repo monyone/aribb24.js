@@ -106,11 +106,8 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], info: 
 
   const canvas = source.createCanvas(plane[0], plane[1]);
   render(canvas as unknown as OffscreenCanvas, [1, 1], tokens, info, option);
-
-  const screen = source.createCanvas(area[0], area[1]);
-  const context = screen.getContext('2d');
-  context.drawImage(canvas, offset[0], offset[1], area[0], area[1], 0, 0, area[0], area[1]);
-  const image = context.getImageData(0, 0, area[0], area[1]);
+  const context = canvas.getContext('2d');
+  const image = context.getImageData(offset[0], offset[1], area[0], area[1]);
 
   if (elapsed_time !== 0) {
     return concat(
