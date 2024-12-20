@@ -5,7 +5,7 @@ import { ARIBB24ParsedToken, ARIBB24Parser, initialState } from '../../../lib/pa
 import read from '../../../lib/demuxer/mpegts';
 import { exit } from '../exit';
 import { writeFS } from '../file';
-import { readableStream } from '../stream';
+import { readableStream, writableStream } from '../stream';
 import render from '../../common/canvas/renderer-strategy';
 import { RendererOption } from '../../common/canvas/renderer-option';
 import { makeEmptySup, makeImageDataSup } from '../../common/sup'
@@ -178,7 +178,8 @@ const cmdline = ([
     return exit(-1);
   });
 
-  const sup = [];
+  const writable = await writableStream(output);
+  const writer = writable.getWriter();
   {
     let management: ARIBB24CaptionManagement | null = null;
     let desired: number | null = null;
@@ -214,9 +215,9 @@ const cmdline = ([
           language: entry.iso_639_language_code,
         };
 
-        sup.push(generate(independent.pts, independent.dts, parser.parse(tokenizer.tokenize(independent.data)), info, parser.currentState().plane, option, napi));
+        writer.write(new Uint8Array(generate(independent.pts, independent.dts, parser.parse(tokenizer.tokenize(independent.data)), info, parser.currentState().plane, option, napi)));
       }
     }
   }
-  writeFS(output, concat(... sup));
+  writer.close();
 })();
