@@ -7,7 +7,6 @@ import { args, ArgsOption, parseArgs } from '../args';
 import { ARIBB24CaptionManagement } from '../../../lib/demuxer/b24/datagroup';
 import muxDatagroup from '../../../lib/muxer/b36/datagroup';
 import muxB36 from '../../../lib/muxer/b36'
-import demuxB36 from '../../../lib/demuxer/b36'
 import { ARIBB36Data, ARIBB36PageData } from '../../../lib/demuxer/b36';
 import { getTokenizeInformation } from '../info';
 

@@ -1,10 +1,8 @@
 #!/usr/bin/env node
 
-import ARIBB24JapaneseJIS8Tokenizer from '../../../lib/tokenizer/b24/jis8/ARIB';
 import { ARIBB24ParsedToken, ARIBB24Parser, initialState } from '../../../lib/parser/parser';
 import read from '../../../lib/demuxer/mpegts';
 import { exit } from '../exit';
-import { writeFS } from '../file';
 import { readableStream, writableStream } from '../stream';
 import render from '../../common/canvas/renderer-strategy';
 import { RendererOption } from '../../common/canvas/renderer-option';
