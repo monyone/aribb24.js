@@ -19,7 +19,8 @@ const makeTokenToHTML = (token: ARIBB24RegionerToken, info: CaptionAssociationIn
         elem.style.color = colortable[token.state.foreground];
       }
       if (option.color.stroke) {
-        elem.style.webkitTextStroke = '0.03em black';
+        elem.style.webkitTextStroke = '0.1em black';
+        elem.style.paintOrder = 'stroke fill';
       }
       elem.textContent = (shouldHalfWidth(token.state.size, info) && halftext.get(token.character)) || token.character;
       return elem;
