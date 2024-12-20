@@ -20,7 +20,7 @@ const cmdline = ([
   {
     long: '--output',
     short: '-o',
-    help: 'Specify Output File (.sup)',
+    help: 'Specify Output File (.1HD)',
     action: 'default'
   },
   {
@@ -38,7 +38,7 @@ const cmdline = ([
 ]) satisfies ArgsOption[];
 
 (async () => {
-  const cmd = parseArgs(args(), cmdline, 'ts2sup', 'MPEG-TS ARIB Caption (Profile A) to SUP (HDMV-PGS)');
+  const cmd = parseArgs(args(), cmdline, 'ts2b36', 'MPEG-TS ARIB Caption (Profile A) to ARIB STD-B36');
   const input = cmd['input'] ?? '-';
   const output = cmd['output'] ?? '-';
   const language = Number.isNaN(Number.parseInt(cmd['language'])) ? (cmd['language'] ?? 0) : Number.parseInt(cmd['language']);
