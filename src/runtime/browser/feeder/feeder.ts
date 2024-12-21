@@ -11,8 +11,7 @@ import { UnreachableError } from "../../../util/error";
 import { ARIBB24BrowserToken } from "../types";
 
 type FeederTimeOffsetOption = {
-  pts: number;
-  dts: number;
+  time: number
 };
 
 type FeederTokenizeOption = {
@@ -50,8 +49,7 @@ export const FeederOption = {
         ... option?.tokenizer,
       },
       offset: {
-        pts: 0,
-        dts: 0,
+        time: 0,
         ... option?.offset,
       }
     };

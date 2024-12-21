@@ -164,8 +164,8 @@ export default abstract class DecodingFeeder implements Feeder {
 
     const lang = caption.tag === 'CaptionStatement' ? (caption.lang + 1) : 0;
 
-    pts += this.option.offset.pts;
-    dts += this.option.offset.dts;
+    pts += this.option.offset.time;
+    dts += this.option.offset.time;
     this.decoder.insert({ dts, lang }, { pts, caption });
   }
 

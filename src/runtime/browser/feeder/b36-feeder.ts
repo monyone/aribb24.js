@@ -13,8 +13,8 @@ export default class B36Feeder implements Feeder {
 
     const { initialTime, pages } = demuxB36(b36);
     this.captions = pages.filter((page) => page.tag === 'ActualPage').flatMap((page) => {
-      const pts = page.displayTiming - initialTime;
-      const duration = page.clearTiming - initialTime;
+      const pts = page.displayTiming - initialTime + this.option.offset.time;
+      const duration = (page.clearTiming - initialTime + this.option.offset.time) - pts;
       const statement = page.statement;
       const management = page.management;
 
