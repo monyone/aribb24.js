@@ -4,7 +4,7 @@ import sbtvdInitialState from "../../lib/parser/state/SBTVD";
 
 
 import ARIBB24Tokenizer from "../../lib/tokenizer/b24/tokenizer";
-
+import ARIBB24UTF8Tokenizer from "../../lib/tokenizer/b24/ucs/tokenizer";
 import ARIBB24JapaneseJIS8Tokenizer from "../../lib/tokenizer/b24/jis8/ARIB";
 import ARIBB24BrazilianJIS8Tokenizer from "../../lib/tokenizer/b24/jis8/SBTVD";
 import { NotUsedDueToStandardError } from "../../util/error";
@@ -13,7 +13,7 @@ export type Association = 'ARIB' | 'SBTVD' | 'UNKNOWN';
 
 export const getTokenizeInformation = (language: string, TCS: number, association: Association = 'UNKNOWN'): [Association, ARIBB24Tokenizer, ARIBB24ParserState] | null => {
   if (TCS === 1) {
-    return ['ARIB', new ARIBB24JapaneseJIS8Tokenizer(), aribInitialState];
+    return ['ARIB', new ARIBB24UTF8Tokenizer(), aribInitialState];
   } else if (TCS !== 0) {
     throw new NotUsedDueToStandardError('Reserved TCS');
   }
