@@ -13,22 +13,13 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
     if (context == null) { return; }
 
     const parser = new ARIBB24BrowserParser(state);
-    for (const token of parser.parse(tokens)) {
-      const plane_width = token.state.plane[0];
-      const plane_height = token.state.plane[1];
+    const parsed = parser.parse(tokens);
+    const { plane: [width, height] } = parser.currentState();
+    if (target != null) {
+      magnification = [Math.ceil(target.width / width), Math.ceil(target.height / height)];
+    }
 
-      const x = target != null ? Math.ceil(target.width / plane_width) : 1;
-      const y = target != null ? Math.ceil(target.height / plane_height) : 1;
-      const width = x * plane_width;
-      const height = y * plane_height;
-      magnification = [x, y];
-
-      if (buffer.width !== width || buffer.height !== height) {
-        buffer.width = width;
-        buffer.height = height;
-        context.clearRect(0, 0, buffer.width, buffer.height);
-      }
-
+    for (const token of parsed) {
       switch (token.tag) {
         case 'Character': {
           renderCharacter(context, token, magnification, info, rendererOption);

@@ -156,6 +156,14 @@ export class ARIBB24BrowserParser {
     this.praser = new ARIBB24Parser(state, option);
   }
 
+  public currentState(): ARIBB24ParserState {
+    return this.praser.currentState();
+  }
+
+  public currentOption(): ARIBB24ParserOption {
+    return this.praser.currentOption();
+  }
+
   private parseBitmapOrInherit(token: ARIBB24BrowserToken): ARIBB24BrowserParsedToken[] {
     if (token.tag !== 'Bitmap') { return this.praser.parseToken(token as ARIBB24Token); }
     return [ARIBB24BitmapParsedToken.from(token, this.praser.currentState(), this.praser.currentOption())];
