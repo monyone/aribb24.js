@@ -30,6 +30,12 @@ const cmdline = ([
     action: 'default',
   },
   {
+    long: '--author',
+    short: '-a',
+    help: 'Specify author',
+    action: 'default',
+  },
+  {
     long: '--help',
     short: '-h',
     help: 'Show help message',
@@ -41,6 +47,7 @@ const cmdline = ([
   const cmd = parseArgs(args(), cmdline, 'ts2b36', 'MPEG-TS ARIB Caption (Profile A) to ARIB STD-B36');
   const input = cmd['input'] ?? '-';
   const output = cmd['output'] ?? '-';
+  const author = cmd['author'] ?? '';
   const language = Number.isNaN(Number.parseInt(cmd['language'])) ? (cmd['language'] ?? 0) : Number.parseInt(cmd['language']);
 
   const pages: ARIBB36PageData[] = [];
@@ -161,7 +168,7 @@ const cmdline = ([
     extensible: [false, false, false, true, false, false, false, false],
     compatible: [true, false, false, false, false, false, false, false],
     expireDate: null,
-    author: 'monyone',
+    author: author,
     creationDateTime: null,
     broadcastStartDate: null,
     broadcastEndDate: null,
