@@ -41,6 +41,8 @@ export const ARIBB24RubySpan = {
 export type ARIBB24Span = ARIBB24NormalSpan | ARIBB24RubySpan;
 
 export type ARIBB24Region = {
+  plane: [number, number],
+  margin: [number, number],
   position: [number, number],
   area: [number, number];
   size: (typeof ARIBB24_CHARACTER_SIZE)[keyof typeof ARIBB24_CHARACTER_SIZE],
@@ -77,7 +79,9 @@ export default (tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformatio
     const is_same_charsize = region != null && (charsize_normalize(region.size) === charsize_normalize(character.state.size));
     if (!(is_same_background && is_same_highlight && is_same_charsize)) {
       regions.push({
-        position: [character.state.position[0], character.state.position[1] - ARIBB24Parser.box(character.state)[1]],
+        plane: [... character.state.plane],
+        margin: [... character.state.margin],
+        position: [character.state.position[0], character.state.position[1] - (ARIBB24Parser.box(character.state)[1] - 1)],
         area: [ARIBB24Parser.box(character.state)[0], ARIBB24Parser.box(character.state)[1]],
         size: charsize_normalize(character.state.size),
         background: character.state.background,
