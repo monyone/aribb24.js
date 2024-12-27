@@ -103,7 +103,7 @@ const image = (begin: number, end: number, id: string, tokens: ARIBB24ParsedToke
     }),
     styles: [],
     contents: [
-      XMLNode.from('div', { begin: `${begin}s`, end: `${end}s` }, divs)
+      XMLNode.from('div', { begin: `${begin.toFixed(3)}s`, end: `${end.toFixed(3)}s` }, divs)
     ]
   }
 }
@@ -221,21 +221,6 @@ const cmdline = ([
         data: tokens,
       });
     }
-  }
-
-  for (let i = 1; i < captions.length; i++) {
-    let elapsed_time = 0;
-    let start_with_clear = false;
-    for (const token of captions[i].data) {
-      if (token.tag === 'TimeControlWait') {
-        elapsed_time += token.seconds;
-      } else if (token.tag === 'ClearScreen' && elapsed_time === 0) {
-        start_with_clear = true;
-      }
-    }
-
-    if (start_with_clear) { continue; }
-    captions[i + 0].data = [... captions[i - 1].data, ... captions[i + 0].data];
   }
 
   for (let i = 0; i < captions.length - 1; i++) {
