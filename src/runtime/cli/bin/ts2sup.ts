@@ -14,7 +14,7 @@ import { args, ArgsOption, parseArgs } from '../args';
 import { ARIBB24CaptionManagement, CaptionAssociationInformation } from '../../../lib/demuxer/b24/datagroup';
 import { getTokenizeInformation } from '../info';
 
-const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformation, plane: [number, number], option: RendererOption, source: typeof import('@napi-rs/canvas')): ArrayBuffer => {
+const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[],  plane: [number, number], info: CaptionAssociationInformation, option: RendererOption, source: typeof import('@napi-rs/canvas')): ArrayBuffer => {
   let sx = Number.POSITIVE_INFINITY, sy = Number.POSITIVE_INFINITY, dx = 0, dy = 0;
   let elapsed_time = 0;
   const foreground_codes = new Set<string>();
@@ -213,7 +213,7 @@ const cmdline = ([
           language: entry.iso_639_language_code,
         };
 
-        writer.write(new Uint8Array(generate(independent.pts, independent.dts, parser.parse(tokenizer.tokenize(independent.data)), info, parser.currentState().plane, option, napi)));
+        writer.write(new Uint8Array(generate(independent.pts, independent.dts, parser.parse(tokenizer.tokenize(independent.data)), parser.currentState().plane, info, option, napi)));
       }
     }
   }
