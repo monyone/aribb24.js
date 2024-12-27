@@ -9,8 +9,8 @@ export default defineConfig({
       entry: [
         resolve(__dirname, 'src/index.ts'),
         resolve(__dirname, 'src/runtime/cli/bin/ts2sup.ts'),
-        resolve(__dirname, 'src/runtime/cli/bin/ts2b36.ts')
-
+        resolve(__dirname, 'src/runtime/cli/bin/ts2b36.ts'),
+        resolve(__dirname, 'src/runtime/cli/bin/ts2imsc.ts')
       ],
       name: 'aribb24js',
       fileName: '[format]/[name]',
