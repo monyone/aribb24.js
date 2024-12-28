@@ -3,13 +3,12 @@
 import { ARIBB24ParsedToken, ARIBB24Parser, ARIBB24ParserState } from '../../../lib/parser/parser';
 import read from '../../../lib/demuxer/mpegts';
 import { exit } from '../exit';
-import { readableStream, writableStream } from '../stream';
+import { readableStream } from '../stream';
 import render from '../../common/canvas/renderer-strategy';
 import { RendererOption } from '../../common/canvas/renderer-option';
 import { args, ArgsOption, parseArgs } from '../args';
 import { ARIBB24CaptionManagement, CaptionAssociationInformation } from '../../../lib/demuxer/b24/datagroup';
 import { getTokenizeInformation } from '../info';
-import regioner from '../../../lib/parser/regioner';
 import { UnreachableError } from '../../../util/error';
 import { ARIBB24Token } from '../../../lib/tokenizer/token';
 import { writeFS } from '../file';
@@ -231,9 +230,10 @@ const cmdline = ([
 
   const header = `<?xml version="1.0" encoding="UTF-8"?>`;
   const layout = XMLNode.from('layout');
-  const head = XMLNode.from('head', {}, [
-    layout,
-  ]);
+  const styling = XMLNode.from('styling');
+  const head = XMLNode.from('head');
+  head.children.push(layout);
+  // head.children.push(styling);
   const body = XMLNode.from('body');
   const tt = XMLNode.from('tt', {
     'xmlns': 'http://www.w3.org/ns/ttml',
@@ -254,8 +254,11 @@ const cmdline = ([
     const parser = new ARIBB24Parser(initialState, { magnification: 2});
     const rendered = image(begin, end, `${id}`, parser.parse(data), [1920, 1080], info, option, napi);
     if (rendered == null) { continue; }
-    body.children.push(... rendered.contents);
-    layout.children.push(... rendered.regions);
+
+    const { regions, styles, contents, } = rendered;
+    body.children.push(... contents);
+    layout.children.push(... regions);
+    styling.children.push(... styles);
     id++;
   }
 
