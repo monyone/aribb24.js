@@ -206,7 +206,7 @@ const retriveCharacterSVGTextElement = (token: ARIBB24CharacterParsedToken, info
   const { state, option, character: key } = token;
 
   const should_halfwidth = shouldHalfWidth(state.size, info);
-  const replace_halfwidth = rendererOption.replace.half  && should_halfwidth;
+  const replace_halfwidth = rendererOption.replace.half && should_halfwidth;
   const has_halfwidth =  halfwidth.has(key);
   const character = replace_halfwidth && has_halfwidth ? halfwidth.get(key)! : key;
 
