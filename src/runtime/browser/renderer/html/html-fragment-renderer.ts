@@ -87,9 +87,6 @@ export default class HTMLFragmentRenderer implements Renderer {
     this.option = HTMLFragmentRendererOption.from(option);
     // Setup HTML
     this.element = document.createElement('div');
-    if (this.option.color.background && false) {
-      //this.element.style.backgroundColor = this.option.color.background;
-    }
   }
 
   public resize(width: number, height: number): void {}
@@ -119,7 +116,7 @@ export default class HTMLFragmentRenderer implements Renderer {
     const parser = new ARIBB24BrowserParser(initialState);
     const fragment = new DocumentFragment();
 
-    for (const region of makeRegions(parser.parse(replaceDRCS(tokens, this.option.replace.drcs)), info)) {
+    const regions = makeRegions(parser.parse(replaceDRCS(tokens, this.option.replace.drcs)), info).map((region) => {
       const div = document.createElement('div');
       div.style.display = 'inline-block';
       if (region.highlight) {
@@ -162,7 +159,14 @@ export default class HTMLFragmentRenderer implements Renderer {
         div.appendChild(elem);
       }
 
-      fragment.appendChild(div);
+      return div;
+    });
+
+    for (const region of regions.slice(0, -1)) {
+      region.style.marginRight = '0.5em';
+    }
+    for (const region of regions) {
+      fragment.appendChild(region);
     }
 
     this.clear();
