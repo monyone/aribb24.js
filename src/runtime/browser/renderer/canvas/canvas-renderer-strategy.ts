@@ -18,6 +18,11 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
     if (target != null) {
       magnification = [Math.ceil(target.width / width), Math.ceil(target.height / height)];
     }
+    if (buffer.width !== width || buffer.height !== height) {
+      buffer.width = width;
+      buffer.height = height;
+      context.clearRect(0, 0, buffer.width, buffer.height);
+    }
 
     for (const token of parsed) {
       switch (token.tag) {
