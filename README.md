@@ -17,6 +17,15 @@ ARIB STD-B24 Captione Renderer
         * ID3 Timed Metadata: Sent by [xtne6f/tsreadex](https://github.com/xtne6f/tsreadex)
     * HLS:
         * ID3 Timed Metadata: above MPEG-TS ID3 Timed Metadata
+* Support various rendering methods
+  * Canvas (CanvasRendererMainThread, CanvasRendererWebWorker)
+  * SVG (SVGDOMRenderer)
+  * HTML (HTMLFragmentRenderer)
+  * Text (TextRenderer)
+* also CLI Tools Availables
+  * ts2sup: ARIB STD-B24 to SUP (PGS)
+  * ts2imsc: ARIB STD-B24 to IMSC (Image Profile)
+  * ts2b36: ARIB STD-B24 to ARIB STD-B36
 
 ## Special Thanks
 
@@ -27,12 +36,38 @@ ARIB STD-B24 Captione Renderer
 * Influenced by [TVCaptionMod2](https://github.com/xtne6f/TVCaptionMod2).
     * Got lots of feedback form the project author and heavily inspired by it.
 
+## Getting Started
+
+### mpegts.js
+
+```javascript
+<script src="mpegts.js"></script>
+<script type="module">
+    import { Controller, MPEGTSFeeder, CanvasWebWorkerRenderer } from "./aribb24.mjs";
+    const video = document.getElementById('video');
+
+    const controller = new Controller();
+    const feeder = new MPEGTSFeeder();
+    const renderer = new CanvasWebWorkerRenderer();
+
+    controller.attachFeeder(feeder);
+    controller.attachRenderer(renderer);
+    controller.attachMedia(video);
+
+    player.on(mpegts.Events.PES_PRIVATE_DATA_ARRIVED, (data) => {
+        feeder.feedB24(new Uint8Array(data.data).buffer, (data.pts ?? data.nearest_pts) / 1000, (data.dts ?? data.nearest_pts) / 1000);
+    });
+    player.on(mpegts.Events.TIMED_ID3_METADATA_ARRIVED, (data) => {
+        feeder.feedID3(new Uint8Array(data.data).buffer, (data.pts ?? data.nearest_pts) / 1000, (data.dts ?? data.nearest_pts) / 1000);
+    });
+</script>
+```
+
 ## Options
 
 ### Feeder
 ```typescript
 type FeederOption = Partial<{
-  timeshift: number; // shift caption time
   recieve: {
     association: 'ARIB' | 'SBTVD' | null; // null is AutoDetect
     type: 'Caption' | 'Superimpose';
@@ -41,6 +76,9 @@ type FeederOption = Partial<{
   tokenizer: {
     pua: boolean; // use PUA for ARIB NON-STANDARD CHARACTER
   };
+  offset: {
+    time: number,
+  }
 }>;
 ```
 
@@ -54,7 +92,6 @@ type CanvasRendererOption = Partial<{
   },
   replace: {
     half: boolean, // default: true
-    small: boolean // default: true
     drcs: Map<string, string>,
     glyph: Map<string, PathElement>,
   }
@@ -69,29 +106,3 @@ type CanvasRendererOption = Partial<{
   }
 }>;
 ```
-
-## Getting Started
-
-### mpegts.js
-
-```javascript
-<script src="mpegts.js"></script>
-<script type="module">
-    import { Controller, MPEGTSFeeder, CanvasWebWorkerRenderer, CanvasMainThreadRenderer } from "./aribb24.mjs";
-    const video = document.getElementById('video');
-
-    const controller = new Controller();
-    const feeder = new MPEGTSFeeder();
-    const renderer = new CanvasWebWorkerRenderer();
-
-    controller.attachFeeder(feeder);
-    controller.attachRenderer(renderer);
-    controller.attachMedia(video);
-
-    player.on(mpegts.Events.PES_PRIVATE_DATA_ARRIVED, (data) => {
-        feeder.feedB24(new Uint8Array(data.data).buffer, (data.pts ?? data.nearest_pts) / 1000, (data.dts  ?? data.nearest_pts) / 1000);
-    });
-    player.on(mpegts.Events.TIMED_ID3_METADATA_ARRIVED, (data) => {
-        feeder.feedID3(new Uint8Array(data.data).buffer, (data.pts ?? data.nearest_pts) / 1000, (data.dts  ?? data.nearest_pts) / 1000);
-    });
-</script>
