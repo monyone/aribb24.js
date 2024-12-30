@@ -1,4 +1,3 @@
-import type { PathElement } from "../additional-symbols-glyph";
 import { RendererOption } from "../renderer-option";
 
 export type TextRendererOption = RendererOption & {

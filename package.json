@@ -15,6 +15,11 @@
       "umd": "./dist/aribb24.umd.js",
       "import": "./dist/es/index.mjs",
       "require": "./dist/cjs/index.js"
+    },
+    "./glyph": {
+      "types": "./dist/types/runtime/common/additional-symbols-glyph.d.ts",
+      "import": "./dist/es/runtime/common/additional-symbols-glyph.mjs",
+      "require": "./dist/cjs/runtime/common/additional-symbols-glyph.js"
     }
   },
   "bin": {

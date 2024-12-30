@@ -1,4 +1,4 @@
-import type { PathElement } from "../additional-symbols-glyph";
+import type { PathElement } from "../../../common/additional-symbols-glyph";
 import { RendererOption } from "../renderer-option";
 
 type SVGDOMRendererFontOption = {
