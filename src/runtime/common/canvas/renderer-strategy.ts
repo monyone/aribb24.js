@@ -185,7 +185,7 @@ export const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCan
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSParsedToken, magnification: [number, number], foreground: string, orn: string | null): void => {
+const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSParsedToken, Path2DSource: typeof Path2D, magnification: [number, number], foreground: string, orn: string | null): void => {
   const { state, option, width, height, depth, binary } = token;
   const uint8 = new Uint8Array(binary);
 
@@ -194,29 +194,9 @@ const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasR
   context.translate(start_x, start_y);
   context.scale(option.magnification * magnification[0], option.magnification * magnification[1]);
 
-  if (orn != null) {
-    context.strokeStyle = orn;
-    context.lineJoin = 'round';
-    context.lineWidth = 2 * option.magnification;
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        let value = 0;
-        for(let d = 0; d < depth; d++){
-          const byte = Math.floor(((((y * width) + x) * depth) + d) / 8);
-          const index = 7 - (((((y * width) + x) * depth) + d) % 8);
-          value *= 2;
-          value += ((uint8[byte] & (1 << index)) >> index);
-        }
-
-        if (value === 0) { continue; }
-        context.strokeRect(x, y, 1, 1);
-      }
-    }
-  }
-
-  context.fillStyle = foreground;
-  for(let y = 0; y < height; y++){
-    for(let x = 0; x < width; x++){
+  let path = '';
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
       let value = 0;
       for(let d = 0; d < depth; d++){
         const byte = Math.floor(((((y * width) + x) * depth) + d) / 8);
@@ -226,9 +206,19 @@ const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasR
       }
 
       if (value === 0) { continue; }
-      context.fillRect(x, y, 1, 1);
+      path += (path === '' ? '' : ' ') + `M ${x} ${y} h ${1} v ${1} H ${x} Z`;
     }
   }
+  const path2D = new Path2DSource(path);
+
+  if (orn != null) {
+    context.strokeStyle = orn;
+    context.lineJoin = 'round';
+    context.lineWidth = 2 * option.magnification;
+    context.stroke(path2D);
+  }
+
+  context.fill(path2D);
 
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
@@ -248,5 +238,5 @@ export const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRe
   const orn = stroke ?? (state.ornament != null ? colortable[state.ornament] : null);
   const foreground = rendererOption.color.foreground ?? colortable[state.foreground];
 
-  renderDRCSInternal(context, token, magnification, foreground, orn);
+  renderDRCSInternal(context, token, Path2DSource, magnification, foreground, orn);
 }
