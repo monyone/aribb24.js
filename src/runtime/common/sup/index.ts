@@ -70,13 +70,25 @@ export const makeImageDataSup = (pts: number, dts: number, image: ImageData, pal
     data = data + max;
   }
 
-  const pcs = {
+  const pallete_pcs = {
     width: plane[0],
     height: plane[1],
     frameRate: 30,
     compositionNumber: 0,
     compositionState: CompositionState.EpochStart,
     paletteUpdateFlag: true,
+    paletteId: 0,
+    numberOfCompositionObject: 0,
+    compositionObjects: [],
+  } satisfies PresentationCompositionSegment;
+
+  const object_pcs = {
+    width: plane[0],
+    height: plane[1],
+    frameRate: 30,
+    compositionNumber: 0,
+    compositionState: CompositionState.EpochStart,
+    paletteUpdateFlag: false,
     paletteId: 0,
     numberOfCompositionObject: 1,
     compositionObjects: [{
@@ -133,11 +145,16 @@ export const makeImageDataSup = (pts: number, dts: number, image: ImageData, pal
   }) satisfies ObjectDefinitionSegment[];
 
   return concat(
-    encodeSupFormat(Math.floor(pts * 90000), Math.floor(dts * 90000), encodeSegment(SegmentType.PCS, PresentationCompositionSegment.into(pcs))),
-    encodeSupFormat(Math.floor(pts * 90000), Math.floor(dts * 90000), encodeSegment(SegmentType.WDS, WindowDefinitionSegment.into(wds))),
-    encodeSupFormat(Math.floor(pts * 90000), Math.floor(dts * 90000), encodeSegment(SegmentType.PDS, PaletteDefinitionSegment.into(pds))),
+    // update palette
+    encodeSupFormat(Math.floor(pts * 90000 - 1), Math.floor(dts * 90000) - 6, encodeSegment(SegmentType.PCS, PresentationCompositionSegment.into(pallete_pcs))),
+    encodeSupFormat(Math.floor(pts * 90000 - 1), Math.floor(dts * 90000) - 5, encodeSegment(SegmentType.PDS, PaletteDefinitionSegment.into(pds))),
+    encodeSupFormat(Math.floor(pts * 90000 - 1), Math.floor(dts * 90000) - 4, encodeSegment(SegmentType.END, EndSegment.into())),
+    // present object
+    encodeSupFormat(Math.floor(pts * 90000), Math.floor(dts * 90000) - 3, encodeSegment(SegmentType.PCS, PresentationCompositionSegment.into(object_pcs))),
+    encodeSupFormat(Math.floor(pts * 90000), Math.floor(dts * 90000) - 2, encodeSegment(SegmentType.WDS, WindowDefinitionSegment.into(wds))),
+    encodeSupFormat(Math.floor(pts * 90000), Math.floor(dts * 90000) - 1, encodeSegment(SegmentType.PDS, PaletteDefinitionSegment.into(pds))),
     ... ods.map(segment => encodeSupFormat(Math.floor(pts * 90000), Math.floor(dts * 90000), encodeSegment(SegmentType.ODS, ObjectDefinitionSegment.into(segment)))),
-    encodeSupFormat(Math.floor(pts * 90000), Math.floor(dts * 90000), encodeSegment(SegmentType.END, EndSegment.into())),
+    encodeSupFormat(Math.floor(pts * 90000), Math.floor(dts * 90000) - 0, encodeSegment(SegmentType.END, EndSegment.into())),
   );
 }
 
@@ -148,14 +165,14 @@ export const makeEmptySup = (pts: number, dts: number, plane: [number, number]):
     frameRate: 30,
     compositionNumber: 0,
     compositionState: CompositionState.EpochStart,
-    paletteUpdateFlag: true,
+    paletteUpdateFlag: false,
     paletteId: 0,
     numberOfCompositionObject: 0,
     compositionObjects: [],
   } satisfies PresentationCompositionSegment;
 
   return concat(
-    encodeSupFormat(Math.floor(pts * 90000), Math.floor(dts * 90000), encodeSegment(SegmentType.PCS, PresentationCompositionSegment.into(pcs))),
-    encodeSupFormat(Math.floor(pts * 90000), Math.floor(dts * 90000), encodeSegment(SegmentType.END, EndSegment.into())),
+    encodeSupFormat(Math.floor(pts * 90000), Math.floor(dts * 90000) - 1, encodeSegment(SegmentType.PCS, PresentationCompositionSegment.into(pcs))),
+    encodeSupFormat(Math.floor(pts * 90000), Math.floor(dts * 90000) - 0, encodeSegment(SegmentType.END, EndSegment.into())),
   );
 }
