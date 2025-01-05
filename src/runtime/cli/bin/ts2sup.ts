@@ -13,6 +13,7 @@ import concat from '../../../util/concat';
 import { args, ArgsOption, parseArgs } from '../args';
 import { ARIBB24CaptionManagement, CaptionAssociationInformation } from '../../../lib/demuxer/b24/datagroup';
 import { getTokenizeInformation } from '../info';
+import { PathElement } from '../../common/additional-symbols-glyph';
 
 const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[],  plane: [number, number], info: CaptionAssociationInformation, option: RendererOption, source: typeof import('@napi-rs/canvas')): ArrayBuffer => {
   let sx = Number.POSITIVE_INFINITY, sy = Number.POSITIVE_INFINITY, dx = 0, dy = 0;
@@ -103,7 +104,7 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[],  plane
   }
 
   const canvas = source.createCanvas(plane[0], plane[1]);
-  render(canvas as unknown as OffscreenCanvas, [1, 1], tokens, info, option);
+  render(canvas as unknown as OffscreenCanvas, source.Path2D as unknown as typeof Path2D, [1, 1], tokens, info, option);
   const context = canvas.getContext('2d');
   const image = context.getImageData(offset[0], offset[1], area[0], area[1]);
 
@@ -149,6 +150,12 @@ const cmdline = ([
     action: 'default',
   },
   {
+    long: '--glyph',
+    short: '-g',
+    help: 'Specify use Embedded Glyph',
+    action: 'store_true',
+  },
+  {
     long: '--language',
     short: '-l',
     help: 'Specify language',
@@ -170,6 +177,9 @@ const cmdline = ([
   const background = cmd['background'] ?? null;
   const font = cmd['font'] ?? "'Hiragino Maru Gothic Pro', 'BIZ UDGothic', 'Yu Gothic Medium', 'IPAGothic', sans-serif";
   const language = Number.isNaN(Number.parseInt(cmd['language'])) ? (cmd['language'] ?? 0) : Number.parseInt(cmd['language']);
+  const glyph = cmd['glyph']
+    ? (await import('../../common/additional-symbols-glyph').catch(() => ({ default: new Map<string, PathElement>()}))).default
+    : new Map<string, PathElement>();
 
   const napi = await import('@napi-rs/canvas').catch(() => {
     console.error('Please install @napi-rs/canvas');
@@ -206,6 +216,7 @@ const cmdline = ([
         const parser = new ARIBB24Parser(state, { magnification: 2 });
         const option = RendererOption.from({
           font: { normal: font },
+          replace: { glyph: glyph },
           color: { stroke: stroke, background: background }
         });
         const info = {

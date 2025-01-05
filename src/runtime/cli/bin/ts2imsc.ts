@@ -12,6 +12,7 @@ import { getTokenizeInformation } from '../info';
 import { UnreachableError } from '../../../util/error';
 import { ARIBB24Token } from '../../../lib/tokenizer/token';
 import { writeFS } from '../file';
+import { PathElement } from '../../common/additional-symbols-glyph';
 
 type XMLNode = string | {
   name: string;
@@ -56,7 +57,7 @@ type IMSCData = {
 
 const image = (begin: number, end: number, id: string, tokens: ARIBB24ParsedToken[], plane: [number, number], info: CaptionAssociationInformation, option: RendererOption, source: typeof import('@napi-rs/canvas')): IMSCData | null => {
   const offscreen = source.createCanvas(plane[0], plane[1]);
-  render(offscreen as unknown as OffscreenCanvas, [1, 1], tokens, info, option);
+  render(offscreen as unknown as OffscreenCanvas, source.Path2D as unknown as typeof Path2D, [1, 1], tokens, info, option);
 
   let sx = Number.POSITIVE_INFINITY, sy = Number.POSITIVE_INFINITY, dx = 0, dy = 0;
   let found = false;
@@ -139,6 +140,12 @@ const cmdline = ([
     action: 'default',
   },
   {
+    long: '--glyph',
+    short: '-g',
+    help: 'Specify use Embedded Glyph',
+    action: 'store_true',
+  },
+  {
     long: '--language',
     short: '-l',
     help: 'Specify language',
@@ -160,6 +167,9 @@ const cmdline = ([
   const background = cmd['background'] ?? null;
   const font = cmd['font'] ?? "'Hiragino Maru Gothic Pro', 'BIZ UDGothic', 'Yu Gothic Medium', 'IPAGothic', sans-serif";
   const language = Number.isNaN(Number.parseInt(cmd['language'])) ? (cmd['language'] ?? 0) : Number.parseInt(cmd['language']);
+  const glyph = cmd['glyph']
+    ? (await import('../../common/additional-symbols-glyph').catch(() => ({ default: new Map<string, PathElement>()}))).default
+    : new Map<string, PathElement>();
 
   const napi = await import('@napi-rs/canvas').catch(() => {
     console.error('Please install @napi-rs/canvas');
@@ -168,6 +178,7 @@ const cmdline = ([
 
   const option = RendererOption.from({
     font: { normal: font },
+    replace: { glyph: glyph },
     color: { stroke: stroke, background: background }
   });
 
@@ -251,7 +262,7 @@ const cmdline = ([
     const end = begin + duration;
     if (end === Number.POSITIVE_INFINITY) { continue; }
 
-    const parser = new ARIBB24Parser(initialState, { magnification: 2});
+    const parser = new ARIBB24Parser(initialState, { magnification: 2 });
     const rendered = image(begin, end, `${id}`, parser.parse(data), [1920, 1080], info, option, napi);
     if (rendered == null) { continue; }
 

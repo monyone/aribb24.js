@@ -27,15 +27,15 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
     for (const token of parsed) {
       switch (token.tag) {
         case 'Character': {
-          renderCharacter(context, token, magnification, info, rendererOption);
+          renderCharacter(context, token, globalThis.Path2D, magnification, info, rendererOption);
           break;
         }
         case 'DRCS': {
-          renderDRCS(context, token, magnification, info, rendererOption);
+          renderDRCS(context, token, globalThis.Path2D, magnification, info, rendererOption);
           break;
         }
         case 'Bitmap': {
-          renderBitmap(context, token, magnification, info, rendererOption);
+          renderBitmap(context, token, globalThis.Path2D, magnification, info, rendererOption);
           break;
         }
         case 'ClearScreen':
@@ -79,7 +79,7 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
   }
 }
 
-const renderBitmap = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24BitmapParsedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: CanvasRendererOption): void => {
+const renderBitmap = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24BitmapParsedToken, Path2DSource: typeof Path2D, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: CanvasRendererOption): void => {
   const { x_position, y_position, width, height } = token;
 
   context.drawImage(token.normal_bitmap, x_position * magnification[0], y_position * magnification[1], width* magnification[0], height * magnification[1]);

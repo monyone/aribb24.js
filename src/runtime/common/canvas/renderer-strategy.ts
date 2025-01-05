@@ -9,18 +9,19 @@ import { shouldHalfWidth } from "../quirk";
 import useARIBFont from "../font";
 import { ARIBB24BitmapParsedToken } from "../../browser/types";
 
-export default (buffer: HTMLCanvasElement | OffscreenCanvas, magnification: [number, number], tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
+
+export default (buffer: HTMLCanvasElement | OffscreenCanvas, Path2DSource: typeof Path2D, magnification: [number, number], tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
   const context = buffer.getContext('2d') as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D; // Type Issue
   if (context == null) { return; }
 
   for (const token of tokens) {
     switch (token.tag) {
       case 'Character': {
-        renderCharacter(context, token, magnification, info, rendererOption);
+        renderCharacter(context, token, Path2DSource, magnification, info, rendererOption);
         break;
       }
       case 'DRCS': {
-        renderDRCS(context, token, magnification, info, rendererOption);
+        renderDRCS(context, token, Path2DSource, magnification, info, rendererOption);
         break;
       }
       case 'ClearScreen':
@@ -102,7 +103,7 @@ export const renderUnderline = (context: CanvasRenderingContext2D | OffscreenCan
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-export const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
+export const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24CharacterParsedToken, Path2DSource: typeof Path2D, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
   const { state, option, character: key, non_spacing } = token;
   const should_halfwidth = shouldHalfWidth(state.size, info);
   const replace_halfwidth = rendererOption.replace.half  && should_halfwidth;
@@ -130,7 +131,7 @@ export const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCan
     context.translate(start_x, start_y);
 
     const { viewBox, path } = rendererOption.replace.glyph.get(character)!
-    const path2d = new Path2D(path);
+    const path2d = new Path2DSource(path);
 
     const [sx, sy, dx, dy] = viewBox
     const width = dx - sx
@@ -232,7 +233,7 @@ const renderDRCSInternal = (context: CanvasRenderingContext2D | OffscreenCanvasR
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-export const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSParsedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
+export const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24DRCSParsedToken, Path2DSource: typeof Path2D, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
   const { state } = token;
   // clear
   clear(context, token, magnification, info, rendererOption);
@@ -248,12 +249,4 @@ export const renderDRCS = (context: CanvasRenderingContext2D | OffscreenCanvasRe
   const foreground = rendererOption.color.foreground ?? colortable[state.foreground];
 
   renderDRCSInternal(context, token, magnification, foreground, orn);
-}
-
-const renderBitmap = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24BitmapParsedToken, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: RendererOption): void => {
-  const { x_position, y_position, width, height } = token;
-
-  context.drawImage(token.normal_bitmap, x_position * magnification[0], y_position * magnification[1], width* magnification[0], height * magnification[1]);
-  token.normal_bitmap.close();
-  token.flashing_bitmap?.close();
 }
