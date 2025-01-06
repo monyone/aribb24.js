@@ -146,9 +146,9 @@ export const makeImageDataSup = (pts: number, dts: number, image: ImageData, pal
 
   return concat(
     // update palette
-    encodeSupFormat(Math.floor(pts * 90000 - 1), Math.floor(dts * 90000) - 6, encodeSegment(SegmentType.PCS, PresentationCompositionSegment.into(pallete_pcs))),
-    encodeSupFormat(Math.floor(pts * 90000 - 1), Math.floor(dts * 90000) - 5, encodeSegment(SegmentType.PDS, PaletteDefinitionSegment.into(pds))),
-    encodeSupFormat(Math.floor(pts * 90000 - 1), Math.floor(dts * 90000) - 4, encodeSegment(SegmentType.END, EndSegment.into())),
+    encodeSupFormat(Math.floor(pts * 90000), Math.floor(dts * 90000) - 6, encodeSegment(SegmentType.PCS, PresentationCompositionSegment.into(pallete_pcs))),
+    encodeSupFormat(Math.floor(pts * 90000), Math.floor(dts * 90000) - 5, encodeSegment(SegmentType.PDS, PaletteDefinitionSegment.into(pds))),
+    encodeSupFormat(Math.floor(pts * 90000), Math.floor(dts * 90000) - 4, encodeSegment(SegmentType.END, EndSegment.into())),
     // present object
     encodeSupFormat(Math.floor(pts * 90000), Math.floor(dts * 90000) - 3, encodeSegment(SegmentType.PCS, PresentationCompositionSegment.into(object_pcs))),
     encodeSupFormat(Math.floor(pts * 90000), Math.floor(dts * 90000) - 2, encodeSegment(SegmentType.WDS, WindowDefinitionSegment.into(wds))),
