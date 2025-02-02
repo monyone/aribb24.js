@@ -206,7 +206,7 @@ export default class HLSFeeder extends DecodingFeeder {
   }
 
   public feedB24(data: ArrayBuffer, pts: number, dts?: number): void {
-    this.feed(data, pts, pts ?? dts);
+    this.feed(data, pts, dts ?? pts);
   }
 
   public feedID3(data: ArrayBuffer, pts: number, dts?: number): void {
