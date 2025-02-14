@@ -65,4 +65,4 @@ export { default as ARIBB24BrazilianInitialParserState } from './lib/parser/stat
 export { default as regionerForARIBB24ParsedToken } from './lib/parser/regioner'
 
 // Utils
-export { EOFError, NotImplementedError, UnreachableError } from './util/error';
+export { EOFError, NotImplementedError, ExhaustivenessError, UnreachableError } from './util/error';

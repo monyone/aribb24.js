@@ -1,4 +1,3 @@
-import { UnreachableError } from "../../util/error";
 import { CaptionAssociationInformation } from "../demuxer/b24/datagroup";
 import { ARIBB24_CHARACTER_SIZE, ARIBB24CharacterParsedToken, ARIBB24DRCSParsedToken, ARIBB24ParsedToken, ARIBB24Parser } from "./parser";
 

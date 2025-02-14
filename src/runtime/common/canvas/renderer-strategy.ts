@@ -3,7 +3,7 @@ import { RendererOption } from "./renderer-option";
 import colortable from "../colortable";
 import halfwidth from "../../browser/renderer/halfwidth";
 import namedcolor from "../namedcolor";
-import { UnreachableError } from "../../../util/error";
+import { ExhaustivenessError } from "../../../util/error";
 import { CaptionAssociationInformation } from "../../../lib/demuxer/b24/datagroup";
 import { shouldHalfWidth } from "../quirk";
 import useARIBFont from "../font";
@@ -31,8 +31,7 @@ export default (buffer: HTMLCanvasElement | OffscreenCanvas, Path2DSource: typeo
         }
         break;
       default:
-        const exhaustive: never = token;
-        throw new UnreachableError(`Unhandled ARIB Parsed Token (${exhaustive})`);
+        throw new ExhaustivenessError(token, `Unexpected ARIB Parsed Token in CanvasRenderingStrategy`);
     }
   }
 }

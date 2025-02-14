@@ -1,8 +1,7 @@
 import { ARIBB24Token, ARIBB24BitmapToken, ARIBB24CharacterToken, ARIBB24DRCSToken, ARIBB24MosaicToken } from "../../../../tokenizer/token";
 import ARIBB24Encoder from "../../encoder";
-import md5 from "../../../../../util/md5";
 import concat from "../../../../../util/concat";
-import { NotImplementedError, NotUsedDueToOperationGuidelineError, NotUsedDueToStandardError, UnreachableError } from "../../../../../util/error";
+import { NotImplementedError, NotUsedDueToOperationGuidelineError, NotUsedDueToStandardError } from "../../../../../util/error";
 import { ARIBB24DataUnit, ARIBB24DRCSDataUnit, ARIBB24StatementDataUnit } from "../../../../demuxer/b24/datagroup";
 import { CONTROL_CODES } from "../../../../tokenizer/b24/tokenizer";
 import { ESC_CODES } from "../../../../tokenizer/b24/jis8/tokenizer";

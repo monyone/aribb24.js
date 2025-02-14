@@ -1,5 +1,5 @@
 import { ByteStream } from "../../../util/bytestream";
-import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from "../../../util/error";
+import { NotImplementedError, NotUsedDueToStandardError, ExhaustivenessError, UnreachableError } from "../../../util/error";
 import md5 from "../../../util/md5";
 import { ARIBB24ActiveCoordinatePositionSetToken, ARIBB24ActivePositionBackwardToken, ARIBB24ActivePositionDownToken, ARIBB24ActivePositionForwardToken, ARIBB24ActivePositionReturnToken, ARIBB24ActivePositionSetToken, ARIBB24ActivePositionUpToken, ARIBB24Token, ARIBB24BellToken, ARIBB24BitmapToken, ARIBB24BlackForegroundToken, ARIBB24BlueForegroundToken, ARIBB24BuiltinSoundReplayToken, ARIBB24CancelToken, ARIBB24CharacterToken, ARIBB24CharacterCompositionDotDesignationToken, ARIBB24CharacterSizeControlToken, ARIBB24ClearScreenToken, ARIBB24ColorControlBackgroundToken, ARIBB24ColorControlForegroundToken, ARIBB24ColorControlHalfBackgroundToken, ARIBB24ColorControlHalfForegroundToken, ARIBB24ConcealmentModeToken, ARIBB24ConcealmentModeType, ARIBB24CyanForegroundToken, ARIBB24DeleteToken, ARIBB24DRCSToken, ARIBB24FlashingControlToken, ARIBB24GreenForegroundToken, ARIBB24HilightingCharacterBlockToken, ARIBB24MagentaForegroundToken, ARIBB24MiddleSizeToken, ARIBB24NormalSizeToken, ARIBB24NullToken, ARIBB24OrnamentControlHemmingToken, ARIBB24OrnamentControlHollowToken, ARIBB24OrnamentControlNoneToken, ARIBB24OrnamentControlShadeToken, ARIBB24OrnamentControlType, ARIBB24PalletControlToken, ARIBB24ParameterizedActivePositionForwardToken, ARIBB24PatternPolarityControlToken, ARIBB24RasterColourCommandToken, ARIBB24RecordSeparatorToken, ARIBB24RedForegroundToken, ARIBB24RepeatCharacterToken, ARIBB24ReplacingConcealmentModeToken, ARIBB24SetDisplayFormatToken, ARIBB24SetDisplayPositionToken, ARIBB24SetHorizontalSpacingToken, ARIBB24SetVerticalSpacingToken, ARIBB24SetWritingFormatToken, ARIBB24SingleConcealmentModeToken, ARIBB24SingleConcealmentModeType, ARIBB24SmallSizeToken, ARIBB24SpaceToken, ARIBB24StartLiningToken, ARIBB24StopLiningToken, ARIBB24TimeControlModeToken, ARIBB24TimeControlWaitToken, ARIBB24UnitSeparatorToken, ARIBB24WhiteForegroundToken, ARIBB24WritingModeModificationToken, ARIBB24YellowForegroundToken } from "../token";
 import { ARIBB24CaptionData, ARIBB24DataUnit } from "../../demuxer/b24/datagroup";
@@ -99,7 +99,7 @@ export const processC0 = (stream: ByteStream): ARIBB24Token => {
     case CONTROL_CODES.US: return ARIBB24UnitSeparatorToken.from();
     case CONTROL_CODES.SP: return ARIBB24SpaceToken.from();
     case CONTROL_CODES.DEL: return ARIBB24DeleteToken.from();
-    default: throw new UnreachableError('Undefined C0');
+    default: throw new UnreachableError('Undefined C0 detected');
   }
 }
 

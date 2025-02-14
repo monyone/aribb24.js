@@ -1,4 +1,3 @@
-import { UnreachableError } from "../../util/error";
 import { exit } from "./exit";
 
 const bunArgs = (): string[] => {
@@ -71,7 +70,7 @@ export const parseArgs = (args: string[], options: ArgsOption[], title?: string,
           console.error(`${title ? ' ' : ''}${option.long}: ${option.help}`);
         }
         exit(0);
-        throw new UnreachableError('Not Reachable');
+        throw new Error('Not Reachable');
       }
     }
   }

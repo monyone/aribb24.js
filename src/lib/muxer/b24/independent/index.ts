@@ -1,4 +1,4 @@
-import { UnreachableError } from "../../../../util/error";
+import { ExhaustivenessError } from "../../../../util/error";
 import { PES } from "../../../demuxer/b24/independent";
 
 export default (pes: PES): ArrayBuffer => {
@@ -17,7 +17,6 @@ export default (pes: PES): ArrayBuffer => {
       array.set(new Uint8Array(pes.data), 3);
       return array.buffer;
     default:
-      const exhaustive: never = pes;
-      throw new UnreachableError(`Undefined PES in ARIB Caption (${exhaustive})`);
+      throw new ExhaustivenessError(pes, `Unexpected ARIB Caption Type`);
   }
 }

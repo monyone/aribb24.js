@@ -3,7 +3,7 @@ import { ByteStream } from "../../../../util/bytestream";
 import { ARIBB24Token, ARIBB24DRCSToken } from '../../token';
 import { ARIBB24CharacterToken } from "../../token";
 import ARIBB24Tokenizer, { CONTROL_CODES, processC0, processC1 } from "../tokenizer";
-import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from "../../../../util/error";
+import { NotImplementedError, NotUsedDueToStandardError, ExhaustivenessError, UnreachableError } from "../../../../util/error";
 
 type DRCSData = Omit<ARIBB24DRCSToken, 'tag' | 'combining'>;
 const DRCSData = {

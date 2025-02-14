@@ -1,6 +1,6 @@
 import { ARIBB24Token, ARIBB24BitmapToken, ARIBB24CharacterToken, ARIBB24DRCSToken, ARIBB24MosaicToken, ARIBB24RedForegroundToken } from "../../tokenizer/token";
 import { CONTROL_CODES, CSI_CODE } from "../../tokenizer/b24/tokenizer";
-import { UnreachableError } from "../../../util/error";
+import { ExhaustivenessError } from "../../../util/error";
 import { ARIBB24DataUnit } from "../../demuxer/b24/datagroup";
 
 const generateCSI = (F: number, ... values: number[]): ArrayBuffer => {
@@ -162,8 +162,7 @@ export default abstract class ARIBB24Encoder {
       case 'BuiltinSoundReplay':
         return generateCSI(CSI_CODE.PRA, control.sound);
       default:
-        const exhaustive: never = control;
-        throw new UnreachableError(`Undefined Size Type in STD-B24 ARIB Caption (${exhaustive})`);
+        throw new ExhaustivenessError(control, `Unexpeced ARIBB24Token in encodeControl)`);
     }
   }
   public abstract encodeCharacter(character: ARIBB24CharacterToken): ArrayBuffer;

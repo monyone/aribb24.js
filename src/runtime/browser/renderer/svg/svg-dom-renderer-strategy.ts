@@ -3,7 +3,7 @@ import { ARIBB24FlashingControlType } from "../../../../lib/tokenizer/token";
 import colortable from "../../../common/colortable";
 import halfwidth from "../halfwidth";
 import namedcolor from "../../../common/namedcolor";
-import { UnreachableError } from "../../../../util/error";
+import { ExhaustivenessError } from "../../../../util/error";
 import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datagroup";
 import { shouldHalfWidth } from "../quirk";
 import useARIBFont from "../../../common/font";
@@ -101,8 +101,7 @@ export default (target: SVGSVGElement, state: ARIBB24ParserState, tokens: ARIBB2
         }
         break;
       default:
-        const exhaustive: never = token;
-        throw new UnreachableError(`Unhandled ARIB Parsed Token (${exhaustive})`);
+        throw new ExhaustivenessError(token, `Unexpected ARIB Parsed Token in SVGDOMRenderingStrategy`);
     }
   }
 
@@ -188,8 +187,7 @@ const retriveFlashingAnimateElement = (token: ARIBB24CharacterParsedToken | ARIB
       return animate;
     }
     default:
-      const exhaustive: never = state.flashing;
-      throw new UnreachableError(`Unhandled Flasing Token (${exhaustive})`);
+      throw new ExhaustivenessError(state.flashing, `Unhandled Flasing Token in SVGDOMRenderingStrategy`);
   }
 }
 

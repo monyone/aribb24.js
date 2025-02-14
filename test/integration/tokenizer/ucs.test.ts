@@ -2,7 +2,6 @@ import { describe, test, expect } from 'vitest';
 import ARIBB24UTF8Tokenizer from '@/lib/tokenizer/b24/ucs/tokenizer';
 import { ARIBB24ActivePositionDownToken, ARIBB24ActivePositionReturnToken, ARIBB24CharacterToken, ARIBB24SpaceToken } from '@/lib/tokenizer/token';
 import { CONTROL_CODES } from '@/lib/tokenizer/b24/tokenizer';
-import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from '@/util/error';
 
 const generateBinary = (... operation: (number | string)[]): ArrayBuffer => {
   const encoder = new TextEncoder();

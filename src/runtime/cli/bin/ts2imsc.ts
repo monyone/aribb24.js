@@ -9,7 +9,6 @@ import { RendererOption } from '../../common/canvas/renderer-option';
 import { args, ArgsOption, parseArgs } from '../args';
 import { ARIBB24CaptionManagement, CaptionAssociationInformation } from '../../../lib/demuxer/b24/datagroup';
 import { getTokenizeInformation } from '../info';
-import { UnreachableError } from '../../../util/error';
 import { ARIBB24Token } from '../../../lib/tokenizer/token';
 import { writeFS } from '../file';
 import { PathElement } from '../../common/additional-symbols-glyph';

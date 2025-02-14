@@ -1,5 +1,5 @@
 import { ARIBB24ParserState } from "../../../../lib/parser/parser";
-import { NotImplementedError, UnreachableError } from "../../../../util/error";
+import { NotImplementedError, ExhaustivenessError } from "../../../../util/error";
 import Renderer from "../renderer";
 import { TextRendererOption } from "./text-renderer-option";
 import halftext from "../halftext"
@@ -80,8 +80,7 @@ export default class TextRenderer implements Renderer {
           }
           break;
         default:
-          const exhaustive: never = token;
-          throw new UnreachableError(`Unhandled ARIB Parsed Token (${exhaustive})`);
+          throw new ExhaustivenessError(token, `Unexpected ARIB Parsed Token in TextRenderer`);
       }
     }
   }

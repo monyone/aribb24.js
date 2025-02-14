@@ -1,3 +1,5 @@
+import { ExhaustivenessError, UnreachableError } from "./error";
+
 interface AVLTreeNodeInterface<K, V, O> {
   get parent(): AVLTreeNodeInterface<K, V, O> | null;
   get balanced(): boolean;
@@ -216,8 +218,7 @@ class AVLTreeNode<K, V, O = K> implements AVLTreeNodeInterface<K, V, O> {
           }
           return null;
         default:
-          const exhaustive: never = compare;
-          throw new Error(`Exhaustive check: ${exhaustive} reached!`);
+          throw new ExhaustivenessError(compare, `Exhaustive check reached!`);
       }
     }
   }
@@ -266,8 +267,7 @@ class AVLTreeNode<K, V, O = K> implements AVLTreeNodeInterface<K, V, O> {
           node = node.right;
           break FIND;
         default:
-          const exhaustive: never = compare;
-          throw new Error(`Exhaustive check: ${exhaustive} reached!`);
+          throw new ExhaustivenessError(compare, `Exhaustive check reached!`);
       }
     }
 

@@ -1,5 +1,5 @@
 import { ARIBB24_CHARACTER_SIZE_MAP, ARIBB24DRCSParsedToken, ARIBB24Parser, ARIBB24ParserState } from "../../../../lib/parser/parser";
-import { NotImplementedError, UnreachableError } from "../../../../util/error";
+import { NotImplementedError, ExhaustivenessError } from "../../../../util/error";
 import Renderer from "../renderer";
 import { HTMLFragmentRendererOption, PartialHTMLFragmentRendererOption } from "./html-fragment-renderer-option";
 import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datagroup";
@@ -152,8 +152,7 @@ export default class HTMLFragmentRenderer implements Renderer {
             break;
           }
           default:
-            const exhaustive: never = span;
-            throw new UnreachableError(`Undefined Region Type (${exhaustive})`);
+            throw new ExhaustivenessError(span, `Undefined Region Type in HTMLFragmentRenderer`);
         }
 
         div.appendChild(elem);

@@ -1,5 +1,5 @@
 import { ARIBB24Token, ARIBB24CharacterToken, ARIBB24CharacterSizeControlType, ARIBB24ClearScreenToken, ARIBB24DRCSToken, ARIBB24FlashingControlType, ARIBB24OrnamentControlType } from "../tokenizer/token";
-import { UnreachableError } from "../../util/error";
+import { ExhaustivenessError } from "../../util/error";
 
 export const ARIBB24_CHARACTER_SIZE = {
   Small: 'Small',
@@ -356,8 +356,7 @@ export class ARIBB24Parser {
             this.state.size = ARIBB24_CHARACTER_SIZE.Special2;
             break;
           default:
-            const exhaustive: never = token;
-            throw new UnreachableError(`Undefined Size Type in STD-B24 ARIB Caption (${exhaustive})`);
+            throw new ExhaustivenessError(token, `Unexcepted Size Type in STD-B24 ARIB Caption Content`);
         }
         break;
       // pallet

@@ -1,10 +1,9 @@
 import { ByteStream } from "../../../../util/bytestream";
+import { UnreachableError } from "../../../../util/error";
 
 import type { ARIBB24Token } from '../../token';
 import { ARIBB24DRCSToken, ARIBB24CharacterToken } from "../../token";
 import ARIBB24Tokenizer, { CONTROL_CODES, CSI_CODE, processC0, processC1 } from "../tokenizer";
-import { UnreachableError } from "../../../../util/error";
-
 export const ESC_CODES = {
   LS2: 0x6e,
   LS3: 0x6f,

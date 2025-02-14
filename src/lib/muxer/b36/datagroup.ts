@@ -1,6 +1,6 @@
 import { ByteBuilder } from "../../../util/bytebuilder";
 import CRC16_CCITT from "../../../util/crc16-ccitt";
-import { UnreachableError, ViolationStandardError } from "../../../util/error";
+import { ExhaustivenessError, ViolationStandardError } from "../../../util/error";
 import { ARIBB24CaptionData, ARIBB24DataUnit, TimeControlModeType } from "../../demuxer/b24/datagroup";
 
 const data_unit_parameter = (unit: ARIBB24DataUnit) => {
@@ -12,8 +12,7 @@ const data_unit_parameter = (unit: ARIBB24DataUnit) => {
     case 'Bitmap':
       return 0x35;
     default:
-      const exhaustive: never = unit;
-      throw new UnreachableError(`Undefined Data Unit in STD-B24 ARIB Caption (${exhaustive})`);
+      throw new ExhaustivenessError(unit, `Unexpected Data Unit in STD-B24 ARIB Caption`);
   }
 }
 
@@ -95,7 +94,7 @@ export default (caption: ARIBB24CaptionData) => {
       return statementBuilder.build();
     }
     default:
-      const exhaustive: never = caption;
-      throw new UnreachableError(`Undefined Caption in STD-B24 ARIB Caption (${exhaustive})`);
+      throw new ExhaustivenessError(caption, `Unexpected STD-B24 ARIB Caption Content`);
+
   }
 };

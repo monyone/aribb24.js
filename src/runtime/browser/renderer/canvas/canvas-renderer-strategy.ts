@@ -1,6 +1,6 @@
 import { ARIBB24ParserState } from "../../../../lib/parser/parser";
 import { CanvasRendererOption } from "./canvas-renderer-option";
-import { UnreachableError } from "../../../../util/error";
+import { ExhaustivenessError } from "../../../../util/error";
 import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datagroup";
 import { ARIBB24BitmapParsedToken, ARIBB24BrowserParser, ARIBB24BrowserToken } from "../../types";
 import { renderCharacter, renderDRCS } from "../../../common/canvas/renderer-strategy";
@@ -45,8 +45,7 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
           }
           break;
         default:
-          const exhaustive: never = token;
-          throw new UnreachableError(`Unhandled ARIB Parsed Token (${exhaustive})`);
+          throw new ExhaustivenessError(token, `Unhandled ARIB Parsed Token in CanvasRendererStrategy`);
       }
     }
   }

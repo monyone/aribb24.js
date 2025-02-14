@@ -2,7 +2,7 @@ import { ARIBB24Token, ARIBB24BitmapToken, ARIBB24CharacterToken, ARIBB24DRCSTok
 import ARIBB24Encoder from "../../encoder";
 import md5 from "../../../../../util/md5";
 import concat from "../../../../../util/concat";
-import { NotImplementedError, NotUsedDueToStandardError, UnreachableError } from "../../../../../util/error";
+import { NotImplementedError, NotUsedDueToStandardError, ExhaustivenessError } from "../../../../../util/error";
 import { ARIBB24DataUnit, ARIBB24DRCSDataUnit, ARIBB24StatementDataUnit } from "../../../../demuxer/b24/datagroup";
 import { CONTROL_CODES } from "../../../../tokenizer/b24/tokenizer";
 import { ESC_CODES } from "../../../../tokenizer/b24/jis8/tokenizer";
@@ -55,8 +55,7 @@ export default class ARIBB24JapaneseJIS8Encoder extends ARIBB24Encoder {
           this.mode = 'MACRO0';
           return Uint8Array.from([CONTROL_CODES.SS3, 0x60 /* MACRO-0 */, CONTROL_CODES.ESC, ESC_CODES.LS1R, ... ARIBB24JapaneseJIS8Encoder.ASCII.get(character)!.map((elem) => elem | 0x80)]).buffer;
         default:
-          const exhaustive: never = this.mode;
-          throw new UnreachableError(`Undefined mode in encoder (${exhaustive})`);
+          throw new ExhaustivenessError(this.mode, `Unexpected mode in ARIBB24JapaneseJIS8Encoder`);
       }
     } else if (ARIBB24JapaneseJIS8Encoder.HIRAGANA.has(character)) {
       return Uint8Array.from([CONTROL_CODES.SS2, ... ARIBB24JapaneseJIS8Encoder.HIRAGANA.get(character)!]).buffer;
@@ -68,8 +67,7 @@ export default class ARIBB24JapaneseJIS8Encoder extends ARIBB24Encoder {
         case 'MACRO1':
           return Uint8Array.from([... ARIBB24JapaneseJIS8Encoder.KATAKANA.get(character)!.map((elem) => elem | 0x80)]).buffer;
         default:
-          const exhaustive: never = this.mode;
-          throw new UnreachableError(`Undefined mode in encoder (${exhaustive})`);
+          throw new ExhaustivenessError(this.mode, `Unexpected mode in ARIBB24JapaneseJIS8Encoder`);
       }
     } else if (ARIBB24JapaneseJIS8Encoder.KANJI.has(character)) {
       return Uint8Array.from(ARIBB24JapaneseJIS8Encoder.KANJI.get(character)!).buffer;

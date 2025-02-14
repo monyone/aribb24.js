@@ -1,4 +1,4 @@
-import { UnreachableError } from "../../../../util/error";
+import { ExhaustivenessError } from "../../../../util/error";
 import render from "./canvas-renderer-strategy"
 import { FromMainToWorkerEvent, FromWorkerToMainEventImageBitmap } from "./canvas-renderer-worker.event";
 
@@ -64,8 +64,7 @@ self.addEventListener('message', (event: MessageEvent<FromMainToWorkerEvent>) =>
       break;
     }
     default: {
-      const exhaustive: never = event.data;
-      throw new UnreachableError(`Exhaustive check: ${exhaustive} reached!`);
+      throw new ExhaustivenessError(event.data, `Exhaustive check failed in CanvasRenderingWorker`);
     }
   }
 });

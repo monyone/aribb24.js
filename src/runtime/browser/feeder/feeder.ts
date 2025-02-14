@@ -7,7 +7,7 @@ import ARIBB24BrazilianJIS8Tokenizer from "../../../lib/tokenizer/b24/jis8/SBTVD
 import ARIBB24Tokenizer from "../../../lib/tokenizer/b24/tokenizer";
 import ARIBB24UTF8Tokenizer from "../../../lib/tokenizer/b24/ucs/tokenizer";
 import { ARIBB24Token } from "../../../lib/tokenizer/token";
-import { UnreachableError } from "../../../util/error";
+import { ExhaustivenessError, NotUsedDueToStandardError } from "../../../util/error";
 import { ARIBB24BrowserToken } from "../types";
 
 type FeederTimeOffsetOption = {
@@ -60,7 +60,7 @@ export const getTokenizeInformation = (language: string, TCS: number, option: Fe
   if (TCS === 1) {
     return ['ARIB', new ARIBB24UTF8Tokenizer(), aribInitialState];
   } else if (TCS !== 0) {
-    throw new UnreachableError('Undefined TCS');
+    throw new NotUsedDueToStandardError('not Supported TCS');
   }
 
   switch (option.recieve.association) {

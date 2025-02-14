@@ -1,15 +1,13 @@
-import { UnreachableError } from "../../util/error";
-
 const nodeOrBunExit = (code: number = 0): never => {
   const process = (globalThis as any).process;
   process.exit(code);
-  throw new UnreachableError('Not Reachable');
+  throw new Error('Not Reachable');
 }
 
 const denoExit = (code: number = 0): never => {
   const deno = (globalThis as any).Deno;
   deno.exit(code);
-  throw new UnreachableError('Not Reachable');
+  throw new Error('Not Reachable');
 }
 
 export const exit = (code: number = 0): never => {
