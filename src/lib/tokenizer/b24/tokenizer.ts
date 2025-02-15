@@ -353,8 +353,7 @@ export default abstract class ARIBB24Tokenizer {
           result.push(... this.tokenizeBitmap(unit.data));
           break;
         default:
-          const exhaustive: never = unit;
-          throw new UnreachableError(`Undefined DataUnit in STD-B24 ARIB Caption (${exhaustive})`);
+          throw new ExhaustivenessError(unit, `Unexpected DataUnit in STD-B24 ARIB Caption`);
       }
     }
 

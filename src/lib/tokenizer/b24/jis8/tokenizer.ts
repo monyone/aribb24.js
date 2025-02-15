@@ -1,5 +1,5 @@
 import { ByteStream } from "../../../../util/bytestream";
-import { UnreachableError } from "../../../../util/error";
+import { ExhaustivenessError, UnreachableError } from "../../../../util/error";
 
 import type { ARIBB24Token } from '../../token';
 import { ARIBB24DRCSToken, ARIBB24CharacterToken } from "../../token";
@@ -88,8 +88,7 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
             if (dict.has(code)) { result.push(... this.tokenizeStatement(dict.get(code)!)); }
             break;
           default:
-            const exhaustive: never = type;
-            throw new UnreachableError(`Undefined Dict Type in STD-B24 ARIB Caption (${exhaustive})`);
+            throw new ExhaustivenessError(type, `Undefined Dict Type in STD-B24 ARIB Caption`);
         }
 
         continue;
@@ -119,8 +118,7 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
             if (dict.has(code)) { result.push(... this.tokenizeStatement(dict.get(code)!)); }
             break;
           default:
-            const exhaustive: never = type;
-            throw new UnreachableError(`Undefined Dict Type in STD-B24 ARIB Caption (${exhaustive})`);
+            throw new ExhaustivenessError(type, `Undefined Dict Type in STD-B24 ARIB Caption`);
         }
 
         continue;
@@ -166,8 +164,7 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
               if (dict.has(code)) { result.push(... this.tokenizeStatement(dict.get(code)!)); }
               break;
             default:
-              const exhaustive: never = type;
-              throw new UnreachableError(`Undefined Dict Type in STD-B24 ARIB Caption (${exhaustive})`);
+              throw new ExhaustivenessError(type, `Undefined Dict Type in STD-B24 ARIB Caption`);
           }
 
           break;
@@ -251,8 +248,7 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
               if (dict.has(code)) { result.push(... this.tokenizeStatement(dict.get(code)!)); }
               break;
             default:
-              const exhaustive: never = type;
-              throw new UnreachableError(`Undefined Dict Type in STD-B24 ARIB Caption (${exhaustive})`);
+              throw new ExhaustivenessError(type, `Undefined Dict Type in STD-B24 ARIB Caption`);
           }
 
           break;
