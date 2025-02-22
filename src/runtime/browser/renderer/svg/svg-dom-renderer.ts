@@ -40,7 +40,9 @@ export default class SVGDOMRenderer implements Renderer {
   public render(initialState: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionAssociationInformation): void {
     if (shouldNotAssumeUseClearScreen(info)) { this.clear(); }
 
+    this.svg.style.visibility = 'hidden';
     render(this.svg, initialState, replaceDRCS(tokens, this.option.replace.drcs), info, this.option);
+    this.svg.style.visibility = 'visible';
   }
 
   public onAttach(element: HTMLElement): void {

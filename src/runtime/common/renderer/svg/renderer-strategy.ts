@@ -222,6 +222,8 @@ const retriveCharacterSVGTextElement = (token: ARIBB24CharacterParsedToken, info
   text.attributes['stroke-width'] = orn != null ? `${4 * option.magnification}` : '0';
   text.attributes['stroke'] = orn != null ? orn : 'transparent';
   text.attributes['data-width'] = `${state.fontsize[0] * scale_x}`;
+  text.attributes['textLength'] = `${state.fontsize[0] * scale_x}`;
+  text.attributes['lengthAdjust'] = 'spacingAndGlyphs';
   text.children.push(character);
 
   return text;
