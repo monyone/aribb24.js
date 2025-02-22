@@ -13,7 +13,7 @@ export { default as B36Feeder } from './runtime/browser/feeder/b36-feeder';
 export type { RendererOption } from './runtime/browser/renderer/renderer-option';
 // Canvas
 export type { CanvasRendererOption } from './runtime/browser/renderer/canvas/canvas-renderer-option';
-export { default as CanvasMainThreadRenderer } from './runtime/browser/renderer/canvas/canvas-renderer-main';
+export { default as CanvasMainThreadRenderer } from './runtime/browser/renderer/canvas/canvas-renderer-mainthread';
 export { default as CanvasWebWorkerRenderer } from './runtime/browser/renderer/canvas/canvas-renderer-worker';
 // SVG
 export type { SVGDOMRendererOption } from './runtime/browser/renderer/svg/svg-dom-renderer-option';
@@ -24,6 +24,12 @@ export { default as TextRenderer } from './runtime/browser/renderer/text/text-re
 // HTML
 export type { HTMLFragmentRendererOption } from './runtime/browser/renderer/html/html-fragment-renderer-option';
 export { default as HTMLFragmentRenderer } from './runtime/browser/renderer/html/html-fragment-renderer';
+
+// Strategy
+export { CanvasRendererOption as CanvasRenderingOption, type PartialCanvasRendererOption as PartialCanvasRenderingOption } from './runtime/common/renderer/canvas/renderer-option';
+export { default as canvasRenderingStrategy } from './runtime/common/renderer/canvas/renderer-strategy';
+export { SVGRendererOption as SVGRenderingOption, type PartialSVGRendererOption as PartialSVGRenderingOption } from './runtime/common/renderer/svg/renderer-option';
+export { default as svgRenderingStrategy } from './runtime/common/renderer/svg/renderer-strategy';
 
 // Tokenizer
 export type * from './lib/tokenizer/token';
@@ -57,7 +63,8 @@ export type {
   ARIBB24ParsedToken,
   ARIBB24ClearScreenParsedToken,
   ARIBB24CharacterParsedToken,
-  ARIBB24DRCSParsedToken as ARIBB24DRCSPrasedToken,
+  ARIBB24DRCSParsedToken,
+  ARIBB24BitmapParsedToken,
   ARIBB24ParserState,
 } from './lib/parser/parser';
 export { default as ARIBB24JapaneseInitialParserState } from './lib/parser/state/ARIB';
