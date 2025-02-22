@@ -66,8 +66,10 @@ export default (target: SVGSVGElement, state: ARIBB24ParserState, tokens: ARIBB2
   }
 
   // Fragment append
+  const inner = toSVGElement(buffer) as SVGElement;
+  inner.style.visibility = 'hidden';
   target.setAttribute('viewBox', `0 0 ${parser.currentState().plane[0]} ${parser.currentState().plane[1]}`);
-  target.appendChild(toSVGElement(buffer));
+  target.appendChild(inner);
 
   // Calc textSize
   for (const text of Array.from(target.getElementsByTagNameNS('http://www.w3.org/2000/svg', 'text'))) {
@@ -80,4 +82,5 @@ export default (target: SVGSVGElement, state: ARIBB24ParserState, tokens: ARIBB2
   for (const animate of Array.from(target.getElementsByTagNameNS('http://www.w3.org/2000/svg', 'animate'))) {
     (animate as SVGAnimateElement).beginElement();
   }
+  inner.style.visibility = 'visible';
 }
