@@ -10,7 +10,7 @@ ARIB STD-B24 Captione Renderer
     * Superimpose (A Profile)
 * Support various broadcast specification
     * ARIB STD-B24 (TR-B14, TR-B15)
-    * STTVD ABNT NBR 15606-1
+    * SBTVD ABNT NBR 15606-1
 * Support various streaming protocol embedded ARIB STD-B24
     * MPEG-TS ([xqq/mpegts.js](https://github.com/xqq/mpegts.js)):
         * Private Stream: Specified by ARIB STD-B24
@@ -18,7 +18,7 @@ ARIB STD-B24 Captione Renderer
     * HLS:
         * ID3 Timed Metadata: above MPEG-TS ID3 Timed Metadata
 * Support various rendering methods
-  * Canvas (CanvasRendererMainThread, CanvasRendererWebWorker)
+  * Canvas (CanvasMainThreadRenderer, CanvasWebWorkerRenderer)
   * SVG (SVGDOMRenderer)
   * HTML (HTMLFragmentRenderer)
   * Text (TextRenderer)
@@ -30,7 +30,7 @@ ARIB STD-B24 Captione Renderer
 ## Special Thanks
 
 * Use glyph data from [和田研中丸ゴシック2004ARIB](https://ja.osdn.net/projects/jis2004/wiki/FrontPage) for ARIB additional symbol rendering.
-    * aribb24-embedded.js utilizes embedded glyph data exported from the font which is released under public domain license.
+    * Embedded glyph data exported from the font which is released under public domain license.
 * Inspired by [b24.js](https://github.com/xqq/b24.js).
     * The pioneer of ARIB caption rendering on Web.
 * Influenced by [TVCaptionMod2](https://github.com/xtne6f/TVCaptionMod2).
