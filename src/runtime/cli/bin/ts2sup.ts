@@ -34,7 +34,7 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[],  plane
   }
   const offset = [sx, sy] satisfies [number, number];
   const area = [dx - sx, dy - sy] satisfies [number, number];
-  if (area[0] == Number.NEGATIVE_INFINITY || area[1] === Number.NEGATIVE_INFINITY) {
+  if (area[0] === Number.NEGATIVE_INFINITY || area[1] === Number.NEGATIVE_INFINITY) {
     return makeEmptySup(pts, dts, plane);
   }
 
