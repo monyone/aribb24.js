@@ -4,9 +4,9 @@ import { ARIBB24ParsedToken, ARIBB24Parser, initialState } from '../../../lib/pa
 import read from '../../../lib/demuxer/mpegts';
 import { exit } from '../exit';
 import { readableStream, writableStream } from '../stream';
-import render from '../../common/canvas/renderer-strategy';
-import { RendererOption } from '../../common/canvas/renderer-option';
-import { makeEmptySup, makeImageDataSup } from '../../common/sup'
+import render from '../../common/renderer/canvas/renderer-strategy';
+import { CanvasRendererOption } from '../../common/renderer/canvas/renderer-option';
+import { makeEmptySup, makeImageDataSup } from '../../../lib/muxer/sup'
 import colortable from '../../common/colortable';
 import namedcolor from '../../common/namedcolor';
 import concat from '../../../util/concat';
@@ -15,7 +15,7 @@ import { ARIBB24CaptionManagement, CaptionAssociationInformation } from '../../.
 import { getTokenizeInformation } from '../info';
 import { PathElement } from '../../common/additional-symbols-glyph';
 
-const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[],  plane: [number, number], info: CaptionAssociationInformation, option: RendererOption, source: typeof import('@napi-rs/canvas')): ArrayBuffer => {
+const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[],  plane: [number, number], info: CaptionAssociationInformation, option: CanvasRendererOption, source: typeof import('@napi-rs/canvas')): ArrayBuffer => {
   let sx = Number.POSITIVE_INFINITY, sy = Number.POSITIVE_INFINITY, dx = 0, dy = 0;
   let elapsed_time = 0;
   const foreground_codes = new Set<string>();
@@ -214,7 +214,7 @@ const cmdline = ([
         if (specification == null) { continue; }
         const [association, tokenizer, state] = specification;
         const parser = new ARIBB24Parser(state, { magnification: 2 });
-        const option = RendererOption.from({
+        const option = CanvasRendererOption.from({
           font: { normal: font },
           replace: { glyph: glyph },
           color: { stroke: stroke, background: background }

@@ -4,8 +4,8 @@ import { ARIBB24ParsedToken, ARIBB24Parser, ARIBB24ParserState } from '../../../
 import read from '../../../lib/demuxer/mpegts';
 import { exit } from '../exit';
 import { readableStream } from '../stream';
-import render from '../../common/canvas/renderer-strategy';
-import { RendererOption } from '../../common/canvas/renderer-option';
+import render from '../../common/renderer/canvas/renderer-strategy';
+import { CanvasRendererOption } from '../../common/renderer/canvas/renderer-option';
 import { args, ArgsOption, parseArgs } from '../args';
 import { ARIBB24CaptionManagement, CaptionAssociationInformation } from '../../../lib/demuxer/b24/datagroup';
 import { getTokenizeInformation } from '../info';
@@ -54,7 +54,7 @@ type IMSCData = {
   contents: XMLNode[];
 };
 
-const image = (begin: number, end: number, id: string, tokens: ARIBB24ParsedToken[], plane: [number, number], info: CaptionAssociationInformation, option: RendererOption, source: typeof import('@napi-rs/canvas')): IMSCData | null => {
+const image = (begin: number, end: number, id: string, tokens: ARIBB24ParsedToken[], plane: [number, number], info: CaptionAssociationInformation, option: CanvasRendererOption, source: typeof import('@napi-rs/canvas')): IMSCData | null => {
   const offscreen = source.createCanvas(plane[0], plane[1]);
   render(offscreen as unknown as OffscreenCanvas, source.Path2D as unknown as typeof Path2D, [1, 1], tokens, info, option);
 
@@ -175,7 +175,7 @@ const cmdline = ([
     return exit(-1);
   });
 
-  const option = RendererOption.from({
+  const option = CanvasRendererOption.from({
     font: { normal: font },
     replace: { glyph: glyph },
     color: { stroke: stroke, background: background }

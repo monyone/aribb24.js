@@ -1,4 +1,4 @@
-import halfwidth from "./halfwidth";
+import halfwidth from "../../common/halfwidth";
 
 const half = structuredClone(halfwidth);
 half.set('ア', 'ｱ');

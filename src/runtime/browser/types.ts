@@ -1,7 +1,7 @@
 import CRC32 from "../../util/crc32";
 import { ARIBB24Token, ARIBB24BitmapToken } from "../../lib/tokenizer/token";
 import { replaceDRCS as tokenizerReplaceDRCS } from "../../lib/tokenizer/b24/tokenizer";
-import { ARIBB24CommonParsedToken, ARIBB24ParsedToken, ARIBB24Parser, ARIBB24ParserOption, ARIBB24ParserState } from "../../lib/parser/parser";
+import { ARIBB24BitmapParsedToken, ARIBB24CommonParsedToken, ARIBB24ParsedToken, ARIBB24Parser, ARIBB24ParserOption, ARIBB24ParserState } from "../../lib/parser/parser";
 import regioner, { ARIBB24Region } from "../../lib/parser/regioner";
 import { CaptionAssociationInformation } from "../../lib/demuxer/b24/datagroup";
 
@@ -108,15 +108,15 @@ export const DecodedBitmap = {
 
 export type ARIBB24BrowserToken = Exclude<ARIBB24Token, ARIBB24BitmapToken> | DecodedBitmap;
 
-export type ARIBB24BitmapParsedToken = ARIBB24CommonParsedToken & Omit<DecodedBitmap, 'tag'> & {
+export type ARIBB24BrowserBitmapParsedToken = ARIBB24CommonParsedToken & Omit<DecodedBitmap, 'tag'> & {
   tag: 'Bitmap';
 };
-export const ARIBB24BitmapParsedToken = {
-  from(bitmap: DecodedBitmap, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24BitmapParsedToken {
+export const ARIBB24BrowserBitmapParsedToken = {
+  from(bitmap: DecodedBitmap, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24BrowserBitmapParsedToken {
     return {
       tag: 'Bitmap',
-      state,
-      option,
+      state: structuredClone(state),
+      option: structuredClone(option),
       x_position: bitmap.x_position * option.magnification,
       y_position: bitmap.y_position * option.magnification,
       width: bitmap.width * option.magnification,
@@ -129,7 +129,7 @@ export const ARIBB24BitmapParsedToken = {
   }
 }
 
-export type ARIBB24BrowserParsedToken = ARIBB24ParsedToken | ARIBB24BitmapParsedToken;
+export type ARIBB24BrowserParsedToken = Exclude<ARIBB24ParsedToken, ARIBB24BitmapParsedToken> | ARIBB24BrowserBitmapParsedToken;
 
 export const toBrowserTokenWithBitmap = async (tokens: ARIBB24Token[], pallet: string[]): Promise<ARIBB24BrowserToken[]> => {
   let result: ARIBB24BrowserToken[] = [];
@@ -165,8 +165,8 @@ export class ARIBB24BrowserParser {
   }
 
   private parseBitmapOrInherit(token: ARIBB24BrowserToken): ARIBB24BrowserParsedToken[] {
-    if (token.tag !== 'Bitmap') { return this.praser.parseToken(token as ARIBB24Token); }
-    return [ARIBB24BitmapParsedToken.from(token, this.praser.currentState(), this.praser.currentOption())];
+    if (token.tag !== 'Bitmap') { return this.praser.parseToken(token) as ARIBB24BrowserParsedToken[]; }
+    return [ARIBB24BrowserBitmapParsedToken.from(token, this.praser.currentState(), this.praser.currentOption())];
   }
 
   public parse(tokens: ARIBB24BrowserToken[]): ARIBB24BrowserParsedToken[] {

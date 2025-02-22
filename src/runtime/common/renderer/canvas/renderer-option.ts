@@ -1,4 +1,5 @@
-import { PathElement } from "../additional-symbols-glyph";
+import { PathElement } from "../../additional-symbols-glyph";
+import { RendererOption } from "../renderer-option";
 
 type RendererFontOption = {
   normal: string;
@@ -22,22 +23,22 @@ type RendererResizeOption = {
   objectFit: 'contain' | 'none';
 }
 
-export type RendererOption = {
+export type CanvasRendererOption = RendererOption & {
   font: RendererFontOption;
   replace: RendererReplaceOption;
   color: RendererColorOption;
   resize: RendererResizeOption;
 };
 
-export type PartialRendererOption = Partial<{
+export type PartialCanvasRendererOption = Partial<RendererOption & {
   font: Partial<RendererFontOption>;
   replace:  Partial<RendererReplaceOption>;
   color:  Partial<RendererColorOption>;
   resize:  Partial<RendererResizeOption>;
 }>;
 
-export const RendererOption = {
-  from (option?: PartialRendererOption): RendererOption {
+export const CanvasRendererOption = {
+  from (option?: PartialCanvasRendererOption): CanvasRendererOption {
     return {
       font: {
         normal: "'Hiragino Maru Gothic Pro', 'BIZ UDGothic', 'Yu Gothic Medium', sans-serif",

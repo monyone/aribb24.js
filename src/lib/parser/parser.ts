@@ -1,5 +1,6 @@
-import { ARIBB24Token, ARIBB24CharacterToken, ARIBB24CharacterSizeControlType, ARIBB24ClearScreenToken, ARIBB24DRCSToken, ARIBB24FlashingControlType, ARIBB24OrnamentControlType } from "../tokenizer/token";
+import { ARIBB24Token, ARIBB24CharacterToken, ARIBB24CharacterSizeControlType, ARIBB24ClearScreenToken, ARIBB24DRCSToken, ARIBB24FlashingControlType, ARIBB24OrnamentControlType, ARIBB24BitmapToken } from "../tokenizer/token";
 import { ExhaustivenessError } from "../../util/error";
+import CRC32 from "../../util/crc32";
 
 export const ARIBB24_CHARACTER_SIZE = {
   Small: 'Small',
@@ -127,7 +128,7 @@ export type ARIBB24DRCSParsedToken = ARIBB24CommonParsedToken & Omit<ARIBB24DRCS
   tag: 'DRCS';
 };
 export const ARIBB24DRCSParsedToken = {
-  from({ width, height, depth, binary }: Omit<ARIBB24DRCSToken, 'tag' | 'combining'>, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24DRCSParsedToken {
+  from({ width, height, depth, binary }: ARIBB24DRCSToken, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24DRCSParsedToken {
     return {
       tag: 'DRCS',
       state: structuredClone(state),
@@ -135,11 +136,104 @@ export const ARIBB24DRCSParsedToken = {
       width,
       height,
       depth,
-      binary
+      binary,
     };
   }
 }
-export type ARIBB24ParsedToken = ARIBB24ClearScreenParsedToken | ARIBB24CharacterParsedToken | ARIBB24DRCSParsedToken;
+export type ARIBB24BitmapParsedToken = ARIBB24CommonParsedToken & Omit<ARIBB24BitmapToken, 'tag'> & {
+  tag: 'Bitmap';
+};
+export type ARIBB24BitmapParsedTokenDataURLResult = {
+  width: number;
+  height: number;
+  normal_dataurl: string;
+  flashing_dataurl?: string;
+}
+export const ARIBB24BitmapParsedToken = {
+  from({ x_position, y_position, flc_colors, binary }: ARIBB24BitmapToken, state: ARIBB24ParserState, option: ARIBB24ParserOption): ARIBB24BitmapParsedToken {
+    return {
+      tag: 'Bitmap',
+      state: structuredClone(state),
+      option: structuredClone(option),
+      x_position,
+      y_position,
+      flc_colors,
+      binary,
+    };
+  },
+  toDataURL(token: ARIBB24BitmapParsedToken, pallet: string[]): ARIBB24BitmapParsedTokenDataURLResult {
+    const uint8 = new Uint8Array(token.binary);
+    const flcColors = new Set(token.flc_colors);
+
+    const pngHeaderSize = 8 /* PNG signature */ + 4 /* size */ + 4 /* 'IHDR' */ + 13 /* IHDR */ + 4 /* CRC32 */;
+    const ihdr = uint8.subarray(0, pngHeaderSize);
+    const idat = uint8.subarray(pngHeaderSize, uint8.byteLength);
+    const plteDataSize = 128 * 3;
+    const trnsDataSize = 128;
+    const plteSize = plteDataSize + 12 /* 'PLTE' + size + CRC32 */;
+    const trnsSize = trnsDataSize + 12 /* 'tRNS' + size + CRC32 */;
+    const plteOffset = pngHeaderSize;
+    const trnsOffset = pngHeaderSize + plteSize;
+
+    const pngData = new Uint8Array(ihdr.byteLength + idat.byteLength + plteSize + trnsSize);
+    const pngDataView = new DataView(pngData.buffer);
+    pngData.set(ihdr, 0);
+    pngData.set(idat, pngHeaderSize + plteSize + trnsSize);
+
+    for (let i = 0; i < pallet.length; i++) {
+      const color = pallet[i];
+      const R = Number.parseInt(color.substring(1, 3), 16);
+      const G = Number.parseInt(color.substring(3, 5), 16);
+      const B = Number.parseInt(color.substring(5, 7), 16);
+      const A = Number.parseInt(color.substring(7, 9), 16);
+      pngData[plteOffset + 8 + i * 3 + 0] = R;
+      pngData[plteOffset + 8 + i * 3 + 1] = G;
+      pngData[plteOffset + 8 + i * 3 + 2] = B;
+      pngData[trnsOffset + 8 + i] = flcColors.has(i) ? 0 : A;
+    }
+    pngDataView.setInt32(plteOffset, plteDataSize, false);
+    pngData[plteOffset + 4] = 'P'.charCodeAt(0);
+    pngData[plteOffset + 5] = 'L'.charCodeAt(0);
+    pngData[plteOffset + 6] = 'T'.charCodeAt(0);
+    pngData[plteOffset + 7] = 'E'.charCodeAt(0);
+    pngDataView.setInt32(trnsOffset, trnsDataSize, false);
+    pngData[trnsOffset + 4] = 't'.charCodeAt(0);
+    pngData[trnsOffset + 5] = 'R'.charCodeAt(0);
+    pngData[trnsOffset + 6] = 'N'.charCodeAt(0);
+    pngData[trnsOffset + 7] = 'S'.charCodeAt(0);
+    pngDataView.setInt32(plteOffset + plteSize - 4, CRC32(pngData, plteOffset + 4, plteOffset + 8 + plteDataSize), false);
+    pngDataView.setInt32(trnsOffset + trnsSize - 4, CRC32(pngData, trnsOffset + 4, trnsOffset + 8 + trnsDataSize), false);
+    const width = pngDataView.getInt32(16 /* PNG signature + 'IHDR' + size */, false);
+    const height = pngDataView.getInt32(20 /* PNG signature + 'IHDR' + size + width */, false);
+    const normal_dataurl = 'data:image/png;base64,' + btoa(String.fromCharCode(...pngData));
+
+    if (flcColors.size === 0) {
+      return {
+        width,
+        height,
+        normal_dataurl
+      };
+    }
+
+    // Flashing
+    for (let i = 0; i < pallet.length; i++) {
+      const color = pallet[i];
+      const A = Number.parseInt(color.substring(7, 9), 16);
+      pngData[trnsOffset + 8 + i] = !flcColors.has(i) ? 0 : A;
+    }
+    pngDataView.setInt32(plteOffset + plteSize - 4, CRC32(pngData, plteOffset + 4, plteOffset + 8 + plteDataSize), false);
+    pngDataView.setInt32(trnsOffset + trnsSize - 4, CRC32(pngData, trnsOffset + 4, trnsOffset + 8 + trnsDataSize), false);
+    const flashing_dataurl= 'data:image/png;base64,' + btoa(String.fromCharCode(...pngData));
+
+    return {
+      width,
+      height,
+      normal_dataurl,
+      flashing_dataurl,
+    };
+  }
+}
+export type ARIBB24ParsedToken = ARIBB24ClearScreenParsedToken | ARIBB24CharacterParsedToken | ARIBB24DRCSParsedToken | ARIBB24BitmapParsedToken;
 
 export class ARIBB24Parser {
   private state: ARIBB24ParserState;

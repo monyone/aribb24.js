@@ -1,6 +1,5 @@
-import { CompositionState, encodeSegment, EndSegment, ObjectDefinitionSegment, PaletteDefinitionSegment, PresentationCompositionSegment, SegmentType, SequenceFlag, WindowDefinitionSegment } from "../../../lib/encoder/pgs";
-import { encodeSupFormat, ycbcr } from "../../../lib/muxer/pgs";
-import { ByteBuilder } from "../../../util/bytebuilder";
+import { CompositionState, encodeSegment, EndSegment, ObjectDefinitionSegment, PaletteDefinitionSegment, PresentationCompositionSegment, SegmentType, SequenceFlag, WindowDefinitionSegment } from "../../encoder/pgs";
+import { encodeSupFormat, ycbcr } from "../pgs";
 import concat from "../../../util/concat";
 
 export const makeImageDataSup = (pts: number, dts: number, image: ImageData, palette: [number, number, number, number][], cache: Map<number, number>, plane: [number, number], offset: [number, number], area: [number, number]): ArrayBuffer => {

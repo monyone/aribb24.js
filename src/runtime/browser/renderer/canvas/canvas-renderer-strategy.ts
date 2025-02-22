@@ -2,8 +2,8 @@ import { ARIBB24ParserState } from "../../../../lib/parser/parser";
 import { CanvasRendererOption } from "./canvas-renderer-option";
 import { ExhaustivenessError } from "../../../../util/error";
 import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datagroup";
-import { ARIBB24BitmapParsedToken, ARIBB24BrowserParser, ARIBB24BrowserToken } from "../../types";
-import { renderCharacter, renderDRCS } from "../../../common/canvas/renderer-strategy";
+import { ARIBB24BrowserBitmapParsedToken, ARIBB24BrowserParser, ARIBB24BrowserToken } from "../../types";
+import { renderCharacter, renderDRCS } from "../../../common/renderer/canvas/renderer-strategy";
 
 export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTMLCanvasElement | OffscreenCanvas, state: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionAssociationInformation, rendererOption: CanvasRendererOption): void => {
   // render background
@@ -78,7 +78,7 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
   }
 }
 
-const renderBitmap = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24BitmapParsedToken, Path2DSource: typeof Path2D, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: CanvasRendererOption): void => {
+const renderBitmap = (context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, token: ARIBB24BrowserBitmapParsedToken, Path2DSource: typeof Path2D, magnification: [number, number], info: CaptionAssociationInformation, rendererOption: CanvasRendererOption): void => {
   const { x_position, y_position, width, height } = token;
 
   context.drawImage(token.normal_bitmap, x_position * magnification[0], y_position * magnification[1], width* magnification[0], height * magnification[1]);
