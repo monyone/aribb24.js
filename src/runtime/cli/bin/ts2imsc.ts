@@ -24,7 +24,7 @@ const XMLNode = {
   }
 }
 
-const serialize = (node: XMLNode, depth: number = 0): string => {
+const serializeXML = (node: XMLNode, depth: number = 0): string => {
   if (typeof node === 'string') {
     return '  '.repeat(depth) + node + '\n';
   }
@@ -34,7 +34,7 @@ const serialize = (node: XMLNode, depth: number = 0): string => {
   if (node.children.length === 0) { return result; }
 
   for (const child of node.children) {
-    result += serialize(child, depth + 1);
+    result += serializeXML(child, depth + 1);
   }
   result += '  '.repeat(depth) + `</${node.name}>\n`;
   return result;
@@ -272,5 +272,5 @@ const cmdline = ([
     id++;
   }
 
-  writeFS(output, header + '\n' + serialize(tt));
+  writeFS(output, header + '\n' + serializeXML(tt));
 })();

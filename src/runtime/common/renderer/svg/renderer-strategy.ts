@@ -1,5 +1,5 @@
 import { ARIBB24BitmapParsedToken, ARIBB24CharacterParsedToken, ARIBB24CommonParsedToken, ARIBB24DRCSParsedToken, ARIBB24ParsedToken, ARIBB24Parser, ARIBB24ParserOption, ARIBB24ParserState } from "../../../../lib/parser/parser";
-import { ARIBB24BitmapToken, ARIBB24FlashingControlType, ARIBB24Token } from "../../../../lib/tokenizer/token";
+import { ARIBB24FlashingControlType } from "../../../../lib/tokenizer/token";
 import colortable from "../../colortable";
 import halfwidth from "../../halfwidth";
 import namedcolor from "../../namedcolor";
@@ -8,7 +8,6 @@ import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datag
 import { shouldHalfWidth } from "../../quirk";
 import useARIBFont from "../../font";
 import { SVGRendererOption } from "./renderer-option";
-import CRC32 from "../../../../util/crc32";
 
 export type SVGNode = string | {
   name: string;
@@ -120,7 +119,10 @@ export default (tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformatio
         break;
       }
       case 'ClearScreen':
-        // Noop
+        if (token.time === 0) {
+          buffer.children = [];
+          break;
+        }
         break;
       default:
         throw new ExhaustivenessError(token, `Unexpected ARIB Parsed Token in SVGRenderingStrategy`);
