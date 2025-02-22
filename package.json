@@ -1,6 +1,6 @@
 {
   "name": "aribb24.js",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "main": "./dist/aribb24.js",
   "umd:main": "./dist/aribb24.umd.js",
   "module": "./dist/aribb24.mjs",
@@ -25,7 +25,7 @@
   "bin": {
     "ts2sup": "./dist/cjs/runtime/cli/bin/ts2sup.js",
     "ts2imsc": "./dist/cjs/runtime/cli/bin/ts2imsc.js",
-    "ts2b36": "./dist/cjs/runtime/cli/bin/ts2b36.ts"
+    "ts2b36": "./dist/cjs/runtime/cli/bin/ts2b36.js"
   },
   "author": "monyone <monyone.teihen@gmail.com>",
   "description": "an alternative implementation for b24.js",
