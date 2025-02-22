@@ -22,6 +22,22 @@ export const SVGNode = {
   }
 }
 
+export const serializeSVG = (node: SVGNode, depth: number = 0): string => {
+  if (typeof node === 'string') {
+    return '  '.repeat(depth) + node + '\n';
+  }
+
+  const attributes = Array.from([... (node.name === 'svg' ? [['xmlns', node.xmlns]] : []),  ...Object.entries(node.attributes)]).map(([k, v]) => `${k}="${v}"`).join(' ');
+  let result = '  '.repeat(depth) + `<${node.name}${attributes === '' ? '' : ' ' + attributes}${node.children.length === 0 ? ' /' : ''}>\n`
+  if (node.children.length === 0) { return result; }
+
+  for (const child of node.children) {
+    result += serializeSVG(child, depth + 1);
+  }
+  result += '  '.repeat(depth) + `</${node.name}>\n`;
+  return result;
+}
+
 export default (tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformation, rendererOption: SVGRendererOption): Exclude<SVGNode, string> => {
   const buffer = SVGNode.from('http://www.w3.org/2000/svg', 'svg');
   const fg_groups: SVGNode[] = [];
@@ -119,6 +135,8 @@ export default (tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformatio
   // text
   buffer.children.push(... fg_groups);
   buffer.children.push(... bitmap_groups);
+
+  console.log(serializeSVG(buffer));
 
   return buffer;
 }
