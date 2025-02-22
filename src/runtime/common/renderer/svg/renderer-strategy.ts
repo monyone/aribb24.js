@@ -38,12 +38,15 @@ export const serializeSVG = (node: SVGNode, depth: number = 0): string => {
   return result;
 }
 
-export default (tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformation, rendererOption: SVGRendererOption): Exclude<SVGNode, string> => {
+export default (tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformation, rendererOption: SVGRendererOption, enclosure?: boolean): Exclude<SVGNode, string> => {
+  const target = SVGNode.from('http://www.w3.org/2000/svg', 'svg');
   const buffer = SVGNode.from('http://www.w3.org/2000/svg', 'svg');
   const fg_groups: SVGNode[] = [];
   const bitmap_groups: SVGNode[] = [];
   const bg_paths = new Map<string, string>();
+
   for (const token of tokens) {
+    target.attributes['viewBox'] = `0 0 ${token.state.plane[0]} ${token.state.plane[1]}`;
     buffer.attributes['viewBox'] = `0 0 ${token.state.area[0]} ${token.state.area[1]}`;
     buffer.attributes['x'] = `${token.state.margin[0]}`;
     buffer.attributes['y'] = `${token.state.margin[1]}`;
@@ -136,9 +139,12 @@ export default (tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformatio
   buffer.children.push(... fg_groups);
   buffer.children.push(... bitmap_groups);
 
-  console.log(serializeSVG(buffer));
+  if (!enclosure) {
+    return buffer;
+  }
 
-  return buffer;
+  target.children.push(buffer);
+  return target;
 }
 
 const retriveDecorationSVGPathElement = (token: ARIBB24CharacterParsedToken | ARIBB24DRCSParsedToken, info: CaptionAssociationInformation, rendererOption: SVGRendererOption): SVGNode => {
