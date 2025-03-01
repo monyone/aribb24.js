@@ -30,7 +30,7 @@ describe("ARIB STD-B24 Parser", () => {
     const parser = new ARIBB24Parser(initialState, option);
 
     expect(parser.parseToken(ARIBB24CharacterToken.from('a'))).toStrictEqual([
-      ARIBB24CharacterParsedToken.from(ARIBB24CharacterToken.from('a'), initialStateMagnificated(initialState, option), { magnification: 1 }),
+      ARIBB24CharacterParsedToken.from(ARIBB24CharacterToken.from('a'), initialStateMagnificated(initialState, option), option),
     ]);
   });
 
@@ -39,7 +39,7 @@ describe("ARIB STD-B24 Parser", () => {
     const parser = new ARIBB24Parser(initialState, option);
 
     expect(parser.parseToken(ARIBB24CharacterToken.from('あ'))).toStrictEqual([
-      ARIBB24CharacterParsedToken.from(ARIBB24CharacterToken.from('あ'), initialStateMagnificated(initialState, option), { magnification: 1 }),
+      ARIBB24CharacterParsedToken.from(ARIBB24CharacterToken.from('あ'), initialStateMagnificated(initialState, option), option),
     ]);
   });
 
@@ -48,7 +48,7 @@ describe("ARIB STD-B24 Parser", () => {
     const parser = new ARIBB24Parser(initialState, option);
 
     expect(parser.parseToken(ARIBB24CharacterToken.from('𠮟'))).toStrictEqual([
-      ARIBB24CharacterParsedToken.from(ARIBB24CharacterToken.from('𠮟'), initialStateMagnificated(initialState, option), { magnification: 1 }),
+      ARIBB24CharacterParsedToken.from(ARIBB24CharacterToken.from('𠮟'), initialStateMagnificated(initialState, option), option),
     ]);
   });
 
@@ -57,7 +57,7 @@ describe("ARIB STD-B24 Parser", () => {
     const parser = new ARIBB24Parser(initialState, option);
 
     expect(parser.parseToken(ARIBB24CharacterToken.from('👨‍👩'))).toStrictEqual([
-      ARIBB24CharacterParsedToken.from(ARIBB24CharacterToken.from('👨‍👩'), initialStateMagnificated(initialState, option), { magnification: 1 }),
+      ARIBB24CharacterParsedToken.from(ARIBB24CharacterToken.from('👨‍👩'), initialStateMagnificated(initialState, option), option),
     ]);
   });
 
@@ -72,7 +72,7 @@ describe("ARIB STD-B24 Parser", () => {
     const parser = new ARIBB24Parser(initialState, option);
 
     expect(parser.parseToken(ARIBB24DRCSToken.from(width, height, depth, Uint8Array.from(binary).buffer))).toStrictEqual([
-      ARIBB24DRCSParsedToken.from(ARIBB24DRCSToken.from(width, height, depth, Uint8Array.from(binary).buffer), initialStateMagnificated(initialState, option), { magnification: 1 }),
+      ARIBB24DRCSParsedToken.from(ARIBB24DRCSToken.from(width, height, depth, Uint8Array.from(binary).buffer), initialStateMagnificated(initialState, option), option),
     ]);
   });
 
@@ -87,8 +87,8 @@ describe("ARIB STD-B24 Parser", () => {
     const parser = new ARIBB24Parser(initialState, option);
 
     expect(parser.parseToken(ARIBB24DRCSToken.from(width, height, depth, Uint8Array.from(binary).buffer, '\u3099'))).toStrictEqual([
-      ARIBB24DRCSParsedToken.from(ARIBB24DRCSToken.from(width, height, depth, Uint8Array.from(binary).buffer), initialStateMagnificated(initialState, option), { magnification: 1 }),
-      ARIBB24CharacterParsedToken.from(ARIBB24CharacterToken.from('　\u3099', true), initialStateMagnificated(initialState, option), { magnification: 1 }),
+      ARIBB24DRCSParsedToken.from(ARIBB24DRCSToken.from(width, height, depth, Uint8Array.from(binary).buffer), initialStateMagnificated(initialState, option), option),
+      ARIBB24CharacterParsedToken.from(ARIBB24CharacterToken.from('　\u3099', true), initialStateMagnificated(initialState, option), option),
     ]);
   });
 
@@ -104,7 +104,7 @@ describe("ARIB STD-B24 Parser", () => {
     const parser = new ARIBB24Parser(initialState, option);
 
     expect(parser.parse(replaceDRCS([ARIBB24DRCSToken.from(width, height, depth, Uint8Array.from(binary).buffer, '\u3099')], replace))).toStrictEqual([
-      ARIBB24CharacterParsedToken.from(ARIBB24CharacterToken.from('〓\u3099'), initialStateMagnificated(initialState, option), { magnification: 1 }),
+      ARIBB24CharacterParsedToken.from(ARIBB24CharacterToken.from('〓\u3099'), initialStateMagnificated(initialState, option), option),
     ]);
   });
 
