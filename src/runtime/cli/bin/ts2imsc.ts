@@ -170,7 +170,7 @@ const cmdline = ([
   {
     long: '--output',
     short: '-o',
-    help: 'Specify Output File (.sup)',
+    help: 'Specify Output File (.ttml)',
     action: 'default'
   },
   {
