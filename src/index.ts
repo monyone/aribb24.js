@@ -8,6 +8,8 @@ export type { FeederOption } from './runtime/browser/feeder/feeder'
 export { default as MPEGTSFeeder } from './runtime/browser/feeder/mpegts-feeder';
 export { default as HLSFeeder } from './runtime/browser/feeder/hls-feeder';
 export { default as B36Feeder } from './runtime/browser/feeder/b36-feeder';
+export { default as SpeechRecognitionFeeder } from './runtime/browser/feeder/speech-recognition-feeder';
+
 
 // Renderer
 export type { RendererOption } from './runtime/browser/renderer/renderer-option';

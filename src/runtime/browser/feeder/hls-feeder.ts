@@ -12,7 +12,7 @@ export default class HLSFeeder extends DecodingFeeder {
   private readonly onRemoveTrackHandler: ((event: TrackEvent) => void) = this.onRemoveTrack.bind(this);
   private readonly onPlayHandler = this.onPlay.bind(this);
   private readonly onPauseHandler = this.onPause.bind(this);
-  private readonly interspactHandler = this.interspact.bind(this);
+  private readonly introspectHandler = this.introspect.bind(this);
 
   public constructor(option?: PartialFeederOption) {
     super(option);
@@ -97,7 +97,7 @@ export default class HLSFeeder extends DecodingFeeder {
     this.id3Tracks = this.id3Tracks.filter((track) => track !== track);
   }
 
-  private interspact(): void {
+  private introspect(): void {
     this.registerRenderingLoop();
     if (this.media == null) { return; }
     const current_time = this.media.currentTime;
@@ -162,7 +162,7 @@ export default class HLSFeeder extends DecodingFeeder {
   }
 
   private registerRenderingLoop(): void {
-    this.timer = requestAnimationFrame(this.interspactHandler);
+    this.timer = requestAnimationFrame(this.introspectHandler);
   }
 
   private unregisterRenderingLoop(): void {
