@@ -215,7 +215,7 @@ const cmdline = ([
     help: 'Show help message',
     action: 'help',
   }
-]) satisfies ArgsOption[];
+]) as const satisfies ArgsOption[];
 
 (async () => {
   const cmd = parseArgs(args(), cmdline, 'ts2sup', 'MPEG-TS ARIB Caption (Profile A) to SUP (HDMV-PGS)');
