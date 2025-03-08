@@ -172,8 +172,6 @@ export type ARIBB36Data = ARIBB36ProgramManagementInformation & {
   pages: ARIBB36PageData[]
 };
 
-const textDecoder = new TextDecoder('shift-jis', { fatal: true });
-
 export default (b36: ArrayBuffer): ARIBB36Data => {
   const block = 256;
   const decoder = new TextDecoder('shift-jis', { fatal: true });
@@ -637,7 +635,7 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
     }
     const deleted = deletedValue === 'ERS';
     // memo (メモ)
-    const memo = textDecoder.decode(page.read(20)).trim();
+    const memo = decoder.decode(page.read(20)).trim();
     // reserved (予備)
     page.read(32);
     // completed (ページ完成マーク)
