@@ -10,21 +10,20 @@ export { default as HLSFeeder } from './runtime/browser/feeder/hls-feeder';
 export { default as B36Feeder } from './runtime/browser/feeder/b36-feeder';
 export { default as SpeechRecognitionFeeder } from './runtime/browser/feeder/speech-recognition-feeder';
 
-
 // Renderer
 export type { RendererOption } from './runtime/browser/renderer/renderer-option';
 // Canvas
-export type { CanvasRendererOption } from './runtime/browser/renderer/canvas/canvas-renderer-option';
+export type { CanvasRendererOption, PartialCanvasRendererOption } from './runtime/browser/renderer/canvas/canvas-renderer-option';
 export { default as CanvasMainThreadRenderer } from './runtime/browser/renderer/canvas/canvas-renderer-mainthread';
 export { default as CanvasWebWorkerRenderer } from './runtime/browser/renderer/canvas/canvas-renderer-worker';
 // SVG
-export type { SVGDOMRendererOption } from './runtime/browser/renderer/svg/svg-dom-renderer-option';
+export type { SVGDOMRendererOption, PartialSVGDOMRendererOption } from './runtime/browser/renderer/svg/svg-dom-renderer-option';
 export { default as SVGDOMRenderer } from './runtime/browser/renderer/svg/svg-dom-renderer';
 // Text
 export type { TextRendererOption } from './runtime/browser/renderer/text/text-renderer-option';
 export { default as TextRenderer } from './runtime/browser/renderer/text/text-renderer';
 // HTML
-export type { HTMLFragmentRendererOption } from './runtime/browser/renderer/html/html-fragment-renderer-option';
+export type { HTMLFragmentRendererOption, PartialHTMLFragmentRendererOption } from './runtime/browser/renderer/html/html-fragment-renderer-option';
 export { default as HTMLFragmentRenderer } from './runtime/browser/renderer/html/html-fragment-renderer';
 
 // Strategy
