@@ -183,7 +183,7 @@ const cmdline = ([
     long: '--stroke',
     short: '-s',
     help: 'Specify forced stroke',
-    action: 'store_true',
+    action: 'default',
   },
   {
     long: '--background',
@@ -221,7 +221,7 @@ const cmdline = ([
   const cmd = parseArgs(args(), cmdline, 'ts2sup', 'MPEG-TS ARIB Caption (Profile A) to SUP (HDMV-PGS)');
   const input = cmd['input'] ?? '-';
   const output = cmd['output'] ?? '-';
-  const stroke = cmd['stroke'] ? 'black' : null;
+  const stroke = cmd['stroke'] ?? null;
   const method = ((cmd['method'] ?? 'canvas') as string).toLowerCase();
   const background = cmd['background'] ?? null;
   const font = cmd['font'] ?? "'Hiragino Maru Gothic Pro', 'BIZ UDGothic', 'Yu Gothic Medium', 'IPAGothic', sans-serif";

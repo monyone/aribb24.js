@@ -19,7 +19,7 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[],  plane
   let sx = Number.POSITIVE_INFINITY, sy = Number.POSITIVE_INFINITY, dx = 0, dy = 0;
   let elapsed_time = 0;
   const foreground_codes = new Set<string>();
-  const background_codes = new Set<string>(['#000000FF']);
+  const background_codes = new Set<string>(option.color.stroke ? [namedcolor.get(option.color.stroke) ?? option.color.stroke] : []);
   for (const token of tokens) {
     if (token.tag === 'ClearScreen') {
       elapsed_time = token.time;
@@ -30,6 +30,9 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[],  plane
     dx = Math.max(dx, token.state.margin[0] + token.state.position[0] + ARIBB24Parser.box(token.state)[0]);
     dy = Math.max(dy, token.state.margin[1] + token.state.position[1]);
     background_codes.add(option.color.background ? namedcolor.get(option.color.background) ?? option.color.background : colortable[token.state.background]);
+    if (token.state.ornament != null) {
+      background_codes.add(option.color.stroke ? namedcolor.get(option.color.stroke) ?? option.color.stroke : colortable[token.state.ornament]);
+    }
     foreground_codes.add(colortable[token.state.foreground]);
   }
   const offset = [sx, sy] satisfies [number, number];
@@ -135,7 +138,7 @@ const cmdline = ([
     long: '--stroke',
     short: '-s',
     help: 'Specify forced stroke',
-    action: 'store_true',
+    action: 'default',
   },
   {
     long: '--background',
@@ -173,7 +176,7 @@ const cmdline = ([
   const cmd = parseArgs(args(), cmdline, 'ts2sup', 'MPEG-TS ARIB Caption (Profile A) to SUP (HDMV-PGS)');
   const input = cmd['input'] ?? '-';
   const output = cmd['output'] ?? '-';
-  const stroke = cmd['stroke'] ? 'black' : null;
+  const stroke = cmd['stroke'] ?? null;
   const background = cmd['background'] ?? null;
   const font = cmd['font'] ?? "'Hiragino Maru Gothic Pro', 'BIZ UDGothic', 'Yu Gothic Medium', 'IPAGothic', sans-serif";
   const language = Number.isNaN(Number.parseInt(cmd['language'])) ? (cmd['language'] ?? 0) : Number.parseInt(cmd['language']);
