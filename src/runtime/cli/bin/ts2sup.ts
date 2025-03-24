@@ -64,7 +64,7 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[],  plane
 
   for (const [fr, fg, fb, fa] of foreground_palette) {
     for (const [br, bg, bb, ba] of [... background_palette, [fr, fg, fb, 0], [0, 0, 0, 0]]) {
-      for (let gradation = 1; gradation < gradations - 1; gradation++) {
+      for (let gradation = 1; gradation < gradations; gradation++) {
         const r = Math.floor(fr + (br - fr) * gradation / gradations);
         const g = Math.floor(fg + (bg - fg) * gradation / gradations);
         const b = Math.floor(fb + (bb - fb) * gradation / gradations);
@@ -76,7 +76,7 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[],  plane
   {
     const [fr, fg, fb, fa] = [0, 0, 0, 255];
     const [br, bg, bb, ba] = [0, 0, 0, 128];
-    for (let gradation = 1; gradation < gradations - 1; gradation++) {
+    for (let gradation = 1; gradation < gradations; gradation++) {
       const r = Math.floor(fr + (br - fr) * gradation / gradations);
       const g = Math.floor(fg + (bg - fg) * gradation / gradations);
       const b = Math.floor(fb + (bb - fb) * gradation / gradations);
@@ -87,7 +87,7 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[],  plane
   {
     const [fr, fg, fb, fa] = [0, 0, 0, 128];
     const [br, bg, bb, ba] = [0, 0, 0, 0];
-    for (let gradation = 1; gradation < gradations - 1; gradation++) {
+    for (let gradation = 1; gradation < gradations; gradation++) {
       const r = Math.floor(fr + (br - fr) * gradation / gradations);
       const g = Math.floor(fg + (bg - fg) * gradation / gradations);
       const b = Math.floor(fb + (bb - fb) * gradation / gradations);
