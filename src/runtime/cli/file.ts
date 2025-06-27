@@ -1,11 +1,12 @@
 const bunWriteFS = async (path: string, data: ArrayBuffer | string): Promise<void> => {
   const bun = (globalThis as any).Bun;
-  bun.write(path, data);
+  await bun.write(path, data);
 }
 
+const encoder = new TextEncoder();
 const denoWriteFS = async (path: string, data: ArrayBuffer | string): Promise<void> => {
   const deno = (globalThis as any).Deno;
-  deno.writeFile(path, data);
+  await deno.writeFile(path, typeof data === 'string' ? encoder.encode(data) : data);
 }
 
 const nodeWriteFS = async (path: string, data: ArrayBuffer | string): Promise<void> => {
@@ -14,8 +15,8 @@ const nodeWriteFS = async (path: string, data: ArrayBuffer | string): Promise<vo
   if (path === '-') {
     process.stdout.write(Buffer.from(data));
   } else {
-    const fs = await import('node:fs');
-    fs.writeFileSync(path, Buffer.from(data));
+    const fs = await import('node:fs/promises');
+    await fs.writeFile(path, Buffer.from(data));
   }
 }
 
