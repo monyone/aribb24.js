@@ -9,3 +9,4 @@ tsconfig.build.tsbuildinfo
 test/e2e/**/__screenshots__
 
 .node-version
+mise.toml
