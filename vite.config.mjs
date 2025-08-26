@@ -13,7 +13,7 @@ export default defineConfig({
     },
 
     rollupOptions: {
-      external: ['@napi-rs/canvas', 'node:fs'],
+      external: ['@napi-rs/canvas', 'node:fs', 'node:fs/promises'],
     },
   },
 })
