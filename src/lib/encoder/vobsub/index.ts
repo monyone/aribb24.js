@@ -81,7 +81,6 @@ export const VOBSUBControlRLEOffset = {
   }
 };
 
-export type VOBSUBControlEND = {};
 export const VOBSUBControlEND = {
   into(): ArrayBuffer {
     return new ArrayBuffer();
@@ -229,7 +228,7 @@ export const encode = (x: number, y: number, width: number, height: number, imag
       Number.parseInt(code.slice(1, 3), 16),
       Number.parseInt(code.slice(3, 5), 16),
       Number.parseInt(code.slice(5, 7), 16),
-      Number.parseInt(code.slice(5, 7), 16),
+      Number.parseInt(code.slice(7, 9), 16),
     ];
   }) satisfies RGBATuple[];
   const palette_rgb = palette.map((code) => {
@@ -282,7 +281,7 @@ export const encode = (x: number, y: number, width: number, height: number, imag
     ];
     const alpha = [
       Uint8Array.from([0x04]).buffer,
-      VOBSUBControlPallete.into(alphas),
+      VOBSUBControlAlpha.into(alphas),
     ];
     const coord = [
       Uint8Array.from([0x05]).buffer,
@@ -294,6 +293,7 @@ export const encode = (x: number, y: number, width: number, height: number, imag
     ];
     const last = [
       Uint8Array.from([0xFF]).buffer,
+      VOBSUBControlEND.into(),
     ]
     const all = [... start, ... palette, ... alpha, ... coord, ... rle, ... last] satisfies ArrayBuffer[];
     const bytes = all.reduce((a, b) => a + b.byteLength, 0);
@@ -306,10 +306,11 @@ export const encode = (x: number, y: number, width: number, height: number, imag
     const curr = offset;
     const end = [
       Uint8Array.from([0x02]).buffer,
-      VOBSUBControlStartCaption.into(),
+      VOBSUBControlStopCaption.into(),
     ];
     const last = [
       Uint8Array.from([0xFF]).buffer,
+      VOBSUBControlEND.into(),
     ]
     controls.push(uint16be(Math.floor(duration * 100)), uint16be(curr));
     controls.push(... end, ... last);

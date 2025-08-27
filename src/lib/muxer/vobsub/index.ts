@@ -17,6 +17,7 @@ export const makePES = (data: ArrayBuffer, pts: number): ArrayBuffer => {
 
 export const makePS = (data: ArrayBuffer, stc: number): ArrayBuffer => {
   const array = Uint8Array.from([ 0x00, 0x00, 0x01, 0xba ]);
-  const stuff = Uint8Array.from({ length: 14 });
+  const stuff = Uint8Array.from({ length: 10 });
+  stuff[0] |= 0x40; // MPEG2
   return concat(array.buffer, stuff.buffer, data);
 }
