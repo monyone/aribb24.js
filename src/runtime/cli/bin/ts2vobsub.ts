@@ -174,7 +174,7 @@ const iterate = async (data: ARIBB24MPEGTSData[], language: string | number, cb:
   };
   const stroke = cmd['stroke'] ?? null;
   const background = cmd['background'] ?? null;
-  const foreground = cmd['foreground'] ?? null;
+  const foreground = cmd['foreground'] ?? 'white';
   const font = cmd['font'] ?? "'Hiragino Maru Gothic Pro', 'BIZ UDGothic', 'Yu Gothic Medium', 'IPAGothic', sans-serif";
   const language = Number.isNaN(Number.parseInt(cmd['language'])) ? (cmd['language'] ?? 0) : Number.parseInt(cmd['language']);
   const glyph = cmd['glyph']
