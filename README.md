@@ -24,6 +24,7 @@ ARIB STD-B24 Captione Renderer
   * Text (TextRenderer)
 * also CLI Tools Availables
   * ts2sup: ARIB STD-B24 to SUP (PGS)
+  * ts2vobsub: ARIB STD-B24 to VOBSUB (SPU)
   * ts2imsc: ARIB STD-B24 to IMSC (Image Profile)
   * ts2b36: ARIB STD-B24 to ARIB STD-B36
 
