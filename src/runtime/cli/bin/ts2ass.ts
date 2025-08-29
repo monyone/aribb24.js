@@ -18,6 +18,20 @@ const timestamp = (seconds: number): string => {
 
   return `${hour}:${min.toString(10).padStart(2, '0')}:${sec.toString(10).padStart(2, '0')}.${mill10.toString(10).padStart(2, '0')}`;
 }
+const color = (color: string | number) => {
+  if (typeof color === 'number') {
+    color = colortable[color];
+  }
+  if (namedcolor.has(color)) {
+    color = namedcolor.get(color)!;
+  }
+  color = color.toLowerCase();
+  const r = color.slice(1, 3);
+  const g = color.slice(3, 5);
+  const b = color.slice(5, 7);
+  return `${b}${g}${r}`;
+};
+
 const textize_token = (token: ARIBB24RegionerToken): string => {
   switch (token.tag) {
     case 'Character': return token.character;
@@ -26,7 +40,32 @@ const textize_token = (token: ARIBB24RegionerToken): string => {
   }
 }
 const texize_span = (span: ARIBB24Span): string => {
-  return span.text.map(token => textize_token(token)).join('');
+  let previous_color = null;
+  let result = '';
+  for (const token of span.text) {
+    switch (token.tag) {
+      case 'Character':
+      case 'DRCS':
+        if (previous_color !== token.state.foreground) {
+          previous_color = token.state.foreground;
+          result += `\{\\c${color(token.state.foreground)}&\}`
+        }
+        result += textize_token(token);
+        break;
+      case 'Script': {
+        for (const script of [token.sup, token.sub])
+        {
+          if (previous_color !== script.state.foreground) {
+            previous_color = script.state.foreground;
+            result += `\{\\c${color(script.state.foreground)}&\}`
+          }
+          result += textize_token(script);
+          break;
+        }
+      }
+    }
+  }
+  return result;
 }
 const textize_region = (region: ARIBB24Region): string => {
   const r = region.size === 'Middle' ? 'MSZ' : region.size === 'Small' ? 'SSZ' : 'NSZ';
