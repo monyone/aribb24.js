@@ -2,7 +2,7 @@ import { ARIBB24Parser } from '../../../lib/parser/parser';
 import read from '../../../lib/demuxer/mpegts';
 import { exit } from '../exit';
 import { readableStream, writableStream } from '../stream';
-import regioner, { ARIBB24Region, ARIBB24RegionerToken, ARIBB24Span } from "../../../lib/parser/regioner";
+import regioner, { ARIBB24Region, ARIBB24RegionerToken, ARIBB24Span, SSZ_RUBY_DETECTION } from "../../../lib/parser/regioner";
 import colortable from '../../common/colortable';
 import namedcolor from '../../common/namedcolor';
 import { args, ArgsOption, parseArgs } from '../args';
@@ -166,7 +166,7 @@ const cmdline = ([
           }
         }
 
-        captions.push([independent.pts, elapsed_time ===  0 ? Number.POSITIVE_INFINITY : independent.pts + elapsed_time, regioner(tokens, info)]);
+        captions.push([independent.pts, elapsed_time ===  0 ? Number.POSITIVE_INFINITY : independent.pts + elapsed_time, regioner(tokens, info, SSZ_RUBY_DETECTION.PRESERVE)]);
         plane = parser.currentState().plane;
       }
     }
@@ -192,15 +192,15 @@ const cmdline = ([
   ass += '\n';
   ass += '[V4+ Styles]\n';
   ass += 'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n';
-  ass += 'Style: NSZ,Arial,72,&HFFFFFF,&HFFFFFF,&H80000000,&H80000000,0,0,0,0,100,100,0,0,3,24,0,1,0,0,0,0\n';
-  ass += 'Style: MSZ,Arial,72,&HFFFFFF,&HFFFFFF,&H80000000,&H80000000,0,0,0,0,100,100,0,0,3,24,0,1,0,0,0,0\n';
-  ass += 'Style: SSZ,Arial,36,&HFFFFFF,&HFFFFFF,&H80000000,&H80000000,0,0,0,0,100,100,0,0,3,24,0,1,0,0,0,0\n';
+  ass += 'Style: Normal,Arial,72,&HFFFFFF,&HFFFFFF,&H80000000,&H80000000,0,0,0,0,100,100,0,0,3,24,0,1,0,0,0,0\n';
+  ass += 'Style: Middle,Arial,72,&HFFFFFF,&HFFFFFF,&H80000000,&H80000000,0,0,0,0,100,50,0,0,3,24,0,1,0,0,0,0\n';
+  ass += 'Style: Small,Arial,36,&HFFFFFF,&HFFFFFF,&H80000000,&H80000000,0,0,0,0,100,100,0,0,3,12,0,1,0,0,0,0\n';
   ass += '\n';
   ass += '[Events]\n';
   ass += 'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n';
   ass += captions.map(([begin, end, regions]) => {
     return regions.map((region) => {
-      return `Dialogue: 0,${timestamp(begin)},${timestamp(end)},NSZ,,0,0,0,,{\\bord24}${textize_region(region)}`;
+      return `Dialogue: 0,${timestamp(begin)},${timestamp(end)},${region.size},,0,0,0,,{\\an7}${textize_region(region)}`;
     }).join('\n') + '\n';
   }).join('') + '\n';
 

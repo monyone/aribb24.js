@@ -5,7 +5,7 @@ import { HTMLFragmentRendererOption, PartialHTMLFragmentRendererOption } from ".
 import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datagroup";
 import { shouldHalfWidth, shouldNotAssumeUseClearScreen } from "../quirk";
 import { ARIBB24BrowserParser, ARIBB24BrowserToken, makeRegions, replaceDRCS } from "../../types";
-import { ARIBB24RegionerToken } from "../../../../lib/parser/regioner";
+import { ARIBB24RegionerToken, SSZ_RUBY_DETECTION } from "../../../../lib/parser/regioner";
 import colortable from "../../../common/colortable";
 import halftext from "../halftext";
 
@@ -116,7 +116,7 @@ export default class HTMLFragmentRenderer implements Renderer {
     const parser = new ARIBB24BrowserParser(initialState);
     const fragment = new DocumentFragment();
 
-    const regions = makeRegions(parser.parse(replaceDRCS(tokens, this.option.replace.drcs)), info).map((region) => {
+    const regions = makeRegions(parser.parse(replaceDRCS(tokens, this.option.replace.drcs)), info, SSZ_RUBY_DETECTION.GUESS).map((region) => {
       const div = document.createElement('div');
       div.style.display = 'inline-block';
       if (region.highlight) {

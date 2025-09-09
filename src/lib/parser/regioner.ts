@@ -54,7 +54,13 @@ const charsize_normalize = (size: (typeof ARIBB24_CHARACTER_SIZE)[keyof typeof A
   return size === 'Middle' ? 'Normal' : size;
 };
 
-export default (tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformation): ARIBB24Region[] => {
+export const SSZ_RUBY_DETECTION = {
+  GUESS: 'GUESS_RUBY',
+  PRESERVE: 'PRESERVE',
+  IGNORE: 'IGNORE',
+} as const;
+
+export default (tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformation, ruby_handle_type: (typeof SSZ_RUBY_DETECTION)[keyof typeof SSZ_RUBY_DETECTION]): ARIBB24Region[] => {
   const characters = tokens.filter((token) => token.tag === 'Character' || token.tag === 'DRCS').toSorted((token1, token2) => {
     if (token1.state.position[1] !== token2.state.position[1]) {
       return Math.sign(token1.state.position[1] - token1.state.position[1]);
@@ -176,70 +182,75 @@ export default (tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformatio
   }
 
   // Ruby
-  while (true) {
-    let update = false;
-    LOOP:
-    for (const region of regions.filter(({ size }) => size === ARIBB24_CHARACTER_SIZE.Normal)) {
-      const base_sx = region.position[0] + 0;
-      const base_dx = region.position[0] + region.area[0];
-      const base_uy = region.position[1];
+  if (ruby_handle_type === SSZ_RUBY_DETECTION.GUESS) {
+    while (true) {
+      let update = false;
+      LOOP:
+      for (const region of regions.filter(({ size }) => size === ARIBB24_CHARACTER_SIZE.Normal)) {
+        const base_sx = region.position[0] + 0;
+        const base_dx = region.position[0] + region.area[0];
+        const base_uy = region.position[1];
 
-      let max_intersection_index: number | null = null;
-      let max_intersection_width: number = 0;
-      for (let ruby_index = 0; ruby_index < regions.length; ruby_index++) {
-        const ruby = regions[ruby_index];
-        if (ruby.size !== ARIBB24_CHARACTER_SIZE.Small) { continue; }
-        const ruby_sx = ruby.position[0] + 0;
-        const ruby_dx = ruby.position[0] + ruby.area[0];
-        const ruby_dy = ruby.position[1] + ruby.area[1];
+        let max_intersection_index: number | null = null;
+        let max_intersection_width: number = 0;
+        for (let ruby_index = 0; ruby_index < regions.length; ruby_index++) {
+          const ruby = regions[ruby_index];
+          if (ruby.size !== ARIBB24_CHARACTER_SIZE.Small) { continue; }
+          const ruby_sx = ruby.position[0] + 0;
+          const ruby_dx = ruby.position[0] + ruby.area[0];
+          const ruby_dy = ruby.position[1] + ruby.area[1];
 
-        if (base_uy !== ruby_dy) { continue; }
-        if (base_sx >= ruby_dx || base_dx <= ruby_sx) { continue; }
+          if (base_uy !== ruby_dy) { continue; }
+          if (base_sx >= ruby_dx || base_dx <= ruby_sx) { continue; }
 
-        const intersection_width = Math.min(base_dx, ruby_dx) - Math.max(base_sx, ruby_sx);
-        if (intersection_width > max_intersection_width) {
-          max_intersection_width = intersection_width;
-          max_intersection_index = ruby_index;
+          const intersection_width = Math.min(base_dx, ruby_dx) - Math.max(base_sx, ruby_sx);
+          if (intersection_width > max_intersection_width) {
+            max_intersection_width = intersection_width;
+            max_intersection_index = ruby_index;
+          }
+        }
+
+        if (max_intersection_index != null) {
+          const ruby = regions[max_intersection_index];
+          if (ruby.size !== ARIBB24_CHARACTER_SIZE.Small) { continue; }
+
+          const ruby_sx = ruby.position[0] + 0;
+          const ruby_dx = ruby.position[0] + ruby.area[0];
+
+          const characters = region.spans.flatMap((span) => span.text);
+          const before_characters = characters.filter((character) => {
+            const ch = character.tag === 'Script' ? character.sup : character;
+            const sx = ch.state.position[0];
+            const dx = ch.state.position[0] + ARIBB24Parser.box(ch.state)[0];
+            return dx <= ruby_sx;
+          });
+          const base_characters = characters.filter((character) => {
+            const ch = character.tag === 'Script' ? character.sup : character;
+            const sx = ch.state.position[0];
+            const dx = ch.state.position[0] + ARIBB24Parser.box(ch.state)[0];
+            return ruby_sx < dx && sx < ruby_dx;
+          });
+          const after_characters = characters.filter((character) => {
+            const ch = character.tag === 'Script' ? character.sup : character;
+            const sx = ch.state.position[0];
+            const dx = ch.state.position[0] + ARIBB24Parser.box(ch.state)[0];
+            return ruby_dx <= sx;
+          });
+
+          const ruby_characters = ruby.spans.flatMap((span) => span.text);
+          region.spans = [ARIBB24NormalSpan.from(before_characters), ARIBB24RubySpan.from(base_characters, ruby_characters), ARIBB24NormalSpan.from(after_characters)];
+          regions.splice(max_intersection_index, 1);
+          update = true;
+          break LOOP;
         }
       }
-
-      if (max_intersection_index != null) {
-        const ruby = regions[max_intersection_index];
-        if (ruby.size !== ARIBB24_CHARACTER_SIZE.Small) { continue; }
-
-        const ruby_sx = ruby.position[0] + 0;
-        const ruby_dx = ruby.position[0] + ruby.area[0];
-
-        const characters = region.spans.flatMap((span) => span.text);
-        const before_characters = characters.filter((character) => {
-          const ch = character.tag === 'Script' ? character.sup : character;
-          const sx = ch.state.position[0];
-          const dx = ch.state.position[0] + ARIBB24Parser.box(ch.state)[0];
-          return dx <= ruby_sx;
-        });
-        const base_characters = characters.filter((character) => {
-          const ch = character.tag === 'Script' ? character.sup : character;
-          const sx = ch.state.position[0];
-          const dx = ch.state.position[0] + ARIBB24Parser.box(ch.state)[0];
-          return ruby_sx < dx && sx < ruby_dx;
-        });
-        const after_characters = characters.filter((character) => {
-          const ch = character.tag === 'Script' ? character.sup : character;
-          const sx = ch.state.position[0];
-          const dx = ch.state.position[0] + ARIBB24Parser.box(ch.state)[0];
-          return ruby_dx <= sx;
-        });
-
-        const ruby_characters = ruby.spans.flatMap((span) => span.text);
-        region.spans = [ARIBB24NormalSpan.from(before_characters), ARIBB24RubySpan.from(base_characters, ruby_characters), ARIBB24NormalSpan.from(after_characters)];
-        regions.splice(max_intersection_index, 1);
-        update = true;
-        break LOOP;
-      }
+      if (!update) { break; }
     }
-    if (!update) { break; }
   }
 
-  // remove other SSM for convinience
-  return regions.filter((region) => region.size !== ARIBB24_CHARACTER_SIZE.Small);
+  if (ruby_handle_type === SSZ_RUBY_DETECTION.PRESERVE) {
+    return regions;
+  } else {
+    return regions.filter((region) => region.size !== ARIBB24_CHARACTER_SIZE.Small);
+  }
 }
