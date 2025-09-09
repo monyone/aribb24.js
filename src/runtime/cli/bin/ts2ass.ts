@@ -9,6 +9,7 @@ import { args, ArgsOption, parseArgs } from '../args';
 import { ARIBB24CaptionManagement, CaptionAssociationInformation } from '../../../lib/demuxer/b24/datagroup';
 import { getTokenizeInformation } from '../info';
 import { writeFS } from '../file';
+import halfwidth from '../../common/halfwidth';
 
 const timestamp = (seconds: number): string => {
   const mill10 = Math.floor(seconds * 100) - Math.floor(seconds) * 100;
@@ -34,7 +35,13 @@ const color = (color: string | number) => {
 
 const textize_token = (token: ARIBB24RegionerToken): string => {
   switch (token.tag) {
-    case 'Character': return token.character;
+    case 'Character': {
+      if (token.state.size === 'Middle') {
+        return (halfwidth.get(token.character) ?? token.character);
+      } else {
+        return (token.character);
+      }
+    }
     case 'DRCS': return '〓';
     case 'Script': return textize_token(token.sup) + textize_token(token.sub);
   }
@@ -68,7 +75,7 @@ const texize_span = (span: ARIBB24Span): string => {
   return result;
 }
 const textize_region = (region: ARIBB24Region): string => {
-  const r = region.size === 'Middle' ? 'MSZ' : region.size === 'Small' ? 'SSZ' : 'NSZ';
+  const r = region.size === 'Small' ? 'SSZ' : 'NSZ';
   const x = region.margin[0] + region.position[0];
   const y = region.margin[1] + region.position[1];
   return `\{\\r${r}\}` + `\{\\pos(${x},${y})\}` + region.spans.map((span) => texize_span(span)).join('');
