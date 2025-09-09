@@ -2,15 +2,15 @@ import { CompositionState, encodeSegment, EndSegment, ObjectDefinitionSegment, P
 import { encodeSupFormat, ycbcr } from "../pgs";
 import concat from "../../../util/concat";
 
-export const makeImageDataSup = (pts: number, dts: number, image: ImageData, palette: [number, number, number, number][], cache: Map<number, number>, plane: [number, number], offset: [number, number], area: [number, number]): ArrayBuffer => {
+export const makeImageDataSup = (pts: number, dts: number, image: Uint8ClampedArray, palette: [number, number, number, number][], cache: Map<number, number>, plane: [number, number], offset: [number, number], area: [number, number]): ArrayBuffer => {
   const indexed = [];
   for (let y = 0; y < area[1]; y++) {
     for (let x = 0; x < area[0]; x++) {
       const index = (y * area[0] + x) * 4;
-      const r = image.data[index + 0];
-      const g = image.data[index + 1];
-      const b = image.data[index + 2];
-      const a = image.data[index + 3];
+      const r = image[index + 0];
+      const g = image[index + 1];
+      const b = image[index + 2];
+      const a = image[index + 3];
       const hash = (r * (2 ** 24)) + (g * (2 ** 16)) + (b * (2 ** 8)) + a;
       if (cache.has(hash)) {
         indexed.push(cache.get(hash)!);

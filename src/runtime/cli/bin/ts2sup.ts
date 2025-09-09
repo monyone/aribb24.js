@@ -113,11 +113,11 @@ const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[],  plane
 
   if (elapsed_time !== 0) {
     return concat(
-      makeImageDataSup(pts, dts, image, palette, cache, plane, offset, area),
+      makeImageDataSup(pts, dts, image.data, palette, cache, plane, offset, area),
       makeEmptySup(pts + elapsed_time, dts + elapsed_time, plane)
     );
   } else {
-    return makeImageDataSup(pts, dts, image, palette, cache, plane, offset, area);
+    return makeImageDataSup(pts, dts, image.data, palette, cache, plane, offset, area);
   }
 }
 
