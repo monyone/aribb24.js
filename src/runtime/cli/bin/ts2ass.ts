@@ -77,7 +77,7 @@ const texize_span = (span: ARIBB24Span): string => {
 const textize_region = (region: ARIBB24Region): string => {
   const r = region.size === 'Small' ? 'SSZ' : 'NSZ';
   const x = region.margin[0] + region.position[0];
-  const y = region.margin[1] + region.position[1];
+  const y = region.margin[1] + region.position[1] + (r === 'NSZ' ? 24 : 12);
   return `\{\\r${r}\}` + `\{\\pos(${x},${y})\}` + region.spans.map((span) => texize_span(span)).join('');
 }
 
@@ -199,9 +199,9 @@ const cmdline = ([
   ass += '\n';
   ass += '[V4+ Styles]\n';
   ass += 'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n';
-  ass += 'Style: Normal,Arial,72,&HFFFFFF,&HFFFFFF,&H80000000,&H80000000,0,0,0,0,100,100,0,0,3,24,0,1,0,0,0,0\n';
-  ass += 'Style: Middle,Arial,72,&HFFFFFF,&HFFFFFF,&H80000000,&H80000000,0,0,0,0,100,50,0,0,3,24,0,1,0,0,0,0\n';
-  ass += 'Style: Small,Arial,36,&HFFFFFF,&HFFFFFF,&H80000000,&H80000000,0,0,0,0,100,100,0,0,3,12,0,1,0,0,0,0\n';
+  ass += `Style: Normal,${font},72,&HFFFFFF,&HFFFFFF,&H80000000,&H80000000,0,0,0,0,100,100,0,0,3,24,0,1,0,0,0,0\n`;
+  ass += `Style: Middle,${font},72,&HFFFFFF,&HFFFFFF,&H80000000,&H80000000,0,0,0,0,100,50,0,0,3,24,0,1,0,0,0,0\n`;
+  ass += `Style: Small,${font},36,&HFFFFFF,&HFFFFFF,&H80000000,&H80000000,0,0,0,0,100,100,0,0,3,12,0,1,0,0,0,0\n`;
   ass += '\n';
   ass += '[Events]\n';
   ass += 'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n';

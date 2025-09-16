@@ -75,7 +75,7 @@ export default (tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformatio
       const rx = region.position[0] + region.area[0];
       const ry = region.position[1];
       const tx = character.state.position[0];
-      const ty = character.state.position[1] - (ARIBB24Parser.box(character.state)[1] - 1);
+      const ty = character.state.position[1] + 1 - ARIBB24Parser.box(character.state)[1];
       return rx == tx && ry == ty;
     });
 
