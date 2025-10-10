@@ -77,7 +77,7 @@ const texize_span = (span: ARIBB24Span): string => {
 const textize_region = (region: ARIBB24Region): string => {
   const r = region.size === 'Small' ? 'SSZ' : 'NSZ';
   const x = region.margin[0] + region.position[0];
-  const y = region.margin[1] + region.position[1] + (r === 'NSZ' ? 24 : 12);
+  const y = region.margin[1] + region.position[1] + Math.floor((region.area[1] - region.fontsize[1]) / 2);
   return `\{\\r${r}\}` + `\{\\pos(${x},${y})\}` + region.spans.map((span) => texize_span(span)).join('');
 }
 

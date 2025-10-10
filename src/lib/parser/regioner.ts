@@ -45,6 +45,7 @@ export type ARIBB24Region = {
   position: [number, number],
   area: [number, number];
   size: (typeof ARIBB24_CHARACTER_SIZE)[keyof typeof ARIBB24_CHARACTER_SIZE],
+  fontsize: [number, number];
   background: number;
   highlight: boolean;
   spans: ARIBB24Span[];
@@ -89,6 +90,7 @@ export default (tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformatio
         position: [character.state.position[0], character.state.position[1] - (ARIBB24Parser.box(character.state)[1] - 1)],
         area: [ARIBB24Parser.box(character.state)[0], ARIBB24Parser.box(character.state)[1]],
         size: charsize_normalize(character.state.size),
+        fontsize: character.state.fontsize,
         background: character.state.background,
         highlight: character.state.highlight !== 0,
         spans: [ARIBB24NormalSpan.from([character])],
