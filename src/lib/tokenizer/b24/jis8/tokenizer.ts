@@ -41,9 +41,6 @@ export type DictEntry = CharacterDictEntry | DRCSDictEntry | MacroDictEntry;
 export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
   private GL: 0 | 1 | 2 | 3;
   private GR: 0 | 1 | 2 | 3;
-  private readonly initialGL: 0 | 1 | 2 | 3;
-  private readonly initialGR: 0 | 1 | 2 | 3;
-  private readonly initialGB: [DictEntry, DictEntry, DictEntry, DictEntry];
   private GB: [DictEntry, DictEntry, DictEntry, DictEntry];
   private character_dicts: Record<string, CharacterDictEntry>;
   private drcs_dicts: Record<string, DRCSDictEntry | MacroDictEntry>;
@@ -53,9 +50,6 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
     super();
     this.GL = GL;
     this.GR = GR;
-    this.initialGL = GL;
-    this.initialGR = GR;
-    this.initialGB = [... GB] as [DictEntry, DictEntry, DictEntry, DictEntry];
     this.GB = GB;
     this.character_dicts = character_dicts;
     this.drcs_dicts = structuredClone(drcs_dicts);
@@ -63,9 +57,6 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
   }
 
   public tokenizeStatement(arraybuffer: ArrayBuffer): ARIBB24Token[] {
-    this.GL = this.initialGL;
-    this.GR = this.initialGR;
-    this.GB = [... this.initialGB] as [DictEntry, DictEntry, DictEntry, DictEntry];
     const stream = new ByteStream(arraybuffer);
     const result: ARIBB24Token[] = [];
 
