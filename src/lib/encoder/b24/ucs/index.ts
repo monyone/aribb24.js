@@ -55,7 +55,7 @@ export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
     if (!this.drcs_md5_to_code.has(hash)) {
       if (this.current_drcs_code > 0xF8FF) {
         // too many DRCS replace 〓
-        return this.encoder.encode('〓');
+        return this.encoder.encode('〓').buffer;
       }
 
       const header = Uint8Array.from([

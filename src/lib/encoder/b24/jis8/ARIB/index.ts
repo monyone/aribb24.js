@@ -106,7 +106,7 @@ export default class ARIBB24JapaneseJIS8Encoder extends ARIBB24Encoder {
     }
 
     this.mode = 'MACRO0';
-    return Uint8Array.from([CONTROL_CODES.ESC, 0x24, 0x29, 0x20, 0x40, ... this.drcs_md5_to_code.get(hash)!.map((elem) => elem | 0x80), CONTROL_CODES.SS3, 0x60, CONTROL_CODES.ESC, ESC_CODES.LS1R]);
+    return Uint8Array.from([CONTROL_CODES.ESC, 0x24, 0x29, 0x20, 0x40, ... this.drcs_md5_to_code.get(hash)!.map((elem) => elem | 0x80), CONTROL_CODES.SS3, 0x60, CONTROL_CODES.ESC, ESC_CODES.LS1R]).buffer;
   }
 
   public encodeBitmap(bitmap: ARIBB24BitmapToken): ArrayBuffer {

@@ -1,7 +1,7 @@
 import { EOFError } from "./error";
 
 export class ByteStream {
-  private view: DataView;
+  private view: DataView<ArrayBuffer>;
   private offset: number;
 
   constructor(buffer: ArrayBuffer) {
