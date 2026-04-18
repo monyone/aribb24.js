@@ -29,7 +29,7 @@ describe("ARIB STD-B24 UCS Encoder", () => {
     );
   });
 
-  test('Encode UTF-8 surrogate pair', () => {
+  test('Encode UTF-8 emoji', () => {
     const encoder = new ARIBB24UTF8Encoder();
 
     expect(encoder.encodeToken(ARIBB24CharacterToken.from('👨‍👩'))).toStrictEqual(
