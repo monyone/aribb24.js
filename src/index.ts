@@ -50,7 +50,7 @@ export type { CaptionAssociationInformation, ARIBB24DataUnit, ARIBB24CaptionData
 export { default as demuxIndependentPES } from './lib/demuxer/b24/independent';
 export type { ARIBB36Data, ARIBB36ProgramManagementInformation, ARIBB36PageManagementInformation } from './lib/demuxer/b36';
 export { default as demuxB36 } from './lib/demuxer/b36';
-export type { ARIBB24MPEGTSData, ARIBB24MPEGDemuxOption } from './lib/demuxer/mpegts';
+export type { ARIBB24MPEGTSData, ARIBB24MPEGTSDemuxOption } from './lib/demuxer/mpegts';
 export { default as demuxMPEGTS } from './lib/demuxer/mpegts';
 
 // Muxer

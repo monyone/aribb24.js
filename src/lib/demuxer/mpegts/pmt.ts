@@ -1,11 +1,12 @@
 import { BASIC_HEADER_SIZE, EXTENDED_HEADER_SIZE, CRC_SIZE, section_length } from "./section"
 
-const StreamType = {
+export const MPEGTSStreamType = {
   VIDEO: 'VIDEO',
   AUDIO: 'AUDIO',
   ARIBB24_CAPTION: 'ARIBB24_CAPTION',
   ARIBB24_SUPERIMPOSE: 'ARIBB24_SUPERIMPOSE',
 } as const;
+export type MPEGTSStreamType = (typeof MPEGTSStreamType)[keyof typeof MPEGTSStreamType];
 
 export default (pmt: Uint8Array) => {
   const streams = [];
@@ -18,7 +19,7 @@ export default (pmt: Uint8Array) => {
     const elementary_PID = ((pmt[begin + 1] & 0x1F) << 8) | pmt[begin + 2];
     const ES_info_length = ((pmt[begin + 3] & 0x0F) << 8) | pmt[begin + 4];
 
-    let type: (typeof StreamType)[keyof typeof StreamType] | null = null;
+    let type: MPEGTSStreamType | null = null;
     switch (stream_type) {
       // VIDEO
       case 0x01: type = 'VIDEO'; break; // MPEG-1
