@@ -12,7 +12,7 @@ export default defineConfig({
       formats: ['es', 'cjs', 'umd'],
     },
 
-    rollupOptions: {
+    rolldownOptions: {
       external: ['@napi-rs/canvas', 'node:fs', 'node:fs/promises'],
     },
   },
