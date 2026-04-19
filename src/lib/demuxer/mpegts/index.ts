@@ -56,19 +56,22 @@ export default async function* (readable: ReadableStream<Uint8Array>, option?: P
 
         const first_audio = streams.find(({ type }) => type === 'AUDIO');
         const first_video = streams.find(({ type }) => type === 'VIDEO');
-        superimpose_ref_pid = first_audio?.elementary_PID ?? first_video?.elementary_PID ?? null;
+        superimpose_ref_pid = option?.type === 'Superimpose' ? (first_audio?.elementary_PID ?? first_video?.elementary_PID ?? null) : null;
 
         for (const stream of streams) {
           const video = (option?.offset === 'VIDEO' || option?.offset === 'BOTH' || option?.offset == null) && stream.type === 'VIDEO';
           const audio = (option?.offset === 'AUDIO' || option?.offset === 'BOTH' || option?.offset == null) && stream.type === 'AUDIO';
-          if (!video && !audio) { continue; }
+          const ref = superimpose_ref_pid === stream.elementary_PID;
+          if (!video && !audio && !ref) { continue; }
 
           if (!demuxerOthers.has(stream.elementary_PID)) {
             demuxerOthers.set(stream.elementary_PID, new PacketizedElementaryStreamDemuxer());
           }
         }
       }
-    } else if (demuxerOthers.has(pid) && offset == null) {
+    } else if (demuxerOthers.has(pid)) {
+      if (!(superimpose_ref_pid === pid || offset != null)) { continue; }
+
       for (const stream of demuxerOthers.get(pid)!.feed(packet)) {
         const pts = PTS(stream);
         if (pts == null) { continue; }
