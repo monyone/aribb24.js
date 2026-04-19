@@ -70,7 +70,7 @@ export default async function* (readable: ReadableStream<Uint8Array>, option?: P
         }
       }
     } else if (demuxerOthers.has(pid)) {
-      if (!(superimpose_ref_pid === pid || offset != null)) { continue; }
+      if (!(superimpose_ref_pid === pid || offset == null)) { continue; }
 
       for (const stream of demuxerOthers.get(pid)!.feed(packet)) {
         const pts = PTS(stream);
