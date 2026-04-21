@@ -14,10 +14,12 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
 
     const parser = new ARIBB24BrowserParser(state);
     const parsed = parser.parse(tokens);
-    const { plane: [width, height] } = parser.currentState();
+    let { plane } = parser.currentState();
     if (target != null) {
-      magnification = [Math.ceil(target.width / width), Math.ceil(target.height / height)];
+      magnification = [Math.ceil(target.width / plane[0]), Math.ceil(target.height / plane[1])];
     }
+    const width = plane[0] * magnification[0];
+    const height = plane[1] * magnification[1];
     if (buffer.width !== width || buffer.height !== height) {
       buffer.width = width;
       buffer.height = height;
