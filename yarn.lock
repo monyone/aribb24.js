@@ -244,7 +244,16 @@
   dependencies:
     undici-types "~7.16.0"
 
-"@vitest/browser@^4.1.4":
+"@vitest/browser-playwright@^4.1.4":
+  version "4.1.4"
+  resolved "https://registry.yarnpkg.com/@vitest/browser-playwright/-/browser-playwright-4.1.4.tgz#dec8292ecc8b93998284391bda7247839248d1ee"
+  integrity sha512-q3PchVhZINX23Pv+RERgAtDlp6wzVkID/smOPnZ5YGWpeWUe3jMNYppeVh15j4il3G7JIJty1d1Kicpm0HSMig==
+  dependencies:
+    "@vitest/browser" "4.1.4"
+    "@vitest/mocker" "4.1.4"
+    tinyrainbow "^3.1.0"
+
+"@vitest/browser@4.1.4", "@vitest/browser@^4.1.4":
   version "4.1.4"
   resolved "https://registry.yarnpkg.com/@vitest/browser/-/browser-4.1.4.tgz#a6b1392d87772b894999ca11c0b73d4dc9aa7df4"
   integrity sha512-TrNaY/yVOwxtrxNsDUC/wQ56xSwplpytTeRAqF/197xV/ZddxxulBsxR6TrhVMyniJmp9in8d5u0AcDaNRY30w==
