@@ -136,7 +136,7 @@ export const renderCharacter = (context: CanvasRenderingContext2D | OffscreenCan
     const [sx, sy, dx, dy] = viewBox
     const width = dx - sx
     const height = dy - sy
-    context.scale(state.fontsize[0] / width, state.fontsize[1] / height);
+    context.scale(magnification[0] * state.fontsize[0] / width, magnification[1] * state.fontsize[1] / height);
     context.translate(sx, sy);
 
     // orn
