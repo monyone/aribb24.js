@@ -77,11 +77,11 @@ export default class MPEGTransportStream extends TransformStream<Uint8Array, Uin
         for (let i = 0; i < accendant.byteLength; i++) {
           if (accendant[i] !== SYNC_BYTE) { continue; }
           if (i + PACKET_SIZE > accendant.byteLength) {
-            accendant = accendant.slice(i);
+            accendant = accendant.subarray(i);
             return;
           }
 
-          controller.enqueue(accendant.slice(i, i + PACKET_SIZE));
+          controller.enqueue(accendant.subarray(i, i + PACKET_SIZE));
           i += PACKET_SIZE - 1;
         }
         accendant = new Uint8Array();

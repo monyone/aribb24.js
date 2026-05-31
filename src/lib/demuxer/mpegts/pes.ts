@@ -70,7 +70,7 @@ export default class PacketizedElementaryStreamDemuxer {
   private accendant: Uint8Array = new Uint8Array();
 
   public *feed(packet: Uint8Array) {
-    const content = packet.slice(HEADER_SIZE + (has_adaptation_field(packet) ? 1 + adaptation_field_length(packet) : 0));
+    const content = packet.subarray(HEADER_SIZE + (has_adaptation_field(packet) ? 1 + adaptation_field_length(packet) : 0));
 
     if (payload_unit_start_indicator(packet)) {
       if (this.accendant.byteLength > 0 && PES_packet_length(this.accendant) === 0) {
@@ -84,7 +84,7 @@ export default class PacketizedElementaryStreamDemuxer {
       this.accendant.set(content, old.byteLength);
     }
     if (is_completed(this.accendant)) {
-      yield this.accendant.slice(0, PES_HEADER_SIZE + PES_packet_length(this.accendant));
+      yield this.accendant.subarray(0, PES_HEADER_SIZE + PES_packet_length(this.accendant));
       this.accendant = new Uint8Array();
     }
   }

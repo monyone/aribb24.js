@@ -45,12 +45,12 @@ export default class SectionDemuxer {
         const old = this.accendant;
         this.accendant = new Uint8Array(this.accendant.byteLength + (PACKET_SIZE - begin));
         this.accendant.set(old, 0);
-        this.accendant.set(packet.slice(begin), old.byteLength);
+        this.accendant.set(packet.subarray(begin), old.byteLength);
         return;
       } else {
         const section = new Uint8Array(this.accendant.byteLength + (next - begin));
         section.set(this.accendant, 0);
-        section.set(packet.slice(begin, next), this.accendant.byteLength);
+        section.set(packet.subarray(begin, next), this.accendant.byteLength);
         this.accendant = new Uint8Array();
         yield section
         begin = next;
@@ -61,9 +61,9 @@ export default class SectionDemuxer {
     while (begin < PACKET_SIZE) {
       if (packet[begin] === STUFFING_BYTE) { break; }
 
-      const next = begin + Math.max(0, BASIC_HEADER_SIZE + section_length(packet.slice(begin)));
-      if (next > PACKET_SIZE) { this.accendant = packet.slice(begin); break; }
-      yield packet.slice(begin, next);
+      const next = begin + Math.max(0, BASIC_HEADER_SIZE + section_length(packet.subarray(begin)));
+      if (next > PACKET_SIZE) { this.accendant = packet.subarray(begin); break; }
+      yield packet.subarray(begin, next);
       begin = next;
     }
   }
