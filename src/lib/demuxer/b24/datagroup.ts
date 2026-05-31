@@ -2,29 +2,29 @@ import { ByteStream } from "../../../util/bytestream";
 
 export type ARIBB24StatementDataUnit = {
   tag: 'Statement';
-  data: ArrayBuffer;
+  data: Uint8Array;
 }
 export const ARIBB24StatementDataUnit = {
-  from(data: ArrayBuffer): ARIBB24StatementDataUnit {
+  from(data: Uint8Array): ARIBB24StatementDataUnit {
     return { tag: 'Statement', data };
   }
 }
 export type ARIBB24DRCSDataUnit = {
   tag: 'DRCS'
-  data: ArrayBuffer;
+  data: Uint8Array;
   bytes: 1 | 2;
 }
 export const ARIBB24DRCSDataUnit = {
-  from(data: ArrayBuffer, bytes: 1 | 2): ARIBB24DRCSDataUnit {
+  from(data: Uint8Array, bytes: 1 | 2): ARIBB24DRCSDataUnit {
     return { tag: 'DRCS', data, bytes };
   }
 }
 export type ARIBB24BitmapDataUnit = {
   tag: 'Bitmap'
-  data: ArrayBuffer;
+  data: Uint8Array;
 }
 export const ARIBB24BitmapDataUnit = {
-  from(data: ArrayBuffer): ARIBB24BitmapDataUnit {
+  from(data: Uint8Array): ARIBB24BitmapDataUnit {
     return { tag: 'Bitmap', data };
   }
 }
@@ -125,7 +125,9 @@ export const BCDtoHHMMSSsss = (stream: ByteStream): [number, number, number, num
   ];
 }
 
-export default (data: ArrayBuffer): ARIBB24CaptionData | null => {
+export default (data: Uint8Array | ArrayBufferLike): ARIBB24CaptionData | null => {
+  data = data instanceof Uint8Array ? data : new Uint8Array(data);
+
   const stream = new ByteStream(data);
 
   const data_group_id = (stream.readU8() & 0xFC) >> 2;

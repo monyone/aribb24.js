@@ -23,7 +23,7 @@ export default (caption: ARIBB24CaptionData) => {
     dataunitBuilder.writeU8(0x1F);
     dataunitBuilder.writeU8(data_unit_parameter(unit));
     dataunitBuilder.writeU24(unit.data.byteLength);
-    dataunitBuilder.write(unit.data);
+    dataunitBuilder.write(unit.data.buffer.slice(unit.data.byteOffset, unit.data.byteOffset + unit.data.byteLength));
   }
   const dataunit = dataunitBuilder.build();
 

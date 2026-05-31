@@ -172,7 +172,9 @@ export type ARIBB36Data = ARIBB36ProgramManagementInformation & {
   pages: ARIBB36PageData[]
 };
 
-export default (b36: ArrayBuffer): ARIBB36Data => {
+export default (b36: Uint8Array | ArrayBufferLike): ARIBB36Data => {
+  b36 = b36 instanceof Uint8Array ? b36 : new Uint8Array(b36);
+
   const block = 256;
   const decoder = new TextDecoder('shift-jis', { fatal: true });
   const stream = new ByteStream(b36);
@@ -481,7 +483,7 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
   while (!stream.isEmpty()) {
     const LI = stream.readU32();
     const buffer = stream.read(Math.floor((4 + LI + (block - 1)) / block) * block - 4)
-    const data = new DataView(buffer.slice(0, 4 + LI));
+    const data = new DataView(buffer.buffer, buffer.byteOffset, 4 + LI);
 
     // Page Management Data (ページ管理情報)
     let begin = 0;
@@ -489,7 +491,7 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
     const DL = data.getUint16(begin + 1, false);
     begin += 1 + 2;
     if (data.byteLength < (begin + DL)) { continue; }
-    const page = new ByteStream(data.buffer.slice(begin, begin + DL))
+    const page = new ByteStream(buffer.subarray(begin, begin + DL));
     // pageNumber (ページナンバー/ページコード)
     const pageNumber = String.fromCharCode(
       page.readU8(), page.readU8(), page.readU8(),
@@ -682,7 +684,7 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
     const DL1 = data.getUint16(begin + 1, false);
     begin += 1 + 2;
     if (data.byteLength < (begin + DL1)) { continue; }
-    const management = datagroup(data.buffer.slice(begin, begin + DL1));
+    const management = datagroup(buffer.subarray(begin, begin + DL1));
     if (management == null || management.tag !== 'CaptionManagement') { continue; }
 
     if (pageNumber === '000000') {
@@ -702,7 +704,7 @@ export default (b36: ArrayBuffer): ARIBB36Data => {
     const DL2 = data.getUint16(begin + 1, false) << 8 | data.getUint8(begin + 3);
     begin += 1 + 3;
     if (data.byteLength < (begin + DL2)) { continue; }
-    const statement = datagroup(data.buffer.slice(begin, begin + DL2));
+    const statement = datagroup(buffer.subarray(begin, begin + DL2));
     if (statement == null || statement.tag !== 'CaptionStatement') { continue; }
 
     pages.push({

@@ -36,7 +36,7 @@ for (const [begin, end] of [[0x81, 0x9F], [0xE0, 0xEF]]) {
   }
 }
 
-export default (b36: ARIBB36Data): ArrayBuffer => {
+export default (b36: ARIBB36Data): ArrayBufferLike => {
   const block = 256;
   const builder = new ByteBuilder();
 

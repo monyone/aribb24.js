@@ -24,7 +24,7 @@ const generateCSI = (F: number, ... values: number[]): number[] => {
   return ops;
 }
 
-const generateDRCSUnit = (code: number, width: number, height: number, colors: number, binary?: number[]): ArrayBuffer => {
+const generateDRCSUnit = (code: number, width: number, height: number, colors: number, binary?: number[]): Uint8Array => {
   if (binary == null) {
     binary = [];
     const bits = [0, 1, 6, 2, 7, 5, 4, 3][(colors * 0b00011101) >> 5];
@@ -43,14 +43,14 @@ const generateDRCSUnit = (code: number, width: number, height: number, colors: n
     width, // width,
     height, // height
     ... binary,
-  ]).buffer;
+  ]);
 }
 
 describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize KANJI', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([0x30, 0x26]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([0x30, 0x26]))).toStrictEqual([
       ARIBB24CharacterToken.from('愛'),
     ]);
   });
@@ -58,7 +58,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize KANJI with LS0', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.LS0, 0x24, 0x22]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.LS0, 0x24, 0x22]))).toStrictEqual([
       ARIBB24CharacterToken.from('あ'),
     ]);
   });
@@ -66,7 +66,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize ASCII', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.LS1, 'a'.charCodeAt(0)]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.LS1, 'a'.charCodeAt(0)]))).toStrictEqual([
       ARIBB24CharacterToken.from('ａ'),
     ]);
   });
@@ -74,7 +74,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize HIRAGANA', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SS2, 0x22]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SS2, 0x22]))).toStrictEqual([
       ARIBB24CharacterToken.from('あ'),
     ]);
   });
@@ -82,7 +82,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize KATAKANA', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SS3, 0x61, CONTROL_CODES.LS1, 0x22]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SS3, 0x61, CONTROL_CODES.LS1, 0x22]))).toStrictEqual([
       ARIBB24CharacterToken.from('ア'),
     ]);
   });
@@ -90,7 +90,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize ARIB Character', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([0x75, 0x21]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([0x75, 0x21]))).toStrictEqual([
       ARIBB24CharacterToken.from('㐂'),
     ]);
   });
@@ -98,7 +98,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize NULL', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.NUL]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.NUL]))).toStrictEqual([
       ARIBB24NullToken.from()
     ]);
   });
@@ -106,7 +106,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize BEL', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.BEL]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.BEL]))).toStrictEqual([
       ARIBB24BellToken.from()
     ]);
   });
@@ -114,7 +114,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize APB', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.APB]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.APB]))).toStrictEqual([
       ARIBB24ActivePositionBackwardToken.from()
     ]);
   });
@@ -122,7 +122,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize APF', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.APF]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.APF]))).toStrictEqual([
       ARIBB24ActivePositionForwardToken.from()
     ]);
   });
@@ -130,7 +130,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize APD', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.APD]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.APD]))).toStrictEqual([
       ARIBB24ActivePositionDownToken.from()
     ]);
   });
@@ -138,7 +138,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize APU', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.APU]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.APU]))).toStrictEqual([
       ARIBB24ActivePositionUpToken.from()
     ]);
   });
@@ -146,7 +146,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CS', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CS]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CS]))).toStrictEqual([
       ARIBB24ClearScreenToken.from()
     ]);
   });
@@ -154,7 +154,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize APR', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.APR]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.APR]))).toStrictEqual([
       ARIBB24ActivePositionReturnToken.from()
     ]);
   });
@@ -162,7 +162,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize PAPF', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.PAPF, 5]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.PAPF, 5]))).toStrictEqual([
       ARIBB24ParameterizedActivePositionForwardToken.from(5)
     ]);
   });
@@ -170,7 +170,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CAN', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CAN]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CAN]))).toStrictEqual([
       ARIBB24CancelToken.from()
     ]);
   });
@@ -178,7 +178,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize APS', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.APS, 1, 3]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.APS, 1, 3]))).toStrictEqual([
       ARIBB24ActivePositionSetToken.from(3, 1)
     ]);
   });
@@ -186,7 +186,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize RS', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.RS]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.RS]))).toStrictEqual([
       ARIBB24RecordSeparatorToken.from()
     ]);
   });
@@ -194,7 +194,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize US', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.US]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.US]))).toStrictEqual([
       ARIBB24UnitSeparatorToken.from()
     ]);
   });
@@ -202,7 +202,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize SP', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SP]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SP]))).toStrictEqual([
       ARIBB24SpaceToken.from()
     ]);
   });
@@ -210,7 +210,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize DEL', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.DEL]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.DEL]))).toStrictEqual([
       ARIBB24DeleteToken.from()
     ]);
   });
@@ -218,7 +218,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize BKF', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.BKF]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.BKF]))).toStrictEqual([
       ARIBB24BlackForegroundToken.from()
     ]);
   });
@@ -226,7 +226,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize RDF', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.RDF]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.RDF]))).toStrictEqual([
       ARIBB24RedForegroundToken.from()
     ]);
   });
@@ -234,7 +234,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize GRF', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.GRF]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.GRF]))).toStrictEqual([
       ARIBB24GreenForegroundToken.from()
     ]);
   });
@@ -242,7 +242,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize YLF', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.YLF]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.YLF]))).toStrictEqual([
       ARIBB24YellowForegroundToken.from()
     ]);
   });
@@ -250,7 +250,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize BLF', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.BLF]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.BLF]))).toStrictEqual([
       ARIBB24BlueForegroundToken.from()
     ]);
   });
@@ -258,7 +258,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize MGF', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.MGF]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.MGF]))).toStrictEqual([
       ARIBB24MagentaForegroundToken.from()
     ]);
   });
@@ -266,7 +266,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CNF', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CNF]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CNF]))).toStrictEqual([
       ARIBB24CyanForegroundToken.from()
     ]);
   });
@@ -274,7 +274,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize WHF', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.WHF]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.WHF]))).toStrictEqual([
       ARIBB24WhiteForegroundToken.from()
     ]);
   });
@@ -282,7 +282,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize SSZ', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SSZ]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SSZ]))).toStrictEqual([
       ARIBB24SmallSizeToken.from()
     ]);
   });
@@ -290,7 +290,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize MSZ', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.MSZ]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.MSZ]))).toStrictEqual([
       ARIBB24MiddleSizeToken.from()
     ]);
   });
@@ -298,7 +298,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize NSZ', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.NSZ]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.NSZ]))).toStrictEqual([
       ARIBB24NormalSizeToken.from()
     ]);
   });
@@ -306,7 +306,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize SZX Tiny', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SZX, 0x60]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SZX, 0x60]))).toStrictEqual([
       ARIBB24CharacterSizeControlToken.from(ARIBB24CharacterSizeControlType.TINY)
     ]);
   });
@@ -314,7 +314,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize SZX Double Height', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SZX, 0x41]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SZX, 0x41]))).toStrictEqual([
       ARIBB24CharacterSizeControlToken.from(ARIBB24CharacterSizeControlType.DOUBLE_HEIGHT)
     ]);
   });
@@ -322,7 +322,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize SZX Double Width', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SZX, 0x44]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SZX, 0x44]))).toStrictEqual([
       ARIBB24CharacterSizeControlToken.from(ARIBB24CharacterSizeControlType.DOUBLE_WIDTH)
     ]);
   });
@@ -330,7 +330,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize SZX Double Width and Width', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SZX, 0x45]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SZX, 0x45]))).toStrictEqual([
       ARIBB24CharacterSizeControlToken.from(ARIBB24CharacterSizeControlType.DOUBLE_HEIGHT_AND_WIDTH)
     ]);
   });
@@ -338,7 +338,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize SZX Special1', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SZX, 0x6b]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SZX, 0x6b]))).toStrictEqual([
       ARIBB24CharacterSizeControlToken.from(ARIBB24CharacterSizeControlType.SPECIAL_1)
     ]);
   });
@@ -346,7 +346,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize SZX Special2', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SZX, 0x64]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SZX, 0x64]))).toStrictEqual([
       ARIBB24CharacterSizeControlToken.from(ARIBB24CharacterSizeControlType.SPECIAL_2)
     ]);
   });
@@ -355,7 +355,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
     // SBDTV used transparent space
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.COL, 0x48]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.COL, 0x48]))).toStrictEqual([
       ARIBB24ColorControlForegroundToken.from(8)
     ]);
   });
@@ -364,7 +364,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
     // SBDTV used black background
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.COL, 0x50]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.COL, 0x50]))).toStrictEqual([
       ARIBB24ColorControlBackgroundToken.from(0)
     ]);
   });
@@ -372,7 +372,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize COL HalfForeground', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.COL, 0x61]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.COL, 0x61]))).toStrictEqual([
       ARIBB24ColorControlHalfForegroundToken.from(1)
     ]);
   });
@@ -380,7 +380,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize COL HalfBackground', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.COL, 0x72]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.COL, 0x72]))).toStrictEqual([
       ARIBB24ColorControlHalfBackgroundToken.from(2)
     ]);
   });
@@ -388,7 +388,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize COL Pallet', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.COL, 0x20, 0x45]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.COL, 0x20, 0x45]))).toStrictEqual([
       ARIBB24PalletControlToken.from(5)
     ]);
   });
@@ -396,7 +396,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize FLC Normal', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.FLC, 0x40]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.FLC, 0x40]))).toStrictEqual([
       ARIBB24FlashingControlToken.from(ARIBB24FlashingControlType.NORMAL)
     ]);
   });
@@ -404,7 +404,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize FLC Inverted', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.FLC, 0x47]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.FLC, 0x47]))).toStrictEqual([
       ARIBB24FlashingControlToken.from(ARIBB24FlashingControlType.INVERTED)
     ]);
   });
@@ -412,7 +412,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize FLC Stop', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.FLC, 0x4F]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.FLC, 0x4F]))).toStrictEqual([
       ARIBB24FlashingControlToken.from(ARIBB24FlashingControlType.STOP)
     ]);
   });
@@ -420,7 +420,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CDC Signle Start', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x40]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x40]))).toStrictEqual([
       ARIBB24SingleConcealmentModeToken.from(ARIBB24SingleConcealmentModeType.START)
     ]);
   });
@@ -428,7 +428,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CDC Replacing Start', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x40]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x40]))).toStrictEqual([
       ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.START)
     ]);
   });
@@ -436,7 +436,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CDC Replacing First', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x41]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x41]))).toStrictEqual([
       ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.FIRST)
     ]);
   });
@@ -444,7 +444,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CDC Replacing Second', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x42]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x42]))).toStrictEqual([
       ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.SECOND)
     ]);
   });
@@ -452,7 +452,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CDC Replacing Third', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x43]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x43]))).toStrictEqual([
       ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.THIRD)
     ]);
   });
@@ -460,7 +460,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CDC Replacing Fourth', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x44]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x44]))).toStrictEqual([
       ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.FOURTH)
     ]);
   });
@@ -468,7 +468,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CDC Replacing Fifth', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x45]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x45]))).toStrictEqual([
       ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.FIFTH)
     ]);
   });
@@ -476,7 +476,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CDC Replacing Sixth', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x46]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x46]))).toStrictEqual([
       ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.SIXTH)
     ]);
   });
@@ -484,7 +484,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CDC Replacing Seventh', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x47]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x47]))).toStrictEqual([
       ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.SEVENTH)
     ]);
   });
@@ -492,7 +492,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CDC Replacing Eighth', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x48]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x48]))).toStrictEqual([
       ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.EIGHTH)
     ]);
   });
@@ -500,7 +500,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CDC Replacing Ninth', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x49]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x49]))).toStrictEqual([
       ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.NINTH)
     ]);
   });
@@ -508,7 +508,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CDC Replacing Tenth', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x4A]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x20, 0x4A]))).toStrictEqual([
       ARIBB24ReplacingConcealmentModeToken.from(ARIBB24ReplacingConcealmentModeType.TENTH)
     ]);
   });
@@ -516,7 +516,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CDC Stop', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x4F]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.CDC, 0x4F]))).toStrictEqual([
       ARIBB24ConcealmentModeToken.from(ARIBB24ConcealmentModeType.STOP)
     ]);
   });
@@ -524,7 +524,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize POL Normal', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.POL, 0x40]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.POL, 0x40]))).toStrictEqual([
       ARIBB24PatternPolarityControlToken.from(ARIBB24PatternPolarityControlType.NORMAL)
     ]);
   });
@@ -532,7 +532,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize POL Inverted1', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.POL, 0x41]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.POL, 0x41]))).toStrictEqual([
       ARIBB24PatternPolarityControlToken.from(ARIBB24PatternPolarityControlType.INVERTED_1)
     ]);
   });
@@ -540,7 +540,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize POL Inverted2', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.POL, 0x42]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.POL, 0x42]))).toStrictEqual([
       ARIBB24PatternPolarityControlToken.from(ARIBB24PatternPolarityControlType.INVERTED_2)
     ]);
   });
@@ -548,7 +548,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize WMM Both', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.WMM, 0x40]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.WMM, 0x40]))).toStrictEqual([
       ARIBB24WritingModeModificationToken.from(ARIBB24WritingModeModificationType.BOTH)
     ]);
   });
@@ -556,7 +556,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize WMM Foreground', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.WMM, 0x44]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.WMM, 0x44]))).toStrictEqual([
       ARIBB24WritingModeModificationToken.from(ARIBB24WritingModeModificationType.FOREGROUND)
     ]);
   });
@@ -564,7 +564,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize WMM Background', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.WMM, 0x45]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.WMM, 0x45]))).toStrictEqual([
       ARIBB24WritingModeModificationToken.from(ARIBB24WritingModeModificationType.BACKGROUND)
     ]);
   });
@@ -572,13 +572,13 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize MACRO throw NotImplementedError', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.MACRO]).buffer)).toThrowError(NotImplementedError);
+    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.MACRO]))).toThrowError(NotImplementedError);
   });
 
   test('Tokenize HLC', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.HLC, 0x4F]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.HLC, 0x4F]))).toStrictEqual([
       ARIBB24HilightingCharacterBlockToken.from(0x0F)
     ]);
   });
@@ -586,7 +586,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize RPC', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.RPC, 0x7F]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.RPC, 0x7F]))).toStrictEqual([
       ARIBB24RepeatCharacterToken.from(0x3F)
     ]);
   });
@@ -594,7 +594,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize SPL', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SPL]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.SPL]))).toStrictEqual([
       ARIBB24StopLiningToken.from()
     ]);
   });
@@ -602,7 +602,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize STL', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.STL]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.STL]))).toStrictEqual([
       ARIBB24StartLiningToken.from()
     ]);
   });
@@ -610,7 +610,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize Time Wait', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.TIME, 0x20, 0x7F]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.TIME, 0x20, 0x7F]))).toStrictEqual([
       ARIBB24TimeControlWaitToken.from(0x3F / 10)
     ]);
   });
@@ -618,7 +618,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize Time TMD Mode Free', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.TIME, 0x28, 0x40]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.TIME, 0x28, 0x40]))).toStrictEqual([
       ARIBB24TimeControlModeToken.from(ARIBB24TimeControlModeType.FREE)
     ]);
   });
@@ -626,7 +626,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize Time TMD Mode Real', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.TIME, 0x28, 0x41]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.TIME, 0x28, 0x41]))).toStrictEqual([
       ARIBB24TimeControlModeToken.from(ARIBB24TimeControlModeType.REAL)
     ]);
   });
@@ -634,7 +634,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize Time TMD Mode Offset', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.TIME, 0x28, 0x42]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.TIME, 0x28, 0x42]))).toStrictEqual([
       ARIBB24TimeControlModeToken.from(ARIBB24TimeControlModeType.OFFSET)
     ]);
   });
@@ -642,7 +642,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize Time TMD Mode Unique', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.TIME, 0x28, 0x43]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.TIME, 0x28, 0x43]))).toStrictEqual([
       ARIBB24TimeControlModeToken.from(ARIBB24TimeControlModeType.UNIQUE)
     ]);
   });
@@ -650,19 +650,19 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize Time Specify throw NotUsedDueToStandardError', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.TIME, 0x29]).buffer)).toThrowError(NotUsedDueToStandardError);
+    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([CONTROL_CODES.TIME, 0x29]))).toThrowError(NotUsedDueToStandardError);
   });
 
   test('Tokenize CSI GSM throw NotImplementedError', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.GSM)]).buffer)).toThrowError(NotImplementedError);
+    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.GSM)]))).toThrowError(NotImplementedError);
   });
 
   test('Tokenize CSI SWF', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.SWF, 7)]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.SWF, 7)]))).toStrictEqual([
       ARIBB24SetWritingFormatToken.from(7)
     ]);
   });
@@ -670,13 +670,13 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CSI CCC throw NotImplementedError', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.CCC)]).buffer)).toThrowError(NotImplementedError);
+    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.CCC)]))).toThrowError(NotImplementedError);
   });
 
   test('Tokenize CSI SDF', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.SDF, 680, 480)]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.SDF, 680, 480)]))).toStrictEqual([
       ARIBB24SetDisplayFormatToken.from(680, 480),
     ]);
   });
@@ -684,7 +684,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CSI SSM', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.SSM, 24, 24)]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.SSM, 24, 24)]))).toStrictEqual([
       ARIBB24CharacterCompositionDotDesignationToken.from(24, 24),
     ]);
   });
@@ -692,7 +692,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CSI SHS', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.SHS, 1)]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.SHS, 1)]))).toStrictEqual([
       ARIBB24SetHorizontalSpacingToken.from(1)
     ]);
   });
@@ -700,7 +700,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CSI SVS', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.SVS, 1)]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.SVS, 1)]))).toStrictEqual([
       ARIBB24SetVerticalSpacingToken.from(1)
     ]);
   });
@@ -708,31 +708,31 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CSI PLD throw NotImplementedError', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.PLD)]).buffer)).toThrowError(NotImplementedError);
+    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.PLD)]))).toThrowError(NotImplementedError);
   });
 
   test('Tokenize CSI PLU throw NotImplementedError', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.PLU)]).buffer)).toThrowError(NotImplementedError);
+    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.PLU)]))).toThrowError(NotImplementedError);
   });
 
   test('Tokenize CSI GAA throw NotImplementedError', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.GAA)]).buffer)).toThrowError(NotImplementedError);
+    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.GAA)]))).toThrowError(NotImplementedError);
   });
 
   test('Tokenize CSI SRC throw NotImplementedError', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.SRC)]).buffer)).toThrowError(NotImplementedError);
+    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.SRC)]))).toThrowError(NotImplementedError);
   });
 
   test('Tokenize CSI SDP', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.SDP, 100, 100)]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.SDP, 100, 100)]))).toStrictEqual([
       ARIBB24SetDisplayPositionToken.from(100, 100)
     ]);
   });
@@ -740,7 +740,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CSI ACPS', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.ACPS, 700, 400)]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.ACPS, 700, 400)]))).toStrictEqual([
       ARIBB24ActiveCoordinatePositionSetToken.from(700, 400)
     ]);
   });
@@ -748,13 +748,13 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CSI TCC throw NotImplementedError', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.TCC)]).buffer)).toThrowError(NotImplementedError);
+    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.TCC)]))).toThrowError(NotImplementedError);
   });
 
   test('Tokenize CSI ORN NoneOrnament without CLMA', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.ORN, 0)]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.ORN, 0)]))).toStrictEqual([
       ARIBB24OrnamentControlNoneToken.from(),
     ]);
   });
@@ -762,7 +762,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CSI ORN HemmingOrnament', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.ORN, 1, 0x7F)]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.ORN, 1, 0x7F)]))).toStrictEqual([
       ARIBB24OrnamentControlHemmingToken.from(0x7F),
     ]);
   });
@@ -770,7 +770,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CSI ORN ShadeOrament', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.ORN, 2, 0x7F)]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.ORN, 2, 0x7F)]))).toStrictEqual([
       ARIBB24OrnamentControlShadeToken.from(0x7F)
     ]);
   });
@@ -778,7 +778,7 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CSI ORN HollowOrament', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.ORN, 3)]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.ORN, 3)]))).toStrictEqual([
       ARIBB24OrnamentControlHollowToken.from()
     ]);
   });
@@ -786,25 +786,25 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CSI MDF throw NotImplementedError', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.MDF)]).buffer)).toThrowError(NotImplementedError);
+    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.MDF)]))).toThrowError(NotImplementedError);
   });
 
   test('Tokenize CSI CFS throw NotImplementedError', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.CFS)]).buffer)).toThrowError(NotImplementedError);
+    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.CFS)]))).toThrowError(NotImplementedError);
   });
 
   test('Tokenize CSI XCS throw NotImplementedError', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.XCS)]).buffer)).toThrowError(NotImplementedError);
+    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.XCS)]))).toThrowError(NotImplementedError);
   });
 
   test('Tokenize CSI PRA', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.PRA, 0)]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.PRA, 0)]))).toStrictEqual([
       ARIBB24BuiltinSoundReplayToken.from(0),
     ]);
   });
@@ -812,19 +812,19 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CSI ACS throw NotImplementedError', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.ACS)]).buffer)).toThrowError(NotImplementedError);
+    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.ACS)]))).toThrowError(NotImplementedError);
   });
 
   test('Tokenize CSI UED throw NotImplementedError', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.UED)]).buffer)).toThrowError(NotImplementedError);
+    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.UED)]))).toThrowError(NotImplementedError);
   });
 
   test('Tokenize CSI RCS', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.RCS, 0)]).buffer)).toStrictEqual([
+    expect(tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.RCS, 0)]))).toStrictEqual([
       ARIBB24RasterColourCommandToken.from(0),
     ]);
   });
@@ -832,6 +832,6 @@ describe("ARIB STD-B24 Japanese JIS8 Tokenizer", () => {
   test('Tokenize CSI SCS throw NotImplementedError', () => {
     const tokenizer = new ARIBB24JapaneseJIS8Tokenizer();
 
-    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.SCS)]).buffer)).toThrowError(NotImplementedError);
+    expect(() => tokenizer.tokenizeStatement(Uint8Array.from([... generateCSI(CSI_CODE.SCS)]))).toThrowError(NotImplementedError);
   });
 });

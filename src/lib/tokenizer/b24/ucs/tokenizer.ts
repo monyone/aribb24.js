@@ -39,8 +39,8 @@ export default class ARIBB24UTF8Tokenizer extends ARIBB24Tokenizer {
   private decoder = new TextDecoder('utf-8', { fatal: true });
   private drcs = new Map<string, DRCSData>();
 
-  public tokenizeStatement(arraybuffer: ArrayBuffer): ARIBB24Token[] {
-    const stream = new ByteStream(arraybuffer);
+  public tokenizeStatement(data: Uint8Array): ARIBB24Token[] {
+    const stream = new ByteStream(data);
     const result: ARIBB24Token[] = [];
 
     while (!stream.isEmpty()) {
@@ -86,31 +86,30 @@ export default class ARIBB24UTF8Tokenizer extends ARIBB24Tokenizer {
     return result;
   }
 
-  public processDRCS(bytes: 1 | 2, arraybuffer: ArrayBuffer): void {
+  public processDRCS(bytes: 1 | 2, data: Uint8Array): void {
     if (bytes === 1) {
       throw new NotUsedDueToStandardError('Not used 1-byte DRCS in UTF-8');
     }
 
-    const uint8 = new Uint8Array(arraybuffer);
-    let begin = 0, end = uint8.byteLength;
-    const NumberOfCode = uint8[begin + 0];
+    let begin = 0, end = data.byteLength;
+    const NumberOfCode = data[begin + 0];
     begin += 1
     while (begin < end){
-      const CharacterCode = (uint8[begin + 0] << 8) | uint8[begin + 1];
-      const NumberOfFont = uint8[begin + 2];
+      const CharacterCode = (data[begin + 0] << 8) | data[begin + 1];
+      const NumberOfFont = data[begin + 2];
       begin += 3
 
       for (let font = 0; font < NumberOfFont; font++) {
-        const fontId = (uint8[begin + 0] & 0xF0) >> 4
-        const mode = (uint8[begin + 0] & 0x0F)
+        const fontId = (data[begin + 0] & 0xF0) >> 4
+        const mode = (data[begin + 0] & 0x0F)
 
         if (mode === 0 || mode === 1) {
-          const colors = uint8[begin + 1] + 2;
-          const width = uint8[begin + 2];
-          const height = uint8[begin + 3];
+          const colors = data[begin + 1] + 2;
+          const width = data[begin + 2];
+          const height = data[begin + 3];
           const depth = [0, 1, 6, 2, 7, 5, 4, 3][(colors * 0b00011101) >> 5]; // De Brujin Sequence in 8 bit
           const length = Math.floor(width * height * depth / 8);
-          const binary = uint8.slice(begin + 4, begin + 4 + length).buffer;
+          const binary = data.slice(begin + 4, begin + 4 + length).buffer;
 
           this.drcs.set(String.fromCodePoint(CharacterCode), DRCSData.from(width, height, depth, binary));
 

@@ -83,8 +83,8 @@ export default async function* (readable: ReadableStream<Uint8Array>, option?: P
     } else if (pid === CAPTION_PID) {
       for (const pes of demuxerCaption.feed(packet)) {
         if (offset == null) { continue; }
-        const content = pes.slice(PES_HEADER_SIZE + PES_header_length(pes));
-        const independent = demuxIndependentPES((new Uint8Array(content)).buffer);
+        const content = pes.subarray(PES_HEADER_SIZE + PES_header_length(pes));
+        const independent = demuxIndependentPES(content);
         if (independent == null) { continue; }
         const datagroup = demuxDatagroup(independent.data);
         if (datagroup == null) { continue; }

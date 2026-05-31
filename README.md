@@ -57,10 +57,10 @@ ARIB STD-B24 Captione Renderer
     controller.attachMedia(video);
 
     player.on(mpegts.Events.PES_PRIVATE_DATA_ARRIVED, (data) => {
-        feeder.feedB24(new Uint8Array(data.data).buffer, (data.pts ?? data.nearest_pts) / 1000, (data.dts ?? data.nearest_pts) / 1000);
+        feeder.feedB24(data.data, (data.pts ?? data.nearest_pts) / 1000, (data.dts ?? data.nearest_pts) / 1000);
     });
     player.on(mpegts.Events.TIMED_ID3_METADATA_ARRIVED, (data) => {
-        feeder.feedID3(new Uint8Array(data.data).buffer, (data.pts ?? data.nearest_pts) / 1000, (data.dts ?? data.nearest_pts) / 1000);
+        feeder.feedID3(data.data, (data.pts ?? data.nearest_pts) / 1000, (data.dts ?? data.nearest_pts) / 1000);
     });
 </script>
 ```

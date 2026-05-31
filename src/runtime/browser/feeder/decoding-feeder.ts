@@ -154,7 +154,7 @@ export default abstract class DecodingFeeder implements Feeder {
     }
   }
 
-  protected feed(data: ArrayBuffer, pts: number, dts: number) {
+  protected feed(data: Uint8Array, pts: number, dts: number) {
     const datagroup = demuxPES(data);
     if (datagroup == null) { return; }
     if (datagroup.tag !== this.option.recieve.type) { return; }

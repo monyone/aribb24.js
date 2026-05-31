@@ -5,7 +5,7 @@ import { CONTROL_CODES, CSI_CODE, replaceDRCS } from '@/lib/tokenizer/b24/tokeni
 import { NotImplementedError, NotUsedDueToStandardError } from '@/util/error';
 import md5 from '@/util/md5';
 
-const generateBinary = (... operation: (number | string)[]): ArrayBuffer => {
+const generateBinary = (... operation: (number | string)[]): Uint8Array => {
   const encoder = new TextEncoder();
   const inject = operation.map((elem) => {
     if (typeof(elem) === 'number') {
@@ -16,11 +16,11 @@ const generateBinary = (... operation: (number | string)[]): ArrayBuffer => {
   });
 
   const length = inject.reduce((sum, array) => sum + array.byteLength, 0);
-  const uint8 = new Uint8Array(length);
+  const data = new Uint8Array(length);
   for (let i = 0, offset = 0; i < inject.length; offset += inject[i].byteLength, i++) {
-    uint8.set(inject[i], offset);
+    data.set(inject[i], offset);
   }
-  return uint8.buffer;
+  return data;
 }
 
 const generateCSI = (F: number, ... values: number[]): number[] => {
@@ -41,7 +41,7 @@ const generateCSI = (F: number, ... values: number[]): number[] => {
   return ops;
 }
 
-const generateDRCSUnit = (code: number, width: number, height: number, colors: number, binary?: number[]): ArrayBuffer => {
+const generateDRCSUnit = (code: number, width: number, height: number, colors: number, binary?: number[]): Uint8Array => {
   if (binary == null) {
     binary = [];
     const bits = [0, 1, 6, 2, 7, 5, 4, 3][(colors * 0b00011101) >> 5];
@@ -60,7 +60,7 @@ const generateDRCSUnit = (code: number, width: number, height: number, colors: n
     width, // width,
     height, // height
     ... binary,
-  ]).buffer;
+  ]);
 }
 
 describe("ARIB STD-B24 UCS Tokenizer", () => {

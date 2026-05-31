@@ -27,7 +27,7 @@ const timestamp = (seconds: number): string => {
   return `${hour.toString(10).padStart(2, '0')}:${min.toString(10).padStart(2, '0')}:${sec.toString(10).padStart(2, '0')}:${mill.toString(10).padStart(3, '0')}`;
 }
 
-const generate = (palette: string[], tokens: ARIBB24ParsedToken[],  plane: [number, number], info: CaptionAssociationInformation, option: CanvasRendererOption, source: typeof import('@napi-rs/canvas')): ArrayBuffer | null => {
+const generate = (palette: string[], tokens: ARIBB24ParsedToken[],  plane: [number, number], info: CaptionAssociationInformation, option: CanvasRendererOption, source: typeof import('@napi-rs/canvas')): ArrayBufferLike | null => {
   let sx = Number.POSITIVE_INFINITY, sy = Number.POSITIVE_INFINITY, dx = 0, dy = 0;
   let elapsed_time = 0;
   const colors_set = new Set<string>(['#00000000']);

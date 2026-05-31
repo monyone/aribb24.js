@@ -33,7 +33,7 @@ export type MacroDictEntry = {
   type: (typeof DictEntryType.MACRO),
   code: number;
   bytes: number;
-  dict: Map<number, ArrayBuffer>
+  dict: Map<number, Uint8Array>
 };
 
 export type DictEntry = CharacterDictEntry | DRCSDictEntry | MacroDictEntry;
@@ -56,8 +56,8 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
     this.non_spacing = non_spacing;
   }
 
-  public tokenizeStatement(arraybuffer: ArrayBuffer): ARIBB24Token[] {
-    const stream = new ByteStream(arraybuffer);
+  public tokenizeStatement(data: Uint8Array): ARIBB24Token[] {
+    const stream = new ByteStream(data);
     const result: ARIBB24Token[] = [];
 
     while (!stream.isEmpty()) {
@@ -268,27 +268,26 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
     return result;
   }
 
-  public processDRCS(bytes: 1 | 2, arraybuffer: ArrayBuffer): void {
-    const uint8 = new Uint8Array(arraybuffer);
-    let begin = 0, end = uint8.byteLength;
-    const NumberOfCode = uint8[begin + 0];
+  public processDRCS(bytes: 1 | 2, data: Uint8Array): void {
+    let begin = 0, end = data.byteLength;
+    const NumberOfCode = data[begin + 0];
     begin += 1
     while (begin < end){
-      const CharacterCode = (uint8[begin + 0] << 8) | uint8[begin + 1];
-      const NumberOfFont = uint8[begin + 2];
+      const CharacterCode = (data[begin + 0] << 8) | data[begin + 1];
+      const NumberOfFont = data[begin + 2];
       begin += 3
 
       for (let font = 0; font < NumberOfFont; font++) {
-        const fontId = (uint8[begin + 0] & 0xF0) >> 4
-        const mode = (uint8[begin + 0] & 0x0F)
+        const fontId = (data[begin + 0] & 0xF0) >> 4
+        const mode = (data[begin + 0] & 0x0F)
 
         if (mode === 0 || mode === 1) { // FIXME: Other Mode Not Supported
-          const depth = uint8[begin + 1] + 2;
-          const width = uint8[begin + 2];
-          const height = uint8[begin + 3];
+          const depth = data[begin + 1] + 2;
+          const width = data[begin + 2];
+          const height = data[begin + 3];
           const bits = [0, 1, 6, 2, 7, 5, 4, 3][(depth * 0b00011101) >> 5]; // De Brujin Sequence in 8 bit
           const length = Math.floor(width * height * bits / 8);
-          const binary = uint8.slice(begin + 4, begin + 4 + length).buffer;
+          const binary = data.slice(begin + 4, begin + 4 + length).buffer;
 
           if (bytes === 1) {
             const index = (CharacterCode & 0xFF00) >> 8;

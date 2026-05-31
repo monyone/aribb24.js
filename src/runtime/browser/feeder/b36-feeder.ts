@@ -8,7 +8,8 @@ export default class B36Feeder implements Feeder {
   private option: FeederOption;
   private captions: FeederPresentationData[];
 
-  public constructor(b36: ArrayBuffer, option?: PartialFeederOption) {
+  public constructor(b36: Uint8Array | ArrayBufferLike, option?: PartialFeederOption) {
+    b36 = b36 instanceof Uint8Array ? b36 : new Uint8Array(b36);
     this.option = FeederOption.from(option);
 
     const { initialTime, pages } = demuxB36(b36);

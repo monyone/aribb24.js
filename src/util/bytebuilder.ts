@@ -1,13 +1,13 @@
 import concat from "./concat";
 
 export class ByteBuilder {
-  private buffers: ArrayBuffer[] = [];
+  private buffers: ArrayBufferLike[] = [];
 
   public build() {
     return concat(... this.buffers);
   }
 
-  public write(buffer: ArrayBuffer): void {
+  public write(buffer: ArrayBufferLike): void {
     this.buffers.push(buffer);
   }
 

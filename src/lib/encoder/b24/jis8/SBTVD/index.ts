@@ -23,7 +23,7 @@ export default class ARIBB24BrazilianJIS8Encoder extends ARIBB24Encoder {
     const statement_binaries = concat(Uint8Array.from([CONTROL_CODES.ESC, ESC_CODES.LS1R]).buffer, ... tokens.map(this.encodeTokenHandler));
     return [
       ... this.drcs_units,
-      ARIBB24StatementDataUnit.from(statement_binaries),
+      ARIBB24StatementDataUnit.from(new Uint8Array(statement_binaries)),
     ];
   }
 

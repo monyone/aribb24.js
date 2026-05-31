@@ -188,28 +188,31 @@ export default class HLSFeeder extends DecodingFeeder {
       if (id3.value.key === 'PRIV' && id3.value.info === 'aribb24.js') {
         this.feed(id3.value.data, cue.startTime, cue.startTime);
       } else if (id3.value.key === 'TXXX' && id3.value.info === 'aribb24.js') {
-        this.feed(base64ToUint8Array(id3.value.data).buffer, cue.startTime, cue.startTime);
+        this.feed(base64ToUint8Array(id3.value.data), cue.startTime, cue.startTime);
       }
     } else if (cue.track.label === 'id3') { // hls.js
       if (id3.value.key === 'PRIV' && id3.value.info === 'aribb24.js') {
         this.feed(id3.value.data, cue.startTime, cue.startTime);
       } else if (id3.value.key === 'TXXX' && id3.value.info === 'aribb24.js') {
-        this.feed(base64ToUint8Array(id3.value.data).buffer, cue.startTime, cue.startTime);
+        this.feed(base64ToUint8Array(id3.value.data), cue.startTime, cue.startTime);
       }
     } else if (cue.track.label === 'Timed Metadata') { // video.js
       if (id3.frame.key === 'PRIV' && id3.frame.owner === 'aribb24.js') {
         this.feed(id3.frame.data, cue.startTime, cue.startTime);
       } else if (id3.frame.key === 'TXXX' && id3.frame.description === 'aribb24.js') {
-        this.feed(base64ToUint8Array(id3.frame.data).buffer, cue.startTime, cue.startTime);
+        this.feed(base64ToUint8Array(id3.frame.data), cue.startTime, cue.startTime);
       }
     }
   }
 
-  public feedB24(data: ArrayBuffer, pts: number, dts?: number): void {
+  public feedB24(data: Uint8Array | ArrayBufferLike, pts: number, dts?: number): void {
+    data = data instanceof Uint8Array ? data : new Uint8Array(data);
     this.feed(data, pts, dts ?? pts);
   }
 
-  public feedID3(data: ArrayBuffer, pts: number, dts?: number): void {
+  public feedID3(data: Uint8Array | ArrayBufferLike, pts: number, dts?: number): void {
+    data = data instanceof Uint8Array ? data : new Uint8Array(data);
+
     for (const frame of parseID3v2(data)) {
       switch (frame.id) {
         case 'PRIV': {
@@ -219,7 +222,7 @@ export default class HLSFeeder extends DecodingFeeder {
         }
         case 'TXXX': {
           if (frame.description !== 'aribb24.js') { break; }
-          this.feed(base64ToUint8Array(frame.text).buffer, pts, dts ?? pts);
+          this.feed(base64ToUint8Array(frame.text), pts, dts ?? pts);
           break;
         }
       }

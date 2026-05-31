@@ -1,6 +1,6 @@
 import { ByteBuilder } from "../../../util/bytebuilder";
 
-export const encodeSupFormat = (pts: number, dts: number, data: ArrayBuffer): ArrayBuffer => {
+export const encodeSupFormat = (pts: number, dts: number, data: ArrayBufferLike): ArrayBufferLike => {
   const builder = new ByteBuilder();
   builder.writeU16(0x5047); // magic
   builder.writeU32(pts);

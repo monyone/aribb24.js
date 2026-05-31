@@ -360,25 +360,24 @@ export default abstract class ARIBB24Tokenizer {
     return result;
   }
 
-  abstract tokenizeStatement(arraybuffer: ArrayBuffer): ARIBB24Token[];
-  abstract processDRCS(bytes: 1 | 2, arraybuffer: ArrayBuffer): void;
+  abstract tokenizeStatement(data: Uint8Array): ARIBB24Token[];
+  abstract processDRCS(bytes: 1 | 2, data: Uint8Array): void;
 
-  public tokenizeBitmap(arraybuffer: ArrayBuffer): ARIBB24Token[] {
-    const uint8 = new Uint8Array(arraybuffer);
+  public tokenizeBitmap(data: Uint8Array): ARIBB24Token[] {
     let begin = 0;
 
-    const x_position = (((uint8[begin] << 8) | uint8[begin + 1]) << 16) >> 16;
+    const x_position = (((data[begin] << 8) | data[begin + 1]) << 16) >> 16;
     begin += 2;
-    const y_position = (((uint8[begin] << 8) | uint8[begin + 1]) << 16) >> 16;
+    const y_position = (((data[begin] << 8) | data[begin + 1]) << 16) >> 16;
     begin += 2;
-    const number_of_flc_colors = uint8[begin];
+    const number_of_flc_colors = data[begin];
     begin += 1;
-    const flcColors = Array.from(uint8.subarray(begin, begin + number_of_flc_colors));
+    const flcColors = Array.from(data.subarray(begin, begin + number_of_flc_colors));
     begin += number_of_flc_colors;
     const pngHeaderSize = 8 /* PNG signature */ + 4 /* size */ + 4 /* 'IHDR' */ + 13 /* IHDR */ + 4 /* CRC32 */;
-    if (begin + pngHeaderSize > uint8.byteLength) { return []; }
+    if (begin + pngHeaderSize > data.byteLength) { return []; }
 
-    return [ARIBB24BitmapToken.from(x_position, y_position, flcColors, arraybuffer.slice(begin)) ];
+    return [ARIBB24BitmapToken.from(x_position, y_position, flcColors, data.slice(begin).buffer) ];
   }
 }
 

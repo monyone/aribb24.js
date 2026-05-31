@@ -1,7 +1,7 @@
 import { ByteStream } from "../../../util/bytestream";
 import { BCDtoHHMMSSsss, ARIBB24CaptionData, CaptionManagementLanguageEntry, ARIBB24DataUnit, DisplayModeAndDisplayConditionDesignation, DisplayModeTypeAll, TimeControlModeAndOffsetTime, TimeControlModeAndPresentationStartTime, TimeControlModeType } from "../b24/datagroup";
 
-export default (data: ArrayBuffer): ARIBB24CaptionData | null => {
+export default (data: Uint8Array): ARIBB24CaptionData | null => {
   const stream = new ByteStream(data);
 
   const data_group_id = (stream.readU8() & 0xFC) >> 2;

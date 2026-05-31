@@ -1,11 +1,13 @@
 import { EOFError } from "./error";
 
 export class ByteStream {
-  private view: DataView<ArrayBuffer>;
+  private data: Uint8Array;
+  private view: DataView<ArrayBufferLike>;
   private offset: number;
 
-  constructor(buffer: ArrayBuffer) {
-    this.view = new DataView(buffer);
+  constructor(data: Uint8Array) {
+    this.data = data;
+    this.view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     this.offset = 0;
   }
 
@@ -17,12 +19,12 @@ export class ByteStream {
     return this.offset === this.view.byteLength;
   }
 
-  public read(length: number): ArrayBuffer {
+  public read(length: number): Uint8Array {
     if (!this.exists(length)) {
       throw new EOFError('Detected EOF!');
     }
 
-    const result = this.view.buffer.slice(this.offset, this.offset + length);
+    const result = this.data.subarray(this.offset, this.offset + length);
     this.offset += length;
     return result;
   }
@@ -83,8 +85,8 @@ export class ByteStream {
     return result;
   }
 
-  public readAll(): ArrayBuffer {
-    const result = this.view.buffer.slice(this.offset, this.view.byteLength);
+  public readAll(): Uint8Array {
+    const result = this.data.subarray(this.offset);
     this.offset = this.view.byteLength;
     return result;
   }

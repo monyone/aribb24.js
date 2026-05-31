@@ -45,7 +45,7 @@ describe("ARIB STD-B24 Muxer Demuxer Consistenty for DataUnit", () => {
       timeControlMode: TimeControlModeType.FREE,
       units: [{
         tag: 'Statement',
-        data: new ArrayBuffer(0)
+        data: new Uint8Array(0)
       }],
     } as const satisfies ARIBB24CaptionData;
     expect(demux(mux(data))).toStrictEqual(data);
@@ -60,7 +60,22 @@ describe("ARIB STD-B24 Muxer Demuxer Consistenty for DataUnit", () => {
       units: [{
         tag: 'DRCS',
         bytes: 1,
-        data: new ArrayBuffer(1)
+        data: new Uint8Array(1)
+      }],
+    } as const satisfies ARIBB24CaptionData;
+    expect(demux(mux(data))).toStrictEqual(data);
+  });
+
+  test('Mux Statement With DRCS Content with byteoffset', () => {
+    const data = {
+      tag: 'CaptionStatement',
+      group: 0,
+      lang: 1,
+      timeControlMode: TimeControlModeType.FREE,
+      units: [{
+        tag: 'DRCS',
+        bytes: 1,
+        data: new Uint8Array([1, 2, 3, 4, 5, 6]).subarray(1, 3)
       }],
     } as const satisfies ARIBB24CaptionData;
     expect(demux(mux(data))).toStrictEqual(data);
@@ -75,7 +90,7 @@ describe("ARIB STD-B24 Muxer Demuxer Consistenty for DataUnit", () => {
       units: [{
         tag: 'DRCS',
         bytes: 2,
-        data: new ArrayBuffer(2)
+        data: new Uint8Array(2)
       }],
     } as const satisfies ARIBB24CaptionData;
     expect(demux(mux(data))).toStrictEqual(data);
@@ -89,7 +104,7 @@ describe("ARIB STD-B24 Muxer Demuxer Consistenty for DataUnit", () => {
       timeControlMode: TimeControlModeType.FREE,
       units: [{
         tag: 'Bitmap',
-        data: new ArrayBuffer(3)
+        data: new Uint8Array(3)
       }],
     } as const satisfies ARIBB24CaptionData;
     expect(demux(mux(data))).toStrictEqual(data);
@@ -104,13 +119,13 @@ describe("ARIB STD-B24 Muxer Demuxer Consistenty for DataUnit", () => {
       units: [{
         tag: 'DRCS',
         bytes: 1,
-        data: new ArrayBuffer(4),
+        data: new Uint8Array(4),
       }, {
         tag: 'Statement',
-        data: new ArrayBuffer(5)
+        data: new Uint8Array(5)
       }, {
         tag: 'Bitmap',
-        data: new ArrayBuffer(6)
+        data: new Uint8Array(6)
       }],
     } as const satisfies ARIBB24CaptionData;
     expect(demux(mux(data))).toStrictEqual(data);

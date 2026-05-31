@@ -3,7 +3,7 @@ import { CONTROL_CODES, CSI_CODE } from "../../tokenizer/b24/tokenizer";
 import { ExhaustivenessError } from "../../../util/error";
 import { ARIBB24DataUnit } from "../../demuxer/b24/datagroup";
 
-const generateCSI = (F: number, ... values: number[]): ArrayBuffer => {
+const generateCSI = (F: number, ... values: number[]): ArrayBufferLike => {
   const ops = [F];
 
   let sp: 0x20 | 0x3b = 0x20;
@@ -26,7 +26,7 @@ export default abstract class ARIBB24Encoder {
 
   public abstract encode(tokens: ARIBB24Token[]): ARIBB24DataUnit[];
 
-  public encodeToken(token: ARIBB24Token): ArrayBuffer {
+  public encodeToken(token: ARIBB24Token): ArrayBufferLike {
     switch (token.tag) {
       case 'Character':
         return this.encodeCharacter(token);
@@ -41,7 +41,7 @@ export default abstract class ARIBB24Encoder {
     }
   }
 
-  public encodeControl(control: Exclude<ARIBB24Token, ARIBB24CharacterToken | ARIBB24DRCSToken | ARIBB24BitmapToken | ARIBB24MosaicToken>): ArrayBuffer {
+  public encodeControl(control: Exclude<ARIBB24Token, ARIBB24CharacterToken | ARIBB24DRCSToken | ARIBB24BitmapToken | ARIBB24MosaicToken>): ArrayBufferLike {
     switch (control.tag) {
       // C0
       case 'Null':
@@ -165,8 +165,8 @@ export default abstract class ARIBB24Encoder {
         throw new ExhaustivenessError(control, `Unexpeced ARIBB24Token in encodeControl)`);
     }
   }
-  public abstract encodeCharacter(character: ARIBB24CharacterToken): ArrayBuffer;
-  public abstract encodeDRCS(drcs: ARIBB24DRCSToken): ArrayBuffer;
-  public abstract encodeBitmap(bitmap: ARIBB24BitmapToken): ArrayBuffer;
-  public abstract encodeMosaic(mozaic: ARIBB24MosaicToken): ArrayBuffer;
+  public abstract encodeCharacter(character: ARIBB24CharacterToken): ArrayBufferLike;
+  public abstract encodeDRCS(drcs: ARIBB24DRCSToken): ArrayBufferLike;
+  public abstract encodeBitmap(bitmap: ARIBB24BitmapToken): ArrayBufferLike;
+  public abstract encodeMosaic(mozaic: ARIBB24MosaicToken): ArrayBufferLike;
 }

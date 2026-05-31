@@ -1,7 +1,7 @@
 import { ByteBuilder } from "../../../util/bytebuilder";
 import concat from "../../../util/concat";
 
-const uint16be = (value: number): ArrayBuffer => {
+const uint16be = (value: number): ArrayBufferLike => {
   const buffer = new ArrayBuffer(2);
   const view = new DataView(buffer);
   view.setUint16(0, value, false);
@@ -87,7 +87,7 @@ export const VOBSUBControlEND = {
   }
 };
 
-export const encodeControl = (type: (typeof ControlType)[keyof typeof ControlType], data: ArrayBuffer): ArrayBuffer => {
+export const encodeControl = (type: (typeof ControlType)[keyof typeof ControlType], data: ArrayBufferLike): ArrayBufferLike => {
   const builder = new ByteBuilder();
   builder.writeU8(type);
   builder.write(data);
@@ -265,7 +265,7 @@ export const encode = (x: number, y: number, width: number, height: number, imag
   const [top, bottom] = encodeImage(width, height, image, rgba_tuple);
 
   const control_data_offset = top.byteLength + bottom.byteLength + 4;
-  const controls: ArrayBuffer[] = [];
+  const controls: ArrayBufferLike[] = [];
   let offset = control_data_offset;
   {
     const curr = offset;

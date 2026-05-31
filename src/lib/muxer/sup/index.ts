@@ -2,7 +2,7 @@ import { CompositionState, encodeSegment, EndSegment, ObjectDefinitionSegment, P
 import { encodeSupFormat, ycbcr } from "../pgs";
 import concat from "../../../util/concat";
 
-export const makeImageDataSup = (pts: number, dts: number, image: Uint8ClampedArray, palette: [number, number, number, number][], cache: Map<number, number>, plane: [number, number], offset: [number, number], area: [number, number]): ArrayBuffer => {
+export const makeImageDataSup = (pts: number, dts: number, image: Uint8ClampedArray, palette: [number, number, number, number][], cache: Map<number, number>, plane: [number, number], offset: [number, number], area: [number, number]): ArrayBufferLike => {
   const indexed = [];
   for (let y = 0; y < area[1]; y++) {
     for (let x = 0; x < area[0]; x++) {
@@ -157,7 +157,7 @@ export const makeImageDataSup = (pts: number, dts: number, image: Uint8ClampedAr
   );
 }
 
-export const makeEmptySup = (pts: number, dts: number, plane: [number, number]): ArrayBuffer => {
+export const makeEmptySup = (pts: number, dts: number, plane: [number, number]): ArrayBufferLike => {
   const pcs = {
     width: plane[0],
     height: plane[1],

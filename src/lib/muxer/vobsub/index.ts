@@ -4,7 +4,7 @@ import concat from "../../../util/concat";
 import BitBuilder from "../../../util/bitbuilder";
 
 
-export const makePES = (data: ArrayBuffer, pts: number): ArrayBuffer => {
+export const makePES = (data: ArrayBufferLike, pts: number): ArrayBufferLike => {
   const length = 3 + 5 + data.byteLength;
   const array = Uint8Array.from([
     0x00, 0x00, 0x01,
@@ -25,7 +25,7 @@ export const makePES = (data: ArrayBuffer, pts: number): ArrayBuffer => {
   return concat(array.buffer, builder.build(), data);
 }
 
-export const makePS = (data: ArrayBuffer, stc: number): ArrayBuffer => {
+export const makePS = (data: ArrayBufferLike, stc: number): ArrayBufferLike => {
   const array = Uint8Array.from([ 0x00, 0x00, 0x01, 0xba ]);
   const builder = new BitBuilder();
   builder.writeBits(0b01, 2); // Marker Bit (MPEG2)

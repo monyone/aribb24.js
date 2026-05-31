@@ -3,7 +3,7 @@ import ARIBB24UTF8Tokenizer from '@/lib/tokenizer/b24/ucs/tokenizer';
 import { ARIBB24ActivePositionDownToken, ARIBB24ActivePositionReturnToken, ARIBB24CharacterToken, ARIBB24SpaceToken } from '@/lib/tokenizer/token';
 import { CONTROL_CODES } from '@/lib/tokenizer/b24/tokenizer';
 
-const generateBinary = (... operation: (number | string)[]): ArrayBuffer => {
+const generateBinary = (... operation: (number | string)[]): Uint8Array => {
   const encoder = new TextEncoder();
   const inject = operation.map((elem) => {
     if (typeof(elem) === 'number') {
@@ -14,11 +14,11 @@ const generateBinary = (... operation: (number | string)[]): ArrayBuffer => {
   });
 
   const length = inject.reduce((sum, array) => sum + array.byteLength, 0);
-  const uint8 = new Uint8Array(length);
+  const data = new Uint8Array(length);
   for (let i = 0, offset = 0; i < inject.length; offset += inject[i].byteLength, i++) {
-    uint8.set(inject[i], offset);
+    data.set(inject[i], offset);
   }
-  return uint8.buffer;
+  return data;
 }
 
 const generateCharacterTokens = (str: string) => {

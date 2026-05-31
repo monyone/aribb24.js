@@ -20,11 +20,11 @@ export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
     const statement_binaries = concat(... tokens.map(this.encodeTokenHandler));
     return [
       ... this.drcs_units,
-      ARIBB24StatementDataUnit.from(statement_binaries),
+      ARIBB24StatementDataUnit.from(new Uint8Array(statement_binaries)),
     ];
   }
 
-  public encodeControl(control: Exclude<ARIBB24Token, ARIBB24CharacterToken | ARIBB24DRCSToken | ARIBB24BitmapToken | ARIBB24MosaicToken>): ArrayBuffer {
+  public encodeControl(control: Exclude<ARIBB24Token, ARIBB24CharacterToken | ARIBB24DRCSToken | ARIBB24BitmapToken | ARIBB24MosaicToken>): ArrayBufferLike {
     switch (control.tag) {
       // C0
       case 'Null':
@@ -49,7 +49,7 @@ export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
     }
   }
 
-  public encodeDRCS(drcs: ARIBB24DRCSToken): ArrayBuffer {
+  public encodeDRCS(drcs: ARIBB24DRCSToken): ArrayBufferLike {
     const hash = md5(drcs.binary);
 
     if (!this.drcs_md5_to_code.has(hash)) {
@@ -69,7 +69,7 @@ export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
         drcs.width, // height
       ]).buffer;
 
-      this.drcs_units.push(ARIBB24DRCSDataUnit.from(concat(header, drcs.binary), 2));
+      this.drcs_units.push(ARIBB24DRCSDataUnit.from(new Uint8Array(concat(header, drcs.binary)), 2));
       this.drcs_md5_to_code.set(hash, this.current_drcs_code);
       this.current_drcs_code++;
     }

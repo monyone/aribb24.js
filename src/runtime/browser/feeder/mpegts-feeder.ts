@@ -8,11 +8,14 @@ export default class MPEGTSFeeder extends DecodingFeeder {
     super(option);
   }
 
-  public feedB24(data: ArrayBuffer, pts: number, dts?: number) {
+  public feedB24(data: Uint8Array | ArrayBufferLike, pts: number, dts?: number) {
+    data = data instanceof Uint8Array ? data : new Uint8Array(data);
     this.feed(data, pts, dts ?? pts);
   }
 
-  public feedID3(data: ArrayBuffer, pts: number, dts?: number) {
+  public feedID3(data: Uint8Array | ArrayBufferLike, pts: number, dts?: number) {
+    data = data instanceof Uint8Array ? data : new Uint8Array(data);
+
     for (const frame of parseID3v2(data)) {
       switch (frame.id) {
         case 'PRIV': {
@@ -22,7 +25,7 @@ export default class MPEGTSFeeder extends DecodingFeeder {
         }
         case 'TXXX': {
           if (frame.description !== 'aribb24.js') { break; }
-          this.feed(base64ToUint8Array(frame.text).buffer, pts, dts ?? pts);
+          this.feed(base64ToUint8Array(frame.text), pts, dts ?? pts);
           break;
         }
       }
