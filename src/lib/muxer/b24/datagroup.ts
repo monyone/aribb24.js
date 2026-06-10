@@ -79,8 +79,8 @@ export default (caption: ARIBB24CaptionData) => {
         const HH = (Math.floor(caption.presentationStartTime[0] / 10) << 4) | ((caption.presentationStartTime[0] % 10) << 0);
         const MM = (Math.floor(caption.presentationStartTime[1] / 10) << 4) | ((caption.presentationStartTime[1] % 10) << 0);
         const SS = (Math.floor(caption.presentationStartTime[2] / 10) << 4) | ((caption.presentationStartTime[2] % 10) << 0);
-        const sss1 = (Math.floor(caption.presentationStartTime[2] / 100) << 4) | (((caption.presentationStartTime[2] / 10) % 10) << 0);
-        const sss2 = (Math.floor(caption.presentationStartTime[2] % 10) << 4) | 0b1111;
+        const sss1 = (Math.floor(caption.presentationStartTime[3] / 100) << 4) | ((Math.floor(caption.presentationStartTime[3] / 10) % 10) << 0);
+        const sss2 = ((caption.presentationStartTime[3] % 10) << 4) | 0b1111;
         datagroupBuilder.writeU8(HH);
         datagroupBuilder.writeU8(MM);
         datagroupBuilder.writeU8(SS);

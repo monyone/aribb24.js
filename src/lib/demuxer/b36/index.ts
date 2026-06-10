@@ -269,8 +269,8 @@ export default (b36: Uint8Array | ArrayBufferLike): ARIBB36Data => {
   ), 10);
   // untime (アンタイムの有無)
   const untimeValue = String.fromCharCode(program.readU8());
-  if (soundValue !== '*' && soundValue !== ' ') {
-    throw new ViolationStandardError(`Undefined sound: ${soundValue}`);
+  if (untimeValue !== '*' && untimeValue !== ' ') {
+    throw new ViolationStandardError(`Undefined untime: ${untimeValue}`);
   }
   const untime = untimeValue === '*';
   // realtimeTimingType (RTタイミング種別)

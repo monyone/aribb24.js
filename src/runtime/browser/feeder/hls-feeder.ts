@@ -94,7 +94,7 @@ export default class HLSFeeder extends DecodingFeeder {
     const track = event.track!;
     if (!HLSFeeder.isID3Track(track)) { return; }
 
-    this.id3Tracks = this.id3Tracks.filter((track) => track !== track);
+    this.id3Tracks = this.id3Tracks.filter((t) => t !== track);
   }
 
   private introspect(): void {
@@ -120,7 +120,7 @@ export default class HLSFeeder extends DecodingFeeder {
           const middle = Math.floor((begin + end) / 2);
           const start_time = cues[middle].startTime;
 
-          if (current_time < start_time) {
+          if (this.privious_time < start_time) {
             end = middle;
           } else {
             begin = middle;

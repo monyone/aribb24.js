@@ -64,9 +64,9 @@ export const SSZ_RUBY_DETECTION = {
 export default (tokens: ARIBB24ParsedToken[], info: CaptionAssociationInformation, ruby_handle_type: (typeof SSZ_RUBY_DETECTION)[keyof typeof SSZ_RUBY_DETECTION]): ARIBB24Region[] => {
   const characters = tokens.filter((token) => token.tag === 'Character' || token.tag === 'DRCS').toSorted((token1, token2) => {
     if (token1.state.position[1] !== token2.state.position[1]) {
-      return Math.sign(token1.state.position[1] - token1.state.position[1]);
+      return Math.sign(token1.state.position[1] - token2.state.position[1]);
     } else {
-      return Math.sign(token1.state.position[0] - token1.state.position[0]);
+      return Math.sign(token1.state.position[0] - token2.state.position[0]);
     }
   });
 

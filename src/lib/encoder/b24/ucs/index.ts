@@ -66,7 +66,7 @@ export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
         0, // mode
         (2 ** drcs.depth) - 2, // color - 2
         drcs.width, // width,
-        drcs.width, // height
+        drcs.height, // height
       ]).buffer;
 
       this.drcs_units.push(ARIBB24DRCSDataUnit.from(new Uint8Array(concat(header, drcs.binary)), 2));
