@@ -4,16 +4,16 @@ export type { Event } from './runtime/browser/controller/events';
 export { EventType } from './runtime/browser/controller/events';
 
 // Feeder
-export type { FeederOption } from './runtime/browser/feeder/feeder'
+export { FeederOption } from './runtime/browser/feeder/feeder'
 export { default as MPEGTSFeeder } from './runtime/browser/feeder/mpegts-feeder';
 export { default as HLSFeeder } from './runtime/browser/feeder/hls-feeder';
 export { default as B36Feeder } from './runtime/browser/feeder/b36-feeder';
 export { default as SpeechRecognitionFeeder } from './runtime/browser/feeder/speech-recognition-feeder';
 
 // Renderer
-export type { RendererOption } from './runtime/browser/renderer/renderer-option';
+export { RendererOption } from './runtime/browser/renderer/renderer-option';
 // Canvas
-export type { CanvasRendererOption, PartialCanvasRendererOption } from './runtime/browser/renderer/canvas/canvas-renderer-option';
+export { CanvasRendererOption, type PartialCanvasRendererOption } from './runtime/browser/renderer/canvas/canvas-renderer-option';
 export { default as CanvasMainThreadRenderer } from './runtime/browser/renderer/canvas/canvas-renderer-mainthread';
 export { default as CanvasWebWorkerRenderer } from './runtime/browser/renderer/canvas/canvas-renderer-worker';
 // SVG
@@ -33,8 +33,8 @@ export { SVGRendererOption as SVGRenderingOption, type PartialSVGRendererOption 
 export { default as svgRenderingStrategy } from './runtime/common/renderer/svg/renderer-strategy';
 
 // Tokenizer
-export type * from './lib/tokenizer/token';
-export type { default as ARIBB24Tokenizer, replaceDRCS } from './lib/tokenizer/b24/tokenizer';
+export * from './lib/tokenizer/token';
+export { default as ARIBB24Tokenizer, replaceDRCS } from './lib/tokenizer/b24/tokenizer';
 export { default as ARIBB24JIS8Tokenizer } from './lib/tokenizer/b24/jis8/tokenizer';
 export { default as ARIBB24JapaneseJIS8Tokenizer } from './lib/tokenizer/b24/jis8/ARIB';
 export type { ARIBB24JapaneseJIS8TokenizerOption } from './lib/tokenizer/b24/jis8/ARIB';

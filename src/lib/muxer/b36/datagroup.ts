@@ -1,5 +1,4 @@
 import { ByteBuilder } from "../../../util/bytebuilder";
-import CRC16_CCITT from "../../../util/crc16-ccitt";
 import { ExhaustivenessError, ViolationStandardError } from "../../../util/error";
 import { ARIBB24CaptionData, ARIBB24DataUnit, TimeControlModeType } from "../../demuxer/b24/datagroup";
 

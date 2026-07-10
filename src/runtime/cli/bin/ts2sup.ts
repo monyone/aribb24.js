@@ -15,7 +15,7 @@ import { ARIBB24CaptionManagement, CaptionAssociationInformation } from '../../.
 import { getTokenizeInformation } from '../info';
 import { PathElement } from '../../common/additional-symbols-glyph';
 
-const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[],  plane: [number, number], info: CaptionAssociationInformation, option: CanvasRendererOption, source: typeof import('@napi-rs/canvas')): ArrayBuffer => {
+const generate = (pts: number, dts: number, tokens: ARIBB24ParsedToken[],  plane: [number, number], info: CaptionAssociationInformation, option: CanvasRendererOption, source: typeof import('@napi-rs/canvas')): ArrayBufferLike => {
   let sx = Number.POSITIVE_INFINITY, sy = Number.POSITIVE_INFINITY, dx = 0, dy = 0;
   let elapsed_time = 0;
   const foreground_codes = new Set<string>();
