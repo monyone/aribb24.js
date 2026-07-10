@@ -285,30 +285,29 @@ class AVLTreeNode<K, V, O = K> implements AVLTreeNodeInterface<K, V, O> {
     // Deletion
     const rightmost = node.left?.rightmost();
     const leftmost = node.right?.leftmost();
+    let rotation: AVLTreeNodeInterface<K, V, O> | null;
     if (rightmost) {
-      rightmost.parent?.replace(rightmost, null);
+      rotation = rightmost.parent !== node ? rightmost.parent : rightmost;
+      rightmost.parent?.replace(rightmost, rightmost.left);
       node.parent?.replace(node, rightmost);
       rightmost.right = node.right;
       if (node.right != null) { node.right.parent = rightmost; }
-      if (rightmost !== node.left) {
-        rightmost.left = node.left;
-        if (node.left != null) { node.left.parent = rightmost; }
-      }
+      rightmost.left = node.left;
+      if (node.left != null) { node.left.parent = rightmost; }
     } else if (leftmost) {
-      leftmost.parent?.replace(leftmost, null);
+      rotation = leftmost.parent !== node ? leftmost.parent : leftmost;
+      leftmost.parent?.replace(leftmost, leftmost.right);
       node.parent?.replace(node, leftmost);
       leftmost.left = node.left;
       if (node.left != null) { node.left.parent = leftmost; }
-      if (leftmost !== node.right) {
-        leftmost.right = node.right;
-        if (node.right != null) { node.right.parent = leftmost; }
-      }
+      leftmost.right = node.right;
+      if (node.right != null) { node.right.parent = leftmost; }
     } else {
+      rotation = node.parent;
       node.parent?.replace(node, null);
     }
 
-    // Rotation And Update Information
-    for (let curr: (typeof node.parent) = node; curr != null; curr = curr.parent) {
+    for (let curr: AVLTreeNodeInterface<K, V, O> | null = rotation; curr != null; curr = curr.parent) {
       curr.rotate();
       curr.refresh();
     }
@@ -316,12 +315,12 @@ class AVLTreeNode<K, V, O = K> implements AVLTreeNodeInterface<K, V, O> {
 
   public replace(from: AVLTreeNode<K, V, O>, to: AVLTreeNode<K, V, O> | null): void {
     if (this.left === from) {
-      if (from.parent === this.left) { from.parent = null; }
+      if (from.parent === this) { from.parent = null; }
       if (to != null) { to.parent = this; }
       this.left = to;
     }
     if (this.right === from) {
-      if (from.parent === this.right) { from.parent = null; }
+      if (from.parent === this) { from.parent = null; }
       if (to != null) { to.parent = this; }
       this.right = to;
     }
