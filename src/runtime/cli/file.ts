@@ -1,12 +1,20 @@
 const bunWriteFS = async (path: string, data: ArrayBufferLike | string): Promise<void> => {
   const bun = (globalThis as any).Bun;
-  await bun.write(path, data);
+  await bun.write(path === '-' ? bun.stdout : path, data);
 }
 
-const encoder = new TextEncoder();
 const denoWriteFS = async (path: string, data: ArrayBufferLike | string): Promise<void> => {
+  const encoder = new TextEncoder();
   const deno = (globalThis as any).Deno;
-  await deno.writeFile(path, typeof data === 'string' ? encoder.encode(data) : new Uint8Array(data));
+  const bytes = typeof data === 'string' ? encoder.encode(data) : new Uint8Array(data);
+  if (path === '-') {
+    let written = 0;
+    while (written < bytes.byteLength) {
+      written += await deno.stdout.write(bytes.subarray(written));
+    }
+  } else {
+    await deno.writeFile(path, bytes);
+  }
 }
 
 const nodeWriteFS = async (path: string, data: ArrayBufferLike | string): Promise<void> => {
