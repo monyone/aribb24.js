@@ -122,13 +122,14 @@ export const makeImageDataSup = (pts: number, dts: number, image: Uint8ClampedAr
       }
     }),
   } satisfies PaletteDefinitionSegment;
+  const objectDataLength = objects.reduce((a, b) => a + b.byteLength, 0);
   const ods = objects.map((object, index) => {
     if (objects.length === 1 || index === 0) {
       return {
         objectId: 0,
         objectVersionNumber: 0,
         lastInSequenceFlag: objects.length === 1 ? SequenceFlag.FirstAndLastInSequence : SequenceFlag.FirstInSequence,
-        objectDataLength: object.byteLength + 4,
+        objectDataLength: objectDataLength + 4,
         width: area[0],
         height: area[1],
         objectData: object,
