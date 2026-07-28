@@ -8,13 +8,13 @@ const bunReadableStreamFS = (path: string): ReadableStream<Uint8Array> => {
   return file.stream();
 }
 
-const denoReadableStreamFS = (path: string): ReadableStream<Uint8Array> => {
+const denoReadableStreamFS = async (path: string): Promise<ReadableStream<Uint8Array>> => {
   const deno = (globalThis as any).Deno;
   if (path === '-') {
     return deno.stdin.readable;
   }
 
-  const file = deno.open(path, { read: true });
+  const file = await deno.open(path, { read: true });
   return file.readable;
 }
 
