@@ -27,7 +27,7 @@ const timestamp = (seconds: number): string => {
   return `${hour.toString(10).padStart(2, '0')}:${min.toString(10).padStart(2, '0')}:${sec.toString(10).padStart(2, '0')}:${mill.toString(10).padStart(3, '0')}`;
 }
 
-const generate = (palette: string[], tokens: ARIBB24ParsedToken[],  plane: [number, number], info: CaptionAssociationInformation, option: CanvasRendererOption, source: typeof import('@napi-rs/canvas')): ArrayBufferLike | null => {
+const generate = (palette: string[], tokens: ARIBB24ParsedToken[], duration: number | null, plane: [number, number], info: CaptionAssociationInformation, option: CanvasRendererOption, source: typeof import('@napi-rs/canvas')): ArrayBufferLike | null => {
   let sx = Number.POSITIVE_INFINITY, sy = Number.POSITIVE_INFINITY, dx = 0, dy = 0;
   let elapsed_time = 0;
   const colors_set = new Set<string>(['#00000000']);
@@ -52,6 +52,7 @@ const generate = (palette: string[], tokens: ARIBB24ParsedToken[],  plane: [numb
   if (area[0] === Number.NEGATIVE_INFINITY || area[1] === Number.NEGATIVE_INFINITY) {
     return null;
   }
+  duration = elapsed_time > 0 ? elapsed_time : duration;
 
   const colors = Array.from(colors_set.values());
   if (colors.length > 4) {
@@ -67,7 +68,7 @@ const generate = (palette: string[], tokens: ARIBB24ParsedToken[],  plane: [numb
   const context = canvas.getContext('2d');
   const image = context.getImageData(offset[0], offset[1], area[0], area[1]);
 
-  return encode(offset[0], offset[1], area[0], area[1], image.data, elapsed_time === 0 ? null : elapsed_time, colors as [string, string, string, string], palette);
+  return encode(offset[0], offset[1], area[0], area[1], image.data, duration, colors as [string, string, string, string], palette);
 }
 
 const cmdline = ([
@@ -133,9 +134,11 @@ const cmdline = ([
   }
 ]) as const satisfies ArgsOption[];
 
-const iterate = async (data: ARIBB24MPEGTSData[], language: string | number, cb: (entry: CaptionManagementLanguageEntry, association: Association, tokenizer: ARIBB24Tokenizer, state: ARIBB24ParserState, independent: ARIBB24MPEGTSData) => void) => {
+const iterate = async (data: ARIBB24MPEGTSData[], language: string | number, cb: (entry: CaptionManagementLanguageEntry, association: Association, tokenizer: ARIBB24Tokenizer, state: ARIBB24ParserState, independent: ARIBB24MPEGTSData, next: ARIBB24MPEGTSData | null) => void) => {
   let management: ARIBB24CaptionManagement | null = null;
   let desired: number | null = null;
+  let filledCb: ((next: ARIBB24MPEGTSData | null) => void) | null = null;
+
   for (const independent of data) {
     if (independent.tag !== 'Caption') { continue; }
 
@@ -158,8 +161,10 @@ const iterate = async (data: ARIBB24MPEGTSData[], language: string | number, cb:
       const specification = getTokenizeInformation(entry.iso_639_language_code, entry.TCS, 'UNKNOWN');
       if (specification == null) { continue; }
       const [association, tokenizer, state] = specification;
-      cb(entry, association, tokenizer, state, independent);
+      filledCb?.(independent);
+      filledCb = (next) => cb(entry, association, tokenizer, state, independent, next);
     }
+    filledCb?.(null);
   }
 }
 
@@ -238,7 +243,7 @@ const iterate = async (data: ARIBB24MPEGTSData[], language: string | number, cb:
 
   let filepos = 0;
   const cues: [seconds: number, filepos: number][] = [];
-  iterate(captions, language, (entry, association, tokenizer, state, independent) => {
+  iterate(captions, language, (entry, association, tokenizer, state, independent, next) => {
     const parser = new ARIBB24Parser(state, { magnification: 2 });
     const option = CanvasRendererOption.from({
       font: { normal: font },
@@ -250,7 +255,8 @@ const iterate = async (data: ARIBB24MPEGTSData[], language: string | number, cb:
       language: entry.iso_639_language_code,
     };
 
-    const encoded = generate(palette, parser.parse(tokenizer.tokenize(independent.data)), parser.currentState().plane, info, option, napi);
+    const duration = next == null ? null : ((Math.floor((next.pts - independent.pts) * 90000) + 2 ** 33) % 2 ** 33) / 90000;
+    const encoded = generate(palette, parser.parse(tokenizer.tokenize(independent.data)), duration, parser.currentState().plane, info, option, napi);
     if (encoded == null) { return; }
 
     const ps = makePS(makePES(concat(Uint8Array.from([0x20]).buffer, encoded), Math.floor(independent.pts * 90000)), Math.floor(independent.pts * 90000));
