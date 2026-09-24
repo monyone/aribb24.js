@@ -29,11 +29,11 @@ export type FeederOption = {
   tokenizer: FeederTokenizeOption;
   offset: FeederTimeOffsetOption;
 };
-export type PartialFeederOption = {
+export type PartialFeederOption = Partial<{
   recieve: Partial<FeederRecieveOption>;
   tokenizer: Partial<FeederTokenizeOption>;
   offset: Partial<FeederTimeOffsetOption>;
-}
+}>;
 export const FeederOption = {
   from (option?: PartialFeederOption): FeederOption {
     return {
