@@ -34,4 +34,32 @@ describe("AVL", () => {
       expect(avl.get(data[i])).toStrictEqual(undefined);
     }
   });
+
+  test('Floor/Ceil against brute-force reference', () => {
+    const avl = new AVLTree<number, number>(compareNumber, compareNumber, (val) => val);
+    const keys = Array.from({ length: 64 }, (_, i) => i * 3);
+    for (const key of keys) {
+      avl.insert(key, key);
+    }
+
+    const expectedFloor = (query: number): number | undefined => {
+      let best: number | undefined = undefined;
+      for (const key of keys) {
+        if (key <= query && (best === undefined || key > best)) { best = key; }
+      }
+      return best;
+    };
+    const expectedCeil = (query: number): number | undefined => {
+      let best: number | undefined = undefined;
+      for (const key of keys) {
+        if (key >= query && (best === undefined || key < best)) { best = key; }
+      }
+      return best;
+    };
+
+    for (let query = -2; query <= keys[keys.length - 1] + 2; query++) {
+      expect(avl.floor(query)).toStrictEqual(expectedFloor(query));
+      expect(avl.ceil(query)).toStrictEqual(expectedCeil(query));
+    }
+  });
 });
