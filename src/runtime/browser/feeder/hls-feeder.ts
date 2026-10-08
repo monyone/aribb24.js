@@ -70,6 +70,11 @@ export default class HLSFeeder extends DecodingFeeder {
     this.detachMedia();
   }
 
+  protected disappearance(): void {
+    super.disappearance();
+    this.privious_time = null;
+  }
+
   private registerID3Track(): void {
     if (this.media == null) { return; }
 
@@ -187,21 +192,21 @@ export default class HLSFeeder extends DecodingFeeder {
     const id3 = cue as any;
     if (cue.track.inBandMetadataTrackDispatchType === 'com.apple.streaming') { // Safari
       if (id3.value.key === 'PRIV' && id3.value.info === 'aribb24.js') {
-        this.feed(id3.value.data, cue.startTime, cue.startTime);
+        this.decode(id3.value.data, cue.startTime);
       } else if (id3.value.key === 'TXXX' && id3.value.info === 'aribb24.js') {
-        this.feed(base64ToUint8Array(id3.value.data), cue.startTime, cue.startTime);
+        this.decode(base64ToUint8Array(id3.value.data), cue.startTime);
       }
     } else if (cue.track.label === 'id3') { // hls.js
       if (id3.value.key === 'PRIV' && id3.value.info === 'aribb24.js') {
-        this.feed(id3.value.data, cue.startTime, cue.startTime);
+        this.decode(id3.value.data, cue.startTime);
       } else if (id3.value.key === 'TXXX' && id3.value.info === 'aribb24.js') {
-        this.feed(base64ToUint8Array(id3.value.data), cue.startTime, cue.startTime);
+        this.decode(base64ToUint8Array(id3.value.data), cue.startTime);
       }
     } else if (cue.track.label === 'Timed Metadata') { // video.js
       if (id3.frame.key === 'PRIV' && id3.frame.owner === 'aribb24.js') {
-        this.feed(id3.frame.data, cue.startTime, cue.startTime);
+        this.decode(id3.frame.data, cue.startTime);
       } else if (id3.frame.key === 'TXXX' && id3.frame.description === 'aribb24.js') {
-        this.feed(base64ToUint8Array(id3.frame.data), cue.startTime, cue.startTime);
+        this.decode(base64ToUint8Array(id3.frame.data), cue.startTime);
       }
     }
   }

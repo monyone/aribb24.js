@@ -174,13 +174,25 @@ export default abstract class DecodingFeeder implements Feeder {
     if (datagroup.tag !== this.option.recieve.type) { return; }
 
     const caption = demuxDatagroup(datagroup.data);
-    if (caption == null) { return ; }
+    if (caption == null) { return; }
 
     const lang = caption.tag === 'CaptionStatement' ? (caption.lang + 1) : 0;
 
     pts += this.option.offset.time;
     dts += this.option.offset.time;
     this.decoder.insert({ dts, lang }, { pts, caption });
+  }
+
+  protected decode(data: Uint8Array, pts: number) {
+    const datagroup = demuxPES(data);
+    if (datagroup == null) { return; }
+    if (datagroup.tag !== this.option.recieve.type) { return; }
+
+    const caption = demuxDatagroup(datagroup.data);
+    if (caption == null) { return; }
+
+    pts += this.option.offset.time;
+    this.notify({ pts, caption });
   }
 
   public prepare(time: number): void {
@@ -202,7 +214,7 @@ export default abstract class DecodingFeeder implements Feeder {
     this.disappearance();
   }
 
-  private disappearance(): void {
+  protected disappearance(): void {
     this.present.forEach(closeValueImageBitmap);
     this.present.clear();
     this.priviousTime = null;
