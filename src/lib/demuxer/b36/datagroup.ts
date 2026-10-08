@@ -1,5 +1,5 @@
 import { ByteStream } from "../../../util/bytestream";
-import { BCDtoHHMMSSsss, ARIBB24CaptionData, CaptionManagementLanguageEntry, ARIBB24DataUnit, DisplayModeAndDisplayConditionDesignation, DisplayModeTypeAll, TimeControlModeAndOffsetTime, TimeControlModeAndPresentationStartTime, TimeControlModeType } from "../b24/datagroup";
+import { BCDtoHHMMSSsss, ARIBB24CaptionData, ARIBB24CaptionManagementLanguageEntry, ARIBB24DataUnit, DisplayModeAndDisplayConditionDesignation, DisplayModeTypeAll, TimeControlModeAndOffsetTime, TimeControlModeAndPresentationStartTime, TimeControlModeType } from "../b24/datagroup";
 
 export default (data: Uint8Array): ARIBB24CaptionData | null => {
   const stream = new ByteStream(data);
@@ -22,7 +22,7 @@ export default (data: Uint8Array): ARIBB24CaptionData | null => {
     }) satisfies TimeControlModeAndOffsetTime;
 
     const num_languages = stream.readU8();
-    const languages: CaptionManagementLanguageEntry[] = [];
+    const languages: ARIBB24CaptionManagementLanguageEntry[] = [];
     for (let i = 0; i < 1; i++) {
       const language_tag_DMF = stream.readU8();
       const language_tag = (language_tag_DMF & 0xE0) >> 5

@@ -62,7 +62,7 @@ export const RollupModeType = {
   RESERVED2: 3,
 } as const
 
-export type CaptionManagementLanguageEntry = {
+export type ARIBB24CaptionManagementLanguageEntry = {
   lang: number;
   iso_639_language_code: string;
   rollup: (typeof RollupModeType)[keyof typeof RollupModeType];
@@ -92,7 +92,7 @@ export type TimeControlModeAndPresentationStartTime = {
 export type ARIBB24CaptionManagement = {
   tag: 'CaptionManagement';
   group: 0 | 1;
-  languages: CaptionManagementLanguageEntry[],
+  languages: ARIBB24CaptionManagementLanguageEntry[],
   units: ARIBB24DataUnit[];
 } & TimeControlModeAndOffsetTime;
 export type ARIBB24CaptionStatement = {
@@ -147,7 +147,7 @@ export default (data: Uint8Array | ArrayBufferLike): ARIBB24CaptionData | null =
     }) satisfies TimeControlModeAndOffsetTime;
 
     const num_languages = stream.readU8();
-    const languages: CaptionManagementLanguageEntry[] = [];
+    const languages: ARIBB24CaptionManagementLanguageEntry[] = [];
     for (let i = 0; i < num_languages; i++) {
       const language_tag_DMF = stream.readU8();
       const language_tag = (language_tag_DMF & 0xE0) >> 5

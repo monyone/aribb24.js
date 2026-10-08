@@ -44,12 +44,36 @@ export { default as ARIBB24BrazilianJIS8Tokenizer } from './lib/tokenizer/b24/ji
 export { default as ARIBB24UTF8Encoder } from './lib/encoder/b24/ucs';
 export { default as ARIBB24JapaneseJIS8Encoder } from './lib/encoder/b24/jis8/ARIB';
 
-// Demuxer
+// Demuxer (STD-B24)
 export { default as demuxDatagroup } from './lib/demuxer/b24/datagroup';
-export type { CaptionAssociationInformation, ARIBB24DataUnit, ARIBB24CaptionData, ARIBB24CaptionStatement, ARIBB24CaptionManagement } from './lib/demuxer/b24/datagroup';
+export { TimeControlModeType as ARIBB24DatagroupTimeControlMode } from './lib/demuxer/b24/datagroup';
+export { TCSType as ARIBB24DatagroupTCS } from './lib/demuxer/b24/datagroup';
+export { RollupModeType as ARIBB24DatagroupRollupMode } from './lib/demuxer/b24/datagroup';
+export type { CaptionAssociationInformation, ARIBB24DataUnit, ARIBB24CaptionData, ARIBB24CaptionStatement, ARIBB24CaptionManagement, ARIBB24CaptionManagementLanguageEntry } from './lib/demuxer/b24/datagroup';
 export { default as demuxIndependentPES } from './lib/demuxer/b24/independent';
-export type { ARIBB36Data, ARIBB36ProgramManagementInformation, ARIBB36PageManagementInformation } from './lib/demuxer/b36';
+// Demuxer (STD-B36)
+export type { ARIBB36Data, ARIBB36PageData, ARIBB36ProgramManagementInformation, ARIBB36PageManagementInformation } from './lib/demuxer/b36';
 export { default as demuxB36 } from './lib/demuxer/b36';
+// (Program Management Data)
+export { TimingUnitType as ARIBB36TimingUnitType } from './lib/demuxer/b36';
+export { TimeControlModeType as ARIBB36TimeControlMode } from './lib/demuxer/b36';
+export { ProgramMaterialType as ARIBB36ProgramMaterialType } from './lib/demuxer/b36';
+export { RegistrationModeType as ARIBB36RegistrationMode } from './lib/demuxer/b36';
+export { DisplayModeType as ARIBB36DisplayMode } from './lib/demuxer/b36';
+export { ProgramType as ARIBB36ProgramType } from './lib/demuxer/b36';
+export { RealtimeTimingType as ARIBB36RealtimeTimingType } from './lib/demuxer/b36';
+export { SynchronizationModeType as ARIBB36SynchronizationMode } from './lib/demuxer/b36';
+// (Page Management Data)
+export { PageMaterialType as ARIBB36PageMaterialType } from './lib/demuxer/b36';
+export { DisplayTimingType as ARIBB36DisplayTimingType } from './lib/demuxer/b36';
+export { FormatDensityType as ARIBB36FormatDensityType } from './lib/demuxer/b36';
+export { FormatWritingModeType as ARIBB36FormatWritingMode } from './lib/demuxer/b36';
+export { DisplayAspectRatioType as ARIBB36DisplayAspectRatioType } from './lib/demuxer/b36';
+export { ScrollType as ARIBB36ScrollType } from './lib/demuxer/b36';
+export { ScrollDirectionType as ARIBB36ScrollDirectionType } from './lib/demuxer/b36';
+export { PresentationFormatConversionModeType as ARIBB36PresentationFormatConversionMode } from './lib/demuxer/b36';
+export { DRCSConversionModeType as ARIBB36DRCSConversionMode } from './lib/demuxer/b36';
+// Demuxer (MPEG-TS)
 export type { ARIBB24MPEGTSData, ARIBB24MPEGTSDemuxOption } from './lib/demuxer/mpegts';
 export { default as demuxMPEGTS } from './lib/demuxer/mpegts';
 
@@ -60,14 +84,7 @@ export { default as muxB36 } from './lib/muxer/b36'
 
 // Parser
 export { ARIBB24Parser, ARIBB24ParserOption } from './lib/parser/parser';
-export type {
-  ARIBB24ParsedToken,
-  ARIBB24ClearScreenParsedToken,
-  ARIBB24CharacterParsedToken,
-  ARIBB24DRCSParsedToken,
-  ARIBB24BitmapParsedToken,
-  ARIBB24ParserState,
-} from './lib/parser/parser';
+export type { ARIBB24ParsedToken, ARIBB24ClearScreenParsedToken, ARIBB24CharacterParsedToken, ARIBB24DRCSParsedToken, ARIBB24BitmapParsedToken, ARIBB24ParserState } from './lib/parser/parser';
 export { default as ARIBB24JapaneseInitialParserState } from './lib/parser/state/ARIB';
 export { default as ARIBB24BrazilianInitialParserState } from './lib/parser/state/ARIB';
 export { default as regionerForARIBB24ParsedToken } from './lib/parser/regioner'

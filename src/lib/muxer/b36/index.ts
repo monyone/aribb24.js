@@ -1,4 +1,4 @@
-import { ARIBB36Data, DisplayTimingType, TimingUnitType } from "../../demuxer/b36";
+import { ARIBB36Data, TimingUnitType } from "../../demuxer/b36";
 import datagroup from "../../muxer/b36/datagroup";
 import { ByteBuilder } from "../../../util/bytebuilder";
 import { secondsToTimecode, secondToFrameCount } from "../../../util/timecode";
@@ -287,8 +287,12 @@ export default (b36: ARIBB36Data): ArrayBufferLike => {
     // usersAreaUsed (ユーザーズエリア識別)
     programInformationBuilder.writeU8((b36.usersAreaUsed ? '*' : ' ').charCodeAt(0))
     if (b36.usersAreaUsed) {
+      const CCIS = 'CCIS';
+      for (let i = 0; i < CCIS.length; i++) {
+        programInformationBuilder.writeU8(CCIS.charCodeAt(i));
+      }
       programInformationBuilder.writeU8(b36.writingFormatConversionMode);
-      programInformationBuilder.writeU8(b36.drcsConversionMode << 6 | 0x3F);
+      programInformationBuilder.writeU8((b36.drcsConversionMode << 6) | 0x3F);
     }
   }
 
@@ -442,8 +446,12 @@ export default (b36: ARIBB36Data): ArrayBufferLike => {
       // usersAreaUsed (ユーザーズエリア識別)
       pageInformationBuilder.writeU8((page.usersAreaUsed ? '*' : ' ').charCodeAt(0))
       if (page.usersAreaUsed) {
+        const CCIS = 'CCIS';
+        for (let i = 0; i < CCIS.length; i++) {
+          pageInformationBuilder.writeU8(CCIS.charCodeAt(i));
+        }
         pageInformationBuilder.writeU8(page.writingFormatConversionMode);
-        pageInformationBuilder.writeU8(page.drcsConversionMode << 6 | 0x3F);
+        pageInformationBuilder.writeU8((page.drcsConversionMode << 6) | 0x3F);
       }
     }
     // Build

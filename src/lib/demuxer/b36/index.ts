@@ -28,7 +28,7 @@ export const RegistrationModeType = {
   ADDITION: 'A',
   NOT_SPECIFIED: ' ',
 } as const;
-export const displayModeType = {
+export const DisplayModeType = {
   AUTO_ENABLED: '0',
   AUTO_DISABLED: '1',
   SELECT: '2',
@@ -45,7 +45,7 @@ export const RealtimeTimingType = {
   LAPTIME: 'LT',
   JST: 'JS',
 } as const;
-export const SyncronizationModeType = {
+export const SynchronizationModeType = {
   ASYNC: 'A',
   PROGRAM_SYNC: 'P',
   TIME_SYNC: 'T',
@@ -59,7 +59,7 @@ export type ARIBB36ProgramManagementInformation = {
   programMaterialType: (typeof ProgramMaterialType)[keyof typeof ProgramMaterialType];
   registrationMode: (typeof RegistrationModeType)[keyof typeof RegistrationModeType];
   languageCode: string;
-  displayMode: `${(typeof displayModeType)[keyof typeof displayModeType]}${(typeof displayModeType)[keyof typeof displayModeType]}`;
+  displayMode: `${(typeof DisplayModeType)[keyof typeof DisplayModeType]}${(typeof DisplayModeType)[keyof typeof DisplayModeType]}`;
   programType: (typeof ProgramType)[keyof typeof ProgramType];
   sound: boolean;
   totalPages: number;
@@ -68,7 +68,7 @@ export type ARIBB36ProgramManagementInformation = {
   realtimeTimingType: (typeof RealtimeTimingType)[keyof typeof RealtimeTimingType];
   timingUnitType: (typeof TimingUnitType)[keyof typeof TimingUnitType];
   initialTime: number;
-  syncronizationMode: (typeof SyncronizationModeType)[keyof typeof SyncronizationModeType];
+  syncronizationMode: (typeof SynchronizationModeType)[keyof typeof SynchronizationModeType];
   timeControlMode: (typeof TimeControlModeType)[keyof typeof TimeControlModeType];
   extensible: [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
   compatible: [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
@@ -129,6 +129,18 @@ export const ScrollDirectionType = {
   HORIZONTAL: 'H',
   VERTICAL: 'V',
 } as const;
+export const PresentationFormatConversionModeType = {
+  HD_SIDE_PANEL: 0x01,
+  SD: 0x02,
+  SD_WIDE_SIDE_PANEL: 0x03,
+  MOBILE: 0x04
+} as const;
+export const DRCSConversionModeType = {
+  MODE_A: 0b00,
+  MODE_B: 0b01,
+  MOBILE: 0b10,
+  INCONVERTIBLE: 0b11,
+} as const;
 
 export type ARIBB36PageManagementInformation = {
   pageNumber: string;
@@ -154,7 +166,7 @@ export type ARIBB36PageManagementInformation = {
 } | {
   usersAreaUsed: true,
   writingFormatConversionMode: number;
-  drcsConversionMode: number;
+  drcsConversionMode: (typeof DRCSConversionModeType)[keyof typeof DRCSConversionModeType];
 });
 
 export type ARIBB36PageData = ARIBB36PageManagementInformation & ({
@@ -225,25 +237,25 @@ export default (b36: Uint8Array | ArrayBufferLike): ARIBB36Data => {
   // displayMode (DMF受信表示)
   const receptionDisplayMode = String.fromCharCode(program.readU8());
   switch (receptionDisplayMode) {
-    case displayModeType.AUTO_ENABLED:
-    case displayModeType.AUTO_DISABLED:
-    case displayModeType.SELECT:
-    case displayModeType.SELECT_SPECIFIC:
+    case DisplayModeType.AUTO_ENABLED:
+    case DisplayModeType.AUTO_DISABLED:
+    case DisplayModeType.SELECT:
+    case DisplayModeType.SELECT_SPECIFIC:
       break;
     default:
       throw new ViolationStandardError(`Undefined displayMode: ${receptionDisplayMode}`);
   }
   const recordingDisplayMode = String.fromCharCode(program.readU8());
   switch (recordingDisplayMode) {
-    case displayModeType.AUTO_ENABLED:
-    case displayModeType.AUTO_DISABLED:
-    case displayModeType.SELECT:
-    case displayModeType.SELECT_SPECIFIC:
+    case DisplayModeType.AUTO_ENABLED:
+    case DisplayModeType.AUTO_DISABLED:
+    case DisplayModeType.SELECT:
+    case DisplayModeType.SELECT_SPECIFIC:
       break;
     default:
       throw new ViolationStandardError(`Undefined displayMode: ${recordingDisplayMode}`);
   }
-  const displayMode = `${receptionDisplayMode}${recordingDisplayMode}` as `${(typeof displayModeType)[keyof typeof displayModeType]}${(typeof displayModeType)[keyof typeof displayModeType]}`;
+  const displayMode = `${receptionDisplayMode}${recordingDisplayMode}` as `${(typeof DisplayModeType)[keyof typeof DisplayModeType]}${(typeof DisplayModeType)[keyof typeof DisplayModeType]}`;
   // programType (独立/補完/字幕)
   const programType = String.fromCharCode(program.readU8());
   switch (programType) {
@@ -305,9 +317,9 @@ export default (b36: Uint8Array | ArrayBufferLike): ARIBB36Data => {
   // syncronizationMode (同期モード)
   const syncronizationMode = String.fromCharCode(program.readU8());
   switch (syncronizationMode) {
-    case SyncronizationModeType.ASYNC:
-    case SyncronizationModeType.PROGRAM_SYNC:
-    case SyncronizationModeType.TIME_SYNC:
+    case SynchronizationModeType.ASYNC:
+    case SynchronizationModeType.PROGRAM_SYNC:
+    case SynchronizationModeType.TIME_SYNC:
       break;
     default:
       throw new ViolationStandardError(`Undefined syncronizationMode: ${syncronizationMode}`);
@@ -472,11 +484,15 @@ export default (b36: Uint8Array | ArrayBufferLike): ARIBB36Data => {
     throw new ViolationStandardError(`Undefined usersAreaUsed: ${usersAreaUsedValue}`);
   }
   const usersAreaUsed = usersAreaUsedValue === '*';
-  const usersArea = usersAreaUsed ? {
-    usersAreaUsed,
-    writingFormatConversionMode: program.readU8(),
-    drcsConversionMode: ((program.readU8() & 0xC0) >> 6)
-  } : { usersAreaUsed };
+  const usersArea = (() => {
+    if (!usersAreaUsed) { return { usersAreaUsed }};
+    program.read(4);
+    return {
+      usersAreaUsed,
+      writingFormatConversionMode: program.readU8(),
+      drcsConversionMode: ((program.readU8() & 0xC0) >> 6) as (typeof DRCSConversionModeType)[keyof typeof DRCSConversionModeType]
+    };
+  })();
 
   // Program Page Information
   const pages: ARIBB36PageData[] = [];
@@ -652,11 +668,15 @@ export default (b36: Uint8Array | ArrayBufferLike): ARIBB36Data => {
       throw new ViolationStandardError(`Undefined sound: ${usersAreaUsedValue}`);
     }
     const usersAreaUsed = usersAreaUsedValue === '*';
-    const usersArea = usersAreaUsed ? {
-      usersAreaUsed,
-      writingFormatConversionMode: page.readU8(),
-      drcsConversionMode: ((page.readU8() & 0xC0) >> 6)
-    } : { usersAreaUsed };
+    const usersArea = (() => {
+      if (!usersAreaUsed) { return { usersAreaUsed }};
+      page.read(4);
+      return {
+        usersAreaUsed,
+        writingFormatConversionMode: page.readU8(),
+        drcsConversionMode: ((page.readU8() & 0xC0) >> 6) as (typeof DRCSConversionModeType)[keyof typeof DRCSConversionModeType]
+      };
+    })();
 
     const pageManagementInformationBase = {
       pageMaterialType,
