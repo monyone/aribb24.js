@@ -9,7 +9,7 @@ import { ARIBB24BrowserParser, ARIBB24BrowserToken, replaceDRCS } from "../../ty
 
 export default class TextRenderer implements Renderer {
   private option: TextRendererOption;
-  private text: string | null = null;
+  private text: string = '';
 
   public constructor(option?: Partial<TextRendererOption>) {
     this.option = TextRendererOption.from(option);
@@ -17,10 +17,10 @@ export default class TextRenderer implements Renderer {
 
   public resize(width: number, height: number): void {}
   public destroy(): void {
-    this.text = null;
+    this.text = '';
   }
   public clear(): void {
-    this.text = null;
+    this.text = '';
   }
   public hide(): void {}
   public show(): void {}
@@ -37,8 +37,6 @@ export default class TextRenderer implements Renderer {
       switch (token.tag) {
         case 'Character': {
           const { state, character } = token;
-          if (this.text == null) { break; }
-
           if ((character === ' ' || character === '　') && state.background === 8 && shouldRemoveTransparentSpace(info)) { break; }
 
           // if ARIB in Japanese, SSZ is almost ruby
@@ -60,7 +58,6 @@ export default class TextRenderer implements Renderer {
         }
         case 'DRCS': {
           const { state } = token;
-          if (this.text == null) { break; }
 
           if (privious_y != null && state.position[1] !== privious_y) {
             this.text += '\n';
@@ -83,6 +80,10 @@ export default class TextRenderer implements Renderer {
           throw new ExhaustivenessError(token, `Unexpected ARIB Parsed Token in TextRenderer`);
       }
     }
+  }
+
+  public getText(): string {
+    return this.text;
   }
 
   public onAttach(element: HTMLElement): void {}
