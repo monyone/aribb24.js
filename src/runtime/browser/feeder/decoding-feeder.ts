@@ -5,7 +5,7 @@ import demuxPES from '../../../lib/demuxer/b24/independent';
 import demuxDatagroup, { ARIBB24CaptionManagement } from '../../../lib/demuxer/b24/datagroup'
 import { ARIBB24ClearScreenToken } from '../../../lib/tokenizer/token';
 import { initialState } from '../../../lib/parser/parser';
-import { toBrowserTokenWithBitmap } from '../types';
+import { ARIBB24BrowserToken, toBrowserTokenWithBitmap } from '../types';
 import colortable from '../../common/colortable';
 
 type DecodingOrderedKey = {
@@ -29,12 +29,16 @@ const compareKey = (a: DecodingOrderedKey, b: DecodingOrderedKey) => {
   }
 }
 
-const closeValueImageBitmap = (value: FeederPresentationData) => {
-  for (const token of value.data) {
+const closeTokenImageBitmap = (tokens: ARIBB24BrowserToken[]) => {
+  for (const token of tokens) {
     if (token.tag !== 'Bitmap') { continue; }
     token.normal_bitmap.close();
     token.flashing_bitmap?.close();
   }
+};
+
+const closeValueImageBitmap = (value: FeederPresentationData) => {
+  closeTokenImageBitmap(value.data);
 }
 
 export default abstract class DecodingFeeder implements Feeder {
@@ -89,7 +93,8 @@ export default abstract class DecodingFeeder implements Feeder {
 
   private async pump() {
     while (!this.isDestroyed) {
-      for await (const { pts, caption } of this.generator(this.abortController.signal)) {
+      const signal = this.abortController.signal;
+      for await (const { pts, caption } of this.generator(signal)) {
         if (caption.tag === 'CaptionManagement') {
           if (this.priviousManagementData?.group === caption.group) { continue; }
 
@@ -103,6 +108,9 @@ export default abstract class DecodingFeeder implements Feeder {
           }
           this.priviousManagementData = caption;
 
+          if (signal.aborted) { break; }
+          const already = this.present.get(pts);
+          if (already != null) { closeValueImageBitmap(already); }
           this.present.insert(pts, {
             pts,
             duration: Number.POSITIVE_INFINITY,
@@ -140,6 +148,12 @@ export default abstract class DecodingFeeder implements Feeder {
           }
         }
 
+        if (signal.aborted) {
+          closeTokenImageBitmap(tokenized);
+          break;
+        }
+        const already = this.present.get(pts);
+        if (already != null) { closeValueImageBitmap(already); }
         this.present.insert(pts, {
           pts,
           duration,
