@@ -75,6 +75,7 @@ export default class HLSFeeder extends DecodingFeeder {
 
     for (const track of Array.from(this.media.textTracks)) {
       if (!HLSFeeder.isID3Track(track)) { continue; }
+      track.mode = 'hidden';
       this.id3Tracks.push(track);
     }
   }
