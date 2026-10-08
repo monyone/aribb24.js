@@ -121,7 +121,7 @@ export default class HLSFeeder extends DecodingFeeder {
       let curr_index: number | null = null;
 
       {
-        let begin = 0, end = cues.length;
+        let begin = -1, end = cues.length;
         while (begin + 1 < end) {
           const middle = Math.floor((begin + end) / 2);
           const start_time = cues[middle].startTime;
@@ -135,7 +135,7 @@ export default class HLSFeeder extends DecodingFeeder {
         prev_index = begin;
       }
       {
-        let begin = 0, end = cues.length;
+        let begin = -1, end = cues.length;
         while (begin + 1 < end) {
           const middle = Math.floor((begin + end) / 2);
           const start_time = cues[middle].startTime;
@@ -154,11 +154,7 @@ export default class HLSFeeder extends DecodingFeeder {
       }
 
       if (prev_index < curr_index) {
-        for (let index = curr_index; index > prev_index; index--) {
-          this.feedID3v2Cue(cues[index]);
-        }
-      } else {
-        for (let index = prev_index; index < curr_index; index++) {
+        for (let index = prev_index + 1; index <= curr_index; index++) {
           this.feedID3v2Cue(cues[index]);
         }
       }
