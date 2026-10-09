@@ -46,6 +46,7 @@ export { default as ARIBB24JapaneseJIS8Encoder } from './lib/encoder/b24/jis8/AR
 
 // Demuxer (STD-B24)
 export { default as demuxDatagroup } from './lib/demuxer/b24/datagroup';
+export { DisplayModeType as ARIBB24DatagroupDisplayMode } from './lib/demuxer/b24/datagroup';
 export { TimeControlModeType as ARIBB24DatagroupTimeControlMode } from './lib/demuxer/b24/datagroup';
 export { TCSType as ARIBB24DatagroupTCS } from './lib/demuxer/b24/datagroup';
 export { RollupModeType as ARIBB24DatagroupRollupMode } from './lib/demuxer/b24/datagroup';
