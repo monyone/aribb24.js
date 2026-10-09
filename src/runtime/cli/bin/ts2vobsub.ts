@@ -12,7 +12,7 @@ import colortable from '../../common/colortable';
 import namedcolor from '../../common/namedcolor';
 import concat from '../../../util/concat';
 import { args, ArgsOption, parseArgs } from '../args';
-import { ARIBB24CaptionManagement, CaptionAssociationInformation, CaptionManagementLanguageEntry } from '../../../lib/demuxer/b24/datagroup';
+import { ARIBB24CaptionManagement, CaptionAssociationInformation, ARIBB24CaptionManagementLanguageEntry } from '../../../lib/demuxer/b24/datagroup';
 import { Association, getTokenizeInformation } from '../info';
 import { PathElement } from '../../common/additional-symbols-glyph';
 import ARIBB24Tokenizer from '../../../lib/tokenizer/b24/tokenizer';
@@ -134,7 +134,7 @@ const cmdline = ([
   }
 ]) as const satisfies ArgsOption[];
 
-const iterate = async (data: ARIBB24MPEGTSData[], language: string | number, cb: (entry: CaptionManagementLanguageEntry, association: Association, tokenizer: ARIBB24Tokenizer, state: ARIBB24ParserState, independent: ARIBB24MPEGTSData, next: ARIBB24MPEGTSData | null) => void) => {
+const iterate = async (data: ARIBB24MPEGTSData[], language: string | number, cb: (entry: ARIBB24CaptionManagementLanguageEntry, association: Association, tokenizer: ARIBB24Tokenizer, state: ARIBB24ParserState, independent: ARIBB24MPEGTSData, next: ARIBB24MPEGTSData | null) => void) => {
   let management: ARIBB24CaptionManagement | null = null;
   let desired: number | null = null;
   let filledCb: ((next: ARIBB24MPEGTSData | null) => void) | null = null;
