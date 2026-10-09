@@ -39,8 +39,6 @@ export default class B36Feeder implements Feeder {
     });
   }
 
-  public prepare(_: number): void {}
-
   public content(time: number): FeederPresentationData | null {
     {
       const first = this.captions[0];

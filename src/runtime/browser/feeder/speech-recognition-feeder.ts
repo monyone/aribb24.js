@@ -97,7 +97,6 @@ export default class SpeechRecognitionFeeder implements Feeder {
     this.clear();
   }
 
-  public prepare(_: number): void {}
   public content(_: number): FeederPresentationData | null {
     if (this.media == null) { return null; }
     if (this.recognitionTime == null) { return null; }

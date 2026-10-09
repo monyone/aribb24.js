@@ -82,6 +82,7 @@ export const getTokenizeInformation = (language: string, TCS: number, option: Fe
 }
 
 export type FeederDecodingData = {
+  dts: number;
   pts: number;
   caption: Exclude<ReturnType<typeof datagroup>, null>;
 };
@@ -94,7 +95,6 @@ export type FeederPresentationData = {
 };
 
 export default interface Feeder {
-  prepare(time: number): void;
   content(time: number): FeederPresentationData | null;
   clear(): void;
   destroy(): void;

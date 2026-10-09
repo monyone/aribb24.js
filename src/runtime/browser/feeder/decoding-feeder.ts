@@ -66,6 +66,7 @@ export default abstract class DecodingFeeder implements Feeder {
     if (segment != null) {
       this.decoderBuffer.push(segment);
     } else {
+      this.priviousManagementData = null;
       this.abortController.abort();
       this.abortController = new AbortController();
     }
@@ -96,6 +97,7 @@ export default abstract class DecodingFeeder implements Feeder {
       const signal = this.abortController.signal;
       for await (const { pts, caption } of this.generator(signal)) {
         if (caption.tag === 'CaptionManagement') {
+          if (signal.aborted) { break; }
           if (this.priviousManagementData?.group === caption.group) { continue; }
 
           if (typeof(this.option.recieve.language) === 'number') {
@@ -108,7 +110,6 @@ export default abstract class DecodingFeeder implements Feeder {
           }
           this.priviousManagementData = caption;
 
-          if (signal.aborted) { break; }
           const already = this.present.get(pts);
           if (already != null) { closeValueImageBitmap(already); }
           this.present.insert(pts, {
@@ -125,6 +126,7 @@ export default abstract class DecodingFeeder implements Feeder {
         }
 
         // Caption
+        if (signal.aborted) { break; }
         if (this.priviousManagementData == null) { continue; }
 
         const entry = this.priviousManagementData.languages.find((entry) => entry.lang === caption.lang);
@@ -180,32 +182,19 @@ export default abstract class DecodingFeeder implements Feeder {
 
     pts += this.option.offset.time;
     dts += this.option.offset.time;
-    this.decoder.insert({ dts, lang }, { pts, caption });
+    this.decoder.insert({ dts, lang }, { dts, pts, caption });
   }
 
-  protected decode(data: Uint8Array, pts: number) {
-    const datagroup = demuxPES(data);
-    if (datagroup == null) { return; }
-    if (datagroup.tag !== this.option.recieve.type) { return; }
-
-    const caption = demuxDatagroup(datagroup.data);
-    if (caption == null) { return; }
-
-    pts += this.option.offset.time;
-    this.notify({ pts, caption });
-  }
-
-  public prepare(time: number): void {
-    this.priviousTime = time;
+  private prepare(time: number): void {
+    this.priviousTime = this.decoder.lower({ dts: time })?.dts ?? Number.NEGATIVE_INFINITY;
   }
 
   public content(time: number): FeederPresentationData | null {
-    if (this.priviousTime != null) {
-      for (const segment of this.decoder.range(this.priviousTime, time)) {
-        this.notify(segment);
-      }
+    if (this.priviousTime == null) { this.prepare(time); }
+    for (const segment of this.decoder.range(this.priviousTime!, time)) {
+      this.notify(segment);
+      this.priviousTime = segment.dts;
     }
-    this.priviousTime = time;
     return this.present.floor(time) ?? null;
   }
 
@@ -218,7 +207,6 @@ export default abstract class DecodingFeeder implements Feeder {
     this.present.forEach(closeValueImageBitmap);
     this.present.clear();
     this.priviousTime = null;
-    this.priviousManagementData = null;
     this.notify(null);
   }
 

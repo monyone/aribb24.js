@@ -6,8 +6,8 @@ import DecodingFeeder from './decoding-feeder';
 export default class HLSFeeder extends DecodingFeeder {
   private media: HTMLMediaElement | null = null;
   private timer: number | null = null;
-  private privious_time: number | null = null;
   private id3Tracks: TextTrack[] = [];
+  private id3TrackPriviousTimes: Map<TextTrack, number> = new Map<TextTrack, number>();
   private readonly onAddTrackHandler: ((event: TrackEvent) => void) = this.onAddTrack.bind(this);
   private readonly onRemoveTrackHandler: ((event: TrackEvent) => void) = this.onRemoveTrack.bind(this);
   private readonly onPlayHandler = this.onPlay.bind(this);
@@ -24,14 +24,17 @@ export default class HLSFeeder extends DecodingFeeder {
 
     this.setupHandlers();
     this.registerID3Track();
+    if (!this.media.paused) {
+      this.registerRenderingLoop();
+    }
   }
 
   public detachMedia(): void {
+    this.unregisterRenderingLoop();
     this.unregisterID3Track();
     this.cleanupHandlers();
 
     this.media = null
-    this.privious_time = null;
   }
 
   private static isID3Track(track: TextTrack): boolean {
@@ -67,12 +70,13 @@ export default class HLSFeeder extends DecodingFeeder {
   }
 
   public destroy(): void {
+    super.destroy();
     this.detachMedia();
   }
 
   protected disappearance(): void {
     super.disappearance();
-    this.privious_time = null;
+    this.id3TrackPriviousTimes.clear();
   }
 
   private registerID3Track(): void {
@@ -87,46 +91,64 @@ export default class HLSFeeder extends DecodingFeeder {
 
   private unregisterID3Track(): void {
     this.id3Tracks = [];
+    this.id3TrackPriviousTimes.clear();
   }
 
   private onAddTrack(event: TrackEvent): void {
     const track = event.track!;
     if (!HLSFeeder.isID3Track(track)) { return; }
-
+    track.mode = 'hidden';
     this.id3Tracks.push(track);
   }
 
   private onRemoveTrack(event: TrackEvent): void {
     const track = event.track!;
     if (!HLSFeeder.isID3Track(track)) { return; }
-
     this.id3Tracks = this.id3Tracks.filter((t) => t !== track);
+    this.id3TrackPriviousTimes.delete(track);
   }
 
   private introspect(): void {
+    this.timer = null;
     this.registerRenderingLoop();
+
     if (this.media == null) { return; }
     const current_time = this.media.currentTime;
-
-    if (this.privious_time == null) {
-      this.privious_time = current_time;
-      return;
-    }
 
     for (const track of this.id3Tracks) {
       const cues = Array.from(track.cues ?? []);
       if (cues.length === 0) { continue; }
 
-      let prev_index: number | null = null;
-      let curr_index: number | null = null;
+      // ない場合は現在時刻未満の 直近のstartTime を保存する
+      if (!this.id3TrackPriviousTimes.has(track)) {
+        let curr_index = 0;
+        {
+          let begin = -1, end = cues.length;
+          while (begin + 1 < end) {
+            const middle = Math.floor((begin + end) / 2);
+            const start_time = cues[middle].startTime;
 
+            if (current_time <= start_time) {
+              end = middle;
+            } else {
+              begin = middle;
+            }
+          }
+          curr_index = begin;
+        }
+        this.id3TrackPriviousTimes.set(track, cues[curr_index]?.startTime ?? Number.NEGATIVE_INFINITY);
+        continue;
+      }
+      const privious_time = this.id3TrackPriviousTimes.get(track)!;
+
+      let prev_index = 0, curr_index = 0;
       {
         let begin = -1, end = cues.length;
         while (begin + 1 < end) {
           const middle = Math.floor((begin + end) / 2);
           const start_time = cues[middle].startTime;
 
-          if (this.privious_time < start_time) {
+          if (privious_time < start_time) {
             end = middle;
           } else {
             begin = middle;
@@ -149,8 +171,8 @@ export default class HLSFeeder extends DecodingFeeder {
         curr_index = begin;
       }
 
-      if (prev_index === null || curr_index === null || prev_index === curr_index){
-        continue;
+      if (cues[curr_index] != null) {
+        this.id3TrackPriviousTimes.set(track, cues[curr_index].startTime);
       }
 
       if (prev_index < curr_index) {
@@ -159,11 +181,10 @@ export default class HLSFeeder extends DecodingFeeder {
         }
       }
     }
-
-    this.privious_time = current_time;
   }
 
   private registerRenderingLoop(): void {
+    if (this.timer != null){ return; }
     this.timer = requestAnimationFrame(this.introspectHandler);
   }
 
@@ -188,21 +209,21 @@ export default class HLSFeeder extends DecodingFeeder {
     const id3 = cue as any;
     if (cue.track.inBandMetadataTrackDispatchType === 'com.apple.streaming') { // Safari
       if (id3.value.key === 'PRIV' && id3.value.info === 'aribb24.js') {
-        this.decode(id3.value.data, cue.startTime);
+        this.feed(id3.value.data, cue.startTime, cue.startTime);
       } else if (id3.value.key === 'TXXX' && id3.value.info === 'aribb24.js') {
-        this.decode(base64ToUint8Array(id3.value.data), cue.startTime);
+        this.feed(base64ToUint8Array(id3.value.data), cue.startTime, cue.startTime);
       }
     } else if (cue.track.label === 'id3') { // hls.js
       if (id3.value.key === 'PRIV' && id3.value.info === 'aribb24.js') {
-        this.decode(id3.value.data, cue.startTime);
+        this.feed(id3.value.data, cue.startTime, cue.startTime);
       } else if (id3.value.key === 'TXXX' && id3.value.info === 'aribb24.js') {
-        this.decode(base64ToUint8Array(id3.value.data), cue.startTime);
+        this.feed(base64ToUint8Array(id3.value.data), cue.startTime, cue.startTime);
       }
     } else if (cue.track.label === 'Timed Metadata') { // video.js
       if (id3.frame.key === 'PRIV' && id3.frame.owner === 'aribb24.js') {
-        this.decode(id3.frame.data, cue.startTime);
+        this.feed(id3.frame.data, cue.startTime, cue.startTime);
       } else if (id3.frame.key === 'TXXX' && id3.frame.description === 'aribb24.js') {
-        this.decode(base64ToUint8Array(id3.frame.data), cue.startTime);
+        this.feed(base64ToUint8Array(id3.frame.data), cue.startTime, cue.startTime);
       }
     }
   }

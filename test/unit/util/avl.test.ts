@@ -62,4 +62,32 @@ describe("AVL", () => {
       expect(avl.ceil(query)).toStrictEqual(expectedCeil(query));
     }
   });
+
+  test('Lower/Upper against brute-force reference', () => {
+    const avl = new AVLTree<number, number>(compareNumber, compareNumber, (val) => val);
+    const keys = Array.from({ length: 64 }, (_, i) => i * 3);
+    for (const key of keys) {
+      avl.insert(key, key);
+    }
+
+    const expectedLower = (query: number): number | undefined => {
+      let best: number | undefined = undefined;
+      for (const key of keys) {
+        if (key < query && (best === undefined || key > best)) { best = key; }
+      }
+      return best;
+    };
+    const expectedUpper = (query: number): number | undefined => {
+      let best: number | undefined = undefined;
+      for (const key of keys) {
+        if (key > query && (best === undefined || key < best)) { best = key; }
+      }
+      return best;
+    };
+
+    for (let query = -2; query <= keys[keys.length - 1] + 2; query++) {
+      expect(avl.lower(query)).toStrictEqual(expectedLower(query));
+      expect(avl.upper(query)).toStrictEqual(expectedUpper(query));
+    }
+  });
 });

@@ -10,6 +10,8 @@ interface AVLTreeNodeInterface<K, V, O> {
   get(key: K): V | undefined;
   floor(key: K): V | undefined;
   ceil(key: K): V | undefined;
+  lower(key: K): V | undefined;
+  upper(key: K): V | undefined;
   insert(key: K, value: V): void;
   delete(key: K): void;
   replace(from: AVLTreeNode<K, V, O>, to: AVLTreeNode<K, V, O> | null): void;
@@ -53,15 +55,23 @@ class AVLTreeDummyNode<K, V, O = K> implements AVLTreeNodeInterface<K, V, O> {
   }
 
   public get(key: K): V | undefined {
-    return this.actual?.get(key) ?? undefined;
+    return this.actual?.get(key);
   }
 
   public floor(key: K): V | undefined {
-    return this.actual?.floor(key) ?? undefined;
+    return this.actual?.floor(key);
   }
 
   public ceil(key: K): V | undefined {
-    return this.actual?.ceil(key) ?? undefined;
+    return this.actual?.ceil(key);
+  }
+
+  public lower(key: K): V | undefined {
+    return this.actual?.lower(key);
+  }
+
+  public upper(key: K): V | undefined {
+    return this.actual?.upper(key);
   }
 
   public insert(key: K, value: V): void {
@@ -192,31 +202,47 @@ class AVLTreeNode<K, V, O = K> implements AVLTreeNodeInterface<K, V, O> {
     }
   }
 
-  private find(key: K, algorithm: 'exact' | 'floor' | 'ceil' = 'exact'): AVLTreeNode<K, V, O> | null {
+  private find(key: K, algorithm: 'exact' | 'floor' | 'ceil' | 'upper' | 'lower' = 'exact'): AVLTreeNode<K, V, O> | null {
     let node: AVLTreeNode<K, V, O> = this;
     let candidate: AVLTreeNode<K, V, O> | null = null;
 
     FIND:
     while (true) {
-      const compare = this.compareKey(key, node.key);
+      let compare = this.compareKey(key, node.key);
       switch (compare) {
         case 0:
-          return node;
+          if (algorithm === 'upper') {
+            if (node.right != null) {
+              node = node.right;
+              continue FIND;
+            } else {
+              return candidate;
+            }
+          }else if (algorithm === 'lower') {
+            if (node.left != null) {
+              node = node.left;
+              continue FIND;
+            } else {
+              return candidate;
+            }
+          } else {
+            return node;
+          }
         case -1:
-          if (algorithm === 'ceil') { candidate = node; }
+          if (algorithm === 'ceil' || algorithm === 'upper') { candidate = node; }
           if (node.left != null) {
             node = node.left;
             continue FIND;
-          } else if (algorithm === 'ceil') {
+          } else if (algorithm === 'ceil' || algorithm === 'upper') {
             return node;
           }
           return algorithm === 'exact' ? null : candidate;
         case 1:
-          if (algorithm === 'floor') { candidate = node; }
+          if (algorithm === 'floor' || algorithm === 'lower') { candidate = node; }
           if (node.right != null) {
             node = node.right;
             continue FIND;
-          } else if (algorithm === 'floor') {
+          } else if (algorithm === 'floor' || algorithm === 'lower') {
             return node;
           }
           return algorithm === 'exact' ? null : candidate;
@@ -231,16 +257,25 @@ class AVLTreeNode<K, V, O = K> implements AVLTreeNodeInterface<K, V, O> {
   }
 
   public get(key: K): V | undefined {
-    return this.find(key, 'exact')?.value ?? undefined;
+    return this.find(key, 'exact')?.value;
   }
 
   public floor(key: K): V | undefined {
-    return this.find(key, 'floor')?.value ?? undefined;
+    return this.find(key, 'floor')?.value;
   }
 
   public ceil(key: K): V | undefined {
-    return this.find(key, 'ceil')?.value ?? undefined;
+    return this.find(key, 'ceil')?.value;
   }
+
+  public lower(key: K): V | undefined {
+    return this.find(key, 'lower')?.value;
+  }
+
+  public upper(key: K): V | undefined {
+    return this.find(key, 'upper')?.value;
+  }
+
 
   public insert(key: K, value: V): void {
     let node: AVLTreeNode<K, V, O> = this;
@@ -339,9 +374,9 @@ class AVLTreeNode<K, V, O = K> implements AVLTreeNodeInterface<K, V, O> {
     const f = this.compareOrder(from, this.order);
     const t = this.compareOrder(to, this.order);
 
-    if (f <= 0) { yield* (this.left?.range(from, to) ?? []); }
-    if (f <= 0 && t > 0){ yield this.value; }
-    if (t > 0) { yield* (this.right?.range(from, to) ?? []); }
+    if (f < 0) { yield* (this.left?.range(from, to) ?? []); }
+    if (f < 0 && t >= 0){ yield this.value; }
+    if (t >= 0) { yield* (this.right?.range(from, to) ?? []); }
   }
 }
 
@@ -376,6 +411,14 @@ export default class AVLTree<K, V, O = K>  {
 
   public ceil(key: K): V | undefined {
     return this.root.ceil(key);
+  }
+
+  public lower(key: K): V | undefined {
+    return this.root.lower(key);
+  }
+
+  public upper(key: K): V | undefined {
+    return this.root.upper(key);
   }
 
   public forEach(func: (value: V) => void): void {

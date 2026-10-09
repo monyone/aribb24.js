@@ -40,24 +40,28 @@ export default class Controller {
   }
 
   public attachMedia(media: HTMLVideoElement, container?: HTMLElement): void {
-    if (this.container) {
-      this.renderers.forEach((renderer) => renderer.onDetach());
-    }
+    this.detachMedia();
     this.media = media;
     this.container = container ?? media.parentElement!;
     if (this.container) {
       this.renderers.forEach((renderer) => renderer.onAttach(this.container!));
     }
-    this.feeder?.prepare(this.media.currentTime);
+    this.feeder?.onAttach();
     this.setupHandlers();
+    // 再生中で表示状態ならレンダーループを起動する
+    if (!this.media.paused && this.isShowing) {
+      this.registerRenderingLoop();
+    }
   }
 
   public detachMedia(): void {
+    this.clear();
     if (this.container) {
       this.renderers.forEach((renderer) => renderer.onDetach());
     }
     this.cleanupHandlers()
     this.media = this.container = null
+    this.unregisterRenderingLoop();
   }
 
   private setupHandlers() {
@@ -93,10 +97,6 @@ export default class Controller {
     this.detachFeeder();
     this.feeder = feeder;
     this.feeder.onAttach();
-
-    if (this.media != null) {
-      this.feeder.prepare(this.media.currentTime);
-    }
   }
 
   public detachFeeder() {
@@ -155,6 +155,8 @@ export default class Controller {
   }
 
   private onTimeupdate() {
+    this.timer = null;
+
     // not showing, do not show
     if (!this.isShowing) { return; }
 
@@ -163,6 +165,7 @@ export default class Controller {
   }
 
   private registerRenderingLoop(): void {
+    if (this.timer != null) { return; }
     this.timer = requestAnimationFrame(this.onTimeupdateHandler);
   }
 
@@ -173,15 +176,10 @@ export default class Controller {
   }
 
   private onPlay(): void {
-    if (this.media != null) {
-      this.feeder?.prepare(this.media.currentTime);
-    }
-
     this.renderers.forEach((renderer) => {
       renderer.onPlay();
     });
 
-    if (this.timer != null) { return }
     this.registerRenderingLoop();
   }
 
@@ -241,7 +239,7 @@ export default class Controller {
 
   public show(): void {
     this.isShowing = true;
-    if (this.timer == null) {
+    if (this.media != null && !this.media.paused) {
       this.registerRenderingLoop();
     }
     this.renderers.forEach((renderer) => renderer.show());
