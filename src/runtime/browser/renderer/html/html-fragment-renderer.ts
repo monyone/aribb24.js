@@ -104,7 +104,7 @@ export default class HTMLFragmentRenderer implements Renderer {
     this.element.style.visibility = 'hidden';
   }
   public show(): void {
-    this.element.style.visibility = 'showing';
+    this.element.style.visibility = 'visible';
   }
 
   public render(initialState: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionAssociationInformation): void {
