@@ -1,0 +1,65 @@
+name: Deploy NPM Package
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'package.json'
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ steps.check.outputs.deploy }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Check Version
+        id: check
+        run: |
+          PACKAGE_NAME=$(npm pkg get name | tr -d '"')
+          LOCAL_VERSION=$(npm pkg get version | tr -d '"')
+          PUBLISHED_VERSION=$(npm view ${PACKAGE_NAME} version 2>/dev/null || echo "0.0.0")
+          if [ "$LOCAL_VERSION" != "$PUBLISHED_VERSION" ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Version $LOCAL_VERSION is already published. Skipping."
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    needs: check-version
+    if: needs.check-version.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install Dependency
+        run: yarn install --frozen-lockfile
+
+      - name: Run Type Check
+        run: yarn tsc
+
+      - name: Publish npm
+        run: npm publish
