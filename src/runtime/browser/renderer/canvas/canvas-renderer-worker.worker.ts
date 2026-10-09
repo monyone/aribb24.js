@@ -59,6 +59,8 @@ self.addEventListener('message', (event: MessageEvent<FromMainToWorkerEvent>) =>
 
       createImageBitmap(present).then((bitmap) => {
         self.postMessage(FromWorkerToMainEventImageBitmap.from(bitmap));
+      }).catch(() => {
+        self.postMessage(FromWorkerToMainEventImageBitmap.from())
       });
 
       break;
