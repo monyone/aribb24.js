@@ -40,6 +40,7 @@ export default class SpeechRecognitionFeeder implements Feeder {
   public detachMedia(): void {
     if (this.media == null) { return; }
     this.media.removeEventListener('ended', this.endedHandler);
+    this.media.removeEventListener('loadedmetadata', this.endedHandler);
     this.media = null
   }
 
@@ -67,7 +68,9 @@ export default class SpeechRecognitionFeeder implements Feeder {
     if (this.media == null) { return; }
     const stream = (this.media as any).captureStream();
     this.track = stream.getAudioTracks()[0];
-    this.recognition.start(this.track);
+    if (this.track) {
+      this.recognition.start(this.track);
+    }
   }
 
   public clear(): void {
