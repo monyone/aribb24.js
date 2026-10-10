@@ -286,36 +286,20 @@ export class ARIBB24Parser {
   }
 
   private move_relative_pos(x: number, y: number) {
-    while (x < 0){
-      this.state.position[0] -= ARIBB24Parser.box(this.state)[0];
-      x++;
-      while (this.state.position[0] < 0) {
-        this.state.position[0] += this.state.area[0];
-        y--;
-      }
+    { // x
+      this.state.position[0] += ARIBB24Parser.box(this.state)[0] * x;
+      // 幅 0 で除算するケースが敵対的に入れられるかもしれないので、その場合は無限にして折り返さない
+      const denominator = this.state.area[0] !== 0 ? this.state.area[0] : Number.POSITIVE_INFINITY;
+      const times = Math.floor(this.state.position[0] / denominator);
+      this.state.position[0] -= times * this.state.area[0];
+      y += times;
     }
-    while (x > 0){
-      this.state.position[0] += ARIBB24Parser.box(this.state)[0];
-      x--;
-      while (this.state.position[0] >= this.state.area[0]) {
-        this.state.position[0] -= this.state.area[0];
-        y++;
-      }
-    }
-    while (y < 0){
-      this.state.position[1] -= ARIBB24Parser.box(this.state)[1];
-      y++;
-    }
-    while (y > 0){
-      this.state.position[1] += ARIBB24Parser.box(this.state)[1];
-      y--;
-    }
-
-    while (this.state.position[1] >= this.state.area[1]) {
-      this.state.position[1] -= this.state.area[1];
-    }
-    while (this.state.position[1] < 0) {
-      this.state.position[1] += this.state.area[1];
+    { // y
+      this.state.position[1] += ARIBB24Parser.box(this.state)[1] * y;
+      // 高さ 0 で除算するケースが敵対的に入れられるかもしれないので、その場合は無限にして折り返さない
+      const denominator = this.state.area[1] !== 0 ? this.state.area[1] : Number.POSITIVE_INFINITY;
+      const times = Math.floor(this.state.position[1] / denominator);
+      this.state.position[1] -= times * this.state.area[1];
     }
   }
 
