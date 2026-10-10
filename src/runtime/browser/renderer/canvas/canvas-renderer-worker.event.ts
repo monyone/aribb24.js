@@ -96,4 +96,15 @@ export const FromWorkerToMainEventImageBitmap = {
   }
 }
 
-export type FromWorkerToMainEvent = FromWorkerToMainEventImageBitmap;
+export type FromWorkerToMainEventTerminated = {
+  type: 'terminated';
+};
+export const FromWorkerToMainEventTerminated = {
+  from (): FromWorkerToMainEventTerminated {
+    return {
+      type: 'terminated',
+    };
+  }
+}
+
+export type FromWorkerToMainEvent = FromWorkerToMainEventImageBitmap | FromWorkerToMainEventTerminated;

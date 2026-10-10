@@ -1,6 +1,6 @@
 import { ExhaustivenessError } from "../../../../util/error";
 import render from "./canvas-renderer-strategy"
-import { FromMainToWorkerEvent, FromWorkerToMainEventImageBitmap } from "./canvas-renderer-worker.event";
+import { FromMainToWorkerEvent, FromWorkerToMainEventImageBitmap, FromWorkerToMainEventTerminated } from "./canvas-renderer-worker.event";
 
 let present: OffscreenCanvas | null = null;
 let buffer: OffscreenCanvas | null = null;
@@ -28,6 +28,7 @@ self.addEventListener('message', (event: MessageEvent<FromMainToWorkerEvent>) =>
         buffer.width = buffer.height = 0;
         buffer = null;
       }
+      self.postMessage(FromWorkerToMainEventTerminated.from())
       break;
     }
     case 'clear': {
@@ -55,12 +56,15 @@ self.addEventListener('message', (event: MessageEvent<FromMainToWorkerEvent>) =>
       break;
     }
     case 'imagebitmap': {
-      if (present == null) { break; }
+      if (present == null) {
+        self.postMessage(FromWorkerToMainEventImageBitmap.from());
+        break;
+      }
 
       createImageBitmap(present).then((bitmap) => {
         self.postMessage(FromWorkerToMainEventImageBitmap.from(bitmap));
       }).catch(() => {
-        self.postMessage(FromWorkerToMainEventImageBitmap.from())
+        self.postMessage(FromWorkerToMainEventImageBitmap.from());
       });
 
       break;

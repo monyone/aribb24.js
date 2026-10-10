@@ -2,7 +2,7 @@ import { ARIBB24ParserState } from "../../../../lib/parser/parser";
 import CanvasRenderer from "./canvas-renderer";
 
 import RenderingWorker from "./canvas-renderer-worker.worker?worker&inline";
-import { FromMainToWorkerEventClear, FromMainToWorkerEventInitialize, FromMainToWorkerEventRender, FromMainToWorkerEventResize, FromWorkerToMainEvent, FromWorkerToMainEventImageBitmap } from "./canvas-renderer-worker.event";
+import { FromMainToWorkerEventClear, FromMainToWorkerEventImageBitmap, FromMainToWorkerEventInitialize, FromMainToWorkerEventRender, FromMainToWorkerEventResize, FromMainToWorkerEventTerminate, FromWorkerToMainEvent, FromWorkerToMainEventImageBitmap } from "./canvas-renderer-worker.event";
 import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datagroup";
 import { ARIBB24BrowserToken, replaceDRCS } from "../../types";
 import { PartialCanvasRendererOption } from "./canvas-renderer-option";
@@ -10,6 +10,7 @@ import { PartialCanvasRendererOption } from "./canvas-renderer-option";
 export default class CanvasWebWorkerRenderer extends CanvasRenderer {
   private buffer: OffscreenCanvas;
   private present: OffscreenCanvas;
+  private terminated: boolean = false;
   private worker: Worker;
   private waitPromise: Promise<void> | null = null;
   private waitResolve: () => void = () => {};
@@ -27,8 +28,14 @@ export default class CanvasWebWorkerRenderer extends CanvasRenderer {
   }
 
   public destroy(): void {
-    this.worker.postMessage(FromMainToWorkerEventResize.from(0, 0));
-    this.worker.terminate();
+    this.worker.postMessage(FromMainToWorkerEventTerminate.from());
+    const callback = (event: MessageEvent<FromWorkerToMainEvent>) => {
+      if (event.data.type !== 'terminated') { return; }
+      this.worker.removeEventListener('message', callback);
+      this.worker.terminate();
+      this.terminated = true;
+    };
+    this.worker.addEventListener('message', callback);
   }
 
   public clear(): void {
@@ -40,6 +47,9 @@ export default class CanvasWebWorkerRenderer extends CanvasRenderer {
   }
 
   public async getPresentationImageBitmap(): Promise<ImageBitmap | null> {
+    // そもそも worker が終了してたら新規に受け付けはしない
+    if (this.terminated) { return null; }
+
     while (this.waitPromise != null) {
       await this.waitPromise;
       if (this.waitPromise == null) { break; }
@@ -53,18 +63,29 @@ export default class CanvasWebWorkerRenderer extends CanvasRenderer {
         resolve();
       };
     });
+    if (this.terminated) { // 終了してたら、何もせず順番待ちを進める
+      this.waitResolve();
+      return null;
+    }
 
-    this.worker.postMessage(FromWorkerToMainEventImageBitmap.from());
+    // ここは getPresentationImageBitmap がシリアルになってるので、複数の呼び出しは混在しない
+    this.worker.postMessage(FromMainToWorkerEventImageBitmap.from());
     const promise: Promise<ImageBitmap | null> = new Promise((resolve) => {
-      this.worker.addEventListener('message', (event: MessageEvent<FromWorkerToMainEvent>) => {
+      const callback = (event: MessageEvent<FromWorkerToMainEvent>) => {
         switch (event.data.type) {
-          case 'imagebitmap': {
+          case 'imagebitmap':
+            this.worker.removeEventListener('message', callback);
             resolve(event.data.bitmap);
             this.waitResolve();
-            return;
-          }
+            break;
+          case 'terminated':
+            this.worker.removeEventListener('message', callback);
+            resolve(null);
+            this.waitResolve();
+            break;
         }
-      }, { once: true });
+      }
+      this.worker.addEventListener('message', callback);
     });
 
     return promise;
