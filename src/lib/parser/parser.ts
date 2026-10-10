@@ -1,6 +1,7 @@
 import { ARIBB24Token, ARIBB24CharacterToken, ARIBB24CharacterSizeControlType, ARIBB24ClearScreenToken, ARIBB24DRCSToken, ARIBB24FlashingControlType, ARIBB24OrnamentControlType, ARIBB24BitmapToken } from "../tokenizer/token";
 import { ExhaustivenessError } from "../../util/error";
 import CRC32 from "../../util/crc32";
+import { uint8ArrayToBase64 } from "../../util/binary";
 
 export const ARIBB24_CHARACTER_SIZE = {
   Small: 'Small',
@@ -205,7 +206,7 @@ export const ARIBB24BitmapParsedToken = {
     pngDataView.setInt32(trnsOffset + trnsSize - 4, CRC32(pngData, trnsOffset + 4, trnsOffset + 8 + trnsDataSize), false);
     const width = pngDataView.getInt32(16 /* PNG signature + 'IHDR' + size */, false);
     const height = pngDataView.getInt32(20 /* PNG signature + 'IHDR' + size + width */, false);
-    const normal_dataurl = 'data:image/png;base64,' + btoa(String.fromCharCode(...pngData));
+    const normal_dataurl = 'data:image/png;base64,' + uint8ArrayToBase64(pngData);
 
     if (flcColors.size === 0) {
       return {
@@ -223,7 +224,7 @@ export const ARIBB24BitmapParsedToken = {
     }
     pngDataView.setInt32(plteOffset + plteSize - 4, CRC32(pngData, plteOffset + 4, plteOffset + 8 + plteDataSize), false);
     pngDataView.setInt32(trnsOffset + trnsSize - 4, CRC32(pngData, trnsOffset + 4, trnsOffset + 8 + trnsDataSize), false);
-    const flashing_dataurl= 'data:image/png;base64,' + btoa(String.fromCharCode(...pngData));
+    const flashing_dataurl= 'data:image/png;base64,' + uint8ArrayToBase64(pngData);
 
     return {
       width,

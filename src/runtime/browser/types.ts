@@ -4,6 +4,7 @@ import { replaceDRCS as tokenizerReplaceDRCS } from "../../lib/tokenizer/b24/tok
 import { ARIBB24BitmapParsedToken, ARIBB24CommonParsedToken, ARIBB24ParsedToken, ARIBB24Parser, ARIBB24ParserOption, ARIBB24ParserState } from "../../lib/parser/parser";
 import regioner, { ARIBB24Region, SSZ_RUBY_DETECTION } from "../../lib/parser/regioner";
 import { CaptionAssociationInformation } from "../../lib/demuxer/b24/datagroup";
+import { uint8ArrayToBase64 } from "../../util/binary";
 
 export type DecodedBitmap = {
   tag: 'Bitmap';
@@ -63,9 +64,7 @@ export const DecodedBitmap = {
     const height = pngDataView.getInt32(20 /* PNG signature + 'IHDR' + size + width */, false);
 
     const normalImage = new Image(width, height);
-    let normalImageStr = '';
-    for (let i = 0; i < pngData.length; i++) { normalImageStr += String.fromCharCode(pngData[i]); }
-    normalImage.src = 'data:image/png;base64,' + btoa(normalImageStr);
+    normalImage.src = 'data:image/png;base64,' + uint8ArrayToBase64(pngData);
     await normalImage.decode();
     const normal_bitmap = await createImageBitmap(normalImage);
 
@@ -91,9 +90,7 @@ export const DecodedBitmap = {
     pngDataView.setInt32(trnsOffset + trnsSize - 4, CRC32(pngData, trnsOffset + 4, trnsOffset + 8 + trnsDataSize), false);
 
     const flashingImage = new Image(width, height);
-    let flashingImageStr = '';
-    for (let i = 0; i < pngData.length; i++) { flashingImageStr += String.fromCharCode(pngData[i]); }
-    flashingImage.src = 'data:image/png;base64,' + btoa(flashingImageStr);
+    flashingImage.src = 'data:image/png;base64,' + uint8ArrayToBase64(pngData);
     await flashingImage.decode();
     const flashing_bitmap = await createImageBitmap(flashingImage);
 
