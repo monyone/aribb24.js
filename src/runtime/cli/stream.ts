@@ -45,13 +45,13 @@ const bunWritableStreamFS = (path: string): WritableStream<Uint8Array> => {
   });
 }
 
-const denoWritableStreamFS = (path: string): WritableStream<Uint8Array> => {
+const denoWritableStreamFS = async (path: string): Promise<WritableStream<Uint8Array>> => {
   const deno = (globalThis as any).Deno;
   if (path === '-') {
     return deno.stdout.writable;
   }
 
-  const file = deno.open(path, { create: true });
+  const file = await deno.open(path, { create: true });
   return file.writable;
 }
 
