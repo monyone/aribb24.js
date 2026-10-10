@@ -116,7 +116,7 @@ export default class HLSFeeder extends DecodingFeeder {
     const current_time = this.media.currentTime;
 
     for (const track of this.id3Tracks) {
-      const cues = Array.from(track.cues ?? []);
+      const cues = track.cues ?? [];
       if (cues.length === 0) { continue; }
 
       // ない場合は現在時刻未満の 直近のstartTime を保存する
