@@ -50,7 +50,7 @@ export default class TextRenderer implements Renderer {
 
           // Otherwise, apply half
           if (this.option.replace.half && shouldHalfWidth(state.size, info)) {
-            this.text += halftext.get(character)!;
+            this.text += halftext.get(character) ?? character;
           } else {
             this.text += character;
           }
