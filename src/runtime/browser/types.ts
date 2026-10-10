@@ -61,8 +61,11 @@ export const DecodedBitmap = {
     pngDataView.setInt32(trnsOffset + trnsSize - 4, CRC32(pngData, trnsOffset + 4, trnsOffset + 8 + trnsDataSize), false);
     const width = pngDataView.getInt32(16 /* PNG signature + 'IHDR' + size */, false);
     const height = pngDataView.getInt32(20 /* PNG signature + 'IHDR' + size + width */, false);
+
     const normalImage = new Image(width, height);
-    normalImage.src = 'data:image/png;base64,' + btoa(String.fromCharCode(...pngData));
+    let normalImageStr = '';
+    for (let i = 0; i < pngData.length; i++) { normalImageStr += String.fromCharCode(pngData[i]); }
+    normalImage.src = 'data:image/png;base64,' + btoa(normalImageStr);
     await normalImage.decode();
     const normal_bitmap = await createImageBitmap(normalImage);
 
@@ -88,7 +91,9 @@ export const DecodedBitmap = {
     pngDataView.setInt32(trnsOffset + trnsSize - 4, CRC32(pngData, trnsOffset + 4, trnsOffset + 8 + trnsDataSize), false);
 
     const flashingImage = new Image(width, height);
-    flashingImage.src = 'data:image/png;base64,' + btoa(String.fromCharCode(...pngData));
+    let flashingImageStr = '';
+    for (let i = 0; i < pngData.length; i++) { flashingImageStr += String.fromCharCode(pngData[i]); }
+    flashingImage.src = 'data:image/png;base64,' + btoa(flashingImageStr);
     await flashingImage.decode();
     const flashing_bitmap = await createImageBitmap(flashingImage);
 
