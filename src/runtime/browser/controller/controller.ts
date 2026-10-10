@@ -141,7 +141,7 @@ export default class Controller {
 
     this.renderers.forEach((renderer) => {
       if (!renderer.onContainerResize(width, height)) { return; }
-      this.paint(true);
+      this.repaint(renderer);
     });
   }
 
@@ -150,7 +150,7 @@ export default class Controller {
 
     this.renderers.forEach((renderer) => {
       if (!renderer.onVideoResize(this.media!.videoWidth, this.media!.videoHeight)) { return; }
-      this.paint(true);
+      this.repaint(renderer);
     });
   }
 
@@ -161,7 +161,7 @@ export default class Controller {
     if (!this.isShowing) { return; }
 
     this.registerRenderingLoop();
-    this.paint(false);
+    this.paint();
   }
 
   private registerRenderingLoop(): void {
@@ -191,22 +191,12 @@ export default class Controller {
     this.unregisterRenderingLoop();
   }
 
-  private paint(repaint: boolean) {
+  private paint() {
     // precondition
     if (!this.media) { return; }
 
     const currentTime = this.media.currentTime;
     const current = this.feeder?.content(currentTime) ?? null;
-    if (repaint) {
-      // paint
-      if (current == null || currentTime >= current.pts + current.duration) {
-        this.renderers.forEach((renderer) => renderer.clear());
-      } else {
-        this.renderers.forEach((renderer) => renderer.render(current.state, structuredClone(current.data), current.info));
-      }
-
-      return;
-    }
 
     // render
     if (current == null) { // current is null
@@ -227,6 +217,20 @@ export default class Controller {
       for (const token of current.data.filter((data) => data.tag === 'BuiltinSoundReplay')) {
         this.emitter.emit(EventType.BuiltinSound, BuiltinSound.from(token.sound));
       }
+    }
+  }
+
+  private repaint(renderer?: ARIBB24Renderer) {
+    // precondition
+    if (!this.media) { return; }
+
+    const renderers = renderer == null ? this.renderers : [renderer];
+    const currentTime = this.media.currentTime;
+    const current = this.feeder?.content(currentTime) ?? null;
+    if (current == null || currentTime >= current.pts + current.duration) {
+      renderers.forEach((renderer) => renderer.clear());
+    } else {
+      renderers.forEach((renderer) => renderer.render(structuredClone(current.state), structuredClone(current.data), structuredClone(current.info)));
     }
   }
 
