@@ -183,6 +183,24 @@ export const replaceDRCS = (tokens: ARIBB24BrowserToken[], replace: Map<string, 
   return tokenizerReplaceDRCS(tokens as ARIBB24Token[], replace) as ARIBB24BrowserToken[];
 };
 
+export const extractImageBitmap = (tokens: ARIBB24BrowserToken[]): ImageBitmap[] => {
+  return tokens.filter((token) => token.tag === 'Bitmap').flatMap((token) => {
+    if (token.flashing_bitmap) {
+      return [token.normal_bitmap, token.flashing_bitmap];
+    } else {
+      return [token.normal_bitmap];
+    }
+  });
+};
+
+export const closeImageBitmap = (tokens: ARIBB24BrowserToken[]) => {
+  for (const token of tokens) {
+    if (token.tag !== 'Bitmap') { continue; }
+    token.normal_bitmap.close();
+    token.flashing_bitmap?.close();
+  }
+};
+
 export const makeRegions = (tokens: ARIBB24BrowserParsedToken[], info: CaptionAssociationInformation, ruby_handle_type: (typeof SSZ_RUBY_DETECTION)[keyof typeof SSZ_RUBY_DETECTION]): ARIBB24Region[] => {
   return regioner(tokens.filter((token) => {
     if (token.tag !== 'Bitmap') { return true; }

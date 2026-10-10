@@ -4,7 +4,7 @@ import CanvasRenderer from "./canvas-renderer";
 import RenderingWorker from "./canvas-renderer-worker.worker?worker&inline";
 import { FromMainToWorkerEventClear, FromMainToWorkerEventImageBitmap, FromMainToWorkerEventInitialize, FromMainToWorkerEventRender, FromMainToWorkerEventResize, FromMainToWorkerEventTerminate, FromWorkerToMainEvent, FromWorkerToMainEventImageBitmap } from "./canvas-renderer-worker.event";
 import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datagroup";
-import { ARIBB24BrowserToken, replaceDRCS } from "../../types";
+import { ARIBB24BrowserToken, extractImageBitmap, replaceDRCS } from "../../types";
 import { PartialCanvasRendererOption } from "./canvas-renderer-option";
 
 export default class CanvasWebWorkerRenderer extends CanvasRenderer {
@@ -43,7 +43,10 @@ export default class CanvasWebWorkerRenderer extends CanvasRenderer {
   }
 
   public render(initialState: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionAssociationInformation): void {
-    this.worker.postMessage(FromMainToWorkerEventRender.from(initialState, replaceDRCS(tokens, this.option.replace.drcs), info, this.option));
+    this.worker.postMessage(
+      FromMainToWorkerEventRender.from(initialState, replaceDRCS(tokens, this.option.replace.drcs), info, this.option),
+      extractImageBitmap(tokens)
+    );
   }
 
   public async getPresentationImageBitmap(): Promise<ImageBitmap | null> {

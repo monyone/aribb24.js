@@ -1,6 +1,6 @@
 import { ARIBB24ParserState } from "../../../../lib/parser/parser";
 import { CaptionAssociationInformation } from "../../../../lib/demuxer/b24/datagroup";
-import { ARIBB24BrowserToken, replaceDRCS } from "../../types";
+import { ARIBB24BrowserToken, closeImageBitmap, replaceDRCS } from "../../types";
 import { shouldNotAssumeUseClearScreen } from "../quirk";
 import Renderer from "../renderer";
 import { PartialSVGDOMRendererOption, SVGDOMRendererOption } from "./svg-dom-renderer-option";
@@ -41,6 +41,7 @@ export default class SVGDOMRenderer implements Renderer {
     if (shouldNotAssumeUseClearScreen(info)) { this.clear(); }
 
     render(this.svg, initialState, replaceDRCS(tokens, this.option.replace.drcs), info, this.option);
+    closeImageBitmap(tokens);
   }
 
   public onAttach(element: HTMLElement): void {

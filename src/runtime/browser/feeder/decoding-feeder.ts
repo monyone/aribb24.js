@@ -5,7 +5,7 @@ import demuxPES from '../../../lib/demuxer/b24/independent';
 import demuxDatagroup, { ARIBB24CaptionManagement } from '../../../lib/demuxer/b24/datagroup'
 import { ARIBB24ClearScreenToken } from '../../../lib/tokenizer/token';
 import { initialState } from '../../../lib/parser/parser';
-import { ARIBB24BrowserToken, toBrowserTokenWithBitmap } from '../types';
+import { ARIBB24BrowserToken, closeImageBitmap, toBrowserTokenWithBitmap } from '../types';
 import colortable from '../../common/colortable';
 
 type DecodingOrderedKey = {
@@ -15,11 +15,11 @@ type DecodingOrderedKey = {
 
 const calcDecodingOrder = ({ dts }: DecodingOrderedKey): number => {
   return dts;
-}
+};
 
 const compareNumber = (a: number, b: number) => {
   return Math.sign(a - b) as (-1 | 0 | 1);
-}
+};
 
 const compareKey = (a: DecodingOrderedKey, b: DecodingOrderedKey) => {
   if (compareNumber(a.dts, b.dts) !== 0) {
@@ -27,19 +27,11 @@ const compareKey = (a: DecodingOrderedKey, b: DecodingOrderedKey) => {
   } else {
     return compareNumber(a.lang ?? -1, b.lang ?? -1)
   }
-}
-
-const closeTokenImageBitmap = (tokens: ARIBB24BrowserToken[]) => {
-  for (const token of tokens) {
-    if (token.tag !== 'Bitmap') { continue; }
-    token.normal_bitmap.close();
-    token.flashing_bitmap?.close();
-  }
 };
 
 const closeValueImageBitmap = (value: FeederPresentationData) => {
-  closeTokenImageBitmap(value.data);
-}
+  closeImageBitmap(value.data);
+};
 
 export default abstract class DecodingFeeder implements Feeder {
   private option: FeederOption;
@@ -151,7 +143,7 @@ export default abstract class DecodingFeeder implements Feeder {
         }
 
         if (signal.aborted) {
-          closeTokenImageBitmap(tokenized);
+          closeImageBitmap(tokenized);
           break;
         }
         const already = this.present.get(pts);
