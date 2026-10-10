@@ -48,10 +48,7 @@ export default class Controller {
     }
     this.feeder?.onAttach();
     this.setupHandlers();
-    // 再生中で表示状態ならレンダーループを起動する
-    if (!this.media.paused && this.isShowing) {
-      this.registerRenderingLoop();
-    }
+    this.registerRenderingLoop();
   }
 
   public detachMedia(): void {
@@ -156,10 +153,6 @@ export default class Controller {
 
   private onTimeupdate() {
     this.timer = null;
-
-    // not showing, do not show
-    if (!this.isShowing) { return; }
-
     this.registerRenderingLoop();
     this.paint();
   }
@@ -179,16 +172,12 @@ export default class Controller {
     this.renderers.forEach((renderer) => {
       renderer.onPlay();
     });
-
-    this.registerRenderingLoop();
   }
 
   private onPause(): void {
     this.renderers.forEach((renderer) => {
       renderer.onPause();
     });
-
-    this.unregisterRenderingLoop();
   }
 
   private paint() {
@@ -214,8 +203,10 @@ export default class Controller {
       this.previous_pts = current.pts
 
       // Builtin Sound Callback
-      for (const token of current.data.filter((data) => data.tag === 'BuiltinSoundReplay')) {
-        this.emitter.emit(EventType.BuiltinSound, BuiltinSound.from(token.sound));
+      if (this.isShowing) { // Hide 中に開始した場合は鳴らさない
+        for (const token of current.data.filter((data) => data.tag === 'BuiltinSoundReplay')) {
+          this.emitter.emit(EventType.BuiltinSound, BuiltinSound.from(token.sound));
+        }
       }
     }
   }
@@ -243,15 +234,11 @@ export default class Controller {
 
   public show(): void {
     this.isShowing = true;
-    if (this.media != null && !this.media.paused) {
-      this.registerRenderingLoop();
-    }
     this.renderers.forEach((renderer) => renderer.show());
   }
 
   public hide(): void {
     this.isShowing = false;
-    this.unregisterRenderingLoop();
     this.renderers.forEach((renderer) => renderer.hide());
   }
 

@@ -10,8 +10,6 @@ export default class HLSFeeder extends DecodingFeeder {
   private id3TrackPreviousTimes: Map<TextTrack, number> = new Map<TextTrack, number>();
   private readonly onAddTrackHandler: ((event: TrackEvent) => void) = this.onAddTrack.bind(this);
   private readonly onRemoveTrackHandler: ((event: TrackEvent) => void) = this.onRemoveTrack.bind(this);
-  private readonly onPlayHandler = this.onPlay.bind(this);
-  private readonly onPauseHandler = this.onPause.bind(this);
   private readonly introspectHandler = this.introspect.bind(this);
 
   public constructor(option?: PartialFeederOption) {
@@ -24,9 +22,7 @@ export default class HLSFeeder extends DecodingFeeder {
 
     this.setupHandlers();
     this.registerID3Track();
-    if (!this.media.paused) {
-      this.registerRenderingLoop();
-    }
+    this.registerRenderingLoop();
   }
 
   public detachMedia(): void {
@@ -56,8 +52,6 @@ export default class HLSFeeder extends DecodingFeeder {
 
     this.media.textTracks.addEventListener('addtrack', this.onAddTrackHandler);
     this.media.textTracks.addEventListener('removetrack', this.onRemoveTrackHandler);
-    this.media.addEventListener('play', this.onPlayHandler);
-    this.media.addEventListener('pause', this.onPauseHandler);
   }
 
   private cleanupHandlers(): void {
@@ -65,8 +59,6 @@ export default class HLSFeeder extends DecodingFeeder {
 
     this.media.textTracks.removeEventListener('addtrack', this.onAddTrackHandler);
     this.media.textTracks.removeEventListener('removetrack', this.onRemoveTrackHandler);
-    this.media.removeEventListener('play', this.onPlayHandler);
-    this.media.removeEventListener('pause', this.onPauseHandler);
   }
 
   public destroy(): void {
@@ -192,15 +184,6 @@ export default class HLSFeeder extends DecodingFeeder {
     if (this.timer == null) { return; }
     cancelAnimationFrame(this.timer);
     this.timer = null;
-  }
-
-  private onPlay(): void {
-    if (this.timer != null) { return }
-    this.registerRenderingLoop();
-  }
-
-  private onPause(): void {
-    this.unregisterRenderingLoop();
   }
 
   private feedID3v2Cue(cue: TextTrackCue): void {
