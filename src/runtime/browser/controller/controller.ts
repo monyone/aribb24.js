@@ -25,7 +25,7 @@ export default class Controller {
   private readonly onPauseHandler = this.onPause.bind(this);
   // Renderer
   private renderers: ARIBB24Renderer[] = [];
-  private privious_pts: number | null = null;
+  private previous_pts: number | null = null;
   // Feeder
   private feeder: ARIBB24Feeder | null = null;
   // Control
@@ -210,18 +210,18 @@ export default class Controller {
 
     // render
     if (current == null) { // current is null
-      if (this.privious_pts == null) { return; }
+      if (this.previous_pts == null) { return; }
       this.renderers.forEach((renderer) => renderer.clear());
-      this.privious_pts = null;
+      this.previous_pts = null;
     } else if (currentTime >= current.pts + current.duration) { // cue duration expired, clear
       const end = current.pts + current.duration;
-      if (this.privious_pts === end) { return; }
+      if (this.previous_pts === end) { return; }
       this.renderers.forEach((renderer) => renderer.clear());
-      this.privious_pts = end; // end is finite
+      this.previous_pts = end; // end is finite
     } else { // render
-      if (this.privious_pts === current.pts) { return; }
+      if (this.previous_pts === current.pts) { return; }
       this.renderers.forEach((renderer) => renderer.render(structuredClone(current.state), structuredClone(current.data), structuredClone(current.info)));
-      this.privious_pts = current.pts
+      this.previous_pts = current.pts
 
       // Builtin Sound Callback
       for (const token of current.data.filter((data) => data.tag === 'BuiltinSoundReplay')) {
@@ -233,8 +233,8 @@ export default class Controller {
   private clear() {
     // clearRect for viewer
     this.renderers.forEach((renderer) => renderer.clear());
-    // clear privious information
-    this.privious_pts = null;
+    // clear previous information
+    this.previous_pts = null;
   }
 
   public show(): void {

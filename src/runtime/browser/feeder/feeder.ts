@@ -18,19 +18,19 @@ type FeederTokenizeOption = {
   pua: boolean;
 }
 
-type FeederRecieveOption = {
+type FeederReceiveOption = {
   association: 'ARIB' | 'SBTVD' | null; // null is AutoDetect
   type: 'Caption' | 'Superimpose';
   language: number | string | [string, number];
 };
 
 export type FeederOption = {
-  recieve: FeederRecieveOption;
+  receive: FeederReceiveOption;
   tokenizer: FeederTokenizeOption;
   offset: FeederTimeOffsetOption;
 };
 export type PartialFeederOption = Partial<{
-  recieve: Partial<FeederRecieveOption>;
+  receive: Partial<FeederReceiveOption>;
   tokenizer: Partial<FeederTokenizeOption>;
   offset: Partial<FeederTimeOffsetOption>;
 }>;
@@ -38,11 +38,11 @@ export const FeederOption = {
   from (option?: PartialFeederOption): FeederOption {
     return {
       ... option,
-      recieve: {
+      receive: {
         association: null,
         type: 'Caption',
         language: 0,
-        ... option?.recieve,
+        ... option?.receive,
       },
       tokenizer: {
         pua: false,
@@ -63,7 +63,7 @@ export const getTokenizeInformation = (language: string, TCS: number, option: Fe
     throw new NotUsedDueToStandardError('not Supported TCS');
   }
 
-  switch (option.recieve.association) {
+  switch (option.receive.association) {
     case 'ARIB': return ['ARIB', new ARIBB24JapaneseJIS8Tokenizer({ usePUA: option.tokenizer.pua }), aribInitialState];
     case 'SBTVD': return ['SBTVD', new ARIBB24BrazilianJIS8Tokenizer(), sbtvdInitialState];
   }

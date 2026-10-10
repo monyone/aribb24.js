@@ -70,7 +70,7 @@ ARIB STD-B24 Captione Renderer
 ### Feeder
 ```typescript
 type FeederOption = Partial<{
-  recieve: {
+  receive: {
     association: 'ARIB' | 'SBTVD' | null; // null is AutoDetect
     type: 'Caption' | 'Superimpose';
     language: number | string; // index or iso language code

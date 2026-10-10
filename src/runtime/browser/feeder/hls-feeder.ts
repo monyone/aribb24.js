@@ -7,7 +7,7 @@ export default class HLSFeeder extends DecodingFeeder {
   private media: HTMLMediaElement | null = null;
   private timer: number | null = null;
   private id3Tracks: TextTrack[] = [];
-  private id3TrackPriviousTimes: Map<TextTrack, number> = new Map<TextTrack, number>();
+  private id3TrackPreviousTimes: Map<TextTrack, number> = new Map<TextTrack, number>();
   private readonly onAddTrackHandler: ((event: TrackEvent) => void) = this.onAddTrack.bind(this);
   private readonly onRemoveTrackHandler: ((event: TrackEvent) => void) = this.onRemoveTrack.bind(this);
   private readonly onPlayHandler = this.onPlay.bind(this);
@@ -76,7 +76,7 @@ export default class HLSFeeder extends DecodingFeeder {
 
   protected disappearance(): void {
     super.disappearance();
-    this.id3TrackPriviousTimes.clear();
+    this.id3TrackPreviousTimes.clear();
   }
 
   private registerID3Track(): void {
@@ -91,7 +91,7 @@ export default class HLSFeeder extends DecodingFeeder {
 
   private unregisterID3Track(): void {
     this.id3Tracks = [];
-    this.id3TrackPriviousTimes.clear();
+    this.id3TrackPreviousTimes.clear();
   }
 
   private onAddTrack(event: TrackEvent): void {
@@ -105,7 +105,7 @@ export default class HLSFeeder extends DecodingFeeder {
     const track = event.track!;
     if (!HLSFeeder.isID3Track(track)) { return; }
     this.id3Tracks = this.id3Tracks.filter((t) => t !== track);
-    this.id3TrackPriviousTimes.delete(track);
+    this.id3TrackPreviousTimes.delete(track);
   }
 
   private introspect(): void {
@@ -120,7 +120,7 @@ export default class HLSFeeder extends DecodingFeeder {
       if (cues.length === 0) { continue; }
 
       // ない場合は現在時刻未満の 直近のstartTime を保存する
-      if (!this.id3TrackPriviousTimes.has(track)) {
+      if (!this.id3TrackPreviousTimes.has(track)) {
         let curr_index = 0;
         {
           let begin = -1, end = cues.length;
@@ -136,10 +136,10 @@ export default class HLSFeeder extends DecodingFeeder {
           }
           curr_index = begin;
         }
-        this.id3TrackPriviousTimes.set(track, cues[curr_index]?.startTime ?? Number.NEGATIVE_INFINITY);
+        this.id3TrackPreviousTimes.set(track, cues[curr_index]?.startTime ?? Number.NEGATIVE_INFINITY);
         continue;
       }
-      const privious_time = this.id3TrackPriviousTimes.get(track)!;
+      const previous_time = this.id3TrackPreviousTimes.get(track)!;
 
       let prev_index = 0, curr_index = 0;
       {
@@ -148,7 +148,7 @@ export default class HLSFeeder extends DecodingFeeder {
           const middle = Math.floor((begin + end) / 2);
           const start_time = cues[middle].startTime;
 
-          if (privious_time < start_time) {
+          if (previous_time < start_time) {
             end = middle;
           } else {
             begin = middle;
@@ -172,7 +172,7 @@ export default class HLSFeeder extends DecodingFeeder {
       }
 
       if (cues[curr_index] != null) {
-        this.id3TrackPriviousTimes.set(track, cues[curr_index].startTime);
+        this.id3TrackPreviousTimes.set(track, cues[curr_index].startTime);
       }
 
       if (prev_index < curr_index) {

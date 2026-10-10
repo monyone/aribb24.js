@@ -87,7 +87,7 @@ export { default as muxB36 } from './lib/muxer/b36'
 export { ARIBB24Parser, ARIBB24ParserOption } from './lib/parser/parser';
 export type { ARIBB24ParsedToken, ARIBB24ClearScreenParsedToken, ARIBB24CharacterParsedToken, ARIBB24DRCSParsedToken, ARIBB24BitmapParsedToken, ARIBB24ParserState } from './lib/parser/parser';
 export { default as ARIBB24JapaneseInitialParserState } from './lib/parser/state/ARIB';
-export { default as ARIBB24BrazilianInitialParserState } from './lib/parser/state/ARIB';
+export { default as ARIBB24BrazilianInitialParserState } from './lib/parser/state/SBTVD';
 export { default as regionerForARIBB24ParsedToken } from './lib/parser/regioner'
 
 // Utils

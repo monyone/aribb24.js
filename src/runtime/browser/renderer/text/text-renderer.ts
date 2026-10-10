@@ -31,7 +31,7 @@ export default class TextRenderer implements Renderer {
       this.text = '';
     }
 
-    let privious_y = null;
+    let previous_y = null;
     const parser = new ARIBB24BrowserParser(initialState);
     for (const token of parser.parse(replaceDRCS(tokens, this.option.replace.drcs))) {
       switch (token.tag) {
@@ -43,10 +43,10 @@ export default class TextRenderer implements Renderer {
           if (shouldIgnoreSmallAsRuby(state.size, info)) { break; }
 
           // if differ y, newline inserted
-          if (privious_y != null && state.position[1] !== privious_y) {
+          if (previous_y != null && state.position[1] !== previous_y) {
             this.text += '\n';
           }
-          privious_y = state.position[1];
+          previous_y = state.position[1];
 
           // Otherwise, apply half
           if (this.option.replace.half && shouldHalfWidth(state.size, info)) {
@@ -59,10 +59,10 @@ export default class TextRenderer implements Renderer {
         case 'DRCS': {
           const { state } = token;
 
-          if (privious_y != null && state.position[1] !== privious_y) {
+          if (previous_y != null && state.position[1] !== previous_y) {
             this.text += '\n';
           }
-          privious_y = state.position[1];
+          previous_y = state.position[1];
 
           this.text += '〓';
           break;

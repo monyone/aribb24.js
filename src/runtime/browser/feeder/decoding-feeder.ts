@@ -43,8 +43,8 @@ const closeValueImageBitmap = (value: FeederPresentationData) => {
 
 export default abstract class DecodingFeeder implements Feeder {
   private option: FeederOption;
-  private priviousTime: number | null = null;
-  private priviousManagementData: ARIBB24CaptionManagement | null = null;
+  private previousTime: number | null = null;
+  private previousManagementData: ARIBB24CaptionManagement | null = null;
   private desiredLang: number | null = null;
   private decoder: AVLTree<DecodingOrderedKey, FeederDecodingData, number> = new AVLTree<DecodingOrderedKey, FeederDecodingData, number>(compareKey, compareNumber, calcDecodingOrder);
   private decoderBuffer: FeederDecodingData[] = [];
@@ -66,7 +66,7 @@ export default abstract class DecodingFeeder implements Feeder {
     if (segment != null) {
       this.decoderBuffer.push(segment);
     } else {
-      this.priviousManagementData = null;
+      this.previousManagementData = null;
       this.abortController.abort();
       this.abortController = new AbortController();
     }
@@ -85,10 +85,10 @@ export default abstract class DecodingFeeder implements Feeder {
         return;
       }
 
-      const recieved = [... this.decoderBuffer];
+      const received = [... this.decoderBuffer];
       this.decoderBuffer = [];
 
-      yield* recieved;
+      yield* received;
     }
   }
 
@@ -98,17 +98,17 @@ export default abstract class DecodingFeeder implements Feeder {
       for await (const { pts, caption } of this.generator(signal)) {
         if (caption.tag === 'CaptionManagement') {
           if (signal.aborted) { break; }
-          if (this.priviousManagementData?.group === caption.group) { continue; }
+          if (this.previousManagementData?.group === caption.group) { continue; }
 
-          if (typeof(this.option.recieve.language) === 'number') {
-            this.desiredLang = this.option.recieve.language;
+          if (typeof(this.option.receive.language) === 'number') {
+            this.desiredLang = this.option.receive.language;
           } else {
-            const name = (typeof(this.option.recieve.language) === 'string') ? this.option.recieve.language : this.option.recieve.language[0];
-            const index = (typeof(this.option.recieve.language) === 'string') ? 0 : this.option.recieve.language[1];
+            const name = (typeof(this.option.receive.language) === 'string') ? this.option.receive.language : this.option.receive.language[0];
+            const index = (typeof(this.option.receive.language) === 'string') ? 0 : this.option.receive.language[1];
             const lang = [... caption.languages].sort(({ lang: fst }, { lang: snd}) => fst - snd).filter(({ iso_639_language_code }) => iso_639_language_code === name);
             this.desiredLang = lang?.[index]?.lang ?? null;
           }
-          this.priviousManagementData = caption;
+          this.previousManagementData = caption;
 
           const already = this.present.get(pts);
           if (already != null) { closeValueImageBitmap(already); }
@@ -127,9 +127,9 @@ export default abstract class DecodingFeeder implements Feeder {
 
         // Caption
         if (signal.aborted) { break; }
-        if (this.priviousManagementData == null) { continue; }
+        if (this.previousManagementData == null) { continue; }
 
-        const entry = this.priviousManagementData.languages.find((entry) => entry.lang === caption.lang);
+        const entry = this.previousManagementData.languages.find((entry) => entry.lang === caption.lang);
         if (entry == null) { continue; }
         if (this.desiredLang !== caption.lang) { continue; }
 
@@ -173,7 +173,7 @@ export default abstract class DecodingFeeder implements Feeder {
   protected feed(data: Uint8Array, pts: number, dts: number) {
     const datagroup = demuxPES(data);
     if (datagroup == null) { return; }
-    if (datagroup.tag !== this.option.recieve.type) { return; }
+    if (datagroup.tag !== this.option.receive.type) { return; }
 
     const caption = demuxDatagroup(datagroup.data);
     if (caption == null) { return; }
@@ -186,14 +186,14 @@ export default abstract class DecodingFeeder implements Feeder {
   }
 
   private prepare(time: number): void {
-    this.priviousTime = this.decoder.lower({ dts: time })?.dts ?? Number.NEGATIVE_INFINITY;
+    this.previousTime = this.decoder.lower({ dts: time })?.dts ?? Number.NEGATIVE_INFINITY;
   }
 
   public content(time: number): FeederPresentationData | null {
-    if (this.priviousTime == null) { this.prepare(time); }
-    for (const segment of this.decoder.range(this.priviousTime!, time)) {
+    if (this.previousTime == null) { this.prepare(time); }
+    for (const segment of this.decoder.range(this.previousTime!, time)) {
       this.notify(segment);
-      this.priviousTime = segment.dts;
+      this.previousTime = segment.dts;
     }
     return this.present.floor(time) ?? null;
   }
@@ -206,7 +206,7 @@ export default abstract class DecodingFeeder implements Feeder {
   protected disappearance(): void {
     this.present.forEach(closeValueImageBitmap);
     this.present.clear();
-    this.priviousTime = null;
+    this.previousTime = null;
     this.notify(null);
   }
 

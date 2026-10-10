@@ -9,7 +9,7 @@ export default class SpeechRecognitionFeeder implements Feeder {
   private recognition: any;
   private recognitionTime: number | null = null;
   private interim: string = '';
-  private privious: string = '';
+  private previous: string = '';
 
   private readonly endedHandler = this.capture.bind(this);
   private readonly clearHandler = this.clear.bind(this);
@@ -50,7 +50,7 @@ export default class SpeechRecognitionFeeder implements Feeder {
   private recognitionEnd() {
     if (this.track == null) { return; }
     if (this.interim !== '') {
-      this.privious = this.interim;
+      this.previous = this.interim;
       this.interim = '';
     }
     this.recognition.start(this.track);
@@ -72,7 +72,7 @@ export default class SpeechRecognitionFeeder implements Feeder {
 
   public clear(): void {
     this.recognitionTime = null;
-    this.privious = '';
+    this.previous = '';
     this.interim = '';
   }
 
@@ -101,7 +101,7 @@ export default class SpeechRecognitionFeeder implements Feeder {
     if (this.media == null) { return null; }
     if (this.recognitionTime == null) { return null; }
 
-    const line = this.privious + (this.privious !== '' ? '\n' : '') + this.interim;
+    const line = this.previous + (this.previous !== '' ? '\n' : '') + this.interim;
     const lines = [''];
     for (const ch of line) {
       if (lines[lines.length - 1].length >= 18) {
