@@ -127,10 +127,11 @@ export default class ARIBB24JapaneseJIS8Tokenizer extends ARIBB24JIS8Tokenizer {
 
   public constructor(option?: ARIBB24JapaneseJIS8TokenizerOption) {
     const USING_NORMAL_DICT = option?.usePUA ? ARIBB24JapaneseJIS8Tokenizer.NORMAL_DICT_USE_PUA : ARIBB24JapaneseJIS8Tokenizer.NORMAL_DICT_USE_UNICODE;
+    const USING_DRCS_DICT = structuredClone(JAPAN_DRCS_DICTS);
     super(0, 2,
-      [USING_NORMAL_DICT.KANJI, USING_NORMAL_DICT.ASCII, USING_NORMAL_DICT.HIRAGANA, JAPAN_DRCS_DICTS.MACRO],
+      [USING_NORMAL_DICT.KANJI, USING_NORMAL_DICT.ASCII, USING_NORMAL_DICT.HIRAGANA, USING_DRCS_DICT.MACRO],
       USING_NORMAL_DICT,
-      JAPAN_DRCS_DICTS,
+      USING_DRCS_DICT,
       new Set<string>([
          /* ACUTE ACCENT */
         '\u00B4', // half

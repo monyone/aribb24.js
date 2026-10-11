@@ -52,7 +52,7 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
     this.GR = GR;
     this.GB = GB;
     this.character_dicts = character_dicts;
-    this.drcs_dicts = structuredClone(drcs_dicts);
+    this.drcs_dicts = drcs_dicts;
     this.non_spacing = non_spacing;
   }
 
