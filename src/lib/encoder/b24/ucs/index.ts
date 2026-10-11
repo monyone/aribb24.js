@@ -6,22 +6,33 @@ import { NotImplementedError } from "../../../../util/error";
 import { ARIBB24DataUnit, ARIBB24DRCSDataUnit, ARIBB24StatementDataUnit } from "../../../demuxer/b24/datagroup";
 
 export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
+  private encoder = new TextEncoder();
+
+  private drcs_md5_to_code = new Map<string, number>();
   private current_drcs_code = 0xEC00;
   private drcs_units: ARIBB24DRCSDataUnit[] = [];
-  private drcs_md5_to_code = new Map<string, number>();
 
-  private encoder = new TextEncoder();
+  private reset(): void {
+    this.drcs_md5_to_code.clear();
+    this.current_drcs_code = 0xEC00;
+    this.drcs_units = [];
+  }
 
   public encodeCharacter({ character }: ARIBB24CharacterToken): ArrayBuffer {
     return this.encoder.encode(character).buffer;
   }
 
   public encode(tokens: ARIBB24Token[]): ARIBB24DataUnit[] {
-    const statement_binaries = concat(... tokens.map(this.encodeTokenHandler));
-    return [
-      ... this.drcs_units,
-      ARIBB24StatementDataUnit.from(new Uint8Array(statement_binaries)),
-    ];
+    try {
+      const statement_binaries = concat(... tokens.map(this.encodeTokenHandler));
+      const result = [
+        ... this.drcs_units,
+        ARIBB24StatementDataUnit.from(new Uint8Array(statement_binaries)),
+      ];
+      return result;
+    } finally {
+      this.reset();
+    }
   }
 
   public encodeControl(control: Exclude<ARIBB24Token, ARIBB24CharacterToken | ARIBB24DRCSToken | ARIBB24BitmapToken | ARIBB24MosaicToken>): ArrayBufferLike {

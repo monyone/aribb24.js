@@ -2,7 +2,7 @@ import { ARIBB24Token, ARIBB24BitmapToken, ARIBB24CharacterToken, ARIBB24DRCSTok
 import ARIBB24Encoder from "../../encoder";
 import concat from "../../../../../util/concat";
 import { NotImplementedError, NotUsedDueToOperationGuidelineError, NotUsedDueToStandardError } from "../../../../../util/error";
-import { ARIBB24DataUnit, ARIBB24DRCSDataUnit, ARIBB24StatementDataUnit } from "../../../../demuxer/b24/datagroup";
+import { ARIBB24DataUnit, ARIBB24StatementDataUnit } from "../../../../demuxer/b24/datagroup";
 import { CONTROL_CODES } from "../../../../tokenizer/b24/tokenizer";
 import { ESC_CODES } from "../../../../tokenizer/b24/jis8/tokenizer";
 import ascii from "../ascii";
@@ -14,18 +14,11 @@ export default class ARIBB24BrazilianJIS8Encoder extends ARIBB24Encoder {
   private static ASCII = structuredClone(ascii);
   private static LATIN_EXTENSION = structuredClone(latin_extension);
   private static SPECIAL_CHARACTERS = structuredClone(special_characters);
-
   // DRCS を運用するのかわからない...
-  private drcs_md5_to_code = new Map<string, [number, number]>();
-  private current_drcs_code: [number, number] = [0x21, 0x21];
-  private drcs_units: ARIBB24DRCSDataUnit[] = [];
 
   public encode(tokens: ARIBB24Token[]): ARIBB24DataUnit[] {
     const statement_binaries = concat(Uint8Array.from([CONTROL_CODES.ESC, ESC_CODES.LS1R]).buffer, ... tokens.map(this.encodeTokenHandler));
-    return [
-      ... this.drcs_units,
-      ARIBB24StatementDataUnit.from(new Uint8Array(statement_binaries)),
-    ];
+    return [ARIBB24StatementDataUnit.from(new Uint8Array(statement_binaries))];
   }
 
   public encodeCharacter({ character }: ARIBB24CharacterToken): ArrayBuffer {

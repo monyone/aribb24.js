@@ -33,17 +33,28 @@ export default class ARIBB24JapaneseJIS8Encoder extends ARIBB24Encoder {
   }
 
   private mode: 'MACRO0' | 'MACRO1' = 'MACRO0';
-
   private drcs_md5_to_code = new Map<string, [number, number]>();
   private current_drcs_code: [number, number] = [0x21, 0x21];
   private drcs_units: ARIBB24DRCSDataUnit[] = [];
 
+  private reset(): void {
+    this.mode = 'MACRO0';
+    this.drcs_md5_to_code.clear();
+    this.current_drcs_code = [0x21, 0x21];
+    this.drcs_units = [];
+  }
+
   public encode(tokens: ARIBB24Token[]): ARIBB24DataUnit[] {
-    const statement_binaries = concat(Uint8Array.from([CONTROL_CODES.ESC, ESC_CODES.LS1R]).buffer, ... tokens.map(this.encodeTokenHandler));
-    return [
-      ... this.drcs_units,
-      ARIBB24StatementDataUnit.from(new Uint8Array(statement_binaries)),
-    ];
+    try {
+      const statement_binaries = concat(Uint8Array.from([CONTROL_CODES.ESC, ESC_CODES.LS1R]).buffer, ... tokens.map(this.encodeTokenHandler));
+      const result = [
+        ... this.drcs_units,
+        ARIBB24StatementDataUnit.from(new Uint8Array(statement_binaries)),
+      ];
+      return result;
+    } finally {
+      this.reset();
+    }
   }
 
   public encodeCharacter({ character }: ARIBB24CharacterToken): ArrayBuffer {
@@ -80,7 +91,7 @@ export default class ARIBB24JapaneseJIS8Encoder extends ARIBB24Encoder {
     const hash = md5(drcs.binary);
 
     if (!this.drcs_md5_to_code.has(hash)) {
-      if (this.current_drcs_code[0] === 0x7F && this.current_drcs_code[1] === 0x7F) {
+      if (this.current_drcs_code[0] === 0x7E && this.current_drcs_code[1] === 0x7E) {
         // too many DRCS replace 〓
         return Uint8Array.from(ARIBB24JapaneseJIS8Encoder.KANJI.get('〓')!).buffer;
       }
@@ -99,7 +110,7 @@ export default class ARIBB24JapaneseJIS8Encoder extends ARIBB24Encoder {
       this.drcs_units.push(ARIBB24DRCSDataUnit.from(new Uint8Array(concat(header, drcs.binary)), 2));
       this.drcs_md5_to_code.set(hash, structuredClone(this.current_drcs_code));
       this.current_drcs_code[1]++;
-      if (this.current_drcs_code[1] > 0x7F) {
+      if (this.current_drcs_code[1] > 0x7E) {
         this.current_drcs_code[0]++;
         this.current_drcs_code[1] = 0x21;
       }
