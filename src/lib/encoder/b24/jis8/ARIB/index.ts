@@ -12,10 +12,10 @@ import katakana from "./katakana";
 import symbol from "./symbol";
 
 export default class ARIBB24JapaneseJIS8Encoder extends ARIBB24Encoder {
-  static KANJI = new Map<string, [number, number]>();
-  static ASCII = structuredClone(ascii);
-  static HIRAGANA = structuredClone(hiragana);
-  static KATAKANA = structuredClone(katakana);
+  private static KANJI = new Map<string, [number, number]>();
+  private static ASCII = structuredClone(ascii);
+  private static HIRAGANA = structuredClone(hiragana);
+  private static KATAKANA = structuredClone(katakana);
 
   static {
     const decoder = new TextDecoder('euc-jp', { fatal: true });

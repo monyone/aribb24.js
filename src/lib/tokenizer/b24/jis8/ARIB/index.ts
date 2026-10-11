@@ -69,8 +69,8 @@ export type ARIBB24JapaneseJIS8TokenizerOption = {
 };
 
 export default class ARIBB24JapaneseJIS8Tokenizer extends ARIBB24JIS8Tokenizer {
-  static NORMAL_DICT_USE_PUA = { ... JAPAN_NORMAL_DICTS };
-  static NORMAL_DICT_USE_UNICODE = { ... JAPAN_NORMAL_DICTS };
+  private static NORMAL_DICT_USE_PUA = { ... JAPAN_NORMAL_DICTS };
+  private static NORMAL_DICT_USE_UNICODE = { ... JAPAN_NORMAL_DICTS };
   static {
     const kanji_use_pua = new Map<number, string>();
     const kanji_use_unicode = new Map<number, string>();

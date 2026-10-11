@@ -11,9 +11,9 @@ import special_characters from "./special-characters";
 
 
 export default class ARIBB24BrazilianJIS8Encoder extends ARIBB24Encoder {
-  static ASCII = structuredClone(ascii);
-  static LATIN_EXTENSION = structuredClone(latin_extension);
-  static SPECIAL_CHARACTERS = structuredClone(special_characters);
+  private static ASCII = structuredClone(ascii);
+  private static LATIN_EXTENSION = structuredClone(latin_extension);
+  private static SPECIAL_CHARACTERS = structuredClone(special_characters);
 
   private drcs_md5_to_code = new Map<string, [number, number]>();
   private current_drcs_code: [number, number] = [0x21, 0x21];
