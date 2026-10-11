@@ -15,6 +15,7 @@ export default class ARIBB24BrazilianJIS8Encoder extends ARIBB24Encoder {
   private static LATIN_EXTENSION = structuredClone(latin_extension);
   private static SPECIAL_CHARACTERS = structuredClone(special_characters);
 
+  // DRCS を運用するのかわからない...
   private drcs_md5_to_code = new Map<string, [number, number]>();
   private current_drcs_code: [number, number] = [0x21, 0x21];
   private drcs_units: ARIBB24DRCSDataUnit[] = [];
