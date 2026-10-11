@@ -88,93 +88,101 @@ export default abstract class DecodingFeeder implements Feeder {
     while (!this.isDestroyed) {
       const signal = this.abortController.signal;
       for await (const { pts, caption } of this.generator(signal)) {
-        if (caption.tag === 'CaptionManagement') {
-          if (signal.aborted) { break; }
-          if (this.previousManagementData?.group === caption.group) { continue; }
+        try {
+          if (caption.tag === 'CaptionManagement') {
+            if (signal.aborted) { break; }
+            if (this.previousManagementData?.group === caption.group) { continue; }
 
-          if (typeof(this.option.receive.language) === 'number') {
-            this.desiredLang = this.option.receive.language;
-          } else {
-            const name = (typeof(this.option.receive.language) === 'string') ? this.option.receive.language : this.option.receive.language[0];
-            const index = (typeof(this.option.receive.language) === 'string') ? 0 : this.option.receive.language[1];
-            const lang = [... caption.languages].sort(({ lang: fst }, { lang: snd}) => fst - snd).filter(({ iso_639_language_code }) => iso_639_language_code === name);
-            this.desiredLang = lang?.[index]?.lang ?? null;
+            if (typeof(this.option.receive.language) === 'number') {
+              this.desiredLang = this.option.receive.language;
+            } else {
+              const name = (typeof(this.option.receive.language) === 'string') ? this.option.receive.language : this.option.receive.language[0];
+              const index = (typeof(this.option.receive.language) === 'string') ? 0 : this.option.receive.language[1];
+              const lang = [... caption.languages].sort(({ lang: fst }, { lang: snd}) => fst - snd).filter(({ iso_639_language_code }) => iso_639_language_code === name);
+              this.desiredLang = lang?.[index]?.lang ?? null;
+            }
+            this.previousManagementData = caption;
+
+            const already = this.present.get(pts);
+            if (already != null) { closeValueImageBitmap(already); }
+            this.present.insert(pts, {
+              pts,
+              duration: Number.POSITIVE_INFINITY,
+              state: initialState,
+              info: {
+                association: 'UNKNOWN',
+                language: 'und',
+              },
+              data: [ARIBB24ClearScreenToken.from()]
+            });
+            continue;
           }
-          this.previousManagementData = caption;
 
+          // Caption
+          if (signal.aborted) { break; }
+          if (this.previousManagementData == null) { continue; }
+
+          const entry = this.previousManagementData.languages.find((entry) => entry.lang === caption.lang);
+          if (entry == null) { continue; }
+          if (this.desiredLang !== caption.lang) { continue; }
+
+          const specification = getTokenizeInformation(entry.iso_639_language_code, entry.TCS, this.option);
+          if (specification == null) { continue; }
+
+          const [association, tokenizer, state] = specification;
+          const tokenized = await toBrowserTokenWithBitmap(tokenizer.tokenize(caption), colortable);
+
+          let duration = Number.POSITIVE_INFINITY;
+          let elapse = 0;
+          for (const token of tokenized) {
+            if (token.tag === 'ClearScreen') {
+              if (elapse === 0) { continue; }
+              duration = elapse;
+            } else if (token.tag === 'TimeControlWait') {
+              elapse += token.seconds;
+            }
+          }
+
+          if (signal.aborted) {
+            closeImageBitmap(tokenized);
+            break;
+          }
           const already = this.present.get(pts);
           if (already != null) { closeValueImageBitmap(already); }
           this.present.insert(pts, {
             pts,
-            duration: Number.POSITIVE_INFINITY,
-            state: initialState,
+            duration,
+            state,
             info: {
-              association: 'UNKNOWN',
-              language: 'und',
+              association,
+              language: entry.iso_639_language_code,
             },
-            data: [ARIBB24ClearScreenToken.from()]
+            data: tokenized
           });
-          continue;
+        } catch (e) {
+          this.option.logging.logger.error('B24 Caption Decoding Failed', e);
         }
-
-        // Caption
-        if (signal.aborted) { break; }
-        if (this.previousManagementData == null) { continue; }
-
-        const entry = this.previousManagementData.languages.find((entry) => entry.lang === caption.lang);
-        if (entry == null) { continue; }
-        if (this.desiredLang !== caption.lang) { continue; }
-
-        const specification = getTokenizeInformation(entry.iso_639_language_code, entry.TCS, this.option);
-        if (specification == null) { continue; }
-
-        const [association, tokenizer, state] = specification;
-        const tokenized = await toBrowserTokenWithBitmap(tokenizer.tokenize(caption), colortable);
-
-        let duration = Number.POSITIVE_INFINITY;
-        let elapse = 0;
-        for (const token of tokenized) {
-          if (token.tag === 'ClearScreen') {
-            if (elapse === 0) { continue; }
-            duration = elapse;
-          } else if (token.tag === 'TimeControlWait') {
-            elapse += token.seconds;
-          }
-        }
-
-        if (signal.aborted) {
-          closeImageBitmap(tokenized);
-          break;
-        }
-        const already = this.present.get(pts);
-        if (already != null) { closeValueImageBitmap(already); }
-        this.present.insert(pts, {
-          pts,
-          duration,
-          state,
-          info: {
-            association,
-            language: entry.iso_639_language_code,
-          },
-          data: tokenized
-        });
       }
     }
   }
 
   protected feed(data: Uint8Array, pts: number, dts: number) {
-    const datagroup = demuxPES(data);
-    if (datagroup == null) { return; }
-    if (datagroup.tag !== this.option.receive.type) { return; }
+    try {
+      const datagroup = demuxPES(data);
+      if (datagroup == null) { return; }
+      if (datagroup.tag !== this.option.receive.type) { return; }
 
-    const caption = demuxDatagroup(datagroup.data);
-    if (caption == null) { return; }
+      const caption = demuxDatagroup(datagroup.data);
+      if (caption == null) { return; }
 
-    const lang = caption.tag === 'CaptionStatement' ? (caption.lang + 1) : 0;
+      const lang = caption.tag === 'CaptionStatement' ? (caption.lang + 1) : 0;
 
-    pts += this.option.offset.time;
-    dts += this.option.offset.time;
-    this.decoder.insert({ dts, lang }, { dts, pts, caption });
+      pts += this.option.offset.time;
+      dts += this.option.offset.time;
+      this.decoder.insert({ dts, lang }, { dts, pts, caption });
+    } catch (e) {
+      this.option.logging.logger.error('B24 Caption Demuxing Failed', e);
+    }
   }
 
   private prepare(time: number): void {

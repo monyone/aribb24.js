@@ -1,6 +1,4 @@
-import { ARIBB24CaptionManagement, ARIBB24CaptionStatement } from "../../../lib/demuxer/b24/datagroup";
 import demuxB36 from "../../../lib/demuxer/b36";
-import colortable from "../../common/colortable";
 import { toBrowserTokenWithoutBitmap } from "../types";
 import Feeder, { FeederOption, FeederPresentationData, getTokenizeInformation, PartialFeederOption } from "./feeder";
 
@@ -14,28 +12,35 @@ export default class B36Feeder implements Feeder {
 
     const { initialTime, pages } = demuxB36(b36);
     this.captions = pages.filter((page) => page.tag === 'ActualPage').flatMap((page) => {
-      const pts = page.displayTiming - initialTime + this.option.offset.time;
-      const duration = (page.clearTiming - initialTime + this.option.offset.time) - pts;
-      const statement = page.statement;
-      const management = page.management;
+      try {
+        const pts = page.displayTiming - initialTime + this.option.offset.time;
+        const duration = (page.clearTiming - initialTime + this.option.offset.time) - pts;
+        const statement = page.statement;
+        const management = page.management;
 
-      const entry = management.languages.find((entry) => entry.lang === statement.lang);
-      if (entry == null) { return []; }
-      const specification = getTokenizeInformation(entry.iso_639_language_code, entry.TCS, this.option);
-      if (specification == null) { return []; }
-      const [association, tokenizer, state] = specification;
-      const tokenized = toBrowserTokenWithoutBitmap(tokenizer.tokenize(statement));
+        const entry = management.languages.find((entry) => entry.lang === statement.lang);
+        if (entry == null) { return []; }
+        const specification = getTokenizeInformation(entry.iso_639_language_code, entry.TCS, this.option);
+        if (specification == null) { return []; }
+        const [association, tokenizer, state] = specification;
+        // B36 は 文字スーパー がないので、Bitmap を使わない.
+        // なので、ビットマップを除外する
+        const tokenized = toBrowserTokenWithoutBitmap(tokenizer.tokenize(statement));
 
-      return [{
-        pts,
-        duration,
-        state,
-        info: {
-          association,
-          language: entry.iso_639_language_code,
-        },
-        data: tokenized,
-      } satisfies FeederPresentationData]
+        return [{
+          pts,
+          duration,
+          state,
+          info: {
+            association,
+            language: entry.iso_639_language_code,
+          },
+          data: tokenized,
+        } satisfies FeederPresentationData];
+      } catch (e) {
+        this.option.logging.logger.error('B36 caption page decoding failed', e);
+        return [];
+      }
     });
   }
 

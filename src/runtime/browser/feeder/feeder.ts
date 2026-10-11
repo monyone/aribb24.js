@@ -6,9 +6,9 @@ import ARIBB24JapaneseJIS8Tokenizer from "../../../lib/tokenizer/b24/jis8/ARIB/i
 import ARIBB24BrazilianJIS8Tokenizer from "../../../lib/tokenizer/b24/jis8/SBTVD/index";
 import ARIBB24Tokenizer from "../../../lib/tokenizer/b24/tokenizer";
 import ARIBB24UTF8Tokenizer from "../../../lib/tokenizer/b24/ucs/tokenizer";
-import { ARIBB24Token } from "../../../lib/tokenizer/token";
-import { ExhaustivenessError, NotUsedDueToStandardError } from "../../../util/error";
+import { NotUsedDueToStandardError } from "../../../util/error";
 import { ARIBB24BrowserToken } from "../types";
+import { ConsoleLogger, Logger, LogLevel } from "../../../util/logger";
 
 type FeederTimeOffsetOption = {
   time: number
@@ -24,15 +24,21 @@ type FeederReceiveOption = {
   language: number | string | [string, number];
 };
 
+type FeederLoggerOption = {
+  logger: Logger;
+};
+
 export type FeederOption = {
   receive: FeederReceiveOption;
   tokenizer: FeederTokenizeOption;
   offset: FeederTimeOffsetOption;
+  logging: FeederLoggerOption;
 };
 export type PartialFeederOption = Partial<{
   receive: Partial<FeederReceiveOption>;
   tokenizer: Partial<FeederTokenizeOption>;
   offset: Partial<FeederTimeOffsetOption>;
+  logging: Partial<FeederLoggerOption>;
 }>;
 export const FeederOption = {
   from (option?: PartialFeederOption): FeederOption {
@@ -51,6 +57,10 @@ export const FeederOption = {
       offset: {
         time: 0,
         ... option?.offset,
+      },
+      logging: {
+        logger: new ConsoleLogger(LogLevel.ERROR),
+        ... option?.logging,
       }
     };
   }

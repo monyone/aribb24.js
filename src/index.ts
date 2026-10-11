@@ -92,3 +92,4 @@ export { default as regionerForARIBB24ParsedToken } from './lib/parser/regioner'
 
 // Utils
 export { EOFError, NotImplementedError, ExhaustivenessError, UnreachableError } from './util/error';
+export { type Logger, NoopLogger, ConsoleLogger, LogLevel } from './util/logger';
