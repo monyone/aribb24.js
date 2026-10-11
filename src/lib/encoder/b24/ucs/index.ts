@@ -18,7 +18,7 @@ export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
     this.drcs_units = [];
   }
 
-  public encodeCharacter({ character }: ARIBB24CharacterToken): ArrayBuffer {
+  protected encodeCharacter({ character }: ARIBB24CharacterToken): ArrayBuffer {
     return this.encoder.encode(character).buffer;
   }
 
@@ -35,7 +35,7 @@ export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
     }
   }
 
-  public encodeControl(control: Exclude<ARIBB24Token, ARIBB24CharacterToken | ARIBB24DRCSToken | ARIBB24BitmapToken | ARIBB24MosaicToken>): ArrayBufferLike {
+  protected encodeControl(control: Exclude<ARIBB24Token, ARIBB24CharacterToken | ARIBB24DRCSToken | ARIBB24BitmapToken | ARIBB24MosaicToken>): ArrayBufferLike {
     switch (control.tag) {
       // C0
       case 'Null':
@@ -60,7 +60,7 @@ export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
     }
   }
 
-  public encodeDRCS(drcs: ARIBB24DRCSToken): ArrayBufferLike {
+  protected encodeDRCS(drcs: ARIBB24DRCSToken): ArrayBufferLike {
     const hash = md5(drcs.binary);
 
     if (!this.drcs_md5_to_code.has(hash)) {
@@ -93,11 +93,11 @@ export default class ARIBB24UTF8Encoder extends ARIBB24Encoder {
     }
   }
 
-  public encodeBitmap(bitmap: ARIBB24BitmapToken): ArrayBuffer {
+  protected encodeBitmap(_: ARIBB24BitmapToken): ArrayBuffer {
     throw new NotImplementedError('Bitmap is Not Implemented');
   }
 
-  public encodeMosaic(mozaic: ARIBB24MosaicToken): ArrayBuffer {
+  protected encodeMosaic(_: ARIBB24MosaicToken): ArrayBuffer {
     throw new NotImplementedError('Mozaic Character is Not Implemented');
   }
 }

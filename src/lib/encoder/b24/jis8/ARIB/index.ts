@@ -57,7 +57,7 @@ export default class ARIBB24JapaneseJIS8Encoder extends ARIBB24Encoder {
     }
   }
 
-  public encodeCharacter({ character }: ARIBB24CharacterToken): ArrayBuffer {
+  protected encodeCharacter({ character }: ARIBB24CharacterToken): ArrayBuffer {
     if (ARIBB24JapaneseJIS8Encoder.ASCII.has(character)) {
       switch (this.mode) {
         case 'MACRO0':
@@ -87,7 +87,7 @@ export default class ARIBB24JapaneseJIS8Encoder extends ARIBB24Encoder {
     }
   }
 
-  public encodeDRCS(drcs: ARIBB24DRCSToken): ArrayBuffer {
+  protected encodeDRCS(drcs: ARIBB24DRCSToken): ArrayBuffer {
     const hash = md5(drcs.binary);
 
     if (!this.drcs_md5_to_code.has(hash)) {
@@ -120,11 +120,11 @@ export default class ARIBB24JapaneseJIS8Encoder extends ARIBB24Encoder {
     return Uint8Array.from([CONTROL_CODES.ESC, 0x24, 0x29, 0x20, 0x40, ... this.drcs_md5_to_code.get(hash)!.map((elem) => elem | 0x80), CONTROL_CODES.SS3, 0x60, CONTROL_CODES.ESC, ESC_CODES.LS1R]).buffer;
   }
 
-  public encodeBitmap(bitmap: ARIBB24BitmapToken): ArrayBuffer {
+  protected encodeBitmap(_: ARIBB24BitmapToken): ArrayBuffer {
     throw new NotImplementedError('Bitmap is Not Implemented');
   }
 
-  public encodeMosaic(mozaic: ARIBB24MosaicToken): ArrayBuffer {
+  protected encodeMosaic(_: ARIBB24MosaicToken): ArrayBuffer {
     throw new NotImplementedError('Mozaic Character is Not Implemented');
   }
 }

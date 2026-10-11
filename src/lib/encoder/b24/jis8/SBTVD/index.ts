@@ -21,7 +21,7 @@ export default class ARIBB24BrazilianJIS8Encoder extends ARIBB24Encoder {
     return [ARIBB24StatementDataUnit.from(new Uint8Array(statement_binaries))];
   }
 
-  public encodeCharacter({ character }: ARIBB24CharacterToken): ArrayBuffer {
+  protected encodeCharacter({ character }: ARIBB24CharacterToken): ArrayBuffer {
     if (ARIBB24BrazilianJIS8Encoder.ASCII.has(character)) {
       return Uint8Array.from(ARIBB24BrazilianJIS8Encoder.ASCII.get(character)!).buffer;
     } else if (ARIBB24BrazilianJIS8Encoder.LATIN_EXTENSION.has(character)) {
@@ -33,15 +33,15 @@ export default class ARIBB24BrazilianJIS8Encoder extends ARIBB24Encoder {
     }
   }
 
-  public encodeDRCS(drcs: ARIBB24DRCSToken): ArrayBuffer {
+  protected encodeDRCS(_: ARIBB24DRCSToken): ArrayBuffer {
     throw new NotImplementedError('DRCS is Not Implemented');
   }
 
-  public encodeBitmap(bitmap: ARIBB24BitmapToken): ArrayBuffer {
+  protected encodeBitmap(_: ARIBB24BitmapToken): ArrayBuffer {
     throw new NotImplementedError('Bitmap is Not Implemented');
   }
 
-  public encodeMosaic(mozaic: ARIBB24MosaicToken): ArrayBuffer {
+  protected encodeMosaic(_: ARIBB24MosaicToken): ArrayBuffer {
     throw new NotImplementedError('Mozaic Character is Not Implemented');
   }
 }
