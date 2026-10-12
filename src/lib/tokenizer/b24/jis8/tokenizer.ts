@@ -188,38 +188,38 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
             case ESC_CODES.LS3R:
               this.GR = 3;
               break;
-            case 0x24: {
+            case 0x24: { // 2bytes
               const P2 = stream.readU8();
               if (0x28 <= P2 && P2 <= 0x2B) {
                 const P3 = stream.readU8();
                 if (P3 === 0x20) {
                   const P4 = stream.readU8();
-                  const set = Object.values(this.drcs_dicts).find(({ code }) => code === P4);
-                  if (set == null) { throw new ViolationStandardError(`Undefined DRCS Final Byte in STD-B24 ARIB Caption (0x${P4.toString(16)})`); }
+                  const set = Object.values(this.drcs_dicts).find(({ bytes, code }) => bytes === 2 && code === P4);
+                  if (set == null) { throw new ViolationStandardError(`Undefined 2bytes DRCS Final Byte in STD-B24 ARIB Caption (0x${P4.toString(16)})`); }
                   this.GB[P2 - 0x28] = set;
-                } else {
-                  const set = Object.values(this.character_dicts).find(({ code }) => code === P3);
-                  if (set == null) { throw new ViolationStandardError(`Undefined GSET Final Byte in STD-B24 ARIB Caption (0x${P3.toString(16)})`); }
+                } else { // 本当は 2bytes GSET で G0 を 0x28 で指定してはいけないが、Decoder としては Don't Care
+                  const set = Object.values(this.character_dicts).find(({ bytes, code }) => bytes === 2 && code === P3);
+                  if (set == null) { throw new ViolationStandardError(`Undefined 2bytes GSET Final Byte in STD-B24 ARIB Caption (0x${P3.toString(16)})`); }
                   this.GB[P2 - 0x28] = set;
                 }
               } else {
-                const set = Object.values(this.character_dicts).find(({ code }) => code === P2);
-                if (set == null) { throw new ViolationStandardError(`Undefined GSET Final Byte in STD-B24 ARIB Caption (0x${P2.toString(16)})`); }
+                const set = Object.values(this.character_dicts).find(({ bytes, code }) => bytes === 2 && code === P2);
+                if (set == null) { throw new ViolationStandardError(`Undefined 2bytes GSET Final Byte in STD-B24 ARIB Caption (0x${P2.toString(16)})`); }
                 this.GB[0] = set;
               }
               break;
             }
-            default: {
+            default: { // 1bytes
               if (0x28 <= P1 && P1 <= 0x2B) {
                 const P2 = stream.readU8();
                 if (P2 === 0x20) {
                   const P3 = stream.readU8();
-                  const set = Object.values(this.drcs_dicts).find(({ code }) => code === P3);
-                  if (set == null) { throw new ViolationStandardError(`Undefined DRCS Final Byte in STD-B24 ARIB Caption (0x${P3.toString(16)})`); }
+                  const set = Object.values(this.drcs_dicts).find(({ bytes, code }) => bytes === 1 && code === P3);
+                  if (set == null) { throw new ViolationStandardError(`Undefined 1bytes DRCS Final Byte in STD-B24 ARIB Caption (0x${P3.toString(16)})`); }
                   this.GB[P1 - 0x28] = set;
                 } else {
-                  const set = Object.values(this.character_dicts).find(({ code }) => code === P2);
-                  if (set == null) { throw new ViolationStandardError(`Undefined GSET Final Byte in STD-B24 ARIB Caption (0x${P2.toString(16)})`); }
+                  const set = Object.values(this.character_dicts).find(({ bytes, code }) => bytes === 1 && code === P2);
+                  if (set == null) { throw new ViolationStandardError(`Undefined 1bytes GSET Final Byte in STD-B24 ARIB Caption (0x${P2.toString(16)})`); }
                   this.GB[P1 - 0x28] = set;
                 }
               } else {
