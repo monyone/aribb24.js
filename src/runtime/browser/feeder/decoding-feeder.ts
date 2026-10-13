@@ -191,7 +191,7 @@ export default abstract class DecodingFeeder implements Feeder {
 
   public content(time: number): FeederPresentationData | null {
     if (this.previousTime == null) { this.prepare(time); }
-    for (const segment of this.decoder.range(this.previousTime!, time)) {
+    for (const segment of this.decoder.range(this.previousTime!, time, '(]')) {
       this.notify(segment);
       this.previousTime = segment.dts;
     }
@@ -203,7 +203,7 @@ export default abstract class DecodingFeeder implements Feeder {
     while (expired != null) {
       closeValueImageBitmap(expired);
       this.present.delete(expired.pts);
-      expired = this.present.lower(present.pts);
+      expired = this.present.lower(expired.pts);
     }
 
     return present;

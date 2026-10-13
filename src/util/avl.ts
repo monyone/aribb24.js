@@ -1,5 +1,6 @@
 import { ExhaustivenessError, UnreachableError } from "./error";
 
+type RangeOperation = '[]' | '[)' | '(]' | '()'
 interface AVLTreeNodeInterface<K, V, O> {
   get parent(): AVLTreeNodeInterface<K, V, O> | null;
   get balanced(): boolean;
@@ -16,7 +17,8 @@ interface AVLTreeNodeInterface<K, V, O> {
   delete(key: K): void;
   replace(from: AVLTreeNode<K, V, O>, to: AVLTreeNode<K, V, O> | null): void;
   forEach(func: (value: V) => void): void;
-  range(from: O, to: O): Generator<V>;
+  entries(): Generator<[K, V]>;
+  range(from: O, to: O, operation: RangeOperation): Generator<V>;
 }
 
 class AVLTreeDummyNode<K, V, O = K> implements AVLTreeNodeInterface<K, V, O> {
@@ -99,8 +101,12 @@ class AVLTreeDummyNode<K, V, O = K> implements AVLTreeNodeInterface<K, V, O> {
     this.actual?.forEach(func);
   }
 
-  public *range(from: O, to: O): Generator<V> {
-    yield* this.actual?.range(from, to) ?? [];
+  public *entries(): Generator<[K, V]> {
+    yield* this.actual?.entries() ?? [];
+  }
+
+  public *range(from: O, to: O, operation: RangeOperation): Generator<V> {
+    yield* this.actual?.range(from, to, operation) ?? [];
   }
 }
 
@@ -370,13 +376,24 @@ class AVLTreeNode<K, V, O = K> implements AVLTreeNodeInterface<K, V, O> {
     if (this.right != null) { this.right.forEach(func); }
   }
 
-  public *range(from: O, to: O): Generator<V> {
+  public *entries(): Generator<[K, V]> {
+    yield* (this.left?.entries() ?? []);
+    yield [this.key, this.value];
+    yield* (this.right?.entries() ?? []);
+  }
+
+  public *range(from: O, to: O, operation: RangeOperation): Generator<V> {
     const f = this.compareOrder(from, this.order);
     const t = this.compareOrder(to, this.order);
 
-    if (f < 0) { yield* (this.left?.range(from, to) ?? []); }
-    if (f < 0 && t >= 0){ yield this.value; }
-    if (t >= 0) { yield* (this.right?.range(from, to) ?? []); }
+    const is_closed_from = operation[0] === '[';
+    const is_closed_to = operation[1] === ']';
+    const in_from = f < 0 || (is_closed_from && f === 0);
+    const in_to = t > 0 || (is_closed_to && t === 0);
+
+    if (in_from) { yield* (this.left?.range(from, to, operation) ?? []); }
+    if (in_from && in_to){ yield this.value; }
+    if (in_to) { yield* (this.right?.range(from, to, operation) ?? []); }
   }
 }
 
@@ -425,8 +442,12 @@ export default class AVLTree<K, V, O = K>  {
     this.root.forEach(func);
   }
 
-  public *range(from: O, to: O): Generator<V> {
-    yield* this.root.range(from, to);
+  public *entries(): Generator<[K, V]> {
+    yield* this.root.entries();
+  }
+
+  public *range(from: O, to: O, operation: RangeOperation): Generator<V> {
+    yield* this.root.range(from, to, operation);
   }
 
   public insert(key: K, value: V): void {
