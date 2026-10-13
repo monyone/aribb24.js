@@ -1,4 +1,4 @@
-import ARIBB24Feeder from "../feeder/feeder";
+import ARIBB24Feeder, { FeederPresentationData } from "../feeder/feeder";
 import ARIBB24Renderer from "../renderer/renderer";
 import { ControllerOption } from "./controller-option";
 import EventEmitter from "./eventemitter";
@@ -26,7 +26,7 @@ export default class Controller {
   private readonly onPauseHandler = this.onPause.bind(this);
   // Renderer
   private renderers: ARIBB24Renderer[] = [];
-  private previous_pts: number | null = null;
+  private previous: [FeederPresentationData, number] | null = null;
   // Feeder
   private feeder: ARIBB24Feeder | null = null;
   // Control
@@ -200,21 +200,23 @@ export default class Controller {
 
     const currentTime = this.media.currentTime;
     const current = this.feeder?.content(currentTime) ?? null;
+    const previous = this.previous?.[0] ?? null;
+    const previous_pts = this.previous?.[1] ?? null;
 
     // render
     if (current == null) { // current is null
-      if (this.previous_pts == null) { return; }
+      if (this.previous == null) { return; }
       this.renderers.forEach((renderer) => renderer.clear());
-      this.previous_pts = null;
+      this.previous = null;
     } else if (currentTime >= current.pts + current.duration) { // cue duration expired, clear
       const end = current.pts + current.duration;
-      if (this.previous_pts === end) { return; }
+      if (current === previous && previous_pts === end) { return; }
       this.renderers.forEach((renderer) => renderer.clear());
-      this.previous_pts = end; // end is finite
+      this.previous = [current, end]; // end is finite
     } else { // render
-      if (this.previous_pts === current.pts) { return; }
+      if (current === previous && previous_pts === current.pts) { return; }
       this.renderers.forEach((renderer) => renderer.render(structuredClone(current.state), structuredClone(current.data), structuredClone(current.info)));
-      this.previous_pts = current.pts;
+      this.previous = [current, current.pts];
 
       // Builtin Sound Callback
       if (this.isShowing) { // Hide 中に開始した場合は鳴らさない
@@ -243,7 +245,7 @@ export default class Controller {
     // clearRect for viewer
     this.renderers.forEach((renderer) => renderer.clear());
     // clear previous information
-    this.previous_pts = null;
+    this.previous = null;
   }
 
   public show(): void {

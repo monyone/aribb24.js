@@ -8,6 +8,7 @@ export default class SpeechRecognitionFeeder implements Feeder {
   private track: MediaStreamTrack | null = null;
   private recognition: any;
   private recognitionTime: number | null = null;
+  private presentationCache: [number, FeederPresentationData] | null = null;
   private interim: string = '';
   private previous: string = '';
 
@@ -75,6 +76,7 @@ export default class SpeechRecognitionFeeder implements Feeder {
 
   public clear(): void {
     this.recognitionTime = null;
+    this.presentationCache = null;
     this.previous = '';
     this.interim = '';
   }
@@ -104,6 +106,10 @@ export default class SpeechRecognitionFeeder implements Feeder {
     if (this.media == null) { return null; }
     if (this.recognitionTime == null) { return null; }
 
+    if (this.presentationCache?.[0] === this.recognitionTime) {
+      return this.presentationCache[1];
+    }
+
     const line = this.previous + (this.previous !== '' ? '\n' : '') + this.interim;
     const lines = [''];
     for (const ch of line) {
@@ -120,7 +126,6 @@ export default class SpeechRecognitionFeeder implements Feeder {
 
     const firstLine = (lines.length >= 2 ? lines[lines.length - 2] : '').trim();
     const secondLine = (lines.length >= 1 ? lines[lines.length - 1] : '').trim();
-
 
     const tokens = [
       ARIBB24ClearScreenToken.from(),
@@ -141,12 +146,15 @@ export default class SpeechRecognitionFeeder implements Feeder {
       ... Array.from(secondLine).map((ch) => ARIBB24CharacterToken.from(ch)),
     ]
 
-    return {
+    const presentation = {
       pts: this.recognitionTime,
       duration: Number.POSITIVE_INFINITY,
       state: ARIBB24JapaneseInitialParserState,
       info: { association: 'ARIB', language: 'und' },
       data: tokens
-    };
+    } satisfies FeederPresentationData;
+
+    this.presentationCache = [this.recognitionTime, presentation];
+    return presentation;
   }
 }
