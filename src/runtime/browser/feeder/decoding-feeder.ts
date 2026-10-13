@@ -195,7 +195,18 @@ export default abstract class DecodingFeeder implements Feeder {
       this.notify(segment);
       this.previousTime = segment.dts;
     }
-    return this.present.floor(time) ?? null;
+    const present = this.present.floor(time);
+    if (present == null) { return null; }
+
+    // 表示しおわった情報を消込み
+    let expired = this.present.lower(present.pts);
+    while (expired != null) {
+      closeValueImageBitmap(expired);
+      this.present.delete(expired.pts);
+      expired = this.present.lower(present.pts);
+    }
+
+    return present;
   }
 
   public clear(): void {
