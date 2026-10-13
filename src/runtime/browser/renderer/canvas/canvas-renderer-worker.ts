@@ -8,10 +8,12 @@ import { ARIBB24BrowserToken, extractImageBitmap, replaceDRCS } from "../../type
 import { PartialCanvasRendererOption } from "./canvas-renderer-option";
 
 export default class CanvasWebWorkerRenderer extends CanvasRenderer {
+  private resolution: [number, number];
   private buffer: OffscreenCanvas;
   private present: OffscreenCanvas;
   private terminated: boolean = false;
   private worker: Worker;
+
   private waitPromise: Promise<void> | null = null;
   private waitResolve: () => void = () => {};
 
@@ -20,14 +22,21 @@ export default class CanvasWebWorkerRenderer extends CanvasRenderer {
     this.present = this.canvas.transferControlToOffscreen();
     this.buffer = new OffscreenCanvas(0, 0);
     this.worker = new RenderingWorker();
+    this.resolution = [0, 0];
     this.worker.postMessage(FromMainToWorkerEventInitialize.from(this.present, this.buffer), [this.present, this.buffer]);
   }
 
-  public resize(width: number, height: number): void {
+  protected isAvailable(): boolean {
+    return !(this.resolution[0] === 0 && this.resolution[1] === 0);
+  }
+
+  protected resize(width: number, height: number): void {
+    this.resolution = [width, height];
     this.worker.postMessage(FromMainToWorkerEventResize.from(width, height));
   }
 
   public destroy(): void {
+    this.resolution = [0, 0]; // Terminate で実際に 0x0 にするため、合わせる
     this.worker.postMessage(FromMainToWorkerEventTerminate.from());
     const callback = (event: MessageEvent<FromWorkerToMainEvent>) => {
       if (event.data.type !== 'terminated') { return; }
@@ -43,6 +52,8 @@ export default class CanvasWebWorkerRenderer extends CanvasRenderer {
   }
 
   public render(initialState: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionAssociationInformation): void {
+    if (!this.isAvailable()) { return; }
+
     this.worker.postMessage(
       FromMainToWorkerEventRender.from(initialState, replaceDRCS(tokens, this.option.replace.drcs), info, this.option),
       extractImageBitmap(tokens)

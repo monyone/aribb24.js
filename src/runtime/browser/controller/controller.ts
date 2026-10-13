@@ -13,6 +13,7 @@ export default class Controller {
   // Container Resize Handler
   private readonly onContainerResizeHandler = this.onContainerResize.bind(this);
   private resize_observer: ResizeObserver | null = null;
+  private resize_content_box: [number, number] | null = null;
   // Video Resize Handler
   private readonly onVideoResizeHandler = this.onVideoResize.bind(this);
   // Timeupdate Handler
@@ -43,12 +44,12 @@ export default class Controller {
     this.detachMedia();
     this.media = media;
     this.container = container ?? media.parentElement!;
-    if (this.container) {
-      this.renderers.forEach((renderer) => renderer.onAttach(this.container!));
-    }
-    this.feeder?.onAttach();
     this.setupHandlers();
     this.registerRenderingLoop();
+
+    if (this.feeder) { this.attachFeeder(this.feeder); }
+    // attach 時に detach されて削除されたりするので、コピーして attach する
+    Array.from(this.renderers).forEach((renderer) => { this.attachRenderer(renderer); });
   }
 
   public detachMedia(): void {
@@ -88,10 +89,12 @@ export default class Controller {
     }
     this.resize_observer?.disconnect();
     this.resize_observer = null;
+    this.resize_content_box = null;
   }
 
   public attachFeeder(feeder: ARIBB24Feeder) {
     this.detachFeeder();
+
     this.feeder = feeder;
     this.feeder.onAttach();
   }
@@ -102,11 +105,21 @@ export default class Controller {
   }
 
   public attachRenderer(renderer: ARIBB24Renderer) {
-    renderer.onDetach();
+    this.detachRenderer(renderer);
+
     this.renderers.push(renderer);
+    if (this.resize_content_box) {
+      const [width, height] = this.resize_content_box;
+      renderer.onContainerResize(width, height);
+    }
+    if (this.media) {
+      renderer.onVideoResize(this.media.videoWidth, this.media.videoHeight);
+    }
     if (this.container) {
       renderer.onAttach(this.container);
     }
+
+    this.repaint(renderer);
   }
 
   public detachRenderer(renderer: ARIBB24Renderer) {
@@ -135,6 +148,7 @@ export default class Controller {
 
     const width = target.devicePixelContentBoxSize != null ? target.devicePixelContentBoxSize[0].inlineSize : Math.floor(target.contentBoxSize[0].inlineSize * devicePixelRatio);
     const height = target.devicePixelContentBoxSize != null ? target.devicePixelContentBoxSize[0].blockSize : Math.floor(target.contentBoxSize[0].blockSize * devicePixelRatio);
+    this.resize_content_box = [width, height];
 
     this.renderers.forEach((renderer) => {
       if (!renderer.onContainerResize(width, height)) { return; }
@@ -200,7 +214,7 @@ export default class Controller {
     } else { // render
       if (this.previous_pts === current.pts) { return; }
       this.renderers.forEach((renderer) => renderer.render(structuredClone(current.state), structuredClone(current.data), structuredClone(current.info)));
-      this.previous_pts = current.pts
+      this.previous_pts = current.pts;
 
       // Builtin Sound Callback
       if (this.isShowing) { // Hide 中に開始した場合は鳴らさない

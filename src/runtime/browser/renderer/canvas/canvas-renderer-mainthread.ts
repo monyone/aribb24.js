@@ -13,7 +13,7 @@ export default class CanvasMainThreadRenderer extends CanvasRenderer {
     this.buffer = document.createElement('canvas');
   }
 
-  public resize(width: number, height: number): void {
+  protected resize(width: number, height: number): void {
     this.canvas.width = width;
     this.canvas.height = height;
   }
@@ -39,6 +39,8 @@ export default class CanvasMainThreadRenderer extends CanvasRenderer {
   }
 
   public render(initialState: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionAssociationInformation): void {
+    if (!this.isAvailable()) { return; }
+
     render(this.canvas, this.buffer, initialState, replaceDRCS(tokens, this.option.replace.drcs), info, this.option);
   }
 

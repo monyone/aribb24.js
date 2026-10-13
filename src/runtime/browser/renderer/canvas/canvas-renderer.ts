@@ -17,9 +17,14 @@ export default abstract class CanvasRenderer implements Renderer {
     this.canvas.style.pointerEvents = 'none';
     this.canvas.style.width = '100%';
     this.canvas.style.height = '100%';
+    this.canvas.width = 0;
+    this.canvas.height = 0;
+  }
+  protected isAvailable(): boolean {
+    return !(this.canvas.width === 0 && this.canvas.height === 0);
   }
 
-  public abstract resize(width: number, height: number): void;
+  protected abstract resize(width: number, height: number): void;
   public abstract destroy(): void;
   public abstract clear(): void;
   public hide(): void {
@@ -36,6 +41,7 @@ export default abstract class CanvasRenderer implements Renderer {
 
   public onDetach(): void {
     this.canvas.remove();
+    this.resize(0, 0);
   }
 
   public onContainerResize(width: number, height: number): boolean {
