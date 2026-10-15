@@ -1,6 +1,4 @@
-export default (... buffers: ArrayBufferLike[]): ArrayBufferLike => {
-  if (!buffers) { return new ArrayBuffer(0); }
-
+export default (buffers: ArrayBufferLike[] = []): ArrayBufferLike => {
   const sum = buffers.reduce((sum, curr) => sum + curr.byteLength, 0);
   const array = new Uint8Array(sum);
 

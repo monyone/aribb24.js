@@ -22,7 +22,7 @@ export const makePES = (data: ArrayBufferLike, pts: number): ArrayBufferLike => 
   builder.writeBits(Math.floor(pts / (2 **  0)) % (2 ** 15), 15);
   builder.writeBits(0b1, 1); // Marker Bit
 
-  return concat(array.buffer, builder.build(), data);
+  return concat([array.buffer, builder.build(), data]);
 }
 
 export const makePS = (data: ArrayBufferLike, stc: number): ArrayBufferLike => {
@@ -41,5 +41,5 @@ export const makePS = (data: ArrayBufferLike, stc: number): ArrayBufferLike => {
   builder.writeBits(0b11, 2); // Marker Bit
   builder.writeBits(0b11111, 5); // Reserved
   builder.writeBits(0b000, 3); // Stuffing length
-  return concat(array.buffer, builder.build(), data);
+  return concat([array.buffer, builder.build(), data]);
 }

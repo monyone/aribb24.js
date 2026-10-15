@@ -46,7 +46,7 @@ export default class ARIBB24JapaneseJIS8Encoder extends ARIBB24Encoder {
 
   public encode(tokens: ARIBB24Token[]): ARIBB24DataUnit[] {
     try {
-      const statement_binaries = concat(Uint8Array.from([CONTROL_CODES.ESC, ESC_CODES.LS1R]).buffer, ... tokens.map(this.encodeTokenHandler));
+      const statement_binaries = concat([Uint8Array.from([CONTROL_CODES.ESC, ESC_CODES.LS1R]).buffer, ... tokens.map(this.encodeTokenHandler)]);
       const result = [
         ... this.drcs_units,
         ARIBB24StatementDataUnit.from(new Uint8Array(statement_binaries)),
@@ -107,7 +107,7 @@ export default class ARIBB24JapaneseJIS8Encoder extends ARIBB24Encoder {
         drcs.height, // height
       ]).buffer;
 
-      this.drcs_units.push(ARIBB24DRCSDataUnit.from(new Uint8Array(concat(header, drcs.binary)), 2));
+      this.drcs_units.push(ARIBB24DRCSDataUnit.from(new Uint8Array(concat([header, drcs.binary])), 2));
       this.drcs_md5_to_code.set(hash, structuredClone(this.current_drcs_code));
       this.current_drcs_code[1]++;
       if (this.current_drcs_code[1] > 0x7E) {

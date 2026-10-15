@@ -259,7 +259,7 @@ const iterate = async (data: ARIBB24MPEGTSData[], language: string | number, cb:
     const encoded = generate(palette, parser.parse(tokenizer.tokenize(independent.data)), duration, parser.currentState().plane, info, option, napi);
     if (encoded == null) { return; }
 
-    const ps = makePS(makePES(concat(Uint8Array.from([0x20]).buffer, encoded), Math.floor(independent.pts * 90000)), Math.floor(independent.pts * 90000));
+    const ps = makePS(makePES(concat([Uint8Array.from([0x20]).buffer, encoded]), Math.floor(independent.pts * 90000)), Math.floor(independent.pts * 90000));
     cues.push([independent.pts, filepos]);
     filepos += ps.byteLength;
     writer.write(new Uint8Array(ps));

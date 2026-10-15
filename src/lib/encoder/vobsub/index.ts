@@ -318,10 +318,10 @@ export const encode = (x: number, y: number, width: number, height: number, imag
   const controls_packet_bytes = controls.reduce((a, b) => a + b.byteLength, 0);
   const all_packet_bytes = control_data_offset + controls_packet_bytes
 
-  return concat(
+  return concat([
     uint16be(all_packet_bytes), // subtitle_size
     uint16be(control_data_offset), // data_packet_size
     top, bottom,
     ... controls
-  );
+  ]);
 }

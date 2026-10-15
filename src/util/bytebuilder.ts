@@ -4,7 +4,7 @@ export class ByteBuilder {
   private buffers: ArrayBufferLike[] = [];
 
   public build() {
-    return concat(... this.buffers);
+    return concat(this.buffers);
   }
 
   public write(buffer: ArrayBufferLike): void {
