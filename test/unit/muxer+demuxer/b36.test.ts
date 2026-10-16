@@ -44,7 +44,8 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
       pages: []
     } as const satisfies ARIBB36Data;
 
-    expect(demux(mux(data))).toStrictEqual(data);
+    expect(demux(mux(data, '29.97'), '29.97')).toStrictEqual(data);
+    expect(demux(mux(data, '30'), '30')).toStrictEqual(data);
   });
 
   test('Reserved Page only STD-B36', () => {
@@ -121,7 +122,8 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
       }]
     } as const satisfies ARIBB36Data;
 
-    expect(demux(mux(data))).toStrictEqual(data);
+    expect(demux(mux(data, '29.97'), '29.97')).toStrictEqual(data);
+    expect(demux(mux(data, '30'), '30')).toStrictEqual(data);
   });
 
   test('Reserved and Actual Page in STD-B36', () => {
@@ -255,6 +257,7 @@ describe("ARIB STD-B36 Muxer Demuxer Consistenty", () => {
       }]
     } as const satisfies ARIBB36Data;
 
-    expect(demux(mux(data))).toStrictEqual(data);
+    expect(demux(mux(data, '29.97'), '29.97')).toStrictEqual(data);
+    expect(demux(mux(data, '30'), '30')).toStrictEqual(data);
   });
 });

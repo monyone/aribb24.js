@@ -1,4 +1,5 @@
 import demuxB36 from "../../../lib/demuxer/b36";
+import { ALL_FPS_VALUES } from "../../../util/timecode";
 import { toBrowserTokenWithoutBitmap } from "../types";
 import Feeder, { FeederOption, FeederPresentationData, getTokenizeInformation, PartialFeederOption } from "./feeder";
 
@@ -6,11 +7,11 @@ export default class B36Feeder implements Feeder {
   private option: FeederOption;
   private captions: FeederPresentationData[];
 
-  public constructor(b36: Uint8Array | ArrayBufferLike, option?: PartialFeederOption) {
+  public constructor(b36: Uint8Array | ArrayBufferLike, fps: ALL_FPS_VALUES, option?: PartialFeederOption) {
     b36 = b36 instanceof Uint8Array ? b36 : new Uint8Array(b36);
     this.option = FeederOption.from(option);
 
-    const { initialTime, pages } = demuxB36(b36);
+    const { initialTime, pages } = demuxB36(b36, fps);
     this.captions = pages.filter((page) => page.tag === 'ActualPage').flatMap((page) => {
       try {
         const pts = page.displayTiming - initialTime + this.option.offset.time;

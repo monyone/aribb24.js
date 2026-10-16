@@ -1,6 +1,6 @@
 import { ByteStream } from "../../../util/bytestream"
 import { ViolationStandardError } from "../../../util/error";
-import { timecodeToSecond } from "../../../util/timecode";
+import { ALL_FPS_VALUES, isDropFrame, timecodeToSecond } from "../../../util/timecode";
 import { ARIBB24CaptionManagement, ARIBB24CaptionStatement } from "../b24/datagroup";
 import datagroup from "../b36/datagroup"
 
@@ -184,7 +184,7 @@ export type ARIBB36Data = ARIBB36ProgramManagementInformation & {
   pages: ARIBB36PageData[]
 };
 
-export default (b36: Uint8Array | ArrayBufferLike): ARIBB36Data => {
+export default (b36: Uint8Array | ArrayBufferLike, fps: ALL_FPS_VALUES): ARIBB36Data => {
   b36 = b36 instanceof Uint8Array ? b36 : new Uint8Array(b36);
 
   const block = 256;
@@ -312,7 +312,7 @@ export default (b36: Uint8Array | ArrayBufferLike): ARIBB36Data => {
   const initialTimeXX = String.fromCharCode(program.readU8(), program.readU8());
   program.readU8();
   const initialTime = timingUnitType === 'F'
-    ? timecodeToSecond(`${initialTimeHH}:${initialTimeMM}:${initialTimeSS};${initialTimeXX}`)
+    ? timecodeToSecond(`${initialTimeHH}:${initialTimeMM}:${initialTimeSS}${isDropFrame(fps) ? ';' : ':'}${initialTimeXX}`, fps)
     : ((Number.parseInt(initialTimeHH, 10) * 60 + Number.parseInt(initialTimeMM, 10)) * 60 + Number.parseInt(initialTimeSS, 10)) + Number.parseInt(initialTimeXX, 10) / 100;
   // syncronizationMode (同期モード)
   const syncronizationMode = String.fromCharCode(program.readU8());
@@ -551,7 +551,7 @@ export default (b36: Uint8Array | ArrayBufferLike): ARIBB36Data => {
     const displayTimingXX = String.fromCharCode(page.readU8(), page.readU8());
     page.readU8();
     const displayTiming = timingUnitType === 'F'
-      ? timecodeToSecond(`${displayTimingHH}:${displayTimingMM}:${displayTimingSS};${displayTimingXX}`)
+      ? timecodeToSecond(`${displayTimingHH}:${displayTimingMM}:${displayTimingSS}${isDropFrame(fps) ? ';' : ':'}${displayTimingXX}`, fps)
       : ((Number.parseInt(displayTimingHH, 10) * 60 + Number.parseInt(displayTimingMM, 10)) * 60 + Number.parseInt(displayTimingSS, 10)) + Number.parseInt(displayTimingXX, 10) / 100;
     // clearTiming (消去タイミング)
     const clearTimingHH = String.fromCharCode(page.readU8(), page.readU8());
@@ -561,7 +561,7 @@ export default (b36: Uint8Array | ArrayBufferLike): ARIBB36Data => {
     const clearTimingALL = `${clearTimingHH}${clearTimingMM}${clearTimingSS}${clearTimingXX}`;
     page.readU8();
     const clearTiming = clearTimingALL === '        ' ? Number.POSITIVE_INFINITY : timingUnitType === 'F'
-      ? timecodeToSecond(`${clearTimingHH}:${clearTimingMM}:${clearTimingSS};${clearTimingXX}`)
+      ? timecodeToSecond(`${clearTimingHH}:${clearTimingMM}:${clearTimingSS}${isDropFrame(fps) ? ';' : ':'}${clearTimingXX}`, fps)
       : ((Number.parseInt(clearTimingHH, 10) * 60 + Number.parseInt(clearTimingMM, 10)) * 60 + Number.parseInt(clearTimingSS, 10)) + Number.parseInt(clearTimingXX, 10) / 100;
     // timeControlMode (TMD)
     const timeControlMode = String.fromCharCode(page.readU8(), page.readU8());

@@ -180,10 +180,10 @@ const cmdline = ([
     usersAreaUsed: false,
     pages
   };
-  const totalBytes = muxB36(data);
+  const totalBytes = muxB36(data, '29.97');
   const b36: ARIBB36Data = {
     ... data,
     totalBytes: totalBytes.byteLength
   };
-  writeFS(output, muxB36(b36));
+  writeFS(output, muxB36(b36, '29.97'));
 })();

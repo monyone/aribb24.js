@@ -1,7 +1,7 @@
 import { ARIBB36Data, TimingUnitType } from "../../demuxer/b36";
 import datagroup from "../../muxer/b36/datagroup";
 import { ByteBuilder } from "../../../util/bytebuilder";
-import { secondsToTimecode, secondToFrameCount } from "../../../util/timecode";
+import { ALL_FPS_VALUES, secondsToTimecode, secondToFrameCount } from "../../../util/timecode";
 import { ViolationStandardError } from "../../../util/error";
 
 const textDecoder = new TextDecoder('shift-jis', { fatal: true });
@@ -36,7 +36,7 @@ for (const [begin, end] of [[0x81, 0x9F], [0xE0, 0xEF]]) {
   }
 }
 
-export default (b36: ARIBB36Data): ArrayBufferLike => {
+export default (b36: ARIBB36Data, fps: ALL_FPS_VALUES): ArrayBufferLike => {
   const block = 256;
   const builder = new ByteBuilder();
 
@@ -134,7 +134,7 @@ export default (b36: ARIBB36Data): ArrayBufferLike => {
     // initialTime (イニシャルタイム)
     switch (b36.timingUnitType) {
       case TimingUnitType.FRAME: {
-        const value = secondsToTimecode(b36.initialTime).replaceAll(/[:;]/g, '');
+        const value = secondsToTimecode(b36.initialTime, fps).replaceAll(/[:;]/g, '');
         for (let i = 0; i < 8; i++) {
           programInformationBuilder.writeU8(value.charCodeAt(i));
         }
@@ -322,7 +322,7 @@ export default (b36: ARIBB36Data): ArrayBufferLike => {
       // displayTiming (送出タイミング)
       switch (page.timingUnitType) {
         case TimingUnitType.FRAME: {
-          const value = secondsToTimecode(page.displayTiming).replaceAll(/[:;]/g, '');
+          const value = secondsToTimecode(page.displayTiming, fps).replaceAll(/[:;]/g, '');
           for (let i = 0; i < 8; i++) {
             pageInformationBuilder.writeU8(value.charCodeAt(i));
           }
@@ -350,7 +350,7 @@ export default (b36: ARIBB36Data): ArrayBufferLike => {
       } else {
         switch (page.timingUnitType) {
           case TimingUnitType.FRAME: {
-            const value = secondsToTimecode(page.clearTiming).replaceAll(/[:;]/g, '');
+            const value = secondsToTimecode(page.clearTiming, fps).replaceAll(/[:;]/g, '');
             for (let i = 0; i < 8; i++) {
               pageInformationBuilder.writeU8(value.charCodeAt(i));
             }

@@ -82,6 +82,7 @@ export { default as demuxMPEGTS } from './lib/demuxer/mpegts';
 export { default as muxDatagroup } from './lib/muxer/b24/datagroup';
 export { default as muxIndependentPES } from './lib/muxer/b24/independent';
 export { default as muxB36 } from './lib/muxer/b36'
+export { type ALL_FPS_VALUES as ARIBB36TargetFPS } from './util/timecode';
 
 // Parser
 export { ARIBB24Parser, ARIBB24ParserOption } from './lib/parser/parser';
