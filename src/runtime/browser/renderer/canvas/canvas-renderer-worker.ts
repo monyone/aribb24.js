@@ -53,6 +53,8 @@ export default class CanvasWebWorkerRenderer extends CanvasRenderer {
 
   public render(initialState: ARIBB24ParserState, tokens: ARIBB24BrowserToken[], info: CaptionAssociationInformation): void {
     if (!this.isAvailable()) { return; }
+    // TODO: 本当はバッファを生かすべきだが、リサイズに対応できないので現状は消す
+    this.clear();
 
     this.worker.postMessage(
       FromMainToWorkerEventRender.from(initialState, replaceDRCS(tokens, this.option.replace.drcs), info, this.option),
