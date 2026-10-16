@@ -324,7 +324,7 @@ export class ARIBB24Parser {
           this.non_spacings.push(ARIBB24CharacterParsedToken.from(token, this.state, this.option));
         }
         break;
-      case 'DRCS':
+      case 'DRCS': {
         const result = [
           ARIBB24DRCSParsedToken.from(token, this.state, this.option),
           ... (token.combining === '' ? [] : [ARIBB24CharacterParsedToken.from(ARIBB24CharacterToken.from('　' + token.combining, true), this.state, this.option)]),
@@ -333,6 +333,7 @@ export class ARIBB24Parser {
         this.non_spacings = [];
         this.move_relative_pos(1, 0);
         return result;
+      }
       case 'Space': {
         const result = [ARIBB24CharacterParsedToken.from(ARIBB24CharacterToken.from('　'), this.state, this.option), ... this.non_spacings];
         this.non_spacings = [];

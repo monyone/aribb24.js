@@ -15,14 +15,12 @@ export default (buffer: HTMLCanvasElement | OffscreenCanvas, Path2DSource: typeo
 
   for (const token of tokens) {
     switch (token.tag) {
-      case 'Character': {
+      case 'Character':
         renderCharacter(context, token, Path2DSource, magnification, info, rendererOption);
         break;
-      }
-      case 'DRCS': {
+      case 'DRCS':
         renderDRCS(context, token, Path2DSource, magnification, info, rendererOption);
         break;
-      }
       case 'ClearScreen':
         if (token.time === 0) {
           // erase internal buffer

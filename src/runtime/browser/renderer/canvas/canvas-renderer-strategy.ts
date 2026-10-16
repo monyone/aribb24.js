@@ -28,18 +28,15 @@ export default (target: HTMLCanvasElement | OffscreenCanvas | null, buffer: HTML
 
     for (const token of parsed) {
       switch (token.tag) {
-        case 'Character': {
+        case 'Character':
           renderCharacter(context, token, globalThis.Path2D, magnification, info, rendererOption);
           break;
-        }
-        case 'DRCS': {
+        case 'DRCS':
           renderDRCS(context, token, globalThis.Path2D, magnification, info, rendererOption);
           break;
-        }
-        case 'Bitmap': {
+        case 'Bitmap':
           renderBitmap(context, token, globalThis.Path2D, magnification, info, rendererOption);
           break;
-        }
         case 'ClearScreen':
           if (token.time === 0) {
             // erase internal buffer
