@@ -23,11 +23,11 @@
     }
   },
   "bin": {
-    "ts2sup": "./dist/cjs/runtime/cli/bin/ts2sup.js",
-    "ts2vobsub": "./dist/cjs/runtime/cli/bin/ts2vobsub.js",
-    "ts2ass": "./dist/cjs/runtime/cli/bin/ts2ass.js",
-    "ts2imsc": "./dist/cjs/runtime/cli/bin/ts2imsc.js",
-    "ts2b36": "./dist/cjs/runtime/cli/bin/ts2b36.js"
+    "ts2sup": "./dist/es/runtime/cli/bin/ts2sup.mjs",
+    "ts2vobsub": "./dist/es/runtime/cli/bin/ts2vobsub.mjs",
+    "ts2ass": "./dist/es/runtime/cli/bin/ts2ass.mjs",
+    "ts2imsc": "./dist/es/runtime/cli/bin/ts2imsc.mjs",
+    "ts2b36": "./dist/es/runtime/cli/bin/ts2b36.mjs"
   },
   "author": "monyone <monyone.teihen@gmail.com>",
   "description": "an alternative implementation for b24.js",
