@@ -21,7 +21,7 @@ export type CharacterDictEntry = {
   type: (typeof DictEntryType.Character),
   code: number;
   bytes: number;
-  dict: Map<number, string>
+  dict: Map<number, [string, boolean]>
 };
 export type DRCSDictEntry = {
   type: (typeof DictEntryType.DRCS),
@@ -44,16 +44,14 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
   private GB: [DictEntry, DictEntry, DictEntry, DictEntry];
   private character_dicts: Record<string, CharacterDictEntry>;
   private drcs_dicts: Record<string, DRCSDictEntry | MacroDictEntry>;
-  private non_spacing: Set<string>;
 
-  public constructor(GL: 0 | 1 | 2 | 3, GR: 0 | 1 | 2 | 3, GB: [DictEntry, DictEntry, DictEntry, DictEntry], character_dicts: Record<string, CharacterDictEntry>, drcs_dicts: Record<string, DRCSDictEntry | MacroDictEntry>, non_spacing: Set<string>) {
+  public constructor(GL: 0 | 1 | 2 | 3, GR: 0 | 1 | 2 | 3, GB: [DictEntry, DictEntry, DictEntry, DictEntry], character_dicts: Record<string, CharacterDictEntry>, drcs_dicts: Record<string, DRCSDictEntry | MacroDictEntry>) {
     super();
     this.GL = GL;
     this.GR = GR;
     this.GB = GB;
     this.character_dicts = character_dicts;
     this.drcs_dicts = drcs_dicts;
-    this.non_spacing = non_spacing;
   }
 
   public tokenizeStatement(data: Uint8Array): ARIBB24Token[] {
@@ -73,8 +71,7 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
         switch (type) {
           case 'Character':
             if (dict.has(code)) {
-              const ch = dict.get(code)!;
-              const non_spacing = this.non_spacing.has(ch);
+              const [ch, non_spacing] = dict.get(code)!;
               result.push(ARIBB24CharacterToken.from(ch, non_spacing));
             }
             break;
@@ -103,8 +100,7 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
         switch (type) {
           case 'Character':
             if (dict.has(code)) {
-              const ch = dict.get(code)!;
-              const non_spacing = this.non_spacing.has(ch);
+              const [ch, non_spacing] = dict.get(code)!;
               result.push(ARIBB24CharacterToken.from(ch, non_spacing));
             }
             break;
@@ -149,8 +145,7 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
           switch (type) {
             case 'Character':
               if (dict.has(code)) {
-                const ch = dict.get(code)!;
-                const non_spacing = this.non_spacing.has(ch);
+                const [ch, non_spacing] = dict.get(code)!;
                 result.push(ARIBB24CharacterToken.from(ch, non_spacing));
               }
               break;
@@ -243,8 +238,7 @@ export default abstract class ARIBB24JIS8Tokenizer extends ARIBB24Tokenizer {
           switch (type) {
             case 'Character':
               if (dict.has(code)) {
-                const ch = dict.get(code)!;
-                const non_spacing = this.non_spacing.has(ch);
+                const [ch, non_spacing] = dict.get(code)!;
                 result.push(ARIBB24CharacterToken.from(ch, non_spacing));
               }
               break;

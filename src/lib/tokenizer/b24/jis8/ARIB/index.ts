@@ -6,6 +6,17 @@ import katakana from "./katakana";
 import symbol_pua from "./symbol-pua";
 import symbol_unicode from "./symbol-unicode";
 
+// 環境でノンスペーシング文字の規定が違うかもしれない
+const is_kanji_nonspacing = (code: number): boolean => {
+  // 7.1.1.4 の定義に従う
+  if (0x212b <= code && code <= 0x2132) { return true; }
+  if (code === 0x227E) { return true; }
+  return false;
+};
+const prepare_other_nonspacing = (dict: Map<number, string>): Map<number, [string, boolean]> => {
+  return new Map<number, [string, boolean]>(Array.from(dict.entries()).map(([k, v]) => [k, [v, false]]));
+};
+
 const MACRO = new Map([
   [0x60, (Uint8Array.from([0x1b, 0x24, 0x42, 0x1b, 0x29, 0x4a, 0x1b, 0x2a, 0x30, 0x1b, 0x2b, 0x20, 0x70, 0x0f, 0x1b, 0x7d]))], // 漢字系, 英数, ひらがな, マクロ, LS0, LS2R
   [0x61, (Uint8Array.from([0x1b, 0x24, 0x42, 0x1b, 0x29, 0x31, 0x1b, 0x2a, 0x30, 0x1b, 0x2b, 0x20, 0x70, 0x0f, 0x1b, 0x7d]))], // 漢字系, カタカナ, ひらがな
@@ -26,21 +37,21 @@ const MACRO = new Map([
 ]);
 
 const JAPAN_NORMAL_DICTS = {
-  KANJI: { type: 'Character', code: 0x42, bytes: 2, dict: new Map<number, string>() }, // Dummy
-  ASCII: { type: 'Character', code: 0x4a, bytes: 1, dict: ascii },
-  HIRAGANA: { type: 'Character', code: 0x30, bytes: 1, dict: hiragana },
-  KATAKANA: { type: 'Character', code: 0x31, bytes: 1, dict: katakana },
-  MOSAIC_A: { type: 'Character', code: 0x32, bytes: 1, dict: new Map<number, string>() },
-  MOSAIC_B: { type: 'Character', code: 0x33, bytes: 1, dict: new Map<number, string>() },
-  MOSAIC_C: { type: 'Character', code: 0x34, bytes: 1, dict: new Map<number, string>() },
-  MOSAIC_D: { type: 'Character', code: 0x35, bytes: 1, dict: new Map<number, string>() },
-  P_ASCII: { type: 'Character', code: 0x36, bytes: 1, dict: new Map<number, string>() },
-  P_HIRAGANA: { type: 'Character', code: 0x37, bytes: 1, dict: new Map<number, string>() },
-  P_KATAKANA: { type: 'Character', code: 0x38, bytes: 1, dict: new Map<number, string>() },
-  JIS_X_0201_KATAKANA: { type: 'Character', code: 0x49, bytes: 1, dict: new Map<number, string>() },
-  JIS_X_0213_2004_KANJI_1: { type: 'Character', code: 0x39, bytes: 2, dict: new Map<number, string>() },
-  JIS_X_0213_2004_KANJI_2: { type: 'Character', code: 0x3a, bytes: 2, dict: new Map<number, string>() },
-  ADDITIONAL_SYMBOLS: { type: 'Character', code: 0x3b, bytes: 2, dict: new Map<number, string>() } // Dummy
+  KANJI: { type: 'Character', code: 0x42, bytes: 2, dict: new Map<number, [string, boolean]>() }, // Dummy
+  ASCII: { type: 'Character', code: 0x4a, bytes: 1, dict: prepare_other_nonspacing(ascii), },
+  HIRAGANA: { type: 'Character', code: 0x30, bytes: 1, dict: prepare_other_nonspacing(hiragana), },
+  KATAKANA: { type: 'Character', code: 0x31, bytes: 1, dict: prepare_other_nonspacing(katakana), },
+  MOSAIC_A: { type: 'Character', code: 0x32, bytes: 1, dict: new Map<number, [string, boolean]>() },
+  MOSAIC_B: { type: 'Character', code: 0x33, bytes: 1, dict: new Map<number, [string, boolean]>() },
+  MOSAIC_C: { type: 'Character', code: 0x34, bytes: 1, dict: new Map<number, [string, boolean]>() },
+  MOSAIC_D: { type: 'Character', code: 0x35, bytes: 1, dict: new Map<number, [string, boolean]>() },
+  P_ASCII: { type: 'Character', code: 0x36, bytes: 1, dict: new Map<number, [string, boolean]>() },
+  P_HIRAGANA: { type: 'Character', code: 0x37, bytes: 1, dict: new Map<number, [string, boolean]>() },
+  P_KATAKANA: { type: 'Character', code: 0x38, bytes: 1, dict: new Map<number, [string, boolean]>() },
+  JIS_X_0201_KATAKANA: { type: 'Character', code: 0x49, bytes: 1, dict: new Map<number, [string, boolean]>() },
+  JIS_X_0213_2004_KANJI_1: { type: 'Character', code: 0x39, bytes: 2, dict: new Map<number, [string, boolean]>() },
+  JIS_X_0213_2004_KANJI_2: { type: 'Character', code: 0x3a, bytes: 2, dict: new Map<number, [string, boolean]>() },
+  ADDITIONAL_SYMBOLS: { type: 'Character', code: 0x3b, bytes: 2, dict: new Map<number, [string, boolean]>() } // Dummy
 } as const;
 
 // DRCS
@@ -72,35 +83,27 @@ export default class ARIBB24JapaneseJIS8Tokenizer extends ARIBB24JIS8Tokenizer {
   private static NORMAL_DICT_USE_PUA = { ... JAPAN_NORMAL_DICTS };
   private static NORMAL_DICT_USE_UNICODE = { ... JAPAN_NORMAL_DICTS };
   static {
-    const kanji_use_pua = new Map<number, string>();
-    const kanji_use_unicode = new Map<number, string>();
+    const kanji_use_pua = new Map<number, [string, boolean]>();
+    const kanji_use_unicode = new Map<number, [string, boolean]>();
 
     const decoder = new TextDecoder('euc-jp', { fatal: true });
     for (let ch1 = 0x21; ch1 < 0x75; ch1++) {
       for (let ch2 = 0x21; ch2 < 0x7f; ch2++) {
         try {
           const code = (ch1 << 8) | ch2;
+          const nonspacing = is_kanji_nonspacing(code);
           const decoded = decoder.decode((Uint8Array.from([ch1 | 0x80, ch2 | 0x80])));
-          kanji_use_pua.set(code, decoded);
-          kanji_use_unicode.set(code, decoded);
+          kanji_use_pua.set(code, [decoded, nonspacing]);
+          kanji_use_unicode.set(code, [decoded, nonspacing]);
         } catch (e) {}
       }
     }
 
-    for (let ch1 = 0x75; ch1 < 0x7f; ch1++) {
-      for (let ch2 = 0x21; ch2 < 0x7f; ch2++) {
-        const code = (ch1 << 8) | ch2;
-        if (!symbol_pua.has(code)) { continue; }
-        kanji_use_pua.set(code, symbol_pua.get(code)!);
-      }
+    for (const [k, v] of symbol_pua.entries()) {
+      kanji_use_pua.set(k, [v, false]);
     }
-
-    for (let ch1 = 0x75; ch1 < 0x7f; ch1++) {
-      for (let ch2 = 0x21; ch2 < 0x7f; ch2++) {
-        const code = (ch1 << 8) | ch2;
-        if (!symbol_unicode.has(code)) { continue; }
-        kanji_use_unicode.set(code, symbol_unicode.get(code)!);
-      }
+    for (const [k, v] of symbol_unicode.entries()) {
+      kanji_use_unicode.set(k, [v, false]);
     }
 
     this.NORMAL_DICT_USE_PUA = {
@@ -131,27 +134,7 @@ export default class ARIBB24JapaneseJIS8Tokenizer extends ARIBB24JIS8Tokenizer {
     super(0, 2,
       [USING_NORMAL_DICT.KANJI, USING_NORMAL_DICT.ASCII, USING_NORMAL_DICT.HIRAGANA, USING_DRCS_DICT.MACRO],
       USING_NORMAL_DICT,
-      USING_DRCS_DICT,
-      new Set<string>([
-         /* ACUTE ACCENT */
-        '\u00B4', // half
-        /* GRAVE ACCENT */
-        '\u0060', // half
-        '\uFF40', // full
-        /* DIAERESIS */
-        '\u00A8', // half
-        /* CIRCUMFLEX ACCENT */
-        '\u005E', // half
-        '\uFF3E', // full
-        /* OVERLINE */
-        '\u203E', // half
-        '\uFFE3', // full
-        /* LOWLINE */
-        '\u005F', // half
-        '\uFF3F', // full
-        /* LARGE CIRCLE */
-        '\u25EF', // full
-      ])
+      USING_DRCS_DICT
     );
   }
 }
