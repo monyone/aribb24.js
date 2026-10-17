@@ -25,7 +25,7 @@ export type ARIBB24DRCSToken = {
   height: number;
   depth: number;
   binary: ArrayBuffer;
-  combining: string;
+  combining: string; // MEMO: ノンスペーシング文字のあとに DRCS がくる場合のパターンが理屈上はあるので
 };
 export const ARIBB24DRCSToken = {
   from(width: number, height: number, depth: number, binary: ArrayBuffer, combining: string = ''): ARIBB24DRCSToken {
